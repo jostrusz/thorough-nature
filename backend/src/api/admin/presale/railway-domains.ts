@@ -22,9 +22,16 @@ const PROJECT_ID =
   process.env.RAILWAY_PRESALE_PROJECT_ID || "9d7e8516-91b9-46a1-9bd9-66e4ab1da096"
 const ENV_ID =
   process.env.RAILWAY_PRESALE_ENV_ID || "ec0e71d0-68bf-42b0-93a1-b2e36e9203a6"
-const SERVICE_ID =
+// Both storefront services carry customer-facing custom domains (Storefront +
+// Storefront-2, e.g. www.knihyzosrdca.sk lives on Storefront-2). Comma-separated
+// env override, defaults to both production services.
+const SERVICE_IDS = (
   process.env.RAILWAY_PRESALE_STOREFRONT_SERVICE_ID ||
-  "2fdea638-c253-4996-af5c-b1fa5e98471b"
+  "2fdea638-c253-4996-af5c-b1fa5e98471b,11998e87-ec96-41cf-8ddd-d525d2b5a84a"
+)
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean)
 const TOKEN = process.env.RAILWAY_PRESALE_TOKEN || ""
 const TTL_MS = 10 * 60 * 1000
 
@@ -50,24 +57,29 @@ async function fetchRailwayDomains(): Promise<string[]> {
   if (!TOKEN) return []
   const query =
     "query($p:String!,$e:String!,$s:String!){ domains(projectId:$p, environmentId:$e, serviceId:$s){ customDomains{ domain } } }"
-  const resp = await fetch(RAILWAY_GQL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Project-Access-Token": TOKEN,
-    },
-    body: JSON.stringify({
-      query,
-      variables: { p: PROJECT_ID, e: ENV_ID, s: SERVICE_ID },
-    }),
-  })
-  if (!resp.ok) throw new Error(`railway graphql ${resp.status}`)
-  const json: any = await resp.json()
-  if (json?.errors?.length) {
-    throw new Error(`railway graphql: ${JSON.stringify(json.errors[0]?.message)}`)
-  }
-  const cds = json?.data?.domains?.customDomains || []
-  return cds.map((c: any) => c?.domain).filter(Boolean)
+  const results = await Promise.all(
+    SERVICE_IDS.map(async (serviceId) => {
+      const resp = await fetch(RAILWAY_GQL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Project-Access-Token": TOKEN,
+        },
+        body: JSON.stringify({
+          query,
+          variables: { p: PROJECT_ID, e: ENV_ID, s: serviceId },
+        }),
+      })
+      if (!resp.ok) throw new Error(`railway graphql ${resp.status}`)
+      const json: any = await resp.json()
+      if (json?.errors?.length) {
+        throw new Error(`railway graphql: ${JSON.stringify(json.errors[0]?.message)}`)
+      }
+      const cds = json?.data?.domains?.customDomains || []
+      return cds.map((c: any) => c?.domain).filter(Boolean) as string[]
+    })
+  )
+  return results.flat()
 }
 
 /**
