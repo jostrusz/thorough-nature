@@ -59,6 +59,10 @@ import { PsOrderPlacedTemplate, PS_ORDER_PLACED, isPsOrderPlacedTemplateData } f
 import { PsShipmentNotificationTemplate, PS_SHIPMENT_NOTIFICATION, isPsShipmentNotificationData } from './ps-shipment-notification'
 import { PsEbookDeliveryTemplate, PS_EBOOK_DELIVERY, isPsEbookDeliveryData } from './ps-ebook-delivery'
 import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData } from './ps-upsell-confirmed'
+// Kočičí bible (kocici-bible) templates
+import { KbOrderPlacedTemplate, KB_ORDER_PLACED, isKbOrderPlacedTemplateData } from './kb-order-placed'
+import { KbShipmentNotificationTemplate, KB_SHIPMENT_NOTIFICATION, isKbShipmentNotificationData } from './kb-shipment-notification'
+import { KbEbookDeliveryTemplate, KB_EBOOK_DELIVERY, isKbEbookDeliveryData } from './kb-ebook-delivery'
 // Pusť to, co tě ničí (odpust-knizka) templates
 import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
 import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
@@ -169,6 +173,10 @@ export const EmailTemplates = {
   PS_SHIPMENT_NOTIFICATION,
   PS_EBOOK_DELIVERY,
   PS_UPSELL_CONFIRMED,
+  // Kočičí bible
+  KB_ORDER_PLACED,
+  KB_SHIPMENT_NOTIFICATION,
+  KB_EBOOK_DELIVERY,
   // Odpusť to, co tě ničí
   OD_ORDER_PLACED,
   OD_EBOOK_DELIVERY,
@@ -265,11 +273,15 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
       return psKey
     }
   }
-  // Kočičí bible falls back to Psí superživot templates (same locale `cs`, same flow)
-  // until dedicated kb-* templates are created
+  // Kočičí bible — dedicated kb-* templates, with Psí superživot (ps-*) fallback
+  // for template types that don't have a KB variant yet (same locale `cs`, same flow)
   if (project === 'kocici-bible') {
-    const psKey = `ps-${templateKey}`
     const allKeys = Object.values(EmailTemplates) as string[]
+    const kbKey = `kb-${templateKey}`
+    if (allKeys.includes(kbKey)) {
+      return kbKey
+    }
+    const psKey = `ps-${templateKey}`
     if (allKeys.includes(psKey)) {
       return psKey
     }
@@ -885,6 +897,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <PsUpsellConfirmedTemplate {...data} />
 
+    // ── Kočičí bible templates ───────────────────────────────
+    case EmailTemplates.KB_ORDER_PLACED:
+      if (!isKbOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.KB_ORDER_PLACED}"`
+        )
+      }
+      return <KbOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.KB_SHIPMENT_NOTIFICATION:
+      if (!isKbShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.KB_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <KbShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.KB_EBOOK_DELIVERY:
+      if (!isKbEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.KB_EBOOK_DELIVERY}"`
+        )
+      }
+      return <KbEbookDeliveryTemplate {...data} />
+
     // ── Odpusť to, co tě ničí templates ──────────────────────
     case EmailTemplates.OD_ORDER_PLACED:
       if (!isOdOrderPlacedTemplateData(data)) {
@@ -1232,6 +1272,10 @@ export {
   PsShipmentNotificationTemplate,
   PsEbookDeliveryTemplate,
   PsUpsellConfirmedTemplate,
+  // Kočičí bible
+  KbOrderPlacedTemplate,
+  KbShipmentNotificationTemplate,
+  KbEbookDeliveryTemplate,
   // Odpusť to, co tě ničí
   OdOrderPlacedTemplate,
   OdEbookDeliveryTemplate,

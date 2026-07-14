@@ -54,6 +54,26 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     { key: "e-books/nie-wszystko-zasluguje-na-miejsce.pdf", title: "Nie wszystko zasługuje na miejsce", description: "E-book (PDF)", size: "18.5 MB" },
   ],
   // Pusť to, co tě ničí (CZ) — must stay in sync with order-placed-digital-download.ts
+  'kocici-bible': [
+    {
+      key: "e-books/Dlouhovekost-zacina-v-kocici-misce.pdf",
+      title: "Dlouhověkost začíná v kočičí misce",
+      description: "E-book (PDF)",
+      size: "1.9 MB",
+    },
+    {
+      key: "e-books/Hrava-kocka.pdf",
+      title: "Hravá kočka",
+      description: "E-book (PDF)",
+      size: "1.0 MB",
+    },
+    {
+      key: "e-books/Kocici-SOS-100-problemu-100-reseni.pdf",
+      title: "Kočičí SOS: 100 Problémů, 100 Řešení",
+      description: "E-book (PDF)",
+      size: "4.1 MB",
+    },
+  ],
   'odpust-knizka': [
     { key: "e-books/Jak-prestat-nadmerne-premyslet-a-zacit-zit.pdf", title: "Jak přestat nadměrně přemýšlet a začít žít", description: "E-book (PDF)", size: "4.1 MB" },
     { key: "e-books/Laska-bez-cenzury.pdf", title: "Láska bez cenzury", description: "E-book (PDF)", size: "18.5 MB" },
@@ -87,6 +107,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'zycie-zaslugy': process.env.ZZ_STOREFRONT_URL || "https://www.najpierw-ja.pl",
   'zivot-zaslugy': process.env.ZV_STOREFRONT_URL || "https://www.nejdriv-ja.cz",
   'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.pusttocotenici.cz",
+  'kocici-bible': process.env.KB_STOREFRONT_URL || "https://www.kocicibible.cz",
   'pusti-to-sk': process.env.PUSTI_TO_SK_STOREFRONT_URL || "https://www.pustitocotanici.sk",
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
 }
@@ -106,6 +127,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
+  'kocici-bible': 'Tvoje 3 bonusové e-booky jsou připravené! 📖',
 }
 
 // Localized fallback first name per project

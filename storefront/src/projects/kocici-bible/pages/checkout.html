@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Pokladna — Kočičí bible Oficial</title>
+<title>Pokladna — Kočičí bible</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="canonical" href="https://www.kocicibible.cz/checkout">
-<link rel="icon" href="/kocici-bible-logo.png" type="image/webp">
+<link rel="icon" href="/kocici-bible-logo.png" type="image/png">
 
 <!-- Zabránění probliknutí checkoutu při návratu z platby — formulář se ihned skryje -->
 <script>
@@ -17,7 +17,7 @@
   if (search.indexOf('comgate_status=cancelled') !== -1 || search.indexOf('comgate_status=pending') !== -1) {
     var isCancelled = search.indexOf('comgate_status=cancelled') !== -1;
     document.write('<style>.checkout-form,.content,.order-summary,.checkout-header,.breadcrumb-nav{display:none!important}</style>');
-    document.write('<div id="payment-failed-page" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF5F5 0%,#FFF 50%,#FFF5F5 100%);font-family:DM Sans,Inter,sans-serif;padding:20px;">'
+    document.write('<div id="payment-failed-page" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF5F5 0%,#FFF 50%,#FFF5F5 100%);font-family:DM Sans,sans-serif;padding:20px;">'
       + '<div style="max-width:480px;width:100%;text-align:center;">'
       + '<div style="width:80px;height:80px;margin:0 auto 24px;background:' + (isCancelled ? '#FEE2E2' : '#FEF3C7') + ';border-radius:50%;display:flex;align-items:center;justify-content:center;">'
       + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="' + (isCancelled ? '#DC2626' : '#D97706') + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
@@ -27,8 +27,8 @@
       + '</svg></div>'
       + '<h1 style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">' + (isCancelled ? 'Platba byla zrušena' : 'Platba čeká na zpracování') + '</h1>'
       + '<p style="font-size:16px;color:#666;margin:0 0 32px;line-height:1.5;">' + (isCancelled ? 'Vaše platba nebyla dokončena. Žádné peníze nebyly strženy. Můžete to zkusit znovu nebo zvolit jiný způsob platby.' : 'Vaše platba se stále zpracovává. Pokud nebude dokončena do několika minut, zkuste objednávku zadat znovu.') + '</p>'
-      + '<a href="' + window.location.pathname + '" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#6B21A8,#7C3AED);color:#fff;font-size:16px;font-weight:600;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px rgba(107,33,168,0.3);transition:transform 0.15s;">Zkusit objednávku znovu</a>'
-      + '<p style="font-size:13px;color:#999;margin-top:20px;">Pokud problém přetrvává, kontaktujte nás na <a href="mailto:podpora@kocicibible.cz" style="color:#6B21A8;">podpora@kocicibible.cz</a></p>'
+      + '<a href="' + window.location.pathname + '" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#C27BA0,#A8628A);color:#fff;font-size:16px;font-weight:600;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px rgba(194,123,160,0.3);transition:transform 0.15s;">Zkusit objednávku znovu</a>'
+      + '<p style="font-size:13px;color:#999;margin-top:20px;">Pokud problém přetrvává, kontaktujte nás na <a href="mailto:peterka@kocicibible.cz" style="color:#C27BA0;">peterka@kocicibible.cz</a></p>'
       + '</div></div>');
     return;
   }
@@ -40,10 +40,10 @@
 <!-- Mollie Components (platební karta) -->
 <script src="https://js.mollie.com/v1/mollie.js"></script>
 
-<!-- Google Fonts: Inter + Cabin (písma) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Cabin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Fonts: Recoleta (Cloudinary) + DM Sans (local) -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- Klarna Payments SDK (autorizační flow přes widget) -->
 <script src="https://x.klarnacdn.net/kp/lib/v1/api.js" async></script>
@@ -55,7 +55,14 @@
 <script src="https://js.stripe.com/v3/" async></script>
 
 <style>
-/* ─── PÍSMA — načtená přes Google Fonts (Inter + Cabin) ─── */
+/* ─── FONTS ─── */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
 /* ─── PAYMENT PRELOADER (Mollie redirect + Klarna inline) ─── */
 .payment-preloader {
@@ -99,27 +106,27 @@
   100% { transform: translateX(320%); }
 }
 
-/* ─── DESIGN TOKENS — Kočičí bible Oficial (shodné s hlavní stránkou) ─── */
+/* ─── DESIGN TOKENS — Kočičí bible (shodné s hlavní stránkou) ─── */
 :root {
-  --bg: #FFFFFF;
-  --heading: #1A1A1A;
-  --cta: #DC3522;
-  --section: #F3E8FF;
-  --body: #374151;
-  --highlight: #C4B5FD;
-  --dark: #1A1A1A;
+  --bg: #FAF5F8;
+  --heading: #2D1B3D;
+  --cta: #C27BA0;
+  --section: #EDD9E5;
+  --body: #5A3D6B;
+  --highlight: #D9A4C0;
+  --dark: #1A1028;
   --white: #FFFFFF;
-  --light: #F9FAFB;
-  --muted: #6B7280;
-  --cta-hover: #C62E1C;
-  --accent: #6B21A8;
+  --light: #F5EDF2;
+  --muted: #9B7AAD;
+  --cta-hover: #A8628A;
+  --accent: #D498B5;
   --error: #C0392B;
   --success: #27AE60;
-  --border: rgba(107,33,168,0.12);
-  --border-focus: var(--accent);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  --border: rgba(194,123,160,0.18);
+  --border-focus: var(--cta);
+  --shadow-sm: 0 1px 3px rgba(45,27,61,0.06);
+  --shadow-md: 0 4px 16px rgba(45,27,61,0.08);
+  --shadow-lg: 0 8px 32px rgba(45,27,61,0.12);
   --radius: 8px;
   --radius-lg: 12px;
 }
@@ -129,8 +136,8 @@
 html { scroll-behavior: smooth; }
 html, body { overflow-x: clip; max-width: 100vw; }
 body {
-  font-family: 'Cabin', sans-serif;
-  background: #FFFFFF;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
   color: var(--body);
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;
@@ -178,7 +185,7 @@ body {
   animation: fadeIn 0.4s ease forwards;
 }
 .checkout-logo {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--heading);
@@ -234,6 +241,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  /* Grid item má implicitně min-width:auto → sloupec by se roztáhl na min-content
+     obsahu (dlouhé názvy balíčků) a mřížka by přetekla přes okraj obrazovky. */
+  min-width: 0;
 }
 
 /* Shopify-style sekce karty */
@@ -272,7 +282,7 @@ body {
   background: var(--success);
 }
 .section-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--heading);
@@ -300,7 +310,7 @@ body {
 .float-field select {
   width: 100%;
   padding: 22px 16px 8px;
-  font-family: 'Cabin', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 15px;
   font-weight: 400;
   color: var(--heading);
@@ -354,7 +364,7 @@ body {
 .float-field input:focus,
 .float-field select:focus {
   border-color: var(--cta);
-  box-shadow: 0 0 0 3px rgba(107,33,168,0.12);
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
   background: var(--white);
 }
 /* Validace */
@@ -471,7 +481,7 @@ body {
   transition: background 0.1s;
 }
 .foxentry-item:last-child { border-bottom: none; }
-.foxentry-item:hover, .foxentry-item.is-active { background: #FAF5FF; }
+.foxentry-item:hover, .foxentry-item.is-active { background: #F5F3FF; }
 .foxentry-item strong { color: var(--heading); font-weight: 600; }
 .foxentry-item small { color: var(--muted); font-size: 11px; margin-left: 6px; }
 .foxentry-correction {
@@ -505,7 +515,7 @@ body {
   padding: 10px 14px;
   margin-bottom: 16px;
   background: linear-gradient(135deg, #F0F9FF 0%, #F5F3FF 100%);
-  border: 1px solid rgba(107, 33, 168, 0.10);
+  border: 1px solid rgba(194, 123, 160, 0.10);
   border-radius: var(--radius);
   font-size: 13px;
   color: var(--muted);
@@ -537,7 +547,7 @@ body {
 .phone-warning-text { margin-bottom: 8px; }
 .phone-warning-actions { display: flex; gap: 8px; }
 .phone-warning-actions button {
-  font-family: 'Cabin', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
   font-weight: 600;
   padding: 5px 12px;
@@ -567,7 +577,7 @@ body {
   transition: background 0.2s ease, border-color 0.2s ease;
   user-select: none;
 }
-.company-toggle:hover { background: rgba(107,33,168,0.06); border-color: var(--cta); }
+.company-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
 .company-toggle input[type="checkbox"] {
   width: 18px; height: 18px; accent-color: var(--cta);
   cursor: pointer; flex-shrink: 0;
@@ -594,11 +604,11 @@ body {
 .billing-toggle {
   display: flex; align-items: center; gap: 10px;
   margin-top: 16px; padding: 12px 16px;
-  background: rgba(107,33,168,0.04); border: 1px solid #e0e0e0; border-radius: 10px;
+  background: rgba(194,123,160,0.04); border: 1px solid #e0e0e0; border-radius: 10px;
   cursor: pointer; transition: all 0.25s ease;
   user-select: none;
 }
-.billing-toggle:hover { background: rgba(107,33,168,0.06); border-color: var(--cta); }
+.billing-toggle:hover { background: rgba(194,123,160,0.06); border-color: var(--cta); }
 .billing-toggle input[type="checkbox"] {
   width: 18px; height: 18px; accent-color: var(--cta);
   cursor: pointer; flex-shrink: 0;
@@ -644,8 +654,8 @@ body {
 }
 .payment-method.selected {
   border-color: var(--cta);
-  background: rgba(107,33,168,0.04);
-  box-shadow: 0 0 0 3px rgba(107,33,168,0.1);
+  background: rgba(194,123,160,0.04);
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.1);
 }
 .payment-method input[type="radio"] {
   position: absolute;
@@ -687,7 +697,7 @@ body {
   border-radius: 5px;
   flex-shrink: 0;
   object-fit: contain;
-  border: 1px solid rgba(107,33,168,0.12);
+  border: 1px solid rgba(194,123,160,0.12);
 }
 
 .pm-info { flex: 1; }
@@ -706,7 +716,7 @@ body {
   font-size: 10px;
   font-weight: 700;
   color: var(--cta);
-  background: rgba(107,33,168,0.1);
+  background: rgba(194,123,160,0.1);
   padding: 3px 8px;
   border-radius: 20px;
   white-space: nowrap;
@@ -731,7 +741,7 @@ body {
 }
 .klarna-parent.expanded {
   border-color: var(--cta);
-  background: rgba(107,33,168,0.04);
+  background: rgba(194,123,160,0.04);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-color: transparent;
@@ -750,7 +760,7 @@ body {
   border: 1.5px solid var(--cta);
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
-  background: rgba(107,33,168,0.02);
+  background: rgba(194,123,160,0.02);
   overflow: hidden;
   margin-top: -8px;
   margin-bottom: 0;
@@ -768,10 +778,10 @@ body {
   position: relative;
 }
 .klarna-sub-method:hover {
-  background: rgba(107,33,168,0.06);
+  background: rgba(194,123,160,0.06);
 }
 .klarna-sub-method.selected {
-  background: rgba(107,33,168,0.08);
+  background: rgba(194,123,160,0.08);
 }
 .klarna-sub-method + .klarna-sub-method {
   border-top: 1px solid var(--border);
@@ -850,7 +860,7 @@ body {
 }
 .bank-parent.expanded {
   border-color: var(--cta);
-  background: rgba(37,99,235,0.04);
+  background: rgba(194,123,160,0.04);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-color: transparent;
@@ -869,31 +879,33 @@ body {
   border: 1.5px solid var(--cta);
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
-  background: rgba(37,99,235,0.02);
+  background: rgba(194,123,160,0.03);
   overflow: hidden;
   margin-top: -8px;
   margin-bottom: 0;
+  padding: 12px;
 }
 .bank-sub-methods.open {
-  display: block;
+  display: flex; flex-direction: column; gap: 8px;
 }
+/* ═══ Brite-style bank tiles (2026) ═══ */
 .bank-sub-method {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px 12px 50px;
-  cursor: pointer;
-  transition: background 0.15s ease;
   position: relative;
+  display: flex; align-items: center; gap: 12px;
+  background: #FFFFFF; border: 1px solid rgba(45,27,61,0.10);
+  border-radius: 12px; padding: 9px 14px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(45,27,61,0.04);
+  transition: border-color .2s cubic-bezier(0.22,1,0.36,1),
+              background .2s cubic-bezier(0.22,1,0.36,1),
+              box-shadow .2s cubic-bezier(0.22,1,0.36,1);
+  -webkit-tap-highlight-color: transparent;
 }
-.bank-sub-method:hover {
-  background: rgba(37,99,235,0.06);
-}
+.bank-sub-method:hover { border-color: rgba(194,123,160,0.5); box-shadow: 0 3px 10px rgba(45,27,61,0.07); }
 .bank-sub-method.selected {
-  background: rgba(37,99,235,0.08);
-}
-.bank-sub-method + .bank-sub-method {
-  border-top: 1px solid var(--border);
+  border-color: var(--cta);
+  background: rgba(194,123,160,0.045);
+  box-shadow: 0 0 0 1.5px var(--cta), 0 4px 14px rgba(194,123,160,0.14);
 }
 .bank-sub-method input[type="radio"] {
   position: absolute;
@@ -901,47 +913,74 @@ body {
   pointer-events: none;
 }
 .bank-sub-radio {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 21px; height: 21px; border-radius: 50%;
+  border: 2px solid rgba(45,27,61,0.20);
+  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: border-color .2s ease;
 }
-.bank-sub-method.selected .bank-sub-radio {
-  border-color: var(--cta);
-}
+.bank-sub-method.selected .bank-sub-radio { border-color: var(--cta); }
 .bank-sub-radio-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--cta);
-  transform: scale(0);
-  transition: transform 0.2s ease;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--cta); transform: scale(0);
+  transition: transform .2s cubic-bezier(0.34,1.56,0.64,1);
 }
-.bank-sub-method.selected .bank-sub-radio-dot {
-  transform: scale(1);
-}
-.bank-sub-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  object-fit: contain;
+.bank-sub-method.selected .bank-sub-radio-dot { transform: scale(1); }
+.bank-sub-logo {
   flex-shrink: 0;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #FAF6FA; border: 1px solid rgba(45,27,61,0.06);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  transition: background .2s ease, box-shadow .2s ease;
 }
-.bank-sub-info { flex: 1; }
+.bank-sub-method:hover .bank-sub-logo { box-shadow: 0 2px 6px rgba(45,27,61,0.08); }
+.bank-sub-method.selected .bank-sub-logo { background: #fff; box-shadow: 0 2px 8px rgba(194,123,160,0.18); }
+.bank-sub-logo img { max-height: 34px; max-width: 34px; width: auto; object-fit: contain; display: block; border-radius: 8px; }
+.bank-sub-logo svg { width: 26px; height: 26px; }
+.bank-sub-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .bank-sub-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--heading);
+  font-size: 15px; font-weight: 700;
+  color: var(--heading); line-height: 1.25; letter-spacing: -0.01em;
 }
 .bank-sub-desc {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 1px;
+  font-size: 11.5px; font-weight: 500;
+  color: var(--muted); line-height: 1.2;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.bank-sub-method.selected .bank-sub-desc { color: var(--cta); }
+.bank-sub-badge {
+  flex-shrink: 0;
+  background: rgba(194,123,160,0.12); color: var(--cta);
+  font-size: 9.5px; font-weight: 800;
+  padding: 3px 9px; border-radius: 20px;
+  letter-spacing: 0.3px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.bank-sub-go {
+  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(45,27,61,0.05); color: rgba(45,27,61,0.40);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s ease, color .2s ease, transform .25s cubic-bezier(0.22,1,0.36,1);
+}
+.bank-sub-go svg { width: 16px; height: 16px; }
+.bank-sub-method:hover .bank-sub-go { background: rgba(194,123,160,0.16); color: var(--cta); transform: translateX(2px); }
+.bank-sub-method.selected .bank-sub-go { background: var(--cta); color: #fff; box-shadow: 0 3px 8px rgba(194,123,160,0.35); }
+.bank-group-head-icon {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 60%, #9333EA 100%);
+  box-shadow: 0 4px 10px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+}
+.bank-group-head-icon svg { width: 23px; height: 23px; }
+@media (max-width: 520px) {
+  .bank-sub-methods { padding: 10px; }
+  .bank-sub-methods.open { gap: 7px; }
+  .bank-sub-method { padding: 11px 13px; gap: 11px; }
+  .bank-sub-logo { width: 46px; height: 46px; border-radius: 11px; }
+  .bank-sub-logo img { max-height: 40px; max-width: 40px; border-radius: 9px; }
+  .bank-sub-badge { display: none; }
 }
 
 #payment-errors {
@@ -1023,7 +1062,7 @@ body {
 .checkout-btn {
   width: 100%;
   padding: 18px 32px;
-  font-family: 'Cabin', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: var(--white);
@@ -1032,7 +1071,7 @@ body {
   border-radius: var(--radius);
   cursor: pointer;
   letter-spacing: 0.02em;
-  box-shadow: 0 4px 20px rgba(107,33,168,0.3);
+  box-shadow: 0 4px 20px rgba(194,123,160,0.3);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   overflow: hidden;
@@ -1051,7 +1090,7 @@ body {
 .checkout-btn:hover {
   background: var(--cta-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(107,33,168,0.4);
+  box-shadow: 0 8px 28px rgba(194,123,160,0.4);
 }
 .checkout-btn:active { transform: translateY(0); }
 .checkout-btn:disabled {
@@ -1059,7 +1098,7 @@ body {
   cursor: not-allowed;
   transform: none !important;
 }
-.checkout-btn:disabled:hover { background: var(--cta); box-shadow: 0 4px 20px rgba(107,33,168,0.3); }
+.checkout-btn:disabled:hover { background: var(--cta); box-shadow: 0 4px 20px rgba(194,123,160,0.3); }
 .checkout-btn:disabled::before { display: none; }
 
 .checkout-btn .spinner {
@@ -1114,7 +1153,7 @@ body {
   opacity: 0;
 }
 .summary-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--heading);
@@ -1169,7 +1208,7 @@ body {
   border-radius: 2px 0 0 2px;
 }
 .mini-book-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 5.5px;
   font-weight: 700;
   color: var(--heading);
@@ -1177,7 +1216,7 @@ body {
   margin-left: 3px;
 }
 .mini-book-author {
-  font-family: 'Cabin', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 4px;
   color: var(--muted);
   margin-top: 3px;
@@ -1186,7 +1225,7 @@ body {
 
 .summary-product-info { flex: 1; }
 .summary-product-name {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 15px;
   font-weight: 600;
   color: var(--heading);
@@ -1204,7 +1243,7 @@ body {
   margin-bottom: 6px;
 }
 .summary-product-price {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 18px;
   font-weight: 700;
   color: var(--cta);
@@ -1242,7 +1281,7 @@ body {
   margin-bottom: 0;
 }
 .summary-line.total .price {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 22px;
   color: var(--cta);
 }
@@ -1251,14 +1290,14 @@ body {
 .guarantee-box {
   margin-top: 18px;
   padding: 14px;
-  background: rgba(107,33,168,0.06);
+  background: rgba(194,123,160,0.06);
   border-radius: var(--radius);
-  border: 1px solid rgba(107,33,168,0.12);
+  border: 1px solid rgba(194,123,160,0.12);
   text-align: center;
 }
 .guarantee-box .icon { font-size: 22px; margin-bottom: 5px; }
 .guarantee-box .title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--heading);
@@ -1357,7 +1396,7 @@ body {
   padding: 10px 12px;
   background: var(--light);
   border-radius: var(--radius);
-  border: 1px solid rgba(107,33,168,0.08);
+  border: 1px solid rgba(194,123,160,0.08);
 }
 .summary-review-avatar {
   width: 44px;
@@ -1365,7 +1404,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 2px solid rgba(107,33,168,0.15);
+  border: 2px solid rgba(194,123,160,0.15);
 }
 .summary-review-avatar img {
   width: 100%;
@@ -1454,11 +1493,11 @@ body {
   background: rgba(255,255,255,0.94);
   -webkit-backdrop-filter: blur(20px) saturate(1.4);
   backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid rgba(107,33,168,0.10);
+  border: 1px solid rgba(194,123,160,0.10);
   border-top: none;
   /* Horní hrany rovné (zarovnání s horní hranou telefonu), dolní zaoblené */
   border-radius: 0 0 16px 16px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 16px rgba(45,27,61,0.05);
   /* Smooth transitions pro shrink/expand */
   transition: box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
               border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1),
@@ -1513,7 +1552,7 @@ body {
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .msb-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 13px;
   font-weight: 600;
   color: var(--heading);
@@ -1539,7 +1578,7 @@ body {
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .msb-price {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 17px;
   font-weight: 700;
   color: var(--heading);
@@ -1587,7 +1626,7 @@ body {
   margin-top: 0;
 }
 .mobile-summary-bar.compact {
-  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  box-shadow: 0 4px 24px rgba(45,27,61,0.10);
 }
 
 /* --- Rozevřený content panel --- */
@@ -1632,7 +1671,7 @@ body {
   color: var(--heading);
 }
 .msb-line.total-line .msb-line-val {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 17px;
 }
 .msb-tax-note {
@@ -1710,7 +1749,7 @@ body {
   margin-bottom: 16px;
 }
 .bundle-section-title {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Recoleta', serif;
   font-size: 17px;
   font-weight: 600;
   color: var(--heading);
@@ -1725,7 +1764,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: 1.5px solid rgba(107,33,168,0.15);
+  border: 1.5px solid rgba(194,123,160,0.18);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(.22,1,.36,1);
@@ -1735,8 +1774,8 @@ body {
 .bundle-option:hover { border-color: var(--highlight); background: var(--light); }
 .bundle-option.selected {
   border-color: var(--cta);
-  background: linear-gradient(135deg, rgba(107,33,168,0.06), rgba(212,152,181,0.04));
-  box-shadow: 0 0 0 3px rgba(107,33,168,0.10);
+  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(212,152,181,0.04));
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
 }
 .bundle-radio {
   width: 20px; height: 20px; border-radius: 50%;
@@ -1759,7 +1798,7 @@ body {
 .bundle-badge {
   font-size: 9px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.04em; color: var(--white);
-  background: linear-gradient(135deg, var(--cta), var(--accent));
+  background: var(--cta);
   padding: 2px 6px; border-radius: 5px; line-height: 1.5;
   white-space: nowrap; flex-shrink: 0;
 }
@@ -1772,9 +1811,21 @@ body {
   display: inline-block; margin-top: 2px;
 }
 
+/* Na úzkém displeji se dlouhý název ("2× Kočičí bible") a badge
+   ("NEJOBLÍBENĚJŠÍ") nevejdou na jeden řádek: badge má flex-shrink:0, takže
+   spolkne celý .bundle-info a .bundle-text se stlačí — text se pak kreslí
+   pod badge a ceny lezou přes okraj. Řešení: badge jde na vlastní řádek
+   a názvy se smějí zalomit. */
+@media (max-width: 520px) {
+  .bundle-info { flex-wrap: wrap; }
+  .bundle-text { flex: 1 1 100%; }
+  .bundle-label, .bundle-sublabel { white-space: normal; }
+  .bundle-badge { order: 3; }
+}
+
 /* ─── ORDER BUMP — accordion ─── */
 .order-bump {
-  background: linear-gradient(135deg, rgba(107,33,168,0.06), rgba(245,237,242,0.8));
+  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(245,237,242,0.8));
   border: 2px dashed var(--highlight);
   border-radius: var(--radius-lg);
   padding: 0;
@@ -1794,8 +1845,8 @@ body {
 .order-bump.checked {
   border-style: solid;
   border-color: var(--cta);
-  background: linear-gradient(135deg, rgba(107,33,168,0.10), rgba(245,237,242,1));
-  box-shadow: 0 0 0 3px rgba(107,33,168,0.10);
+  background: linear-gradient(135deg, rgba(194,123,160,0.10), rgba(245,237,242,1));
+  box-shadow: 0 0 0 3px rgba(194,123,160,0.10);
 }
 
 /* Header — vždy viditelný: checkbox + thumbnail + info + expand */
@@ -1822,7 +1873,7 @@ body {
   width: 44px; height: 60px; border-radius: 5px;
   overflow: hidden; flex-shrink: 0;
   background: var(--section);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 2px 8px rgba(45,27,61,0.12);
 }
 .order-bump-thumb img { width: 100%; height: 100%; object-fit: contain; }
 
@@ -1841,7 +1892,7 @@ body {
   background: var(--success); padding: 2px 6px; border-radius: 4px;
 }
 .order-bump-title {
-  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
   color: var(--heading); margin-bottom: 3px;
 }
 .order-bump-title em { color: var(--cta); font-style: italic; }
@@ -1861,14 +1912,14 @@ body {
 
 /* Expand/collapse button */
 .order-bump-expand {
-  border: 1.5px solid rgba(107,33,168,0.30); cursor: pointer;
+  border: 1.5px solid rgba(194,123,160,0.30); cursor: pointer;
   padding: 7px 18px; border-radius: 20px;
   display: flex; align-items: center; gap: 5px;
   flex-shrink: 0; transition: all 0.3s ease;
-  color: var(--cta); background: rgba(107,33,168,0.12);
-  font-size: 13px; font-weight: 700; font-family: 'Cabin', sans-serif;
+  color: var(--cta); background: rgba(194,123,160,0.12);
+  font-size: 13px; font-weight: 700; font-family: 'DM Sans', sans-serif;
 }
-.order-bump-expand:hover { background: rgba(107,33,168,0.22); border-color: var(--cta); transform: scale(1.03); }
+.order-bump-expand:hover { background: rgba(194,123,160,0.22); border-color: var(--cta); transform: scale(1.03); }
 .expand-label { white-space: nowrap; }
 .order-bump-expand svg { transition: transform 0.3s cubic-bezier(.22,1,.36,1); }
 .order-bump-expand[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -1887,7 +1938,7 @@ body {
 }
 .order-bump-detail-inner {
   padding: 0 18px 20px;
-  border-top: 1px solid rgba(107,33,168,0.12);
+  border-top: 1px solid rgba(194,123,160,0.12);
   padding-top: 16px;
 }
 
@@ -1899,11 +1950,11 @@ body {
   width: 90px; height: 124px; border-radius: 8px;
   overflow: hidden; flex-shrink: 0;
   background: var(--section);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(45,27,61,0.12);
 }
 .order-bump-img img { width: 100%; height: 100%; object-fit: contain; }
 .order-bump-detail-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.order-bump-name { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
+.order-bump-name { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
 .order-bump-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
 .order-bump-meta {
   display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
@@ -1937,7 +1988,7 @@ body {
   border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;
 }
 .ob-pillars-title {
-  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
   color: var(--heading); text-align: center; margin-bottom: 12px;
 }
 .ob-pillar-grid {
@@ -1947,7 +1998,7 @@ body {
 .ob-pillar {
   display: flex; align-items: flex-start; gap: 8px;
   padding: 8px 10px; border-radius: 8px;
-  background: linear-gradient(135deg, rgba(107,33,168,0.04), rgba(245,237,242,0.6));
+  background: linear-gradient(135deg, rgba(194,123,160,0.04), rgba(245,237,242,0.6));
   font-size: 12px; line-height: 1.45;
 }
 .ob-pillar:last-child { grid-column: 1 / -1; justify-self: center; max-width: 260px; }
@@ -1963,7 +2014,7 @@ body {
   margin-bottom: 14px;
 }
 .ob-results-title {
-  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  font-family: 'Recoleta', serif; font-size: 14px; font-weight: 600;
   color: var(--heading); margin-bottom: 8px;
 }
 .ob-result-item {
@@ -1976,8 +2027,8 @@ body {
 /* Combo highlight box */
 .ob-combo-box {
   display: flex; gap: 12px; align-items: flex-start;
-  background: linear-gradient(135deg, rgba(107,33,168,0.10), rgba(212,152,181,0.06));
-  border: 1px solid rgba(107,33,168,0.18);
+  background: linear-gradient(135deg, rgba(194,123,160,0.10), rgba(212,152,181,0.06));
+  border: 1px solid rgba(194,123,160,0.18);
   border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;
 }
 .ob-combo-icon { font-size: 24px; flex-shrink: 0; }
@@ -2107,7 +2158,7 @@ body {
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, 'Cabin', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'DM Sans', sans-serif;
   font-size: 16px;
   font-weight: 600;
   height: 48px;
@@ -2243,7 +2294,7 @@ body {
 .paypal-provider #expiry-date iframe,
 .paypal-provider #verification-code iframe,
 .paypal-provider #card-holder iframe {
-  border: 1.5px solid rgba(107,33,168,0.18) !important;
+  border: 1.5px solid rgba(194,123,160,0.18) !important;
   border-radius: 8px !important;
   height: 42px !important;
   background: #FFFFFF !important;
@@ -2255,7 +2306,7 @@ body {
 .paypal-provider #expiry-date iframe:hover,
 .paypal-provider #verification-code iframe:hover,
 .paypal-provider #card-holder iframe:hover {
-  border-color: rgba(107,33,168,0.35) !important;
+  border-color: rgba(194,123,160,0.35) !important;
 }
 </style>
 
@@ -2278,14 +2329,14 @@ body {
 </style>
 <div class="preloader" id="preloader">
  <div class="preloader-logo-wrap">
-  <img src="/kocici-bible-logo.png" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180">
+  <img src="/kocici-bible-logo.png" alt="Kočičí bible" class="preloader-logo" width="180" height="180">
   <div class="preloader-shine"></div>
  </div>
 </div>
 
 <!-- ═══ HLAVIČKA + BREADCRUMB ═══ -->
 <div class="checkout-header">
-  <a href="/" class="checkout-logo">Kočičí bible Oficial</a>
+  <a href="/" class="checkout-logo">Kočičí bible</a>
   <div class="breadcrumb">
     <span class="breadcrumb-step done">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
@@ -2314,7 +2365,7 @@ body {
         <!-- Obrázek produktu z Medusa admin -->
       </div>
       <div class="msb-info">
-        <div class="msb-title" id="msb-title">Kočičí bible Oficial</div>
+        <div class="msb-title" id="msb-title">Kočičí bible</div>
         <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× kniha</div>
       </div>
       <div class="msb-price-col">
@@ -2328,19 +2379,19 @@ body {
       <div class="msb-divider"></div>
       <!-- Hlavní produkt -->
       <div class="msb-line" id="msb-product-line">
-        <span class="msb-line-label" id="msb-product-name">Kočičí bible Oficial</span>
+        <span class="msb-line-label" id="msb-product-name">Kočičí bible</span>
         <span class="msb-line-val" id="msb-product-price">550&nbsp;Kč</span>
       </div>
       <!-- Order bump (skrytý pokud není vybrán) -->
       <div class="msb-line bump" id="msb-bump-line" style="display:none;">
         <span class="msb-line-label" id="msb-bump-name">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Kočičí bible
+          Bonusová kniha
         </span>
         <span class="msb-line-val" id="msb-bump-price">399&nbsp;Kč</span>
       </div>
       <!-- Mezisoučet -->
-      <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(107,33,168,0.18);">
+      <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
         <span class="msb-line-label">Mezisoučet</span>
         <span class="msb-line-val" id="msb-subtotal">550&nbsp;Kč</span>
       </div>
@@ -2420,7 +2471,7 @@ body {
                 <div class="order-bump-tag">Jednorázová nabídka</div>
                 <div class="order-bump-save-tag" id="order-bump-pct-tag">-27%</div>
               </div>
-              <div class="order-bump-title">Přidejte <em id="order-bump-title-name">Psí superživot</em></div>
+              <div class="order-bump-title">Přidej <em id="order-bump-title-name">bonusovou knihu</em></div>
               <div class="order-bump-prices-inline">
                 <span class="order-bump-old-price" id="order-bump-old-price">550&nbsp;Kč</span>
                 <span class="order-bump-new-price" id="order-bump-new-price">399&nbsp;Kč</span>
@@ -2443,10 +2494,10 @@ body {
                   <!-- Obrázek z Medusa admin -->
                 </div>
                 <div class="order-bump-detail-info">
-                  <div class="order-bump-name" id="order-bump-name">Psí superživot</div>
-                  <div class="order-bump-author">Lars Vermeulen</div>
+                  <div class="order-bump-name" id="order-bump-name">Bonusová kniha</div>
+                  <div class="order-bump-author"></div>
                   <div class="order-bump-meta">
-                    <span>&#128214; 270 stran + 3 bonusové e-booky</span>
+                    <span>&#128214; Tištěná kniha</span>
                     <span>&#128054; Psí behaviorista</span>
                     <span>&#11088; 9,2/10 spokojenost zákazníků</span>
                   </div>
@@ -2496,15 +2547,15 @@ body {
                 <div class="ob-results-title">Co získáte&hellip;</div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Tištěnou knihu Psí superživot (270 stran) &mdash; kompletní 4-pilířový systém pro klidného psa</span>
+                  <span>Tištěnou bonusovou knihu za zvýhodněnou cenu</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>3 bonusové e-booky: Dlouhověkost začíná v misce, Hravý pes, Psí SOS: 100 problémů &amp; řešení</span>
+                  <span>Dopravu zdarma a 30denní záruku vrácení peněz</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Dopravu zdarma &mdash; odesíláme společně s vaší objednávkou Kočičí bible</span>
+                  <span>Dopravu zdarma &mdash; odesíláme společně s tvou objednávkou knihy Kočičí bible</span>
                 </div>
                 <div class="ob-result-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
@@ -2516,7 +2567,7 @@ body {
               <div class="ob-combo-box">
                 <div class="ob-combo-icon">&#128054;</div>
                 <div class="ob-combo-text">
-                  <strong>Společně s knihou <em>Kočičí bible Oficial</em> máte kompletní balíček:</strong> spokojená kočka a poslušný pes. Váš domov klidný, harmonický &mdash; a oba mazlíčci šťastní.
+                  <strong>Společně s knihou <em>Kočičí bible</em> máš kompletní balíček:</strong> spokojená kočka i spokojený pes. Perfektní kombinace pro celou zvířecí domácnost.
                 </div>
               </div>
 
@@ -2711,7 +2762,7 @@ body {
             <div style="font-weight:700;font-size:14px;color:#1a1a2e;margin-bottom:10px;">Způsob doručení</div>
 
             <!-- Option 1: Vyzvednutí na pobočce (Pickup) -->
-            <div class="shipping-option selected" id="shipping-pickup" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--accent);border-radius:10px;cursor:pointer;background:rgba(107,33,168,0.03);transition:all 0.15s ease;">
+            <div class="shipping-option selected" id="shipping-pickup" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--accent);border-radius:10px;cursor:pointer;background:rgba(194,123,160,0.03);transition:all 0.15s ease;">
               <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
                 <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></div>
               </div>
@@ -2725,7 +2776,7 @@ body {
 
             <!-- Packeta point selection (shown when pickup selected) -->
             <div id="packeta-point-section" style="margin:8px 0 8px 0;padding-left:28px;">
-              <button type="button" id="packeta-select-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed var(--accent);border-radius:8px;background:rgba(107,33,168,0.04);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease;" onmouseover="this.style.background='rgba(107,33,168,0.08)'" onmouseout="this.style.background='rgba(107,33,168,0.04)'">
+              <button type="button" id="packeta-select-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed var(--accent);border-radius:8px;background:rgba(194,123,160,0.04);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease;" onmouseover="this.style.background='rgba(194,123,160,0.08)'" onmouseout="this.style.background='rgba(194,123,160,0.04)'">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 Vybrat výdejní místo
               </button>
@@ -2837,29 +2888,35 @@ body {
       <div class="summary-product" id="desktop-product">
         <div class="summary-product-img" id="desktop-product-img">
           <div class="mini-book">
-            <div class="mini-book-title">Kočičí bible Oficial</div>
+            <div class="mini-book-title">Kočičí bible</div>
             <div class="mini-book-author">Michal Peterka</div>
           </div>
         </div>
         <div class="summary-product-info">
-          <div class="summary-product-name" id="desktop-product-name">Kočičí bible Oficial</div>
+          <div class="summary-product-name" id="desktop-product-name">Kočičí bible</div>
           <div class="summary-product-author">Michal Peterka</div>
           <div class="summary-product-format">Paperback</div>
           <div class="summary-product-price" id="desktop-product-price">550&nbsp;Kč</div>
         </div>
       </div>
 
-      <!-- 3 bonusové e-knihy zdarma -->
+      <!-- 3 bonusové e-booky zdarma -->
       <div class="summary-bonus">
         <span class="bonus-icon">🎁</span>
-        <span class="bonus-text">+ 3 bonusové e-knihy zdarma</span>
+        <span class="bonus-text">+ 3 bonusové e-booky zdarma</span>
+      </div>
+
+      <!-- Doprava zdarma + záruka -->
+      <div class="summary-bonus">
+        <span class="bonus-icon">🚚</span>
+        <span class="bonus-text">Doprava zdarma + 30denní záruka vrácení peněz</span>
       </div>
 
       <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
-      <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(107,33,168,0.2);">
+      <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
         <span id="summary-bump-name" style="font-size:13px;display:flex;align-items:center;gap:4px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Kočičí bible
+          Bonusová kniha
         </span>
         <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">399&nbsp;Kč</span>
       </div>
@@ -2898,7 +2955,7 @@ body {
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
         <div class="title">100% Záruka vrácení peněz</div>
-        <div class="desc">Nejste spokojeni? Do 30 dnů vám vrátíme celou částku. Bez otázek, bez komplikací.</div>
+        <div class="desc">Nejsi spokojená? Do 30 dnů ti vrátíme celou částku. Bez otázek, bez komplikací.</div>
       </div>
 
       <!-- Informace o dopravě -->
@@ -2913,39 +2970,25 @@ body {
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Dotazy? <strong>podpora@kocicibible.cz</strong></span>
-        </div>
-      </div>
-
-      <!-- Mini recenze — Kočičí bible Oficial -->
-      <div class="summary-reviews">
-        <div class="summary-review">
-          <div class="summary-review-avatar">
-            <img src="https://i.pravatar.cc/80?img=47" alt="Markéta" loading="lazy">
-          </div>
-          <div class="summary-review-content">
-            <div class="summary-review-stars">★★★★★</div>
-            <div class="summary-review-text">&ldquo;Naše kočka čůrala všude možně a já byla zoufalá. Po dvou týdnech s touto knihou je zase doma klid. Opravdu funguje!&rdquo;</div>
-            <div class="summary-review-author">Markéta K., Praha</div>
-          </div>
-        </div>
-        <div class="summary-review">
-          <div class="summary-review-avatar">
-            <img src="https://i.pravatar.cc/80?img=32" alt="Tereza" loading="lazy">
-          </div>
-          <div class="summary-review-content">
-            <div class="summary-review-stars">★★★★★</div>
-            <div class="summary-review-text">&ldquo;Konečně rozumím své kočce. Bonusové e-booky jsou fantastické. Nejlepší investice pro každého kočičáře.&rdquo;</div>
-            <div class="summary-review-author">Tereza V., Brno</div>
-          </div>
+          <span>Dotazy? <strong>peterka@kocicibible.cz</strong></span>
         </div>
       </div>
 
       <!-- Ikony platebních metod -->
       <div class="summary-payments">
-        <img src="/icons/mastercard.svg" alt="Mastercard" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
-        <img src="/icons/visa.svg" alt="Visa" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
-        <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(107,33,168,0.12);">
+        <img src="/icons/mastercard.svg" alt="Mastercard" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/visa.svg" alt="Visa" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/csob.svg" alt="ČSOB" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/ceska-sporitelna.svg" alt="Česká spořitelna" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/komercni-banka.svg" alt="Komerční banka" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/raiffeisenbank.svg" alt="Raiffeisenbank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/fio-banka.svg" alt="Fio banka" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/airbank.svg" alt="Air Bank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/moneta.svg" alt="MONETA" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/mbank.svg" alt="mBank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/unicredit.svg" alt="UniCredit Bank" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
+        <img src="/icons/partners-banka.svg" alt="Partners Banka" height="26" loading="lazy" style="height:26px;width:auto;object-fit:contain;padding:4px 6px;background:#fff;border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
       </div>
 
       <!-- Odkaz na reklamační řád -->
@@ -2967,15 +3010,15 @@ body {
     <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Platbou kartou souhlasíte se zpracováním vašich údajů v souladu se zásadami ochrany osobních údajů platební brány.</p>
   </div>
   <div class="checkout-footer-company">
-    <strong>Kočičí bible Oficial</strong> je publikace společnosti Performance Marketing Solution s.r.o.<br>
+    <strong>Kočičí bible</strong> je publikace společnosti Performance Marketing Solution s.r.o.<br>
     Rybná 716/24, Staré Město, 110 00 Praha, Česká republika<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
     Knihy odesíláme z našeho skladu po celé České republice.<br>
-    Máte dotazy nebo problémy? Neváhejte nás kontaktovat: <a href="mailto:podpora@kocicibible.cz"><strong>podpora@kocicibible.cz</strong></a><br>
+    Máš dotazy nebo problémy? Neváhej nás kontaktovat: <a href="mailto:peterka@kocicibible.cz"><strong>peterka@kocicibible.cz</strong></a><br>
     Odpovídáme do 24 hodin a každý problém řešíme osobně.
   </div>
   <div class="checkout-footer-links">
-    &copy; 2026 Kočičí bible Oficial · Michal Peterka<br>
+    &copy; 2026 Kočičí bible · Michal Peterka<br>
     <a href="obchodni-podminky.html">Obchodní podmínky</a> · <a href="ochrana-osobnich-udaju.html">Ochrana osobních údajů</a> · <a href="reklamace.html">Reklamační řád</a> · <a href="doprava.html">Doprava &amp; Doručení</a>
   </div>
 </div>
@@ -3123,7 +3166,7 @@ body {
 window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(completeRes){
   var o = (completeRes && completeRes.order) ? completeRes.order : completeRes;
   if (!o || typeof o.id !== 'string' || o.id.indexOf('order_') !== 0) {
-    throw new Error('Cart completion did not return a valid order — payment may not be complete');
+    throw new Error('Objednávku se nepodařilo dokončit — platba možná neproběhla. Zkuste to prosím znovu.');
   }
   return o;
 };
@@ -3260,7 +3303,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
       var parts = ['Paperback · ' + selectedBundleQty + '× kniha'];
-      if (orderBumpActive) parts.push('+ Kočičí bible');
+      if (orderBumpActive) parts.push('+ ' + ((PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'bonusová kniha'));
       msbSubtitle.textContent = parts.join(' ');
     }
 
@@ -3310,6 +3353,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var html = '';
+    var productName = PROJECT_CONFIG.mainProduct.name || 'Kočičí bible';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0); // Výchozí: první (1×)
       var perUnit = (opt.price / opt.qty).toFixed(2).replace('.', ',');
@@ -3317,8 +3361,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
-      html += '<div class="bundle-text"><span class="bundle-label">' + opt.label + '</span>';
-      if (opt.sublabel) html += '<span class="bundle-sublabel">' + opt.sublabel + '</span>';
+      html += '<div class="bundle-text"><span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
+      html += '<span class="bundle-sublabel">+ 3 bonusové e-booky zdarma</span>';
       html += '</div>';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '</div>';
@@ -3989,7 +4033,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       script.onerror = function(e) {
         _paypalSdkPromise = null;
         console.error('[PayPal SDK] Failed to load URL:', sdkUrl, 'Error:', e);
-        reject(new Error('PayPal SDK failed to load'));
+        reject(new Error('Nepodařilo se načíst PayPal. Zkuste to prosím znovu.'));
       };
       document.head.appendChild(script);
     });
@@ -4145,7 +4189,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (document.querySelector('.payment-preloader')) return;
     var el = document.createElement('div');
     el.className = 'payment-preloader';
-    el.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
+    el.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
     document.body.insertBefore(el, document.body.firstChild);
   }
   function hideExpressPreloader() {
@@ -4479,7 +4523,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         .catch(function(err) {
           btn.classList.remove('loading');
           console.error('[Express ' + method.code + '] Error:', err);
-          alert('Er is een fout opgetreden. Zkuste to znovu nebo použijte formulář níže.');
+          alert('Došlo k chybě. Zkuste to znovu nebo použijte formulář níže.');
         });
     });
   }
@@ -4496,7 +4540,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       s.src = 'https://pay.google.com/gp/p/js/pay.js';
       s.async = true;
       s.onload = resolve;
-      s.onerror = function() { _googlePayJsPromise = null; reject(new Error('Google Pay JS failed to load')); };
+      s.onerror = function() { _googlePayJsPromise = null; reject(new Error('Nepodařilo se načíst Google Pay. Zkuste to prosím znovu.')); };
       document.head.appendChild(s);
     });
     return _googlePayJsPromise;
@@ -4789,7 +4833,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             console.log('[Express Apple Pay] Validating merchant:', event.validationURL);
             applepay.validateMerchant({
               validationUrl: event.validationURL,
-              displayName: PROJECT_CONFIG.name || 'Kočičí bible Oficial',
+              displayName: PROJECT_CONFIG.name || 'Kočičí bible',
             }).then(function(result) {
               session.completeMerchantValidation(result.merchantSession);
             }).catch(function(err) {
@@ -4935,6 +4979,55 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
 
+  // ═══ Dynamic CZ bank registry — tiles sourced from gateway config (admin) ═══
+  // Canonical bank identity → per-provider method code (Comgate bank_cz_* / PayU PBL value).
+  // A bank shows up in the checkout group when its method is active on ANY gateway;
+  // first gateway in /store/payment-options order (= admin priority) wins.
+  var CZ_BANK_REGISTRY = [
+    { key: 'cs',   label: 'Česká spořitelna',  icon: '/icons/ceska-sporitelna.svg', comgate: 'bank_cz_cs',   payu: 'cs', popular: true },
+    { key: 'csob', label: 'ČSOB',              icon: '/icons/csob.svg',             comgate: 'bank_cz_csob', payu: 'cb' },
+    { key: 'kb',   label: 'Komerční banka',    icon: '/icons/komercni-banka.svg',   comgate: 'bank_cz_kb',   payu: 'kb' },
+    { key: 'rb',   label: 'Raiffeisenbank',    icon: '/icons/raiffeisenbank.svg',   comgate: 'bank_cz_rb',   payu: 'rf' },
+    { key: 'mo',   label: 'Moneta Money Bank', icon: '/icons/moneta.svg',           comgate: 'bank_cz_mo',   payu: 'pg' },
+    { key: 'fio',  label: 'Fio banka',         icon: '/icons/fio-banka.svg',        comgate: 'bank_cz_fb',   payu: 'pf' },
+    { key: 'mb',   label: 'mBank',             icon: '/icons/mbank.svg',            comgate: 'bank_cz_mb',   payu: 'mp' },
+    { key: 'ab',   label: 'Air Bank',          icon: '/icons/airbank.svg',          comgate: 'bank_cz_ab',   payu: null },
+    { key: 'pb',   label: 'Partners Banka',    icon: '/icons/partners-banka.svg',   comgate: 'bank_cz_pb',   payu: null },
+    { key: 'uc',   label: 'UniCredit Bank',    icon: '/icons/unicredit.svg',        comgate: 'bank_cz_uc',   payu: 'uc' },
+  ];
+  // Active tiles collected from /store/payment-options: key → {method, provider, provider_id}
+  var czBankTiles = {};
+  var czQrSource = null; // PayU qrcz when active — otherwise QR rides on Comgate BANK_CZ_OTHER
+
+  function collectCzBankMethod(m, providerName, providerIdFull) {
+    // Comgate individual bank buttons
+    if (providerName === 'comgate' && m.code && m.code.indexOf('bank_cz_') === 0) {
+      for (var i = 0; i < CZ_BANK_REGISTRY.length; i++) {
+        if (CZ_BANK_REGISTRY[i].comgate === m.code) {
+          var k = CZ_BANK_REGISTRY[i].key;
+          if (!czBankTiles[k]) czBankTiles[k] = { method: m.code, provider: providerName, provider_id: m.provider_id || providerIdFull };
+          return true;
+        }
+      }
+      return true; // unknown bank_cz_* code — hide rather than render broken
+    }
+    // PayU CZ pay-by-link methods
+    if (providerName === 'payu') {
+      if (m.code === 'qrcz') {
+        if (!czQrSource) czQrSource = { method: 'qrcz', provider: providerName, provider_id: m.provider_id || providerIdFull };
+        return true;
+      }
+      for (var j = 0; j < CZ_BANK_REGISTRY.length; j++) {
+        if (CZ_BANK_REGISTRY[j].payu === m.code) {
+          var k2 = CZ_BANK_REGISTRY[j].key;
+          if (!czBankTiles[k2]) czBankTiles[k2] = { method: m.code, provider: providerName, provider_id: m.provider_id || providerIdFull };
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   // Popisy platebních metod (česky)
   var METHOD_DESCRIPTIONS = {
     ideal: 'Platba přes vaši banku',
@@ -4943,6 +5036,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     klarna_later: 'Nejprve obdržíte, zaplatíte později',
     klarna_slice: 'Platba ve splátkách',
     creditcard: 'Visa, Mastercard, Maestro',
+    c: 'Visa, Mastercard, Maestro',
+    card: 'Visa, Mastercard, Maestro',
     paypal: 'Platba přes PayPal účet',
     eps: 'Platba přes rakouskou banku',
     przelewy24: 'Polský platební systém',
@@ -4995,8 +5090,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
   function getMethodIconHTML(code) {
-    if (code === 'creditcard') {
-      return '<img src="/icons/creditcard.svg" alt="Platební karta" class="pm-icon" onerror="this.style.display=\'none\'">';
+    // Platební karta (creditcard / PayU 'c' / 'card') — moderní gradient ikonka
+    if (code === 'creditcard' || code === 'c' || code === 'card') {
+      return '<div class="pm-icon" style="width:34px;height:24px;border-radius:6px;background:linear-gradient(135deg,#6366F1 0%,#7C3AED 55%,#9333EA 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(99,102,241,0.35),inset 0 1px 0 rgba(255,255,255,0.25);">' +
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none">' +
+          '<rect x="3" y="6.5" width="18" height="12.5" rx="2.2" fill="rgba(255,255,255,0.96)"/>' +
+          '<rect x="3" y="9" width="18" height="2.6" fill="#6D28D9"/>' +
+          '<rect x="5.4" y="14" width="4.6" height="3" rx="0.8" fill="#F5B301"/>' +
+          '<rect x="12" y="15.4" width="6.6" height="1.5" rx="0.75" fill="#C4B5FD"/>' +
+        '</svg></div>';
     }
     // COD: modern inline SVG icon (package + coins)
     if (code === 'cod') {
@@ -5067,13 +5169,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Flatten methods from all gateways into a single list
       allPaymentOptions = [];
+      czBankTiles = {};
+      czQrSource = null;
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
-          // Individual CZ banks render inside the bank_transfer group — skip standalone tiles
-          if (m.code && m.code.indexOf('bank_cz_') === 0) return;
+          // CZ bank buttons (Comgate/PayU) render inside the bank group — collect & skip standalone tiles
+          if (collectCzBankMethod(m, gw.provider, m.provider_id || providerIdFull)) return;
           var CZ_NAMES = {
             'creditcard': 'Platební karta',
+            'c': 'Platební karta',
+            'card': 'Platební karta',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
@@ -5197,6 +5303,22 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var klarnaMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) !== -1; });
     var otherMethods = methods.filter(function(m) { return KLARNA_CODES.indexOf(m.code) === -1; });
 
+    // Synthetic bank-group anchor: when CZ bank tiles are active (e.g. PayU-only mode)
+    // but no Comgate bank_transfer method exists, render the group anyway — first.
+    var hasBankAnchor = otherMethods.some(function(m) { return m.code === 'bank_transfer'; });
+    if (!hasBankAnchor && (Object.keys(czBankTiles).length > 0 || czQrSource)) {
+      var src0 = czBankTiles[Object.keys(czBankTiles)[0]] || czQrSource;
+      otherMethods.unshift({
+        code: 'bank_transfer',
+        display_name: 'Bankovní převod | QR platba',
+        provider: src0.provider,
+        provider_id: src0.provider_id,
+        sort_order: -1,
+        available_countries: [],
+        supported_currencies: []
+      });
+    }
+
     // Clear existing content (keep error/loading divs)
     var loadingEl = document.getElementById('payment-methods-loading');
     var errorEl = document.getElementById('payment-methods-error');
@@ -5309,14 +5431,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           parent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
         }
       } else if (item.type === 'method' && item.data.code === 'bank_transfer') {
-        // ═══ Bank transfer → render as expandable group ═══
+        // ═══ Bank transfer → expandable group (Brite-style tiles, admin-driven) ═══
         var m = item.data;
         var bankParent = document.createElement('div');
         bankParent.className = 'bank-parent';
         bankParent.setAttribute('data-bank-parent', 'true');
         bankParent.innerHTML =
           '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
-          getMethodIconHTML('bank_transfer') +
+          '<div class="bank-group-head-icon"><svg viewBox="0 0 24 24" fill="none">' +
+            '<path d="M4.2 9.1 11.1 4.7a1.7 1.7 0 0 1 1.8 0l6.9 4.4c1 .63.55 2.18-.63 2.18H4.83c-1.18 0-1.63-1.55-.63-2.18Z" fill="rgba(255,255,255,0.96)"/>' +
+            '<circle cx="12" cy="8.1" r="1.15" fill="#6D28D9"/>' +
+            '<rect x="5.3" y="12.7" width="2.5" height="5.2" rx="1.25" fill="rgba(255,255,255,0.92)"/>' +
+            '<rect x="10.75" y="12.7" width="2.5" height="5.2" rx="1.25" fill="rgba(255,255,255,0.92)"/>' +
+            '<rect x="16.2" y="12.7" width="2.5" height="5.2" rx="1.25" fill="rgba(255,255,255,0.92)"/>' +
+            '<rect x="4.2" y="19.3" width="15.6" height="2.1" rx="1.05" fill="#fff"/>' +
+          '</svg></div>' +
           '<div class="pm-info">' +
             '<div class="pm-name">' + m.display_name + '</div>' +
             '<div class="pm-desc">Vyberte svou banku</div>' +
@@ -5324,33 +5453,100 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           '<svg class="bank-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         container.appendChild(bankParent);
 
-        // Bank sub-methods panel
+        // Bank tiles panel
         var bankSubPanel = document.createElement('div');
         bankSubPanel.className = 'bank-sub-methods';
         bankSubPanel.id = 'bank-sub-methods';
         bankSubPanel.setAttribute('data-provider', m.provider);
         bankSubPanel.setAttribute('data-provider-id', m.provider_id);
 
-        Object.keys(BANK_METHODS).forEach(function(bankCode) {
-          var cfg = BANK_METHODS[bankCode];
+        var tileChevron = '<span class="bank-sub-go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>';
+        var appendBankTile = function(opts) {
           var sub = document.createElement('label');
           sub.className = 'bank-sub-method';
-          sub.setAttribute('data-method', bankCode);
-          sub.setAttribute('data-comgate-method', cfg.code);
-          sub.setAttribute('data-provider', m.provider);
-          sub.setAttribute('data-provider-id', m.provider_id);
+          sub.setAttribute('data-method', opts.method);
+          if (opts.comgateMethod) sub.setAttribute('data-comgate-method', opts.comgateMethod);
+          sub.setAttribute('data-provider', opts.provider);
+          sub.setAttribute('data-provider-id', opts.providerId);
           sub.innerHTML =
-            '<input type="radio" name="payment_method" value="' + bankCode + '">' +
+            '<input type="radio" name="payment_method" value="' + opts.method + '">' +
             '<div class="bank-sub-radio"><div class="bank-sub-radio-dot"></div></div>' +
-            '<img src="' + cfg.icon + '" alt="' + cfg.label + '" class="bank-sub-icon" onerror="this.style.display=\'none\'">' +
+            '<div class="bank-sub-logo">' + opts.logoHtml + '</div>' +
             '<div class="bank-sub-info">' +
-              '<div class="bank-sub-name">' + cfg.label + '</div>' +
-              '<div class="bank-sub-desc">' + cfg.desc + '</div>' +
-            '</div>';
+              '<div class="bank-sub-name">' + opts.label + '</div>' +
+              '<div class="bank-sub-desc">&#9889; ' + opts.desc + '</div>' +
+            '</div>' +
+            (opts.badge ? '<span class="bank-sub-badge">' + opts.badge + '</span>' : '') +
+            tileChevron;
           bankSubPanel.appendChild(sub);
+          if (BANK_CODES.indexOf(opts.method) === -1) BANK_CODES.push(opts.method);
+        };
+
+        // Banks: dynamic from admin config (czBankTiles); fallback to hardcoded Comgate list
+        var hasDynamicTiles = Object.keys(czBankTiles).length > 0;
+        CZ_BANK_REGISTRY.forEach(function(b) {
+          var src = hasDynamicTiles
+            ? czBankTiles[b.key]
+            : (b.comgate && BANK_METHODS[b.comgate] ? { method: b.comgate, provider: m.provider, provider_id: m.provider_id } : null);
+          if (!src) return;
+          appendBankTile({
+            method: src.method,
+            comgateMethod: src.provider === 'comgate' ? (COMGATE_METHOD_MAP[src.method] || null) : null,
+            provider: src.provider,
+            providerId: src.provider_id,
+            logoHtml: '<img src="' + b.icon + '" alt="' + b.label + '" onerror="this.style.display=\'none\'">',
+            label: b.label,
+            desc: 'Okamžitý online převod',
+            badge: b.popular ? 'Nejčastější volba' : null
+          });
         });
+
+        // QR tile — PayU qrcz when enabled in admin, otherwise Comgate BANK_CZ_OTHER
+        var qrSvg = '<svg viewBox="0 0 24 24" fill="none">' +
+          '<rect x="2.5" y="2.5" width="8" height="8" rx="2.6" stroke="#2D1B3D" stroke-width="1.9"/>' +
+          '<rect x="5.45" y="5.45" width="2.1" height="2.1" rx="0.8" fill="#2D1B3D"/>' +
+          '<rect x="13.5" y="2.5" width="8" height="8" rx="2.6" stroke="#2D1B3D" stroke-width="1.9"/>' +
+          '<rect x="16.45" y="5.45" width="2.1" height="2.1" rx="0.8" fill="#C27BA0"/>' +
+          '<rect x="2.5" y="13.5" width="8" height="8" rx="2.6" stroke="#2D1B3D" stroke-width="1.9"/>' +
+          '<rect x="5.45" y="16.45" width="2.1" height="2.1" rx="0.8" fill="#2D1B3D"/>' +
+          '<rect x="13.5" y="13.5" width="3.2" height="3.2" rx="1.1" fill="#2D1B3D"/>' +
+          '<rect x="18.3" y="13.5" width="3.2" height="3.2" rx="1.1" fill="#C27BA0"/>' +
+          '<rect x="13.5" y="18.3" width="3.2" height="3.2" rx="1.1" fill="#C27BA0"/>' +
+          '<rect x="18.3" y="18.3" width="3.2" height="3.2" rx="1.1" fill="#2D1B3D"/>' +
+          '</svg>';
+        if (czQrSource) {
+          appendBankTile({
+            method: czQrSource.method, comgateMethod: null,
+            provider: czQrSource.provider, providerId: czQrSource.provider_id,
+            logoHtml: qrSvg, label: 'QR platba — jiná banka', desc: 'Naskenujte QR kód v bankovní aplikaci'
+          });
+        } else {
+          appendBankTile({
+            method: 'bank_cz_other', comgateMethod: 'BANK_CZ_OTHER',
+            provider: m.provider, providerId: m.provider_id,
+            logoHtml: qrSvg, label: 'QR platba — jiná banka', desc: 'Naskenujte QR kód v bankovní aplikaci'
+          });
+        }
+
         container.appendChild(bankSubPanel);
-        // bank_transfer is NOT auto-selected — don't set isFirstSet here
+
+        // Auto-select: expand the group and preselect the first bank (Česká spořitelna)
+        if (!isFirstSet) {
+          var firstTile = bankSubPanel.querySelector('.bank-sub-method');
+          if (firstTile) {
+            bankParent.classList.add('expanded');
+            bankSubPanel.classList.add('open');
+            bankParent.querySelector('.pm-radio-dot').style.transform = 'scale(1)';
+            bankParent.querySelector('.pm-radio').style.borderColor = 'var(--cta)';
+            firstTile.classList.add('selected');
+            var ftInput = firstTile.querySelector('input');
+            if (ftInput) ftInput.checked = true;
+            selectedMethod = firstTile.getAttribute('data-method');
+            selectedProvider = firstTile.getAttribute('data-provider');
+            selectedProviderId = firstTile.getAttribute('data-provider-id');
+            isFirstSet = true;
+          }
+        }
       } else {
         // Regular payment method
         var m = item.data;
@@ -5748,7 +5944,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         try { localStorage.setItem('checkout_shipping_method', 'pickup'); } catch(e) {}
         // Visual: activate pickup, deactivate home
         pickupOpt.style.borderColor = 'var(--accent)';
-        pickupOpt.style.background = 'rgba(107,33,168,0.03)';
+        pickupOpt.style.background = 'rgba(194,123,160,0.03)';
         pickupOpt.querySelector('.shipping-radio div').style.background = 'var(--accent)';
         homeOpt.style.borderColor = 'var(--border)';
         homeOpt.style.background = 'transparent';
@@ -5766,7 +5962,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         try { localStorage.setItem('checkout_shipping_method', 'home'); } catch(e) {}
         // Visual: activate home, deactivate pickup
         homeOpt.style.borderColor = 'var(--accent)';
-        homeOpt.style.background = 'rgba(107,33,168,0.03)';
+        homeOpt.style.background = 'rgba(194,123,160,0.03)';
         homeOpt.querySelector('.shipping-radio div').style.background = 'var(--accent)';
         pickupOpt.style.borderColor = 'var(--border)';
         pickupOpt.style.background = 'transparent';
@@ -5804,6 +6000,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               address: point.place || point.street,
               zip: point.zip,
               city: point.city,
+              // carrierId === null → vlastní výdejní místo/Z-BOX Zásilkovny (validní pro pickupPlaceCode).
+              // Vyplněné carrierId → externí dopravce (s vendors filtrem níže by nemělo nastat).
+              carrierId: (point.carrierId === undefined ? null : point.carrierId),
             };
             // Show selected point
             var display = document.getElementById('packeta-selected-point');
@@ -5829,6 +6028,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'cs',
           country: 'cz',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
+          // Omezit jen na vlastní síť Zásilkovny (výdejní místa + Z-BOXy).
+          // Tím se nenabídnou body externích dopravců, které padaly na
+          // "aktivní výdejní místo nenalezeno" při zakládání zásilky.
+          vendors: [
+            { country: 'cz', group: 'zpoint' },
+            { country: 'cz', group: 'zbox' },
+          ],
         });
       });
     }
@@ -5965,7 +6171,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               emailField.classList.remove('invalid');
             };
           }
-          return; // Stop — ongeldige TLD
+          return; // Stop — neplatná TLD
         }
       }
 
@@ -6177,9 +6383,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     }
 
-    /* ─── Response helper: navigeer naar result data ─── */
+    /* ─── Response helper: navigace na result data ─── */
     function foxentryResult(resp) {
-      // Foxentry antwoord: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
+      // Foxentry odpověď: { response: { result: {...}, resultCorrected: {...}, suggestions: [...] } }
       var r = resp.response || resp;
       return {
         result: r.result || {},
@@ -6391,7 +6597,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     /* ════════════════════════════════════════
      *  2b. E-MAIL VALIDATIE — basic + full proposal handling
-     *  Beslist op basis van proposal (niet alleen isValid)
+     *  Rozhoduje na základě proposal (nejen isValid)
      * ════════════════════════════════════════ */
     if (foxEmailField) {
       foxEmailField.addEventListener('blur', function() {
@@ -6424,7 +6630,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Skrýt předchozí návrh
           if (foxEmailSuggestion) foxEmailSuggestion.style.display = 'none';
 
-          // Extra veiligheid: TLD lengte check (Foxentry basic mist dit)
+          // Extra pojistka: kontrola délky TLD (Foxentry basic toto nedělá)
           var _emailParts = val.split('@');
           var _tld = '';
           if (_emailParts.length === 2) {
@@ -6563,7 +6769,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           console.warn('[Foxentry] Email validation failed, using local fallback:', err.message || err);
           var localValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
 
-          // Extra: TLD lengte check
+          // Extra: kontrola délky TLD
           var _catchParts = val.split('@');
           if (_catchParts.length === 2) {
             var _catchDomain = _catchParts[1].split('.');
@@ -7141,7 +7347,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (!document.querySelector('.payment-preloader')) {
       var preloaderDiv = document.createElement('div');
       preloaderDiv.className = 'payment-preloader';
-      preloaderDiv.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
+      preloaderDiv.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
       document.body.insertBefore(preloaderDiv, document.body.firstChild);
     }
 
@@ -7152,12 +7358,33 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     }).catch(function(e) {
       console.log('[Payment Return] PayPal address sync skipped:', e.message || e);
     }).then(function() {
-      // Complete the cart via Medusa
-      return medusaFetch('/store/carts/' + cartId + '/complete', {
-        method: 'POST'
-      });
-    }).then(function(res) {
-      var order = res.order || res;
+      // Complete the cart via Medusa — WITH POLLING for async payments.
+      // Bank transfers (PBL: rf/cs/cb/kb…) authorize via IPN + safety-net ~30–45 s
+      // AFTER the customer returns, so a single immediate /complete sees {type:"cart"}
+      // (not authorized yet) and used to throw a scary "platba možná neproběhla" error
+      // even though the order was created seconds later. We now poll the window before
+      // deciding, so the happy path is unchanged but async payers no longer see a false error.
+      var POLL_MAX = 16;       // attempts
+      var POLL_EVERY = 3000;   // ms → ~48 s window (covers IPN + safety-net + reconcile)
+      function waitMs(ms) { return new Promise(function(r){ setTimeout(r, ms); }); }
+      function pollComplete(attempt) {
+        return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+          .then(function(res) {
+            var o = (res && res.order) ? res.order : res;
+            if (o && typeof o.id === 'string' && o.id.indexOf('order_') === 0) return o;
+            // {type:"cart"} → payment not authorized yet → retry within the window.
+            if (attempt < POLL_MAX) return waitMs(POLL_EVERY).then(function(){ return pollComplete(attempt + 1); });
+            var pe = new Error('PAYMENT_PENDING'); pe.__pending = true; throw pe;
+          })
+          .catch(function(e) {
+            if (e && e.__pending) throw e;
+            // Transient/network/already-completing → keep polling within the window.
+            if (attempt < POLL_MAX) return waitMs(POLL_EVERY).then(function(){ return pollComplete(attempt + 1); });
+            var pe2 = new Error('PAYMENT_PENDING'); pe2.__pending = true; throw pe2;
+          });
+      }
+      return pollComplete(0);
+    }).then(function(order) {
       localStorage.setItem('medusa_order_id', order.id || '');
       localStorage.setItem('medusa_order_display_id', order.display_id || '');
       // Cleanup abandoned checkout recovery data
@@ -7173,11 +7400,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         window.location.href = PROJECT_CONFIG.upsellUrl;
       }
     }).catch(function(err) {
-      console.error('[Payment Return] Cart completion failed:', err);
+      console.error('[Payment Return] Cart completion pending/failed:', err);
       var preloader = document.querySelector('.payment-preloader');
-      if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:420px;margin:0 auto;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF2F2;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><p style="font-size:20px;font-weight:600;color:#C0392B;font-family:DM Sans,sans-serif;margin:0 0 8px;">Při zpracování platby došlo k chybě</p><p style="font-size:14px;color:#666;margin:0 0 24px;font-family:DM Sans,sans-serif;line-height:1.5;">' + (err.message || 'Zkuste to znovu nebo nás kontaktujte.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;padding:14px 36px;background:#333;color:#fff;border-radius:10px;text-decoration:none;font-family:DM Sans,sans-serif;font-size:15px;font-weight:600;transition:all 0.2s;">Zkusit znovu</a></div>';
-      }
+      if (!preloader) return;
+      // After the poll window the payment is still confirming (typical for bank
+      // transfers) OR genuinely failed. Show a NEUTRAL, non-alarming message with
+      // NO prominent "try again" — the webhook safety-net + reconcile cron finish the
+      // order and the customer gets an e-mail. This avoids both the false "error" and
+      // the double-payment risk. A soft retry link still covers a real non-payment.
+      preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:460px;margin:0 auto;font-family:DM Sans,sans-serif;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF3C7;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><p style="font-size:20px;font-weight:600;color:#1a1a2e;margin:0 0 10px;">Platba se zpracovává ⏳</p><p style="font-size:14px;color:#666;margin:0;line-height:1.6;">Pokud jsi právě zaplatil/a (hlavně převodem), potvrzení může chvíli trvat — <strong>dorazí ti e-mailem</strong>. Prosím <strong>nezadávej objednávku znovu</strong>, ať nezaplatíš dvakrát.</p><p style="font-size:13px;color:#999;margin-top:18px;">Platba neproběhla? <a href="' + window.location.pathname + '" style="color:#C27BA0;font-weight:600;">Zkusit znovu</a> · <a href="mailto:peterka@kocicibible.cz" style="color:#C27BA0;">peterka@kocicibible.cz</a></p></div>';
     });
 
     return; // Stop further checkout initialization
@@ -7269,7 +7500,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
      * 5. Přesměruj zákazníka na platební stránku (Mollie nebo PayPal)
      * 6. Po platbě se zákazník vrátí → dokončit cart (POST /store/carts/{id}/complete)
      *
-     * Hieronder staat de implementatie:
+     * Níže je implementace:
      */
 
     // Údaje zákazníka z formuláře
@@ -7541,6 +7772,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           cartMeta.packeta_point_id = String(selectedPacketaPoint.id);
           cartMeta.packeta_point_name = selectedPacketaPoint.name;
           cartMeta.packeta_point_address = selectedPacketaPoint.address + ', ' + selectedPacketaPoint.zip + ' ' + selectedPacketaPoint.city;
+          // Diagnostika dopravce: prázdné = vlastní místo Zásilkovny (OK pro pickupPlaceCode).
+          // Vyplněné = externí dopravce → v adminu je hned vidět, proč by zásilka mohla padnout.
+          cartMeta.packeta_carrier_id = (selectedPacketaPoint.carrierId === null || selectedPacketaPoint.carrierId === undefined)
+            ? '' : String(selectedPacketaPoint.carrierId);
         }
         if (selectedMethod === 'cod') {
           cartMeta.payment_method = 'cod';
@@ -7729,7 +7964,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   if (!document.querySelector('.payment-preloader')) {
                     var kPreloader = document.createElement('div');
                     kPreloader.className = 'payment-preloader';
-                    kPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
+                    kPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
                     document.body.insertBefore(kPreloader, document.body.firstChild);
                   }
 
@@ -7794,7 +8029,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   var attempts = 20;
                   (function wait() {
                     if (typeof window.AirwallexComponentsSDK !== 'undefined') return resolve();
-                    if (--attempts <= 0) return reject(new Error('Airwallex SDK niet geladen.'));
+                    if (--attempts <= 0) return reject(new Error('Airwallex SDK se nepodařilo načíst.'));
                     setTimeout(wait, 300);
                   })();
                 });
@@ -7905,7 +8140,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 if (!document.querySelector('.payment-preloader')) {
                   var awPreloader = document.createElement('div');
                   awPreloader.className = 'payment-preloader';
-                  awPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
+                  awPreloader.innerHTML = '<div class="preloader-logo-wrap"><img src="/kocici-bible-logo.png" alt="Kočičí bible" class="preloader-logo" width="180" height="180"><div class="preloader-shine"></div></div>';
                   document.body.insertBefore(awPreloader, document.body.firstChild);
                 }
 

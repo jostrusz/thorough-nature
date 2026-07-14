@@ -11,6 +11,7 @@ const PROJECT_SUPPORT_EMAILS: Record<string, string> = {
   'zivot-zaslugy': "anna@nejdriv-ja.cz",
   'pusti-to-sk': "podpora@pustitocotanici.sk",
   'engedd-el': "info@engeddelkonyv.hu",
+  'kocici-bible': "peterka@kocicibible.cz",
 }
 
 export async function GET(req: MedusaRequest, res: MedusaResponse) {

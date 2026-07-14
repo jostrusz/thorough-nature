@@ -195,6 +195,26 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
     },
   ],
   // Engedd el, ami tönkretesz (HU) — 2 bonusz e-könyv
+  'kocici-bible': [
+    {
+      key: "e-books/Dlouhovekost-zacina-v-kocici-misce.pdf",
+      title: "Dlouhověkost začíná v kočičí misce",
+      description: "E-book (PDF)",
+      size: "1.9 MB",
+    },
+    {
+      key: "e-books/Hrava-kocka.pdf",
+      title: "Hravá kočka",
+      description: "E-book (PDF)",
+      size: "1.0 MB",
+    },
+    {
+      key: "e-books/Kocici-SOS-100-problemu-100-reseni.pdf",
+      title: "Kočičí SOS: 100 Problémů, 100 Řešení",
+      description: "E-book (PDF)",
+      size: "4.1 MB",
+    },
+  ],
   'engedd-el': [
     {
       key: "e-books/A-tulgondolas-ellenszere.pdf",
@@ -229,6 +249,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'odpust-knizka': process.env.OD_STOREFRONT_URL || "https://www.pusttocotenici.cz",
   'pusti-to-sk': process.env.PUSTI_TO_SK_STOREFRONT_URL || "https://www.pustitocotanici.sk",
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
+  'kocici-bible': process.env.KB_STOREFRONT_URL || "https://www.kocicibible.cz",
 }
 
 // Localized email subjects per project
@@ -246,6 +267,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
+  'kocici-bible': 'Tvoje 3 bonusové e-booky jsou připravené! 📖',
 }
 
 // Localized fallback first names
@@ -260,6 +282,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'het-leven': 'daar',
   'zycie-zaslugy': 'tam',
   'zivot-zaslugy': 'tam',
+  'kocici-bible': 'tam',
   'odpust-knizka': 'tam',
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',

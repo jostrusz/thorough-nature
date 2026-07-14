@@ -6,7 +6,7 @@
   <title>Děkujeme za objednávku!</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://www.kocicibible.cz/thank-you">
-  <link rel="icon" href="/kocici-bible-logo.png" type="image/webp">
+  <link rel="icon" href="/kocici-bible-logo.png" type="image/png">
 
   <!-- Sdílená konfigurace projektu -->
   <script src="js/project-config.js"></script>
@@ -14,14 +14,14 @@
   <script src="js/pixel.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     DĚKOVACÍ STRÁNKA — Kočičí bible Oficial Design
+     DĚKOVACÍ STRÁNKA — Kočičí bible
      Souhrn objednávky + kontrola adresy + editační formulář
      ═══════════════════════════════════════════════════════════ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ══ Kočičí bible Oficial Design System ══ */
+/* ══ Kočičí bible design system ══ */
 :root {
   --bg: #FFFFFF;
   --heading: #1A1A1A;
@@ -69,10 +69,10 @@ body { background: var(--bg); }
 .ty-hero { text-align: center; margin-bottom: 36px; }
 .ty-check-circle {
   width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px;
-  background: linear-gradient(135deg, var(--cta), var(--accent));
+  background: linear-gradient(135deg, var(--cta), #E8604F);
   display: flex; align-items: center; justify-content: center;
   animation: ty-pop 0.6s cubic-bezier(.16,1,.3,1) 0.3s both;
-  box-shadow: 0 8px 32px rgba(107,33,168,0.3);
+  box-shadow: 0 8px 32px rgba(220,53,34,0.3);
 }
 .ty-check-circle svg { width: 36px; height: 36px; color: #fff; stroke-dasharray: 50; stroke-dashoffset: 50; animation: ty-draw 0.8s ease 0.7s forwards; }
 @keyframes ty-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
@@ -84,14 +84,14 @@ body { background: var(--bg); }
   background: rgba(39,174,96,0.08); padding: 6px 14px; border-radius: 8px;
 }
 .ty-title {
-  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 800;
   font-size: 34px; line-height: 1.18; color: var(--heading); margin-bottom: 12px;
 }
-.ty-title .accent { font-style: italic; color: var(--cta); }
+.ty-title .accent { color: var(--cta); }
 .ty-subtitle { font-size: 17px; color: var(--body); line-height: 1.65; max-width: 560px; margin: 0 auto; }
 .ty-subtitle strong { color: var(--heading); font-weight: 600; }
 
-/* ══ 2. Upozornění na ověření adresy ══ */
+/* ══ 2. Upozornění na kontrolu adresy ══ */
 .ty-address-alert {
   background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
   border: 2px solid #FFB74D;
@@ -114,9 +114,9 @@ body { background: var(--bg); }
 
 /* ══ 3. Karta údajů zákazníka ══ */
 .ty-details-card {
-  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
+  background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 24px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 12px rgba(26,26,26,0.04);
 }
 .ty-details-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -124,15 +124,16 @@ body { background: var(--bg); }
   border-bottom: 1.5px solid var(--light);
 }
 .ty-details-title {
-  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 700;
   font-size: 18px; color: var(--heading);
   display: flex; align-items: center; gap: 8px;
 }
 .ty-edit-btn {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--light); color: var(--cta);
+  font-family: 'Cabin', sans-serif;
   font-size: 13px; font-weight: 600;
-  padding: 8px 16px; border-radius: 10px; border: 1.5px solid var(--highlight);
+  padding: 8px 16px; border-radius: 10px; border: 1.5px solid rgba(220,53,34,0.35);
   cursor: pointer; transition: all 0.3s ease;
 }
 .ty-edit-btn:hover { background: var(--cta); color: var(--white); border-color: var(--cta); }
@@ -141,7 +142,6 @@ body { background: var(--bg); }
 .ty-details-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
 }
-.ty-detail-item { }
 .ty-detail-label {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px;
@@ -159,17 +159,17 @@ body { background: var(--bg); }
 .ty-edit-form-inner {
   background: var(--white); border: 2px solid var(--cta);
   border-radius: 20px; padding: 28px 32px;
-  box-shadow: 0 4px 24px rgba(107,33,168,0.12);
+  box-shadow: 0 4px 24px rgba(220,53,34,0.12);
 }
 .ty-edit-form-title {
-  font-family: 'Inter', sans-serif; font-weight: 600;
+  font-family: 'Inter', sans-serif; font-weight: 700;
   font-size: 18px; color: var(--heading); margin-bottom: 20px;
   display: flex; align-items: center; gap: 8px;
 }
 .ty-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 0; }
 .ty-form-group { position: relative; margin-bottom: 14px; }
 .ty-form-group.full { grid-column: 1 / -1; }
-/* Plovoucí label styl */
+/* Floating label styl */
 .ty-float-field { position: relative; }
 .ty-float-field input {
   width: 100%; height: 54px;
@@ -177,7 +177,7 @@ body { background: var(--bg); }
   font-family: 'Cabin', sans-serif;
   font-size: 15px; font-weight: 400;
   color: var(--heading); background: var(--white);
-  border: 1px solid rgba(0,0,0,0.18);
+  border: 1px solid rgba(26,26,26,0.18);
   border-radius: 10px; outline: none;
   -webkit-appearance: none; appearance: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -191,7 +191,6 @@ body { background: var(--bg); }
   transform-origin: left center;
   background: transparent; padding: 0;
 }
-/* Label plovoucí nahoru */
 .ty-float-field input:focus ~ label,
 .ty-float-field input:not(:placeholder-shown) ~ label {
   top: 10px; transform: translateY(0);
@@ -201,10 +200,9 @@ body { background: var(--bg); }
   color: var(--muted);
 }
 .ty-float-field input::placeholder { color: transparent; }
-/* Focus stav */
 .ty-float-field input:focus {
   border-color: var(--cta);
-  box-shadow: 0 0 0 3px rgba(107,33,168,0.12);
+  box-shadow: 0 0 0 3px rgba(220,53,34,0.12);
   background: var(--white);
 }
 .ty-form-actions {
@@ -216,21 +214,21 @@ body { background: var(--bg); }
   font-family: 'Cabin', sans-serif; font-size: 15px; font-weight: 700;
   padding: 14px 24px; border-radius: 12px; border: none;
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
-  box-shadow: 0 3px 12px rgba(107,33,168,0.25);
+  box-shadow: 0 3px 12px rgba(220,53,34,0.25);
 }
-.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(107,33,168,0.35); }
-.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(107,33,168,0.2); }
+.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(220,53,34,0.35); }
+.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(220,53,34,0.2); }
 .ty-form-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 .ty-form-cancel {
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--light); color: var(--body);
   font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 600;
-  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(0,0,0,0.1);
+  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(26,26,26,0.1);
   cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
 }
-.ty-form-cancel:hover { background: rgba(0,0,0,0.06); transform: translateY(-1px); }
+.ty-form-cancel:hover { background: rgba(26,26,26,0.06); transform: translateY(-1px); }
 
-/* Zpětná vazba */
+/* Zpětná vazba po uložení */
 .ty-feedback {
   display: none; padding: 14px 18px; border-radius: 12px;
   margin-bottom: 24px; font-size: 14px; font-weight: 500;
@@ -247,9 +245,9 @@ body { background: var(--bg); }
 
 /* ══ 5. Souhrn objednávky ══ */
 .ty-order-box {
-  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
+  background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
   border-radius: 20px; padding: 28px 32px; margin-bottom: 28px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 12px rgba(26,26,26,0.04);
 }
 .ty-order-label {
   font-size: 13px; font-weight: 700; text-transform: uppercase;
@@ -262,9 +260,12 @@ body { background: var(--bg); }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; font-size: 20px;
 }
-.ty-order-icon.book { background: rgba(107,33,168,0.12); }
-.ty-order-icon.ebook { background: rgba(212,152,181,0.15); }
-.ty-order-icon.ship { background: rgba(0,0,0,0.06); }
+.ty-order-icon.book { background: linear-gradient(135deg, rgba(220,53,34,0.14), rgba(232,96,79,0.10)); }
+.ty-order-icon.ship { background: rgba(26,26,26,0.06); }
+/* Bonusové e-booky — CSS dlaždice (gradient + emoji), žádné obálky */
+.ty-order-icon.ebook-1 { background: linear-gradient(135deg, #F3E8FF, #DDC7F7); }
+.ty-order-icon.ebook-2 { background: linear-gradient(135deg, #FFE8D6, #FFD1B0); }
+.ty-order-icon.ebook-3 { background: linear-gradient(135deg, #DCF3E4, #B8E6C8); }
 .ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
 .ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
 .ty-order-total {
@@ -272,18 +273,46 @@ body { background: var(--bg); }
   margin-top: 16px; padding-top: 16px;
   border-top: 2px solid var(--light);
 }
-.ty-order-total-label { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 600; color: var(--heading); }
-.ty-order-total-price { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 700; color: var(--cta); }
+.ty-order-total-label { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700; color: var(--heading); }
+.ty-order-total-price { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 800; color: var(--cta); }
+
+/* ══ 5a. Bonusové e-booky — info box ══ */
+.ty-ebooks {
+  background: var(--section); border: 1.5px solid rgba(107,33,168,0.12);
+  border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
+}
+.ty-ebooks-title {
+  font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px;
+  color: var(--heading); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ty-ebooks-desc { font-size: 14.5px; color: var(--body); line-height: 1.6; margin-bottom: 18px; }
+.ty-ebooks-desc strong { color: var(--heading); }
+.ty-ebook-tiles { display: flex; gap: 12px; }
+.ty-ebook-tile {
+  flex: 1; border-radius: 14px; padding: 18px 14px; text-align: center;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
+}
+.ty-ebook-tile:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(26,26,26,0.10); }
+.ty-ebook-tile.t1 { background: linear-gradient(150deg, #6B21A8, #9D5BD2); }
+.ty-ebook-tile.t2 { background: linear-gradient(150deg, #DC3522, #F07B4F); }
+.ty-ebook-tile.t3 { background: linear-gradient(150deg, #1B7A3D, #4CBF72); }
+.ty-ebook-tile-emoji { font-size: 30px; margin-bottom: 8px; }
+.ty-ebook-tile-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.4; }
+.ty-ebooks-note {
+  margin-top: 16px; font-size: 13px; color: var(--muted); line-height: 1.55;
+  display: flex; align-items: flex-start; gap: 8px;
+}
 
 /* ══ 5b. Kontakt na podporu ══ */
 .ty-support {
-  background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
+  background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
   border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
   display: flex; align-items: center; gap: 20px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 12px rgba(26,26,26,0.04);
   transition: all 0.35s cubic-bezier(.16,1,.3,1);
 }
-.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(0,0,0,0.08); transform: translateY(-2px); }
+.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(26,26,26,0.08); transform: translateY(-2px); }
 .ty-support-icon {
   width: 54px; height: 54px; border-radius: 16px;
   background: linear-gradient(135deg, var(--section), var(--light));
@@ -302,7 +331,7 @@ body { background: var(--bg); }
   padding: 13px 24px; border-radius: 12px; border: none;
   cursor: pointer; text-decoration: none;
   transition: all 0.35s cubic-bezier(.16,1,.3,1); flex-shrink: 0;
-  box-shadow: 0 3px 12px rgba(107,33,168,0.25);
+  box-shadow: 0 3px 12px rgba(220,53,34,0.25);
   position: relative; overflow: hidden;
 }
 .ty-support-btn::after {
@@ -311,29 +340,29 @@ body { background: var(--bg); }
   opacity: 0; transition: opacity 0.3s ease;
 }
 .ty-support-btn:hover::after { opacity: 1; }
-.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(107,33,168,0.35); }
-.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(107,33,168,0.2); }
+.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(220,53,34,0.35); }
+.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(220,53,34,0.2); }
 @media (max-width: 600px) {
   .ty-support { flex-direction: column; text-align: center; padding: 24px 20px; }
   .ty-support-btn { width: 100%; justify-content: center; }
 }
 
-/* ══ 6. Co se stane dál — 3 kroky ══ */
+/* ══ 6. Co bude dál — 3 kroky ══ */
 .ty-steps { margin-bottom: 32px; }
 .ty-steps-title {
   font-family: 'Inter', sans-serif; font-size: 24px;
-  font-weight: 600; color: var(--heading); margin-bottom: 20px; text-align: center;
+  font-weight: 800; color: var(--heading); margin-bottom: 20px; text-align: center;
 }
 .ty-steps-grid { display: flex; gap: 16px; }
 .ty-step {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
   border-radius: 18px; padding: 24px 20px; text-align: center;
   transition: transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease;
 }
-.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
+.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(26,26,26,0.1); }
 .ty-step-num {
   width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--cta), var(--accent));
+  background: linear-gradient(135deg, var(--cta), #E8604F);
   color: #fff; font-weight: 700; font-size: 16px;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 12px;
@@ -346,15 +375,15 @@ body { background: var(--bg); }
 .ty-reviews { margin-bottom: 32px; }
 .ty-reviews-title {
   font-family: 'Inter', sans-serif; font-size: 22px;
-  font-weight: 600; color: var(--heading); margin-bottom: 16px; text-align: center;
+  font-weight: 800; color: var(--heading); margin-bottom: 16px; text-align: center;
 }
 .ty-review-cards { display: flex; gap: 16px; }
 .ty-review {
-  flex: 1; background: var(--white); border: 1.5px solid rgba(0,0,0,0.08);
+  flex: 1; background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
   border-radius: 16px; padding: 22px;
   transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
 }
-.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(26,26,26,0.08); }
 .ty-review-stars { color: var(--cta); font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
 .ty-review-text { font-size: 14px; color: var(--body); line-height: 1.6; font-style: italic; margin-bottom: 12px; }
 .ty-review-author { font-size: 13px; font-weight: 600; color: var(--heading); }
@@ -364,17 +393,18 @@ body { background: var(--bg); }
 .ty-share {
   text-align: center; background: var(--light);
   border-radius: 20px; padding: 32px; margin-bottom: 32px;
-  border: 1px solid rgba(0,0,0,0.04);
+  border: 1px solid rgba(26,26,26,0.04);
 }
 .ty-share-title {
   font-family: 'Inter', sans-serif; font-size: 22px;
-  font-weight: 600; color: var(--heading); margin-bottom: 8px;
+  font-weight: 800; color: var(--heading); margin-bottom: 8px;
 }
 .ty-share-desc { font-size: 15px; color: var(--body); margin-bottom: 20px; line-height: 1.55; }
 .ty-share-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .ty-share-btn {
   display: inline-flex; align-items: center; gap: 10px;
   padding: 14px 26px; border-radius: 14px; font-size: 15px;
+  font-family: 'Cabin', sans-serif;
   font-weight: 600; border: none; cursor: pointer;
   text-decoration: none; position: relative; overflow: hidden;
   transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
@@ -392,11 +422,20 @@ body { background: var(--bg); }
 .ty-share-btn.fb { background: #1877F2; color: #fff; }
 .ty-share-btn.fb:hover { box-shadow: 0 8px 28px rgba(24,119,242,0.3); }
 .ty-share-btn.mail { background: var(--dark); color: #fff; }
-.ty-share-btn.mail:hover { box-shadow: 0 8px 28px rgba(26,16,40,0.3); }
+.ty-share-btn.mail:hover { box-shadow: 0 8px 28px rgba(26,26,26,0.3); }
 .ty-share-btn svg { width: 18px; height: 18px; position: relative; z-index: 1; }
 .ty-share-btn span { position: relative; z-index: 1; }
 
-/* ══ Confetti ══ */
+/* ══ 9. Patička ══ */
+.ty-footer {
+  text-align: center; padding-top: 24px;
+  border-top: 1.5px solid var(--light);
+  font-size: 12.5px; color: var(--muted); line-height: 1.7;
+}
+.ty-footer a { color: var(--muted); text-decoration: underline; }
+.ty-footer a:hover { color: var(--cta); }
+
+/* ══ Konfety ══ */
 .ty-confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
 .ty-confetti-piece {
   position: absolute; width: 10px; height: 10px; top: -20px;
@@ -408,7 +447,7 @@ body { background: var(--bg); }
   100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
 }
 
-/* ══ Responsive ══ */
+/* ══ Responsivita ══ */
 @media (prefers-reduced-motion: reduce) {
   .ty-reveal { opacity: 1; transform: none; transition: none; }
   .ty-check-circle { animation: none; }
@@ -421,7 +460,9 @@ body { background: var(--bg); }
   .ty-subtitle { font-size: 15px; }
   .ty-steps-grid { flex-direction: column; }
   .ty-review-cards { flex-direction: column; }
+  .ty-ebook-tiles { flex-direction: column; }
   .ty-order-box { padding: 22px 20px; }
+  .ty-ebooks { padding: 22px 20px; }
   .ty-details-card { padding: 22px 20px; }
   .ty-details-grid { grid-template-columns: 1fr; }
   .ty-details-header { flex-direction: column; gap: 12px; align-items: flex-start; }
@@ -442,23 +483,7 @@ body { background: var(--bg); }
 </head>
 <body>
 
-<!-- ═══ PRELOADER ═══ -->
-<style>
-.preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
-.preloader-logo-wrap { position: relative; overflow: hidden; width: 180px; height: auto; }
-.preloader-logo { width: 100%; height: auto; display: block; animation: preloaderPulse 1.5s ease-in-out infinite; }
-.preloader-shine { position: absolute; top: -100%; left: 0; width: 50%; height: 300%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%); animation: preloaderShine 2s ease-in-out infinite; pointer-events: none; will-change: transform; }
-@keyframes preloaderPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.04); opacity: 0.92; } }
-@keyframes preloaderShine { 0% { transform: translateX(-160%); } 100% { transform: translateX(320%); } }
-</style>
-<div class="preloader" id="preloader">
- <div class="preloader-logo-wrap">
-  <img src="/kocici-bible-logo.png" alt="Kočičí bible Oficial" class="preloader-logo" width="180" height="180">
-  <div class="preloader-shine"></div>
- </div>
-</div>
-
-<!-- Confetti burst -->
+<!-- Konfety -->
 <div class="ty-confetti" id="ty-confetti"></div>
 
 <div class="ty-page">
@@ -470,19 +495,19 @@ body { background: var(--bg); }
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="ty-eyebrow">&#x2705; Objednávka potvrzena</div>
-    <h1 class="ty-title" id="ty-main-title">Děkujeme za <span class="accent">objednávku!</span></h1>
-    <p class="ty-subtitle">Tvoje objednávka je potvrzená. Balíček ti co nejdříve připravíme a pošleme.</p>
+    <div class="ty-eyebrow">&#x2705; Objednávka přijata</div>
+    <h1 class="ty-title" id="ty-main-title">Děkujeme za vaši <span class="accent">objednávku!</span></h1>
+    <p class="ty-subtitle">Vaše objednávka byla úspěšně dokončena. Balíček vám co nejdříve připravíme a předáme Zásilkovně.</p>
   </div>
 
   <!-- ═══════════════════════════════════════
-       2. OVĚŘENÍ DORUČOVACÍ ADRESY
+       2. UPOZORNĚNÍ — KONTROLA ÚDAJŮ
        ═══════════════════════════════════════ -->
   <div class="ty-address-alert ty-reveal ty-d1">
     <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
     <div class="ty-address-alert-text">
-      <div class="ty-address-alert-title">Zkontroluj si doručovací údaje</div>
-      <div class="ty-address-alert-desc">Chceme ti objednávku odeslat co nejdříve. Zkontroluj prosím, jestli je tvoje <strong>adresa</strong>, <strong>e-mail</strong> a <strong>telefon</strong> správně.</div>
+      <div class="ty-address-alert-title">Zkontrolujte si prosím doručovací údaje</div>
+      <div class="ty-address-alert-desc">Chceme vám objednávku odeslat co nejdříve. Zkontrolujte prosím níže, jestli máte správně vyplněnou <strong>adresu</strong>, <strong>e-mail</strong> a <strong>telefonní číslo</strong>.</div>
     </div>
   </div>
 
@@ -493,7 +518,7 @@ body { background: var(--bg); }
     <div class="ty-details-header">
       <div class="ty-details-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Tvoje údaje
+        Vaše údaje
       </div>
       <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -510,16 +535,20 @@ body { background: var(--bg); }
         <div class="ty-detail-value" id="ty-show-lastname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">E-mailová adresa</div>
+        <div class="ty-detail-label">E-mail</div>
         <div class="ty-detail-value" id="ty-show-email">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Telefonní číslo</div>
+        <div class="ty-detail-label">Telefon</div>
         <div class="ty-detail-value" id="ty-show-phone">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full">
         <div class="ty-detail-label">Doručovací adresa</div>
         <div class="ty-detail-value" id="ty-show-address">—</div>
+      </div>
+      <div class="ty-detail-item ty-detail-full" id="ty-pickup-row" style="display:none;">
+        <div class="ty-detail-label">Výdejní místo Zásilkovny</div>
+        <div class="ty-detail-value" id="ty-show-pickup">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
         <div class="ty-detail-label">Firemní údaje</div>
@@ -529,13 +558,13 @@ body { background: var(--bg); }
   </div>
 
   <!-- ═══════════════════════════════════════
-       4. EDITAČNÍ FORMULÁŘ (ve výchozím stavu skrytý)
+       4. EDITAČNÍ FORMULÁŘ (skrytý)
        ═══════════════════════════════════════ -->
   <div class="ty-edit-form" id="ty-edit-form">
     <div class="ty-edit-form-inner">
       <div class="ty-edit-form-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Upravit údaje
+        Úprava údajů
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
@@ -550,17 +579,17 @@ body { background: var(--bg); }
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="email" id="edit-email" placeholder=" ">
-          <label for="edit-email">E-mailová adresa</label>
+          <label for="edit-email">E-mail</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="tel" id="edit-phone" placeholder=" ">
-          <label for="edit-phone">Telefonní číslo</label>
+          <label for="edit-phone">Telefon</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field full">
           <input type="text" id="edit-address" placeholder=" ">
-          <label for="edit-address">Ulice + číslo popisné</label>
+          <label for="edit-address">Ulice a číslo popisné</label>
         </div>
       </div>
       <div class="ty-form-row">
@@ -584,18 +613,18 @@ body { background: var(--bg); }
         </div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field">
-            <input type="text" id="edit-kvk" placeholder=" ">
-            <label for="edit-kvk">IČO</label>
+            <input type="text" id="edit-ico" placeholder=" ">
+            <label for="edit-ico">IČO</label>
           </div>
           <div class="ty-form-group ty-float-field">
-            <input type="text" id="edit-vat" placeholder=" ">
-            <label for="edit-vat">DIČ</label>
+            <input type="text" id="edit-dic" placeholder=" ">
+            <label for="edit-dic">DIČ</label>
           </div>
         </div>
       </div>
       <div class="ty-form-actions">
         <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
-          Uložit
+          Uložit změny
         </button>
         <button class="ty-form-cancel" onclick="toggleEditForm()">Zrušit</button>
       </div>
@@ -612,48 +641,71 @@ body { background: var(--bg); }
        5. SOUHRN OBJEDNÁVKY
        ═══════════════════════════════════════ -->
   <div class="ty-order-box ty-reveal ty-d3">
-    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Tvoje objednávka</div>
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Vaše objednávka</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Kočičí bible Oficial</div>
-          <div class="ty-order-desc">Fyzická kniha &mdash; 270 stran &mdash; doručení domů</div>
+          <div class="ty-order-name">Kočičí bible</div>
+          <div class="ty-order-desc">Tištěná kniha &mdash; posíláme Zásilkovnou</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div class="ty-order-icon ebook-1">&#x1F35B;</div>
         <div>
-          <div class="ty-order-name">Dlouhověkost začíná v misce</div>
-          <div class="ty-order-desc">E-book Výživa &mdash; zkontrolujte svůj e-mail</div>
+          <div class="ty-order-name">Dlouhověkost začíná v kočičí misce</div>
+          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailem</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div class="ty-order-icon ebook-2">&#x1F9F6;</div>
         <div>
-          <div class="ty-order-name">TOP 20 her</div>
-          <div class="ty-order-desc">E-book Aktivity &mdash; zkontrolujte svůj e-mail</div>
+          <div class="ty-order-name">Hravá kočka</div>
+          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailem</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <div class="ty-order-icon ebook">&#x1F4F1;</div>
+        <div class="ty-order-icon ebook-3">&#x1F198;</div>
         <div>
-          <div class="ty-order-name">Proč to dělá</div>
-          <div class="ty-order-desc">E-book Chování &mdash; zkontrolujte svůj e-mail</div>
+          <div class="ty-order-name">Kočičí SOS: 100 Problémů, 100 Řešení</div>
+          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailem</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
-          <div class="ty-order-name">Doprava zdarma</div>
-          <div class="ty-order-desc">Doručení do 1–3 pracovních dnů</div>
+          <div class="ty-order-name">Doprava Zásilkovnou</div>
+          <div class="ty-order-desc" id="ty-shipping-desc">Doručení za 2&ndash;3 pracovní dny</div>
         </div>
       </div>
     </div>
     <div class="ty-order-total">
       <span class="ty-order-total-label">Zaplaceno</span>
-      <span class="ty-order-total-price" id="ty-total-price">550 Kč</span>
+      <span class="ty-order-total-price" id="ty-total-price">550&nbsp;Kč</span>
     </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       5a. BONUSOVÉ E-BOOKY
+       ═══════════════════════════════════════ -->
+  <div class="ty-ebooks ty-reveal ty-d4">
+    <div class="ty-ebooks-title">&#x1F381; Vaše 3 bonusové e-booky</div>
+    <div class="ty-ebooks-desc">Po připsání platby vám <strong>e-mailem pošleme odkaz ke stažení</strong> všech tří bonusových e-booků. Pokud e-mail nevidíte, mrkněte prosím i do složky <strong>spam nebo hromadné</strong>.</div>
+    <div class="ty-ebook-tiles">
+      <div class="ty-ebook-tile t1">
+        <div class="ty-ebook-tile-emoji">&#x1F35B;</div>
+        <div class="ty-ebook-tile-name">Dlouhověkost začíná v&nbsp;kočičí misce</div>
+      </div>
+      <div class="ty-ebook-tile t2">
+        <div class="ty-ebook-tile-emoji">&#x1F9F6;</div>
+        <div class="ty-ebook-tile-name">Hravá kočka</div>
+      </div>
+      <div class="ty-ebook-tile t3">
+        <div class="ty-ebook-tile-emoji">&#x1F198;</div>
+        <div class="ty-ebook-tile-name">Kočičí SOS: 100&nbsp;Problémů, 100&nbsp;Řešení</div>
+      </div>
+    </div>
+    <div class="ty-ebooks-note">&#x23F3;&nbsp;Odkaz ke stažení platí 30 dní od doručení e-mailu. Kdyby vám vypršel, napište nám a pošleme nový.</div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -662,86 +714,74 @@ body { background: var(--bg); }
   <div class="ty-support ty-reveal ty-d4">
     <div class="ty-support-icon">&#x1F4E9;</div>
     <div class="ty-support-text">
-      <div class="ty-support-title">Máš dotaz?</div>
-      <div class="ty-support-desc">Něco nesedí nebo potřebuješ poradit s objednávkou? Neváhej se ozvat &mdash; rádi pomůžeme!</div>
+      <div class="ty-support-title">Máte dotaz nebo něco nesedí?</div>
+      <div class="ty-support-desc">Našli jste chybu v objednávce, nebo si s něčím nevíte rady? Napište nám &mdash; rádi vám pomůžeme.</div>
     </div>
-    <a href="mailto:podpora@kocicibible.cz?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Ahoj%2C%0A%0Am%C3%A1m%20dotaz%20k%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napiš nám</a>
+    <a href="mailto:peterka@kocicibible.cz?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Dobr%C3%BD%20den%2C%0A%0Am%C3%A1m%20dotaz%20ke%20sv%C3%A9%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napište nám</a>
   </div>
 
   <!-- ═══════════════════════════════════════
-       6. CO SE STANE DÁL — 3 kroky
+       6. CO BUDE DÁL — 3 kroky
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
-    <div class="ty-steps-title">Co se stane dál?</div>
+    <div class="ty-steps-title">Co bude dál?</div>
     <div class="ty-steps-grid">
       <div class="ty-step">
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
-        <div class="ty-step-title">Zkontroluj e-mail</div>
-        <div class="ty-step-desc">Do pár minut ti přijde e-mail se třemi bonusovými e-booky ke stažení.</div>
+        <div class="ty-step-title">Zkontrolujte e-mail</div>
+        <div class="ty-step-desc">Během chvíle vám přijde potvrzení objednávky a po připsání platby e-mail s odkazem na 3 bonusové e-booky. Odkaz platí 30 dní.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
-        <div class="ty-step-title">Kniha na cestě</div>
-        <div class="ty-step-desc">Tvoje kniha bude odeslána do 24 hodin. Sledovací odkaz ti pošleme e-mailem.</div>
+        <div class="ty-step-title">Kniha je na cestě</div>
+        <div class="ty-step-desc">Knihu předáme Zásilkovně a doručí vám ji za 2&ndash;3 pracovní dny &mdash; na výdejní místo, nebo až domů. Sledovací číslo zásilky dostanete e-mailem.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
-        <div class="ty-step-icon">&#x1F680;</div>
-        <div class="ty-step-title">Pusť se do tréninku</div>
-        <div class="ty-step-desc">Začni ještě dnes s e-booky. Jakmile dorazí knížka, pusť se do cvičení.</div>
+        <div class="ty-step-icon">&#x1F431;</div>
+        <div class="ty-step-title">Pusťte se do čtení</div>
+        <div class="ty-step-desc">S e-booky můžete začít hned dnes. Až dorazí kniha, budete své kočce rozumět jako nikdy předtím.</div>
       </div>
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════
-       7. RECENZE
-       ═══════════════════════════════════════ -->
-  <div class="ty-reviews ty-reveal ty-d5">
-    <div class="ty-reviews-title">Co říkají naši čtenáři</div>
-    <div class="ty-review-cards">
-      <div class="ty-review">
-        <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Náš pes táhal na vodítku a neposlechl na povel. Po 3 týdnech s touto knihou se úplně změnil. Konečně si užíváme společné procházky!&rdquo;</div>
-        <div class="ty-review-author">Jana M.</div>
-        <div class="ty-review-loc">Praha</div>
-      </div>
-      <div class="ty-review">
-        <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&ldquo;Cvičení jsou tak konkrétní &mdash; žádné obecné fráze, ale skutečné kroky. Naše štěně se za týden naučilo víc než za měsíce předtím. Skvělá kniha!&rdquo;</div>
-        <div class="ty-review-author">Petr K.</div>
-        <div class="ty-review-loc">Brno</div>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════
        8. SDÍLENÍ
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
-    <div class="ty-share-title">Znáš někoho, kdo to taky potřebuje?</div>
-    <div class="ty-share-desc">Máš kamaráda se psem? Pošli mu odkaz a pomoz i jeho pejskovi žít lepší život.</div>
+    <div class="ty-share-title">Znáte někoho, kdo má doma kočku?</div>
+    <div class="ty-share-desc">Pošlete mu odkaz na Kočičí bibli &mdash; uděláte radost jemu i jeho kočce.</div>
     <div class="ty-share-buttons">
-      <a href="https://wa.me/?text=Pr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20knihu%20Ps%C3%AD%20super%C5%BEivot%20a%20mysl%C3%ADm%2C%20%C5%BEe%20by%20se%20ti%20taky%20hodila%20%F0%9F%90%B6" target="_blank" class="ty-share-btn wa">
+      <a href="https://wa.me/?text=Pr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20Ko%C4%8Di%C4%8D%C3%AD%20bibli%20a%20mysl%C3%ADm%2C%20%C5%BEe%20by%20se%20l%C3%ADbila%20i%20tob%C4%9B%20a%20tv%C3%A9%20ko%C4%8Dce%20%F0%9F%90%B1%20https%3A%2F%2Fwww.kocicibible.cz" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
         WhatsApp
       </a>
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fkocicibible.cz" target="_blank" class="ty-share-btn fb">
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.kocicibible.cz" target="_blank" class="ty-share-btn fb">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </a>
-      <a href="mailto:?subject=Tuhle%20knihu%20mus%C3%AD%C5%A1%20%C4%8D%C3%ADst&body=Pr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20knihu%20Ps%C3%AD%20super%C5%BEivot" class="ty-share-btn mail">
+      <a href="mailto:?subject=Tahle%20kniha%20o%20ko%C4%8Dk%C3%A1ch%20t%C4%9B%20bude%20bavit&body=Ahoj%2C%0A%0Apr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20Ko%C4%8Di%C4%8D%C3%AD%20bibli%20a%20mysl%C3%ADm%2C%20%C5%BEe%20by%20se%20l%C3%ADbila%20i%20tob%C4%9B%3A%20https%3A%2F%2Fwww.kocicibible.cz" class="ty-share-btn mail">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
         E-mail
       </a>
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════
+       9. PATIČKA
+       ═══════════════════════════════════════ -->
+  <div class="ty-footer">
+    <strong>Kočičí bible</strong> &mdash; www.kocicibible.cz<br>
+    Performance Marketing Solution s.r.o., Rybná 716/24, 110&nbsp;00 Praha<br>
+    IČO: 06259928 &middot; DIČ: CZ06259928 &middot; <a href="mailto:peterka@kocicibible.cz">peterka@kocicibible.cz</a>
+  </div>
 
 </div>
 
-<!-- ══ JS: Data z objednávky, edit formulář, FB Pixel, Confetti, Scroll reveal ══ -->
+<!-- ══ JS: Data z objednávky, editační formulář, FB Pixel, konfety, scroll reveal ══ -->
 <script>
 (function(){
   // ────────────────────────────────────────────────────
@@ -750,17 +790,100 @@ body { background: var(--bg); }
   var orderId = localStorage.getItem('medusa_order_id') || '';
   var displayId = localStorage.getItem('medusa_order_display_id') || '';
   var customerStr = localStorage.getItem('medusa_customer');
-  var upsellPurchased = localStorage.getItem('medusa_upsell_purchased') === 'true';
 
-  // Bundle + Order bump data z checkoutu
+  // Bundle data z checkoutu
   var bundleQty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1');
-  var bundlePrice = parseFloat(localStorage.getItem('medusa_bundle_price') || PROJECT_CONFIG.mainProduct.price);
-  var orderBumpActive = localStorage.getItem('medusa_order_bump') === 'true';
   var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
+
+  // Doprava — Zásilkovna (výdejní místo / doručení na adresu)
+  var shippingMethod = localStorage.getItem('checkout_shipping_method') || '';
+  var packetaPoint = null;
+  try { packetaPoint = JSON.parse(localStorage.getItem('checkout_packeta_point') || 'null'); } catch(e) {}
 
   var customer = null;
   if (customerStr) {
     try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nelze parsovat zákaznická data'); }
+  }
+
+  // Formátování částky: 550 -> "550 Kč", 1199 -> "1 199 Kč"
+  function formatCzk(amount) {
+    var n = Math.round(Number(amount) || 0);
+    var s = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return s + ' Kč';
+  }
+
+  // Fetch skutečných dat objednávky z API — přepíše localStorage (může být zastaralý)
+  if (orderId && PROJECT_CONFIG.medusaUrl) {
+    fetch(PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/details', {
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.order) {
+        var sa = data.order.shipping_address || {};
+        var updated = {
+          email: data.order.email || (customer && customer.email) || '',
+          first_name: sa.first_name || (customer && customer.first_name) || '',
+          last_name: sa.last_name || (customer && customer.last_name) || '',
+          address_1: sa.address_1 || (customer && customer.address_1) || '',
+          city: sa.city || (customer && customer.city) || '',
+          postal_code: sa.postal_code || (customer && customer.postal_code) || '',
+          country_code: sa.country_code || (customer && customer.country_code) || '',
+          phone: sa.phone || (customer && customer.phone) || '',
+        };
+        customer = updated;
+        localStorage.setItem('medusa_customer', JSON.stringify(updated));
+        updateDetailsDisplay();
+        console.log('TY: Customer data synced from order API (country: ' + updated.country_code + ')');
+
+        // ─── Autoritativní oprava počtu knih + celkové ceny ───
+        // localStorage (medusa_bundle_qty / medusa_checkout_total) není spolehlivý —
+        // objednávka je zdroj pravdy. Počet knih odvodíme z variant_title
+        // ("1 kniha" / "2 knihy" / ...) hlavní položky.
+        try {
+          var orderItems = data.order.items || [];
+          var mainItem = null;
+          var derivedBookCount = 0;
+          for (var i = 0; i < orderItems.length; i++) {
+            var it = orderItems[i];
+            var title = (it.product_title || it.title || '').toLowerCase();
+            // Přeskoč vedlejší položky, hledáme hlavní knihu
+            if (title.indexOf('kočičí') === -1) continue;
+
+            var variantTitle = (it.variant_title || '').toLowerCase();
+            var titleMatch = /^([1-4])\s*knih/.exec(variantTitle);
+            var bundleSize = titleMatch ? parseInt(titleMatch[1], 10) : 1;
+            mainItem = it;
+            derivedBookCount = bundleSize * (it.quantity || 1);
+            break;
+          }
+          if (mainItem && derivedBookCount > 0) {
+            bundleQty = derivedBookCount;
+            var nameEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-name');
+            var descEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-desc');
+            if (nameEl) {
+              nameEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '× Kočičí bible')
+                : 'Kočičí bible';
+            }
+            if (descEl) {
+              descEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '× tištěná kniha — posíláme Zásilkovnou')
+                : 'Tištěná kniha — posíláme Zásilkovnou';
+            }
+          }
+          // Autoritativní celková cena z objednávky
+          if (data.order.total != null) {
+            var totalEl = document.getElementById('ty-total-price');
+            if (totalEl) totalEl.textContent = formatCzk(data.order.total);
+          }
+          console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
+        } catch (e) {
+          console.warn('TY: Could not sync order items:', e && e.message);
+        }
+      }
+    })
+    .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });
   }
 
   // Firemní údaje (B2B)
@@ -773,89 +896,92 @@ body { background: var(--bg); }
   // Mapování country kódů na názvy
   var countryNames = {
     CZ: 'Česká republika', SK: 'Slovensko',
-    DE: 'Německo', AT: 'Rakousko', PL: 'Polsko',
   };
 
   // ────────────────────────────────────────────────────
   // 2. Vyplnění dynamických dat
   // ────────────────────────────────────────────────────
 
-  // 2a. Personalizovaný heading
+  // 2a. Personalizovaný nadpis
   var titleEl = document.getElementById('ty-main-title');
   if (titleEl && customer && customer.first_name) {
     titleEl.innerHTML = 'Děkujeme, <span class="accent">' + customer.first_name + '!</span>';
   }
 
-  // 2b. Objednávkové číslo
+  // 2b. Číslo objednávky
   var orderLabelEl = document.getElementById('ty-order-label');
   if (orderLabelEl && displayId) {
-    orderLabelEl.textContent = '\uD83D\uDCE6 Objednávka #' + displayId;
+    orderLabelEl.textContent = '📦 Objednávka #' + displayId;
   } else if (orderLabelEl && orderId) {
     var shortId = orderId.replace('order_', '').substring(0, 8).toUpperCase();
-    orderLabelEl.textContent = '\uD83D\uDCE6 Objednávka #' + shortId;
+    orderLabelEl.textContent = '📦 Objednávka #' + shortId;
   }
 
-  // 2c. Mailto link — doplň číslo objednávky
+  // 2c. Mailto odkaz — doplň číslo objednávky
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Dotaz k objednávce #' + orderNum);
-    var body = encodeURIComponent('Ahoj,\n\nmám dotaz k objednávce.\n\nČíslo objednávky: #' + orderNum + '\n\nMůj dotaz: ');
-    mailtoEl.href = 'mailto:podpora@kocicibible.cz?subject=' + subject + '&body=' + body;
+    var body = encodeURIComponent('Dobrý den,\n\nmám dotaz ke své objednávce.\n\nČíslo objednávky: #' + orderNum + '\n\nMůj dotaz: ');
+    mailtoEl.href = 'mailto:peterka@kocicibible.cz?subject=' + subject + '&body=' + body;
   }
 
-  // 2d. Celková cena — bere v potaz bundle, order bump a upsell
+  // 2d. Celková cena — bundle ceník z konfigurace jako fallback
+  var bundlePriceMap = {};
+  if (PROJECT_CONFIG.bundleOptions) {
+    PROJECT_CONFIG.bundleOptions.forEach(function(opt) { bundlePriceMap[opt.qty] = opt.price; });
+  }
   var totalPrice;
   if (checkoutTotal > 0) {
-    // Máme uloženou celkovou cenu z checkoutu
     totalPrice = checkoutTotal;
-    // Pokud upsell byl přidán po checkoutu (ne přes order bump), přičti ho
-    if (upsellPurchased && !orderBumpActive) {
-      totalPrice += PROJECT_CONFIG.upsellProduct.price;
-    }
+  } else if (bundlePriceMap[bundleQty]) {
+    totalPrice = bundlePriceMap[bundleQty];
   } else {
-    // Fallback — starý výpočet
-    var mainPrice = PROJECT_CONFIG.mainProduct.price;
-    var upsellPrice = PROJECT_CONFIG.upsellProduct.price;
-    totalPrice = upsellPurchased ? (mainPrice + upsellPrice) : mainPrice;
+    totalPrice = PROJECT_CONFIG.mainProduct.price;
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = totalPrice.toFixed(0) + ' K\u010D';
+    totalPriceEl.textContent = formatCzk(totalPrice);
   }
 
-  // 2e. Aktualizuj hlavní položku s bundle qty
+  // 2e. Aktualizuj hlavní položku podle bundle qty
   var orderItemsEl = document.getElementById('ty-order-items');
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {
-      mainItemName.textContent = bundleQty + '\u00D7 Kočičí bible Oficial';
+      mainItemName.textContent = bundleQty + '× Kočičí bible';
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '\u00D7 fyzická kniha \u2014 doručení domů';
+      mainItemDesc.textContent = bundleQty + '× tištěná kniha — posíláme Zásilkovnou';
     }
   }
 
-  // 2f. Přidej upsell/order bump produkt do seznamu pokud byl zakoupen
-  if (upsellPurchased || orderBumpActive) {
-    if (orderItemsEl) {
-      var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
-      var extraLabel = orderBumpActive ? 'Fyzická kniha \u2014 přidáno k objednávce' : 'Fyzická kniha \u2014 doplňková objednávka';
-      var upsellItemHtml = '<div class="ty-order-item">' +
-        '<div class="ty-order-icon book">\uD83D\uDCD6</div>' +
-        '<div>' +
-          '<div class="ty-order-name">' + upsellName + '</div>' +
-          '<div class="ty-order-desc">' + extraLabel + '</div>' +
-        '</div>' +
-      '</div>';
-      var items = orderItemsEl.querySelectorAll('.ty-order-item');
-      var lastItem = items[items.length - 1];
-      if (lastItem) lastItem.insertAdjacentHTML('beforebegin', upsellItemHtml);
+  // 2f. Text dopravy podle zvolené metody (výdejní místo / doručení domů)
+  var shippingDescEl = document.getElementById('ty-shipping-desc');
+  if (shippingDescEl) {
+    if (shippingMethod === 'home') {
+      shippingDescEl.textContent = 'Doručení na vaši adresu za 2–3 pracovní dny';
+    } else if (shippingMethod === 'pickup') {
+      shippingDescEl.textContent = 'Doručení na výdejní místo za 2–3 pracovní dny';
+    }
+  }
+  // Zobraz zvolené výdejní místo v kartě údajů
+  if (shippingMethod === 'pickup' && packetaPoint && packetaPoint.name) {
+    var pickupRow = document.getElementById('ty-pickup-row');
+    var pickupVal = document.getElementById('ty-show-pickup');
+    if (pickupRow && pickupVal) {
+      pickupRow.style.display = '';
+      var pParts = [packetaPoint.name];
+      var pLine2 = [];
+      if (packetaPoint.address) pLine2.push(packetaPoint.address);
+      if (packetaPoint.zip || packetaPoint.city) pLine2.push([packetaPoint.zip, packetaPoint.city].filter(Boolean).join(' '));
+      if (pLine2.length) pParts.push(pLine2.join(', '));
+      pickupVal.textContent = pParts.join(' — ');
     }
   }
 
-  // 2e. Vyplnění zákaznických údajů
+  // 2g. Vyplnění zákaznických údajů
   function updateDetailsDisplay() {
     if (!customer) return;
     var el = function(id) { return document.getElementById(id); };
@@ -882,11 +1008,11 @@ body { background: var(--bg); }
       if (companyRow && companyVal) {
         companyRow.style.display = '';
         var cParts = [companyData.company_name];
-        if (companyData.kvk_number) cParts.push('IČO: ' + companyData.kvk_number);
-        if (companyData.vat_number) cParts.push('DIČ: ' + companyData.vat_number);
+        if (companyData.ico) cParts.push('IČO: ' + companyData.ico);
+        if (companyData.dic) cParts.push('DIČ: ' + companyData.dic);
         companyVal.innerHTML = cParts.join('<br>');
       }
-      // Ukaž company sekci v edit formuláři
+      // Ukaž firemní sekci v editačním formuláři
       var editCompSection = el('ty-edit-company-section');
       if (editCompSection) editCompSection.style.display = '';
     }
@@ -894,7 +1020,7 @@ body { background: var(--bg); }
   updateDetailsDisplay();
 
   // ────────────────────────────────────────────────────
-  // 2b. 5-minute edit window — hide edit button after 5 min
+  // 2h. 5minutové okno pro úpravy — poté skryj tlačítko
   // ────────────────────────────────────────────────────
   (function() {
     if (!localStorage.getItem('medusa_edit_started_at')) {
@@ -906,11 +1032,11 @@ body { background: var(--bg); }
     var editForm = document.getElementById('ty-edit-form');
 
     if (elapsedMs >= 5 * 60 * 1000) {
-      // Already expired — hide edit button
+      // Okno už vypršelo — skryj tlačítko
       if (editBtn) editBtn.style.display = 'none';
       if (editForm) editForm.classList.remove('is-open');
     } else {
-      // Set timeout to hide when 5 min elapses
+      // Nastav timeout na skrytí po vypršení 5 minut
       var remaining = (5 * 60 * 1000) - elapsedMs;
       setTimeout(function() {
         if (editBtn) editBtn.style.display = 'none';
@@ -922,7 +1048,7 @@ body { background: var(--bg); }
   })();
 
   // ────────────────────────────────────────────────────
-  // 3. Edit formulář — toggle + save
+  // 3. Editační formulář — toggle + uložení
   // ────────────────────────────────────────────────────
   window.toggleEditForm = function() {
     var form = document.getElementById('ty-edit-form');
@@ -949,11 +1075,11 @@ body { background: var(--bg); }
       // Firemní pole předvyplnit
       if (companyData && companyData.company_name) {
         var ec = document.getElementById('edit-company');
-        var ek = document.getElementById('edit-kvk');
-        var ev = document.getElementById('edit-vat');
+        var ei = document.getElementById('edit-ico');
+        var ed = document.getElementById('edit-dic');
         if (ec) ec.value = companyData.company_name || '';
-        if (ek) ek.value = companyData.kvk_number || '';
-        if (ev) ev.value = companyData.vat_number || '';
+        if (ei) ei.value = companyData.ico || '';
+        if (ed) ed.value = companyData.dic || '';
       }
       // Scroll k formuláři
       form.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -962,8 +1088,6 @@ body { background: var(--bg); }
 
   window.saveDetails = function() {
     var btn = document.getElementById('ty-save-btn');
-    var feedback = document.getElementById('ty-feedback');
-    var feedbackText = document.getElementById('ty-feedback-text');
 
     // Načti hodnoty z formuláře
     var newData = {
@@ -976,13 +1100,13 @@ body { background: var(--bg); }
       city: document.getElementById('edit-city').value.trim(),
     };
 
-    // Validace — alespoň email a jméno
+    // Validace — alespoň e-mail a jméno
     if (!newData.email || !newData.first_name) {
-      showFeedback('Vyplň prosím alespoň jméno a e-mail.', 'error');
+      showFeedback('Vyplňte prosím alespoň jméno a e-mail.', 'error');
       return;
     }
 
-    // Loading stav
+    // Stav načítání
     btn.disabled = true;
     btn.innerHTML = '<span class="btn-spinner"></span> Ukládám...';
 
@@ -1005,10 +1129,10 @@ body { background: var(--bg); }
     var ecEl = document.getElementById('edit-company');
     if (ecEl) {
       var cName = ecEl.value.trim();
-      var cKvk = (document.getElementById('edit-kvk') || {}).value || '';
-      var cVat = (document.getElementById('edit-vat') || {}).value || '';
+      var cIco = (document.getElementById('edit-ico') || {}).value || '';
+      var cDic = (document.getElementById('edit-dic') || {}).value || '';
       if (cName) {
-        companyData = { company_name: cName, kvk_number: cKvk.trim(), vat_number: cVat.trim() };
+        companyData = { company_name: cName, ico: cIco.trim(), dic: cDic.trim() };
         localStorage.setItem('medusa_company', JSON.stringify(companyData));
       }
     }
@@ -1046,8 +1170,8 @@ body { background: var(--bg); }
     if (companyData && companyData.company_name) {
       apiPayload.shipping_address.company = companyData.company_name;
       apiPayload.metadata = {};
-      if (companyData.kvk_number) apiPayload.metadata.kvk_number = companyData.kvk_number;
-      if (companyData.vat_number) apiPayload.metadata.vat_number = companyData.vat_number;
+      if (companyData.ico) apiPayload.metadata.ico = companyData.ico;
+      if (companyData.dic) apiPayload.metadata.dic = companyData.dic;
     }
 
     fetch(apiUrl, {
@@ -1063,30 +1187,30 @@ body { background: var(--bg); }
       } else {
         console.warn('TY: API vrátilo chybu:', data.message);
         // Data jsou uložená lokálně, ale API selhalo
-        finishSave(true, 'Údaje uloženy. Pokud problém přetrvává, napiš nám.');
+        finishSave(true, 'Údaje jsme uložili. Pokud by něco nesedělo, napište nám prosím e-mail.');
       }
     })
     .catch(function(err) {
       console.error('TY: Chyba při API volání:', err);
       // Lokální data jsou uložená, API nedostupné
-      finishSave(true, 'Údaje uloženy. Server je momentálně nedostupný.');
+      finishSave(true, 'Údaje jsme uložili. Server je momentálně nedostupný — pokud by něco nesedělo, napište nám.');
     });
   };
 
   function finishSave(success, customMessage) {
     var btn = document.getElementById('ty-save-btn');
     btn.disabled = false;
-    btn.innerHTML = 'Uložit';
+    btn.innerHTML = 'Uložit změny';
 
     // Zavři formulář, ukaž kartu
     document.getElementById('ty-edit-form').classList.remove('is-open');
     document.getElementById('ty-details-card').style.display = '';
 
-    // Ukáž feedback
+    // Ukaž zpětnou vazbu
     if (success) {
-      showFeedback(customMessage || 'Údaje aktualizovány! Balíček odešleme na správnou adresu.', 'success');
+      showFeedback(customMessage || 'Vaše údaje jsme aktualizovali! Balíček pošleme na správnou adresu.', 'success');
     } else {
-      showFeedback(customMessage || 'Něco se pokazilo. Zkus to prosím znovu.', 'error');
+      showFeedback(customMessage || 'Něco se pokazilo. Zkuste to prosím znovu.', 'error');
     }
   }
 
@@ -1096,63 +1220,61 @@ body { background: var(--bg); }
     feedbackText.textContent = message;
     feedback.className = 'ty-feedback is-visible ' + type;
 
-    // Scroll k feedbacku
+    // Scroll ke zpětné vazbě
     feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    // Auto-skryj po 8 sekundách
+    // Automaticky skryj po 8 sekundách
     setTimeout(function() {
       feedback.classList.remove('is-visible');
     }, 8000);
   }
 
   // ────────────────────────────────────────────────────
-  // 4. Facebook Pixel + CAPI — Purchase event (only if not already tracked on upsell page)
+  // 4. Facebook Pixel + CAPI — Purchase event (deduplikace přes MetaTracker)
   // ────────────────────────────────────────────────────
-  var alreadyTracked = localStorage.getItem('medusa_purchase_tracked') === 'true';
-
-  // Guard: skip Purchase event if order has no value (failed/empty orders)
+  // Guard: přeskoč Purchase event pokud objednávka nemá hodnotu (failed/prázdné objednávky)
   if (!totalPrice || totalPrice <= 0 || !orderId) {
     console.warn('TY: Skipping Purchase event — no valid order (totalPrice=' + totalPrice + ', orderId=' + orderId + ')');
-  } else if (!alreadyTracked && typeof MetaTracker !== 'undefined') {
-    // This fires ONLY for order bump flow (customer skipped upsell page, came directly here)
-    var purchaseContentIds = ['dq1pbx9h7a', '2o99o4u5wa', '0e0rq03y7v', 'bap43l83n0', 'zotl3ua4f8'];
-    var purchaseNumItems = bundleQty + (orderBumpActive ? 1 : 0);
-    var purchaseEventId = 'purchase_' + orderId;
+  } else if (typeof MetaTracker !== 'undefined') {
+    var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+    var purchaseNumItems = bundleQty;
 
-    // Build user_data from customer info for maximum EMQ
+    // Sestav user_data ze zákaznických údajů pro maximální EMQ
     var purchaseUserData = {};
     if (customer) {
       if (customer.email) purchaseUserData.em = customer.email;
-      if (customer.firstName || customer.first_name) purchaseUserData.fn = customer.firstName || customer.first_name;
-      if (customer.lastName || customer.last_name) purchaseUserData.ln = customer.lastName || customer.last_name;
+      if (customer.firstName) purchaseUserData.fn = customer.firstName;
+      if (customer.lastName) purchaseUserData.ln = customer.lastName;
       if (customer.phone) purchaseUserData.ph = customer.phone;
       if (customer.city) purchaseUserData.ct = customer.city;
-      if (customer.postalCode || customer.postal_code) purchaseUserData.zp = customer.postalCode || customer.postal_code;
-      if (customer.country || customer.country_code) purchaseUserData.country = customer.country || customer.country_code;
+      if (customer.postalCode) purchaseUserData.zp = customer.postalCode;
+      if (customer.country) purchaseUserData.country = customer.country;
       if (customer.region) purchaseUserData.st = customer.region;
     }
 
-    /* Reload guard: skip Purchase if already fired for this order (page reload safe) */
+    var purchaseEventId = 'purchase_' + orderId;
+    var mainPrice = PROJECT_CONFIG.mainProduct.price || 0;
+    /* Reload guard: přeskoč Purchase pokud už byl pro tuto objednávku odeslán (bezpečné při reloadu stránky) */
     if (orderId && localStorage.getItem('meta_purchase_fired_' + orderId) === 'true') {
       console.log('TY: Purchase already fired for ' + orderId + ' — skipping (likely page reload)');
     } else {
       if (orderId) localStorage.setItem('meta_purchase_fired_' + orderId, 'true');
-    MetaTracker.trackPurchase({
-      content_ids: purchaseContentIds,
-      contents: purchaseContentIds.map(function(id) { return { id: id, quantity: 1 }; }),
-      value: totalPrice,
-      currency: PROJECT_CONFIG.mainProduct.currency || 'CZK',
-      num_items: purchaseNumItems,
-      order_id: orderId
-    }, purchaseUserData, { event_id: purchaseEventId });
+      MetaTracker.trackPurchase({
+        content_ids: purchaseContentIds,
+        contents: purchaseContentIds.map(function(id) {
+          return { id: id, quantity: 1, item_price: mainPrice };
+        }),
+        value: totalPrice,
+        currency: PROJECT_CONFIG.mainProduct.currency || 'CZK',
+        num_items: purchaseNumItems,
+        order_id: orderId
+      }, purchaseUserData, { event_id: purchaseEventId });
     }
-    console.log('TY: Purchase event (order bump flow) — ' + totalPrice + ' Kč event_id=' + purchaseEventId);
-  } else if (alreadyTracked) {
-    console.log('TY: Purchase already tracked on upsell page, skipping');
+    console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' CZK (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
   }
 
   // ────────────────────────────────────────────────────
-  // 5. Vyčisti localStorage — odloženo na 5 minut (aby zákazník stihl upravit údaje)
+  // 5. Vyčisti localStorage — odloženo o 5 minut (aby zákazník stihl upravit údaje)
   // ────────────────────────────────────────────────────
   setTimeout(function() {
     localStorage.removeItem('medusa_cart_id');
@@ -1160,23 +1282,21 @@ body { background: var(--bg); }
     localStorage.removeItem('medusa_payment_provider');
     localStorage.removeItem('medusa_order_id');
     localStorage.removeItem('medusa_order_display_id');
-    localStorage.removeItem('medusa_is_upsell');
-    localStorage.removeItem('medusa_upsell_purchased');
-    localStorage.removeItem('medusa_upsell_order_id');
     localStorage.removeItem('medusa_bundle_qty');
     localStorage.removeItem('medusa_bundle_price');
     localStorage.removeItem('medusa_order_bump');
     localStorage.removeItem('medusa_checkout_total');
-    localStorage.removeItem('medusa_purchase_tracked');
+    localStorage.removeItem('checkout_shipping_method');
+    localStorage.removeItem('checkout_packeta_point');
     console.log('TY: localStorage vyčištěn (po 5 min)');
   }, 5 * 60 * 1000);
 
   // ────────────────────────────────────────────────────
-  // 6. Confetti
+  // 6. Konfety
   // ────────────────────────────────────────────────────
   var confettiEl = document.getElementById('ty-confetti');
   if (confettiEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var colors = ['#6B21A8','#C4B5FD','#1A1A1A','#F3E8FF','#374151','#A78BFA','#fff'];
+    var colors = ['#DC3522','#E8604F','#6B21A8','#F3E8FF','#C4B5FD','#FFD1B0','#fff'];
     var shapes = ['circle','square','triangle'];
     for (var i = 0; i < 60; i++) {
       var piece = document.createElement('div');
@@ -1213,17 +1333,6 @@ body { background: var(--bg); }
     document.querySelectorAll('.ty-reveal').forEach(function(el){ el.classList.add('is-visible'); });
   }
 })();
-</script>
-<script>
-window.addEventListener('load', function() {
- var preloader = document.getElementById('preloader');
- if (preloader) {
-  setTimeout(function() {
-   preloader.style.opacity = '0';
-   setTimeout(function() { preloader.style.display = 'none'; }, 500);
-  }, 300);
- }
-});
 </script>
 
 </body>
