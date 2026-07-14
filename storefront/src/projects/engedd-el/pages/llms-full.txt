@@ -1,6 +1,6 @@
 # Engedd el, ami tönkretesz — teljes tájékoztató (llms-full.txt)
 
-> Ez a dokumentum a(z) https://engeddelkonyv.hu weboldal teljes, gépi feldolgozásra szánt tartalmi összefoglalója AI-keresők és nyelvi modellek számára. A könyv magyar nyelvű, Magyarországra szánt kiadvány.
+> Ez a dokumentum a(z) https://www.engeddelkonyv.hu weboldal teljes, gépi feldolgozásra szánt tartalmi összefoglalója AI-keresők és nyelvi modellek számára. A könyv magyar nyelvű, Magyarországra szánt kiadvány.
 
 ## A termék
 - Cím: Engedd el, ami tönkretesz
@@ -31,14 +31,14 @@ A könyv azoknak szól, akik túl sokat gondolkodnak, nehezen engedik el a múlt
 - Garancia: 30 napos, feltétel nélküli pénzvisszafizetési garancia (a teljes összeg)
 
 ## Kiadó és kapcsolat
-- Weboldal: https://engeddelkonyv.hu
+- Weboldal: https://www.engeddelkonyv.hu
 - E-mail: info@engeddelkonyv.hu
-- Megrendelés: https://engeddelkonyv.hu/checkout
-- Kapcsolat: https://engeddelkonyv.hu/kapcsolat
-- Szállítási információk: https://engeddelkonyv.hu/szallitas
-- Visszaküldés: https://engeddelkonyv.hu/visszakuldes
-- ÁSZF: https://engeddelkonyv.hu/aszf
-- Adatvédelem: https://engeddelkonyv.hu/adatvedelem
+- Megrendelés: https://www.engeddelkonyv.hu/checkout
+- Kapcsolat: https://www.engeddelkonyv.hu/kapcsolat
+- Szállítási információk: https://www.engeddelkonyv.hu/szallitas
+- Visszaküldés: https://www.engeddelkonyv.hu/visszakuldes
+- ÁSZF: https://www.engeddelkonyv.hu/aszf
+- Adatvédelem: https://www.engeddelkonyv.hu/adatvedelem
 - Kiadó: Performance Marketing Solution s.r.o.
 
 ## Gyakran ismételt kérdések

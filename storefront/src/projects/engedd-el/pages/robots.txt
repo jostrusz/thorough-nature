@@ -6,7 +6,7 @@ Disallow: /upsell
 Disallow: /thank-you
 
 # Sitemap
-Sitemap: https://engeddelkonyv.hu/sitemap.xml
+Sitemap: https://www.engeddelkonyv.hu/sitemap.xml
 
 # AI Crawlers — explicitly allowed for citations
 User-agent: GPTBot

@@ -36,13 +36,13 @@ A könyv azoknak szól, akik túl sokat gondolkodnak, nehezen engedik el a múlt
 - Kézbesítés: 3–4 munkanap Magyarország egész területén
 
 ## Kapcsolat és vásárlás
-- Weboldal: https://engeddelkonyv.hu
-- Megrendelés: https://engeddelkonyv.hu/checkout
-- Ügyfélszolgálat: https://engeddelkonyv.hu/kapcsolat (info@engeddelkonyv.hu)
-- Szállítás és kézbesítés: https://engeddelkonyv.hu/szallitas
-- Visszaküldés és garancia: https://engeddelkonyv.hu/visszakuldes
-- Általános szerződési feltételek: https://engeddelkonyv.hu/aszf
-- Adatvédelmi tájékoztató: https://engeddelkonyv.hu/adatvedelem
+- Weboldal: https://www.engeddelkonyv.hu
+- Megrendelés: https://www.engeddelkonyv.hu/checkout
+- Ügyfélszolgálat: https://www.engeddelkonyv.hu/kapcsolat (info@engeddelkonyv.hu)
+- Szállítás és kézbesítés: https://www.engeddelkonyv.hu/szallitas
+- Visszaküldés és garancia: https://www.engeddelkonyv.hu/visszakuldes
+- Általános szerződési feltételek: https://www.engeddelkonyv.hu/aszf
+- Adatvédelmi tájékoztató: https://www.engeddelkonyv.hu/adatvedelem
 - Kiadó: Performance Marketing Solution s.r.o.
 
 ## További információk
