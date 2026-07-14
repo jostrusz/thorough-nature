@@ -5437,6 +5437,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Method descriptions (Norwegian)
   var METHOD_DESCRIPTIONS = {
+    apple_pay: 'Betal raskt og trygt med Apple Pay',
+    google_pay: 'Betal raskt og trygt med Google Pay',
     ideal: 'Betal direkte via din egen bank',
     bancontact: 'Belgisk betalingssystem',
     klarna: 'Betal direkte via Klarna',
@@ -5484,9 +5486,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         '</span>';
     }
     // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay'];
+    var ICON_FILE_MAP = { 'google_pay': 'googlepay', 'apple_pay': 'applepay' };
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'google_pay', 'apple_pay', 'eps', 'swish', 'revolut_pay'];
     if (iconMethods.indexOf(code) !== -1) {
-      return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
+      var iconFile = ICON_FILE_MAP[code] || code;
+      return '<img src="/icons/' + iconFile + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
     // Colored badge fallback
     var badges = {
@@ -5557,6 +5561,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'trustly': 'Trustly',
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
+            'apple_pay': 'Apple Pay',
+            'google_pay': 'Google Pay',
             'bank_transfer': 'Bankoverføring',
             'sepa_debit': 'SEPA automatisk trekk',
             'swish': 'Swish',
