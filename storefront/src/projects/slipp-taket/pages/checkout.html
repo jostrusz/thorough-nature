@@ -3918,6 +3918,27 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var paypalCardMounting = false;
   var paypalClientId = null;
   var _paypalSdkPromise = null; // Centralized PayPal SDK loading promise
+  // ── Revolut inline card (owns the "Betalingskort" tile) ──
+  var revolutCardInst = null;      // RevolutCheckout instance
+  var revolutCardField = null;     // createCardField() handle (.submit / .destroy)
+  var revolutCardToken = null;     // order public token the field is mounted against
+  var revolutCardCartId = null;    // cart the Revolut order/session belongs to
+  var revolutCardAmountKey = null; // amount signature the current field was built for
+  var revolutCardMounting = false; // guard against concurrent mounts
+  // Language of the Revolut card-field labels (Kortnummer / MM/ÅÅ / CVV). Derived from
+  // PROJECT_CONFIG.locale; Revolut supports sk/cs/de/nl/pl/sv/hu/fr/es → 'nb'/'nn'/'no' fall back to en.
+  var REVOLUT_CARD_LOCALE = (function () {
+    var map = { sk: 'sk', cs: 'cs', de: 'de', nl: 'nl', pl: 'pl', sv: 'sv', hu: 'hu', fr: 'fr', es: 'es', no: 'en', nb: 'en', nn: 'en' };
+    return map[(PROJECT_CONFIG.locale || 'nb').toLowerCase()] || 'en';
+  })();
+  var _revolutSdkPromise = null;   // pre-warmed @revolut/checkout module (loaded on card select)
+  // ── Revolut Apple Pay / Google Pay (native wallet buttons) ──
+  var revolutPublicKey = null;     // pk_... — needed to mount the payments() module
+  var revolutEnv = 'prod';         // 'prod' | 'sandbox'
+  var _revolutPaymentsModule = null; // cached payments() instance promise
+  var revolutWalletPR = null;      // current paymentRequest instance
+  var revolutWalletCartId = null;  // cart the wallet order belongs to
+  var revolutWalletMethod = null;  // 'apple_pay' | 'google_pay'
   var expressMethodsList = [];  // Express methods from API
 
   /* ─── CENTRALIZED PAYPAL SDK LOADER ─── */
@@ -4280,8 +4301,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Filter out creditcard — not an express method
     // Also exclude googlepay & applepay — they now render as regular radio methods
+    // Also exclude Revolut — its methods are inline-only (card field / Revolut Pay
+    // button / wallet CTA), never the redirect-based express button flow.
     expressMethods = expressMethods.filter(function(m) {
-      return m.code !== 'creditcard' && m.code !== 'googlepay' && m.code !== 'applepay';
+      return m.code !== 'creditcard' && m.code !== 'googlepay' && m.code !== 'applepay' && m.provider !== 'revolut';
     });
 
     if (expressMethods.length === 0) {
@@ -4950,6 +4973,468 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
+  /* ─── REVOLUT INLINE CARD — owns the "Betalingskort" tile ──────────────────
+   * Unlike Mollie/Airwallex/Stripe (which collect card data client-side and
+   * create the payment intent on submit), Revolut requires the order token
+   * BEFORE the card field can mount. So when the customer confirms the order
+   * we build a cart with the current items, create a Revolut payment session
+   * (→ order token) and mount a single combined card field under the tile.
+   * The customer enters the card and pays inline — no redirect at any point.
+   * ─────────────────────────────────────────────────────────────────────────*/
+  function revolutAmountKey() {
+    return [getCurrentTotal(), selectedBundleQty, (orderBumpActive ? 1 : 0)].join('|');
+  }
+
+  function teardownRevolutCard() {
+    if (revolutCardField && revolutCardField.destroy) { try { revolutCardField.destroy(); } catch (e) {} }
+    revolutCardField = null; revolutCardInst = null; revolutCardToken = null; revolutCardAmountKey = null;
+  }
+
+  // Container-state styling for the Revolut card field (border/box-shadow can't be
+  // set from inside the sandboxed iframe — they live on the #card-number container).
+  // ── Lokalisering av kortbetaling (chrome rundt Revolut-feltet). Språk = PROJECT_CONFIG.locale. ──
+  var CARD_I18N = {
+    sk: { ship:'Doprava', pay:'Platba', title:'Platobná karta', secureNote:'Údaje zadávate priamo do zabezpečeného poľa Revolut — my ich nevidíme.', c1:'256-bit šifrovanie', c2:'3D Secure overenie', c3:'Kartu neukladáme', payBtn:'Zaplatiť', securedBy:'Zabezpečené cez Revolut', guarantee:'30 dní záruka vrátenia', enterCard:'Zadajte údaje karty a potvrďte platbu.', connecting:'🔒 Pripájam sa k zabezpečenej platbe…' },
+    cs: { ship:'Doprava', pay:'Platba', title:'Platební karta', secureNote:'Údaje zadáváte přímo do zabezpečeného pole Revolut — my je nevidíme.', c1:'256bitové šifrování', c2:'Ověření 3D Secure', c3:'Kartu neukládáme', payBtn:'Zaplatit', securedBy:'Zabezpečeno přes Revolut', guarantee:'30 dní záruka vrácení', enterCard:'Zadejte údaje karty a potvrďte platbu.', connecting:'🔒 Připojuji se k zabezpečené platbě…' },
+    de: { ship:'Versand', pay:'Zahlung', title:'Kreditkarte', secureNote:'Sie geben die Daten direkt in das sichere Revolut-Feld ein — wir sehen sie nicht.', c1:'256-Bit-Verschlüsselung', c2:'3D-Secure-Prüfung', c3:'Wir speichern keine Karten', payBtn:'Bezahlen', securedBy:'Gesichert über Revolut', guarantee:'30 Tage Geld-zurück', enterCard:'Geben Sie die Kartendaten ein und bestätigen Sie.', connecting:'🔒 Verbinde mit sicherer Zahlung…' },
+    nl: { ship:'Verzending', pay:'Betaling', title:'Betaalkaart', secureNote:'U voert de gegevens rechtstreeks in het beveiligde Revolut-veld in — wij zien ze niet.', c1:'256-bit versleuteling', c2:'3D Secure-verificatie', c3:'Wij bewaren geen kaarten', payBtn:'Betalen', securedBy:'Beveiligd via Revolut', guarantee:'30 dagen niet-goed-geld-terug', enterCard:'Voer uw kaartgegevens in en bevestig de betaling.', connecting:'🔒 Verbinden met beveiligde betaling…' },
+    pl: { ship:'Dostawa', pay:'Płatność', title:'Karta płatnicza', secureNote:'Dane wpisujesz bezpośrednio w bezpieczne pole Revolut — my ich nie widzimy.', c1:'Szyfrowanie 256-bit', c2:'Weryfikacja 3D Secure', c3:'Nie przechowujemy kart', payBtn:'Zapłać', securedBy:'Zabezpieczone przez Revolut', guarantee:'30 dni gwarancji zwrotu', enterCard:'Wprowadź dane karty i potwierdź płatność.', connecting:'🔒 Łączę z bezpieczną płatnością…' },
+    sv: { ship:'Frakt', pay:'Betalning', title:'Betalkort', secureNote:'Du anger uppgifterna direkt i Revoluts säkra fält — vi ser dem inte.', c1:'256-bitars kryptering', c2:'3D Secure-verifiering', c3:'Vi sparar inga kort', payBtn:'Betala', securedBy:'Säkrad via Revolut', guarantee:'30 dagars återbetalningsgaranti', enterCard:'Ange kortuppgifterna och bekräfta betalningen.', connecting:'🔒 Ansluter till säker betalning…' },
+    no: { ship:'Frakt', pay:'Betaling', title:'Betalingskort', secureNote:'Du skriver inn opplysningene direkte i Revoluts sikre felt — vi ser dem ikke.', c1:'256-bits kryptering', c2:'3D Secure-verifisering', c3:'Vi lagrer ikke kort', payBtn:'Betal', securedBy:'Sikret via Revolut', guarantee:'30 dagers pengene-tilbake', enterCard:'Skriv inn kortopplysningene og bekreft betalingen.', connecting:'🔒 Kobler til sikker betaling…' },
+    hu: { ship:'Szállítás', pay:'Fizetés', title:'Bankkártya', secureNote:'Az adatokat közvetlenül a Revolut biztonságos mezőjébe írja be — mi nem látjuk őket.', c1:'256 bites titkosítás', c2:'3D Secure ellenőrzés', c3:'Nem tároljuk a kártyát', payBtn:'Fizetés', securedBy:'Revoluton keresztül védve', guarantee:'30 napos pénzvisszafizetés', enterCard:'Adja meg a kártyaadatokat és erősítse meg a fizetést.', connecting:'🔒 Csatlakozás a biztonságos fizetéshez…' },
+    fr: { ship:'Livraison', pay:'Paiement', title:'Carte bancaire', secureNote:'Vous saisissez les informations directement dans le champ sécurisé Revolut — nous ne les voyons pas.', c1:'Chiffrement 256 bits', c2:'Vérification 3D Secure', c3:'Nous ne stockons pas les cartes', payBtn:'Payer', securedBy:'Sécurisé via Revolut', guarantee:'Garantie 30 jours', enterCard:'Saisissez les informations de votre carte et confirmez.', connecting:'🔒 Connexion au paiement sécurisé…' },
+    es: { ship:'Envío', pay:'Pago', title:'Tarjeta bancaria', secureNote:'Introduces los datos directamente en el campo seguro de Revolut — nosotros no los vemos.', c1:'Cifrado de 256 bits', c2:'Verificación 3D Secure', c3:'No guardamos tarjetas', payBtn:'Pagar', securedBy:'Protegido con Revolut', guarantee:'Garantía de 30 días', enterCard:'Introduce los datos de tu tarjeta y confirma el pago.', connecting:'🔒 Conectando con el pago seguro…' }
+  };
+  // slipp-taket: locale is 'nb' → resolves via slice(0,2) miss to the 'no' branch (norsk texts).
+  function cardLocale() {
+    var L = (PROJECT_CONFIG.locale || 'no').toLowerCase();
+    if (CARD_I18N[L]) return L;
+    var s = L.slice(0, 2);
+    if (CARD_I18N[s]) return s;
+    return 'no';
+  }
+  function cardT(k) { return (CARD_I18N[cardLocale()] || CARD_I18N.no)[k] || CARD_I18N.no[k] || k; }
+  function ensureRevolutCardStyles() {
+    if (document.getElementById('revolut-card-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'revolut-card-styles';
+    st.textContent =
+      // Elevated premium card wrapping the whole payment block
+      '#card-fields.rc-card-wrap{background:#fff !important;border:1px solid #EDD9E5 !important;border-radius:16px !important;padding:20px !important;box-shadow:0 6px 24px rgba(45,27,61,.06);}' +
+      '#card-number{transition:border-color .2s ease,box-shadow .2s ease;position:relative;height:56px;border-radius:12px !important;}' +
+      '#card-number.rc-focused{border-color:var(--cta) !important;box-shadow:0 0 0 4px rgba(194,123,160,.14);}' +
+      '#card-number.rc-invalid{border-color:var(--error) !important;}' +
+      '#card-number.rc-shake{animation:rcShakeError .4s ease;}' +
+      '@keyframes rcShakeError{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}' +
+      '.rc-skeleton{height:100%;width:100%;border-radius:12px;background:linear-gradient(90deg,#EFEFEF 25%,#E4E4E4 37%,#EFEFEF 63%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;}' +
+      // Header: progress + order line + secure/logos
+      '#rc-head{margin-bottom:14px;animation:fadeIn .3s ease;}' +
+      '.rc-prog{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#9B7AAD;margin-bottom:8px;}' +
+      '.rc-dot{width:7px;height:7px;border-radius:50%;background:#C27BA0;display:inline-block;}' +
+      '.rc-dot.done{background:#2E7D32;}' +
+      '.rc-prog .rc-chk{color:#2E7D32;}' +
+      '.rc-line{display:flex;align-items:center;justify-content:space-between;background:#FAF5F8;border-radius:12px;padding:12px 14px;margin-bottom:14px;}' +
+      '.rc-line-p{font-size:13px;color:#5A3D6B;}' +
+      '.rc-line-a{font-size:15px;font-weight:700;color:#2D1B3D;}' +
+      '.rc-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}' +
+      '.rc-secure{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#2E7D32;}' +
+      '.rc-logos{display:inline-flex;gap:5px;align-items:center;}' +
+      '.rc-logos svg{border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.05);}' +
+      '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;color:#2E7D32;font-weight:700;}' +
+      '.rc-label-check.on{opacity:1;transform:scale(1);animation:checkmark .3s ease;}' +
+      // Trust chips
+      '.rc-secure-note{font-size:12px;color:#8A7290;margin:9px 2px 0;line-height:1.45;}' +
+      '#rc-trust{display:flex;gap:7px;margin-top:16px;}' +
+      '.rc-chip{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:11px;text-align:center;font-size:10.5px;font-weight:600;color:#6B5473;line-height:1.25;}.rc-chip .rc-ic{font-size:16px;}' +
+      '#revolut-pay-btn{margin-top:16px;}' +
+      // Guarantee row
+      '#rc-reassure{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;font-size:12px;color:#5A3D6B;margin-top:12px;}' +
+      '#rc-reassure strong{color:#2D1B3D;font-weight:600;}';
+    document.head.appendChild(st);
+  }
+
+  // Toggle the little green ✓ next to the card label when the card is complete.
+  function toggleCardCompleteCheck(on) {
+    var c = document.querySelector('.rc-label-check');
+    if (c) c.classList.toggle('on', !!on);
+  }
+
+  // Restart the shake animation on the card box (payment error nudge).
+  function shakeCardBox() {
+    var box = document.getElementById('card-number');
+    if (!box) return;
+    box.classList.remove('rc-shake');
+    void box.offsetWidth; // force reflow so the animation replays
+    box.classList.add('rc-shake');
+  }
+
+  // Pre-load the Revolut Web SDK the moment the card tile is selected, so the card
+  // field mounts almost instantly on submit — kills the "Forbereder betaling…" wait.
+  function prewarmRevolutSdk() {
+    if (!_revolutSdkPromise) {
+      _revolutSdkPromise = import('https://esm.sh/@revolut/checkout@1.1.25').catch(function (e) {
+        _revolutSdkPromise = null; // allow a retry on the real submit
+        throw e;
+      });
+    }
+    return _revolutSdkPromise;
+  }
+
+  // Small Visa / Mastercard / Maestro marks shown next to the card label (trust).
+  function revolutCardLogos() {
+    return '<span class="rc-logos">'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Visa"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><text x="16" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" font-style="italic" fill="#1A1F71">VISA</text></svg>'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Mastercard"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><circle cx="13.5" cy="10" r="5.2" fill="#EB001B"/><circle cx="18.5" cy="10" r="5.2" fill="#F79E1B" fill-opacity="0.9"/></svg>'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Maestro"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><circle cx="13.5" cy="10" r="5.2" fill="#0099DF"/><circle cx="18.5" cy="10" r="5.2" fill="#ED0006" fill-opacity="0.85"/></svg>'
+      + '</span>';
+  }
+
+  // Premium trust chrome around the Revolut card field (idempotent):
+  // elevated card wrapper + progress + order line + secure/logos header + trust chips.
+  function decorateRevolutCardForm(cardFieldsEl, amountLabel) {
+    if (!cardFieldsEl) return;
+    var productName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Bestilling';
+    cardFieldsEl.classList.add('rc-card-wrap');
+    // Header: progress → order line → secure + card logos
+    var oldHead = document.getElementById('rc-head'); if (oldHead) oldHead.remove();
+    var head = document.createElement('div');
+    head.id = 'rc-head';
+    head.innerHTML =
+      '<div class="rc-prog"><span class="rc-dot done"></span>' + cardT('ship') + ' <span class="rc-chk">✓</span> · <span class="rc-dot"></span>' + cardT('pay') + '</div>'
+      + '<div class="rc-line"><span class="rc-line-p">' + productName + ' · ' + selectedBundleQty + ' stk</span><span class="rc-line-a">' + amountLabel + '</span></div>'
+      + '<div class="rc-head-row"><span class="rc-secure">🔒 ' + cardT('title') + '<span class="rc-label-check">✓</span></span>' + revolutCardLogos() + '</div>';
+    cardFieldsEl.insertBefore(head, cardFieldsEl.firstChild);
+    // Secure micro-note under the field (reassures where the card data goes)
+    var oldNote = document.getElementById('rc-secure-note'); if (oldNote) oldNote.remove();
+    var note = document.createElement('div');
+    note.id = 'rc-secure-note'; note.className = 'rc-secure-note';
+    note.innerHTML = '🔒 ' + cardT('secureNote');
+    // Trust chips (3 columns) under the field
+    var oldTrust = document.getElementById('rc-trust'); if (oldTrust) oldTrust.remove();
+    var trust = document.createElement('div');
+    trust.id = 'rc-trust';
+    trust.innerHTML = '<span class="rc-chip"><span class="rc-ic">🔐</span>' + cardT('c1') + '</span><span class="rc-chip"><span class="rc-ic">🛡️</span>' + cardT('c2') + '</span><span class="rc-chip"><span class="rc-ic">🚫</span>' + cardT('c3') + '</span>';
+    var errEl = document.getElementById('card-errors');
+    if (errEl && errEl.parentNode) { errEl.parentNode.insertBefore(note, errEl.nextSibling); note.parentNode.insertBefore(trust, note.nextSibling); }
+    else { cardFieldsEl.appendChild(note); cardFieldsEl.appendChild(trust); }
+  }
+
+  /* ─── REVOLUT APPLE PAY / GOOGLE PAY — native wallet buttons ────────────────
+   * When the customer selects the Apple Pay / Google Pay tile, the main "Betal"
+   * button is replaced by the NATIVE wallet button. One tap on it opens the wallet
+   * sheet directly (the browser only opens the sheet from a tap on the wallet's own
+   * button — there's no programmatic trigger). Apple Pay is hidden off Safari/Apple.
+   * The wallet is used only for payment; the shipping address comes from the form.
+   * ──────────────────────────────────────────────────────────────────────────*/
+  function loadRevolutPayments() {
+    if (_revolutPaymentsModule) return _revolutPaymentsModule;
+    if (!revolutPublicKey) return Promise.reject(new Error('Revolut public key mangler'));
+    _revolutPaymentsModule = prewarmRevolutSdk().then(function (m) {
+      return m.default.payments({ locale: 'auto', publicToken: revolutPublicKey, mode: revolutEnv === 'prod' ? 'prod' : 'sandbox' });
+    });
+    return _revolutPaymentsModule;
+  }
+
+  // Apple Pay is only available on Safari + Apple devices with a card in Wallet.
+  function isAppleWalletDevice() {
+    return !!(window.ApplePaySession && typeof window.ApplePaySession.canMakePayments === 'function' && window.ApplePaySession.canMakePayments());
+  }
+
+  // Hide the Revolut Apple Pay tile where Apple Pay can't run (non-Safari / non-Apple).
+  function gateAppleWalletTile() {
+    if (isAppleWalletDevice()) return;
+    var tiles = document.querySelectorAll('#payment-methods .payment-method');
+    Array.prototype.forEach.call(tiles, function (t) {
+      if (t.getAttribute('data-method') === 'apple_pay') t.style.display = 'none';
+    });
+  }
+
+  function buildWalletCustomerData() {
+    var sa = {
+      first_name: (document.getElementById('first_name') || {}).value || '',
+      last_name: (document.getElementById('last_name') || {}).value || '',
+      address_1: (document.getElementById('address') || {}).value || '',
+      city: (document.getElementById('city') || {}).value || '',
+      postal_code: (document.getElementById('postal_code') || {}).value || '',
+      country_code: ((document.getElementById('country') || {}).value || 'NO').toLowerCase(),
+      phone: (document.getElementById('phone') || {}).value || ''
+    };
+    return { email: (document.getElementById('email') || {}).value || '', shipping_address: sa, billing_address: Object.assign({}, sa) };
+  }
+
+  function setWalletHint(msg, isErr) {
+    var h = document.getElementById('revolut-wallet-hint');
+    if (!h) {
+      var wrap = document.querySelector('.checkout-btn-wrap'); if (!wrap) return;
+      h = document.createElement('div'); h.id = 'revolut-wallet-hint';
+      h.style.cssText = 'font-size:12.5px;text-align:center;margin-top:8px;';
+      wrap.appendChild(h);
+    }
+    h.textContent = msg || '';
+    h.style.color = isErr ? 'var(--error)' : '#9B7AAD';
+    h.style.display = msg ? 'block' : 'none';
+  }
+
+  // Wallet createOrder — validate the form, build the cart with the form address +
+  // shipping, create a Revolut session, and hand the sheet the order token.
+  function revolutWalletCreateOrder() {
+    if (!validateAllFields()) {
+      var firstError = form.querySelector('.invalid');
+      if (firstError) { firstError.focus(); firstError.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      setWalletHint('Fyll inn bestillingsopplysningene ovenfor.', true);
+      return Promise.reject(new Error('form-invalid'));
+    }
+    setWalletHint('');
+    var customerData = buildWalletCustomerData();
+    return buildRevolutCardCart()
+      .then(function (cartId) { revolutWalletCartId = cartId; return applyShippingToRevolutCart(cartId, customerData); })
+      .then(function () {
+        return createExpressPaymentSession(revolutWalletCartId, 'pp_revolut_revolut', {
+          method: revolutWalletMethod, amount: getCurrentTotal(),
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
+        });
+      })
+      .then(function (sessionData) {
+        if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut-økt uten token');
+        return { publicId: sessionData.revolutPublicToken };
+      });
+  }
+
+  function onRevolutWalletSuccess() {
+    if (!revolutWalletCartId) return;
+    handleExpressOrderComplete(revolutWalletCartId);
+  }
+
+  // Restore the normal "Betal" button (wallet deselected or unavailable).
+  function restoreSubmitFromWallet() {
+    var c = document.getElementById('revolut-wallet-cta'); if (c) c.remove();
+    if (revolutWalletPR && revolutWalletPR.destroy) { try { revolutWalletPR.destroy(); } catch (e) {} }
+    revolutWalletPR = null;
+    setWalletHint('');
+    if (submitBtn) { submitBtn.style.display = ''; submitBtn.style.opacity = ''; }
+  }
+
+  // Replace the submit button with the native Apple/Google Pay button.
+  function mountRevolutWalletCTA(method) {
+    revolutWalletMethod = method;
+    var wrap = document.querySelector('.checkout-btn-wrap');
+    if (!wrap) return;
+    var oldC = document.getElementById('revolut-wallet-cta'); if (oldC) oldC.remove();
+    var c = document.createElement('div');
+    c.id = 'revolut-wallet-cta';
+    c.style.cssText = 'min-height:48px;margin-bottom:2px;';
+    wrap.insertBefore(c, wrap.firstChild);
+    if (submitBtn) submitBtn.style.display = 'none';
+    setWalletHint('Laster ' + (method === 'apple_pay' ? 'Apple Pay' : 'Google Pay') + '…');
+
+    loadRevolutPayments().then(function (rp) {
+      var pr = rp.paymentRequest(c, {
+        amount: Math.round(getCurrentTotal() * 100),
+        currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(),
+        preferredPaymentMethod: method === 'apple_pay' ? 'applePay' : 'googlePay',
+        createOrder: revolutWalletCreateOrder,
+        onSuccess: onRevolutWalletSuccess,
+        onError: function () { setWalletHint('Betalingen mislyktes — prøv igjen.', true); },
+        onCancel: function () { setWalletHint(''); }
+      });
+      revolutWalletPR = pr;
+      return pr.canMakePayment().then(function (avail) {
+        if (avail) { setWalletHint(''); return pr.render(); }
+        // Wallet unavailable → fall back to the normal button (generic flow → overlay).
+        restoreSubmitFromWallet();
+        setWalletHint((method === 'apple_pay' ? 'Apple Pay' : 'Google Pay') + ' er ikke tilgjengelig på denne enheten — bruk kort i stedet.', true);
+      });
+    }).catch(function () {
+      // SDK / key error → safe fallback to the normal submit button.
+      restoreSubmitFromWallet();
+    });
+  }
+
+  // Build a fresh cart holding the current items (main product + order bump + promo).
+  // Reuses createExpressCart(), which is quantity-aware for single-variant bundles.
+  function buildRevolutCardCart() {
+    return createExpressCart();
+  }
+
+  // Reshape the shared #card-fields form into a single combined field for Revolut.
+  function prepareRevolutCardLayout() {
+    var box = document.getElementById('card-number');
+    // Revolut renders one combined iframe → hide the split expiry/cvc/name boxes.
+    ['expiry-date', 'verification-code', 'card-holder'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.parentElement) el.parentElement.style.display = 'none';
+    });
+    if (box) { box.innerHTML = ''; box.style.height = '56px'; box.style.width = '100%'; box.style.position = 'relative'; }
+    // The built-in "Kortnummer" label is redundant — the new header (secure + logos)
+    // replaces it, and the ✓ completed indicator lives in that header.
+    var lbl = box && box.parentElement ? box.parentElement.querySelector('label') : null;
+    if (lbl) lbl.style.display = 'none';
+    return box;
+  }
+
+  function setCardStatus(msg, isError) {
+    var errEl = document.getElementById('card-errors');
+    if (!errEl) return;
+    errEl.textContent = msg || '';
+    errEl.style.color = isError ? 'var(--error)' : '#9B7AAD';
+  }
+
+  // Attach customer data + the first available shipping method to a cart.
+  // slipp-taket has a single shipping option (home delivery via PostNord).
+  function applyShippingToRevolutCart(cartId, customerData) {
+    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(customerData) })
+      .then(function () { return medusaFetch('/store/shipping-options?cart_id=' + cartId, { method: 'GET' }); })
+      .then(function (shipRes) {
+        var options = shipRes.shipping_options || [];
+        if (options.length === 0) throw new Error('Ingen fraktalternativer tilgjengelig');
+        return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
+          method: 'POST', body: JSON.stringify({ option_id: options[0].id })
+        });
+      });
+  }
+
+  function resetSubmitButton() {
+    if (submitBtn) { submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
+  }
+
+  // Revolut card field authorised the payment → complete the same cart.
+  function onRevolutCardSuccess() {
+    if (!revolutCardCartId) { resetSubmitButton(); return; }
+    handleExpressOrderComplete(revolutCardCartId);
+  }
+
+  // Submit handler for the Revolut card tile (Revolut-hosted-style flow):
+  // customer confirms the order (main "Betal med …") → we build the cart for the
+  // current amount, attach the address + shipping, then REVEAL the card form
+  // (dropdown) with its own confirm button. Payment fires only when they enter
+  // their card and press "Betal". Building fresh here means the amount
+  // and address are always current — no stale-token handling needed.
+  function revolutCardPay(customerData) {
+    var cardFieldsEl = document.getElementById('card-fields');
+    var amountLabel = formatPrice(getCurrentTotal());
+    teardownRevolutCard();
+    ensureRevolutCardStyles();
+
+    // Keep the card form HIDDEN while the cart + session + SDK load. The main
+    // button stays in its spinner state so the customer knows we're working — the
+    // input fields only appear once they're actually ready to be filled in.
+    if (cardFieldsEl) cardFieldsEl.style.display = 'none';
+    var mainTxt = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+    var mainTxtOrig = mainTxt ? mainTxt.textContent : '';
+    if (mainTxt) mainTxt.textContent = 'Forbereder betaling…';
+
+    buildRevolutCardCart()
+      .then(function (cartId) {
+        revolutCardCartId = cartId;
+        return applyShippingToRevolutCart(cartId, customerData);
+      })
+      .then(function () {
+        return createExpressPaymentSession(revolutCardCartId, 'pp_revolut_revolut', {
+          method: 'card', amount: getCurrentTotal(),
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
+        });
+      })
+      .then(function (sessionData) {
+        if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Revolut-økt uten token');
+        revolutCardToken = sessionData.revolutPublicToken;
+        var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
+        // Reuse the SDK pre-warmed on card-tile select (near-instant here).
+        return prewarmRevolutSdk().then(function (m) {
+          return m.default(revolutCardToken, mode).then(function (inst) {
+            revolutCardInst = inst;
+            // Fields are ready → NOW reveal the form (slide-down) and mount into it.
+            if (cardFieldsEl) {
+              cardFieldsEl.style.display = 'block';
+              cardFieldsEl.style.animation = 'slideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            }
+            var box = prepareRevolutCardLayout();
+            revolutCardField = inst.createCardField({
+              target: box,
+              locale: REVOLUT_CARD_LOCALE,
+              theme: 'light',
+              styles: {
+                default: { color: '#1A1A1A', fontFamily: '"DM Sans", system-ui, sans-serif', fontSize: '14px', fontWeight: '500' },
+                completed: { color: '#1A1A1A' },
+                autofilled: { color: '#1A1A1A' },
+                invalid: { color: '#DC2626' }
+              },
+              classes: { focused: 'rc-focused', invalid: 'rc-invalid' },
+              onStatusChange: function (st) { toggleCardCompleteCheck(st && st.completed); },
+              onSuccess: function () { onRevolutCardSuccess(); },
+              onError: function () {
+                // Friendly, non-technical message — keep the customer in the flow.
+                setCardStatus('Betalingen mislyktes — sjekk kortopplysningene og prøv igjen.', true);
+                shakeCardBox();
+                var b = document.getElementById('revolut-pay-btn');
+                if (b) { b.classList.remove('loading'); b.disabled = false; }
+              },
+              onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
+            });
+            // Trust + reassurance chrome (step, secure badge, mini summary, card logos, SSL line)
+            decorateRevolutCardForm(cardFieldsEl, amountLabel);
+            // Confirm button inside the dropdown — styled as the native checkout CTA.
+            var oldBtn = document.getElementById('revolut-pay-btn'); if (oldBtn) oldBtn.remove();
+            var payBtn = document.createElement('button');
+            payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button'; payBtn.className = 'checkout-btn';
+            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">' + cardT('payBtn') + ' ' + amountLabel + ' →</span>';
+            payBtn.onclick = function () {
+              payBtn.classList.add('loading'); payBtn.disabled = true;
+              setCardStatus(cardT('connecting'), false);
+              var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
+              revolutCardField.submit({ name: name, email: customerData.email });
+            };
+            cardFieldsEl.appendChild(payBtn);
+            // Reassurance directly under the pay button
+            var oldReassure = document.getElementById('rc-reassure'); if (oldReassure) oldReassure.remove();
+            var reassure = document.createElement('div');
+            reassure.id = 'rc-reassure';
+            reassure.innerHTML = '<span>✅ ' + cardT('securedBy') + '</span><span>↩️ ' + cardT('guarantee') + '</span>';
+            cardFieldsEl.appendChild(reassure);
+            setCardStatus(cardT('enterCard'), false);
+            // Smoothly hand off from the main button (+ redirect subtext) to the card form's confirm button.
+            var btnSubtext = document.querySelector('.btn-subtext');
+            if (btnSubtext) btnSubtext.style.display = 'none';
+            if (submitBtn) {
+              submitBtn.classList.remove('loading');
+              submitBtn.style.transition = 'opacity 0.25s ease';
+              submitBtn.style.opacity = '0';
+              setTimeout(function () { submitBtn.style.display = 'none'; }, 250);
+            }
+            cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
+      })
+      .catch(function (err) {
+        errorEl.textContent = 'Det oppstod en feil under behandlingen av betalingen. ' + (err.message || 'Prøv igjen.');
+        // Build failed before the form was shown — restore the main button for retry.
+        if (mainTxt) mainTxt.textContent = mainTxtOrig;
+        var btnSubtextErr = document.querySelector('.btn-subtext');
+        if (btnSubtextErr) btnSubtextErr.style.display = '';
+        resetSubmitButton();
+      });
+  }
+
+  // Restore the main submit button + subtext after the Revolut card form was revealed
+  // (customer switched to another payment method) — undo revolutCardPay's hand-off.
+  function restoreSubmitFromRevolutCard() {
+    teardownRevolutCard();
+    var payBtn = document.getElementById('revolut-pay-btn'); if (payBtn) payBtn.remove();
+    var head = document.getElementById('rc-head'); if (head) head.remove();
+    var note = document.getElementById('rc-secure-note'); if (note) note.remove();
+    var trust = document.getElementById('rc-trust'); if (trust) trust.remove();
+    var reassure = document.getElementById('rc-reassure'); if (reassure) reassure.remove();
+    var cardFieldsEl = document.getElementById('card-fields');
+    if (cardFieldsEl) cardFieldsEl.classList.remove('rc-card-wrap');
+    var btnSubtext = document.querySelector('.btn-subtext');
+    if (btnSubtext) btnSubtext.style.display = '';
+    if (submitBtn) {
+      submitBtn.style.display = '';
+      submitBtn.style.opacity = '';
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+  }
+
   // Method descriptions (Norwegian)
   var METHOD_DESCRIPTIONS = {
     ideal: 'Betal direkte via din egen bank',
@@ -4958,6 +5443,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     klarna_later: 'Få varen først, betal senere',
     klarna_slice: 'Betal i avdrag',
     creditcard: 'Visa, Mastercard, American Express',
+    card: 'Visa, Mastercard — betal trygt uten omdirigering',
     paypal: 'Betal med PayPal-kontoen din',
     eps: 'Betal via din østerrikske bank',
     przelewy24: 'Polsk betalingssystem',
@@ -4991,8 +5477,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
   function getMethodIconHTML(code) {
-    if (code === 'creditcard') {
-      return '<svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/><rect x="2" y="5" width="28" height="4" fill="#2D3748"/><rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/><rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/><rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/><rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/></svg>';
+    if (code === 'creditcard' || code === 'card') {
+      return '<span class="pm-icon" style="width:auto;display:inline-flex;gap:3px;align-items:center;flex-shrink:0;">' +
+        '<img src="/icons/visa.svg" alt="Visa" style="height:20px;width:auto;border-radius:3px;border:1px solid rgba(194,123,160,0.12);" onerror="this.style.display=\'none\'">' +
+        '<img src="/icons/mastercard.svg" alt="Mastercard" style="height:20px;width:auto;border-radius:3px;border:1px solid rgba(194,123,160,0.12);" onerror="this.style.display=\'none\'">' +
+        '</span>';
     }
     // For methods with known SVG icons
     var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay'];
@@ -5046,9 +5535,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       allPaymentOptions = [];
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
+        if (gw.provider === 'revolut') {
+          revolutPublicKey = gw.public_key || null;
+          revolutEnv = gw.environment === 'sandbox' ? 'sandbox' : 'prod';
+        }
         (gw.methods || []).forEach(function(m) {
           var NL_NAMES = {
             'creditcard': 'Kortbetaling',
+            'card': 'Betalingskort',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
@@ -5091,9 +5585,34 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
       });
 
-      // Detect which provider handles credit cards
-      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
-      cardProvider = ccOption ? ccOption.provider : '';
+      // Detect which provider handles credit cards.
+      // slipp-taket: Revolut owns the "Betalingskort" tile with an inline card
+      // field. If a Revolut card method is active, drop any redirect-based card
+      // tile + the standalone Revolut card tile and expose ONE unified
+      // 'creditcard' tile backed by Revolut (no redirect — inline flow).
+      var revolutCardOpt = allPaymentOptions.find(function(m) { return m.provider === 'revolut' && m.code === 'card'; });
+      if (revolutCardOpt) {
+        allPaymentOptions = allPaymentOptions.filter(function(m) {
+          if (m.code === 'creditcard') return false;                        // remove other providers' card tile
+          if (m.provider === 'revolut' && m.code === 'card') return false;   // remove standalone Revolut card
+          return true;
+        });
+        allPaymentOptions.unshift({
+          code: 'creditcard',
+          provider: 'revolut',
+          provider_id: 'pp_revolut_revolut',
+          display_name: revolutCardOpt.display_name || 'Betalingskort',
+          icon: 'creditcard',
+          sort_order: -1,
+          environment: revolutCardOpt.environment || 'prod'
+        });
+        cardProvider = 'revolut';
+        // Inline flow → no redirect. Override the generic card description.
+        METHOD_DESCRIPTIONS.creditcard = 'Visa, Mastercard — betal trygt uten omdirigering';
+      } else {
+        var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+        cardProvider = ccOption ? ccOption.provider : '';
+      }
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
       if (allPaymentOptions.length === 0) {
@@ -5154,6 +5673,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }
       if (cardFieldsEl) cardFieldsEl.style.display = 'none';
       if (submitBtnEl) submitBtnEl.style.display = 'none';
+    } else if (selectedProvider === 'revolut' && (selectedMethod === 'apple_pay' || selectedMethod === 'google_pay')) {
+      // Revolut native wallet CTA replaces the submit button (mountRevolutWalletCTA)
+      // — don't restore the submit button here.
+      if (walletEl) {
+        walletEl.style.display = 'none';
+        walletEl.innerHTML = '';
+      }
     } else {
       if (walletEl) {
         walletEl.style.display = 'none';
@@ -5343,9 +5869,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (!hasCreditCard) {
         cardFieldsEl.style.display = 'none';
       } else if (selectedMethod === 'creditcard') {
-        // Stripe & Airwallex use hosted/drop-in checkout, no inline card fields here
-        if (cardProvider === 'stripe' || cardProvider === 'airwallex') {
+        // Stripe & Airwallex use hosted/drop-in checkout, no inline card fields here.
+        // Revolut reveals its inline card form only AFTER the customer confirms the
+        // order (see revolutCardPay) — just pre-warm the SDK now.
+        if (cardProvider === 'stripe' || cardProvider === 'airwallex' || cardProvider === 'revolut') {
           cardFieldsEl.style.display = 'none';
+          if (cardProvider === 'revolut') prewarmRevolutSdk();
         } else if (cardProvider === 'paypal') {
           // PayPal Advanced Card Payments — inline hosted CardFields
           cardFieldsEl.style.display = 'block';
@@ -5362,6 +5891,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Bind click events on newly rendered methods
     bindPaymentMethodEvents();
+
+    // Hide the Revolut Apple Pay tile where Apple Pay can't run (non-Safari / non-Apple).
+    gateAppleWalletTile();
 
     // Update button text
     updateButtonText();
@@ -5421,10 +5953,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         selectedProvider = method.getAttribute('data-provider');
         selectedProviderId = method.getAttribute('data-provider-id') || ('pp_' + selectedProvider + '_' + selectedProvider);
 
+        // Undo any revealed Revolut card form from a previous selection (accordion teardown)
+        restoreSubmitFromRevolutCard();
+
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider === 'paypal') {
+          if (selectedMethod === 'creditcard' && cardProvider === 'revolut') {
+            // Revolut reveals its inline form only AFTER the customer confirms the
+            // order (see revolutCardPay) — pre-warm the SDK so it mounts instantly.
+            cardFields.style.display = 'none';
+            prewarmRevolutSdk();
+          } else if (selectedMethod === 'creditcard' && cardProvider === 'paypal') {
             // PayPal Advanced Card Payments — inline hosted CardFields
             cardFields.style.display = 'block';
             initPayPalCard();
@@ -5437,6 +5977,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           } else {
             cardFields.style.display = 'none';
           }
+        }
+
+        // Revolut wallets → replace the submit button with the native Apple/Google
+        // Pay button (one tap opens the wallet sheet). Any other method → restore.
+        if (selectedProvider === 'revolut' && (selectedMethod === 'apple_pay' || selectedMethod === 'google_pay')) {
+          mountRevolutWalletCTA(selectedMethod);
+        } else {
+          restoreSubmitFromWallet();
         }
 
         updateButtonText();
@@ -5467,7 +6015,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               selectedProviderId = firstSub.getAttribute('data-provider-id');
               klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
             }
-            // Hide credit card fields
+            // Hide credit card fields + undo any Revolut inline form / wallet CTA
+            restoreSubmitFromRevolutCard();
+            restoreSubmitFromWallet();
             var cardFields = document.getElementById('card-fields');
             if (cardFields) cardFields.style.display = 'none';
             updateButtonText();
@@ -5493,6 +6043,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             selectedProviderId = firstSub.getAttribute('data-provider-id');
             klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
           }
+          restoreSubmitFromRevolutCard();
+          restoreSubmitFromWallet();
           var cardFields = document.getElementById('card-fields');
           if (cardFields) cardFields.style.display = 'none';
           updateButtonText();
@@ -5517,6 +6069,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         selectedProviderId = sub.getAttribute('data-provider-id');
         klarnaSelectedCategory = sub.getAttribute('data-klarna-category');
 
+        restoreSubmitFromRevolutCard();
+        restoreSubmitFromWallet();
         var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
         updateButtonText();
@@ -5534,8 +6088,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var providerName = cardProvider === 'stripe' ? 'Stripe'
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
+        : cardProvider === 'revolut' ? 'Revolut'
         : 'Mollie';
-      subtext.textContent = 'Kortopplysningene dine behandles sikkert via ' + providerName + '.';
+      // Revolut = inline card form on this page — no redirect ever happens.
+      subtext.textContent = cardProvider === 'revolut'
+        ? 'Du betaler trygt her på siden — ingen videresending.'
+        : 'Kortopplysningene dine behandles sikkert via ' + providerName + '.';
+    } else if (selectedProvider === 'revolut') {
+      // Revolut Pay / wallets render inline (button or secure pop-up) — no redirect.
+      subtext.textContent = 'Du betaler trygt via Revolut — ingen videresending.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
       subtext.textContent = 'Du blir videresendt til Klarna for å fullføre betalingen.';
     } else {
@@ -5549,10 +6110,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var trustProvider = cardProvider === 'stripe' ? 'Stripe'
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
+          : cardProvider === 'revolut' ? 'Revolut'
           : 'Mollie';
         trustText.textContent = 'Sikret via ' + trustProvider;
       } else {
-        trustText.textContent = 'Sikret via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
+        trustText.textContent = 'Sikret via ' + (selectedProvider === 'paypal' ? 'PayPal'
+          : selectedProvider === 'stripe' ? 'Stripe'
+          : selectedProvider === 'revolut' ? 'Revolut'
+          : 'Mollie');
       }
     }
   }
@@ -7204,6 +7769,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
 
+    // ── REVOLUT INLINE CARD ── Build a dedicated cart + Revolut order, attach the
+    // shipping address, then reveal the inline card form under the tile (its own
+    // Pay button; onSuccess completes the cart). Skips the generic flow below —
+    // the customer is NEVER redirected.
+    if (cardProvider === 'revolut' && selectedMethod === 'creditcard') {
+      revolutCardPay(customerData);
+      return;
+    }
+
     // Step 1: Create or reuse cart (promo cart → background cart → new)
     var reuseCartId = promoCartId || backgroundCartId;
     var cartStep;
@@ -7841,6 +8415,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           });
         }
 
+        // ─── REVOLUT INLINE — embedded card field / Revolut Pay, NO redirect ───
+        // Backend returns a token (+ public key + method); the Revolut Web SDK
+        // renders the chosen method inline against the token. On success we
+        // complete the same Medusa cart. We must run this BEFORE the generic
+        // redirect below (Revolut also returns a checkoutUrl we deliberately skip).
+        if (selectedProviderId && selectedProviderId.indexOf('revolut') !== -1 && providerData.revolutPublicToken) {
+          return handleRevolutInline(result.cartId, providerData);
+        }
+
+        // Revolut without a token → session broken. NEVER fall through to the
+        // generic redirect for Revolut (card and revolut_pay are inline-only).
+        if (selectedProviderId && selectedProviderId.indexOf('revolut') !== -1) {
+          throw new Error('Revolut-betalingsøkten ble ikke opprettet riktig. Prøv igjen.');
+        }
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
@@ -7858,6 +8447,182 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       submitBtn.disabled = false;
     });
   });
+
+  /* ─── REVOLUT INLINE PAYMENT (Web SDK, embedded — no redirect) ───────────────
+   * Renders the selected Revolut method inline against the order token returned
+   * by the backend (initiatePayment). On success, completes the SAME Medusa cart
+   * (authorizePayment sees the Revolut order COMPLETED → order is created), then
+   * goes to thank-you / upsell — exactly like the other providers.
+   *   card              → embedded PCI card field + Pay button
+   *   revolut_pay        → Revolut Pay button
+   *   apple/google/pbb/sepa → Revolut secure pop-up (on-page, not a redirect)
+   * ──────────────────────────────────────────────────────────────────────────*/
+  function handleRevolutInline(cartId, providerData) {
+    var token    = providerData.revolutPublicToken;
+    var pubKey   = providerData.revolutPublicKey || '';
+    var mode     = providerData.environment === 'prod' ? 'prod' : 'sandbox';
+    var method   = providerData.method || 'card';
+    var amtMajor = Number(providerData.amount || 0);
+    var amtMinor = Math.round(amtMajor * 100);
+    var currency = String(providerData.currency || providerData.currency_code || PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase();
+    var amtLabel = formatPrice(amtMajor);
+    var custEmail = (document.getElementById('email') || {}).value || '';
+    var custName  = (((document.getElementById('first_name') || {}).value || '') + ' ' +
+                     ((document.getElementById('last_name') || {}).value || '')).trim() || 'Kunde';
+
+    var ov = document.createElement('div');
+    ov.id = 'revolut-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(45,27,61,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:DM Sans,system-ui,sans-serif;';
+    ov.innerHTML =
+      '<div style="background:#fff;max-width:440px;width:100%;border-radius:14px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);">'
+      + '<div style="font-size:16px;font-weight:700;color:#2D1B3D;">Betal ' + amtLabel + '</div>'
+      + '<div style="font-size:12.5px;color:#9B7AAD;margin:2px 0 16px;">🔒 Sikret via Revolut</div>'
+      + '<div id="rev-mount"></div>'
+      + '<div id="rev-status" style="font-size:13px;margin-top:10px;min-height:16px;"></div>'
+      + '<button id="rev-cancel" type="button" style="margin-top:12px;width:100%;background:none;border:none;color:#9B7AAD;font-size:13px;cursor:pointer;">Avbryt</button>'
+      + '</div>';
+    document.body.appendChild(ov);
+    var mount = ov.querySelector('#rev-mount');
+    var statusEl = ov.querySelector('#rev-status');
+    function setStatus(m, c) { statusEl.textContent = m || ''; statusEl.style.color = c === 'err' ? '#C0392B' : (c === 'ok' ? '#27AE60' : '#5A3D6B'); }
+    function closeOverlay() { if (ov.parentNode) ov.parentNode.removeChild(ov); submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
+    ov.querySelector('#rev-cancel').onclick = closeOverlay;
+
+    function completeAndGo() {
+      setStatus('Fullfører bestillingen…', 'ok');
+      return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+        .then(function (res) {
+          var order = window.__extractOrderOrThrow(res);
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          if (PROJECT_CONFIG.upsellEnabled === false || orderBumpActive) {
+            if (orderBumpActive) localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        })
+        .catch(function () {
+          setStatus('Betalingen gikk gjennom, men bestillingen kunne ikke fullføres — kontakt oss på ' + (PROJECT_CONFIG.supportEmail || 'kundeservice') + '.', 'err');
+        });
+    }
+
+    // A function that hands the Revolut Web SDK our already-created order token.
+    function createOrder() { return Promise.resolve({ publicId: token }); }
+
+    // Last-resort on-page pop-up (secure Revolut window, NOT a full-page redirect).
+    // Used for methods with no dedicated inline widget (SEPA) or as graceful
+    // fallback when a wallet is unavailable in the current browser.
+    function payWithPopupFallback(RevolutCheckout) {
+      return RevolutCheckout(token, mode).then(function (inst) {
+        inst.payWithPopup({
+          email: custEmail, name: custName,
+          onSuccess: function () { completeAndGo(); },
+          onError: function (e) { setStatus((e && e.message) || 'Betalingen mislyktes.', 'err'); },
+          onCancel: function () { setStatus('Betalingen ble avbrutt.', ''); }
+        });
+      });
+    }
+
+    import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
+      var RevolutCheckout = m.default;
+
+      // ── CARD → embedded PCI card field + Pay button (legacy instance) ──
+      if (method === 'card') {
+        return RevolutCheckout(token, mode).then(function (inst) {
+          var cardBox = document.createElement('div');
+          cardBox.style.cssText = 'border:1.5px solid #EDD9E5;border-radius:8px;padding:14px 12px;min-height:46px;background:#fff;';
+          mount.appendChild(cardBox);
+          var payBtn = document.createElement('button');
+          payBtn.type = 'button'; payBtn.className = 'checkout-btn';
+          payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Betal ' + amtLabel + '</span>';
+          payBtn.style.marginTop = '14px';
+          mount.appendChild(payBtn);
+          var card = inst.createCardField({
+            target: cardBox,
+            locale: REVOLUT_CARD_LOCALE,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (msg) { setStatus('Feil: ' + ((msg && msg.message) || msg), 'err'); payBtn.classList.remove('loading'); payBtn.disabled = false; },
+            onValidation: function (errs) { setStatus(errs && errs.length ? (errs[0].message || '') : '', errs && errs.length ? 'err' : ''); }
+          });
+          payBtn.onclick = function () { setStatus('Behandler betaling…'); payBtn.classList.add('loading'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
+        });
+      }
+
+      // ── All other methods use the payments() module (Revolut Pay v2) ──
+      return RevolutCheckout.payments({ locale: 'auto', publicToken: pubKey, mode: mode }).then(function (rp) {
+
+        // ── REVOLUT PAY → inline button. Desktop: secure popup. Mobile: deep-links
+        // straight into the Revolut app, then returns via appReturnUrl. On return the
+        // existing ?payment_return handler polls /complete (covers async webhook auth). ──
+        if (method === 'revolut_pay') {
+          var el = document.createElement('div'); mount.appendChild(el);
+          var revBase = window.location.href.split('?')[0];
+          var revSuccess = revBase + '?payment_return=1&cart_id=' + encodeURIComponent(cartId);
+          try { localStorage.setItem('medusa_cart_id', cartId); } catch (e) {}
+          rp.revolutPay.mount(el, {
+            currency: currency,
+            totalAmount: amtMinor,
+            createOrder: createOrder,
+            // Mobile → open Revolut app, return here. success completes the cart;
+            // failure/cancel land back on the checkout so the customer can retry.
+            mobileRedirectUrls: { success: revSuccess, failure: revBase, cancel: revBase },
+            appReturnUrl: revSuccess
+          });
+          // Desktop popup path still resolves via events (mobile navigates away instead).
+          rp.revolutPay.on('payment', function (ev) {
+            if (ev.type === 'success') completeAndGo();
+            else if (ev.type === 'error') setStatus('Betalingen mislyktes: ' + ((ev.error && ev.error.message) || ''), 'err');
+            else if (ev.type === 'cancel') setStatus('Betalingen ble avbrutt.', '');
+          });
+          return;
+        }
+
+        // ── APPLE PAY / GOOGLE PAY → payment request button (gated by canMakePayment) ──
+        if (method === 'apple_pay' || method === 'google_pay') {
+          var walletLabel = method === 'apple_pay' ? 'Apple Pay' : 'Google Pay';
+          var prefer = method === 'apple_pay' ? 'applePay' : 'googlePay';
+          var el = document.createElement('div'); mount.appendChild(el);
+          var pr = rp.paymentRequest(el, {
+            amount: amtMinor, currency: currency,
+            preferredPaymentMethod: prefer,
+            createOrder: createOrder,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (e) { setStatus('Betalingen mislyktes: ' + ((e && e.message) || ''), 'err'); },
+            onCancel: function () { setStatus('Betalingen ble avbrutt.', ''); }
+          });
+          return pr.canMakePayment().then(function (avail) {
+            if (avail) { setStatus(''); return pr.render(); }
+            // Wallet not available here (browser/device unsupported or domain not
+            // registered in Revolut) → graceful on-page pop-up so the sale isn't lost.
+            setStatus(walletLabel + ' er ikke tilgjengelig i denne nettleseren — åpner et alternativ…', '');
+            return payWithPopupFallback(RevolutCheckout);
+          });
+        }
+
+        // ── PAY BY BANK → inline open-banking widget ──
+        if (method === 'pay_by_bank') {
+          var pbb = rp.payByBank({
+            createOrder: createOrder,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (p) { setStatus('Betalingen mislyktes: ' + ((p && p.error && p.error.message) || ''), 'err'); },
+            onCancel: function () { setStatus('Betalingen ble avbrutt.', ''); }
+          });
+          setStatus('Åpner bankbetaling…');
+          return pbb.show();
+        }
+
+        // ── SEPA (+ any unknown) → on-page pop-up (no dedicated inline widget) ──
+        return payWithPopupFallback(RevolutCheckout);
+      });
+    }).catch(function (e) {
+      setStatus('Kunne ikke laste Revolut: ' + (e && e.message || e), 'err');
+    });
+
+    return Promise.resolve();
+  }
 
   /* ─── COUNTRY SELECTION — region + payment methods ─── */
   var countrySelect = document.getElementById('country');
