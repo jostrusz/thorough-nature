@@ -2522,12 +2522,12 @@ body {
       </div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
-        <span class="msb-line-label">Zwischensumme (exkl. MwSt.)</span>
-        <span class="msb-line-val" id="msb-subtotal">29&nbsp;&euro;</span>
+        <span class="msb-line-label">Zwischensumme</span>
+        <span class="msb-line-val" id="msb-subtotal">35&nbsp;&euro;</span>
       </div>
       <!-- MwSt. -->
       <div class="msb-line" id="msb-tax-line">
-        <span class="msb-line-label" id="msb-tax-label">MwSt. (7%)</span>
+        <span class="msb-line-label" id="msb-tax-label">davon MwSt. (7%)</span>
         <span class="msb-line-val" id="msb-tax-val">2&nbsp;&euro;</span>
       </div>
       <!-- Versand -->
@@ -2619,7 +2619,7 @@ body {
                   <div class="order-bump-meta">
                     <span>&#128214; 350 Seiten</span>
                     <span>&#128197; 30-Tage-Plan</span>
-                    <span>&#11088; 4.9/5 Sterne</span>
+                    <span>&#11088; 4,9/5 Sterne</span>
                   </div>
                   <div class="order-bump-prices">
                     <span class="order-bump-old-price">35 &euro;</span>
@@ -2893,7 +2893,7 @@ body {
             <div style="flex:1;">
               <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Kostenloser Versand</span>
               <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">0 &euro;</span>
-              <div style="color:#666;font-size:12px;margin-top:2px;">Versand innerhalb von 24–48 Stunden via GLS</div>
+              <div style="color:#666;font-size:12px;margin-top:2px;">Lieferung innerhalb von 3–4 Werktagen via GLS</div>
             </div>
             <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
           </div>
@@ -3033,11 +3033,11 @@ body {
       </div>
 
       <div class="summary-line" id="summary-subtotal">
-        <span>Zwischensumme (exkl. MwSt.)</span>
-        <span id="subtotal-value">29&nbsp;&euro;</span>
+        <span>Zwischensumme</span>
+        <span id="subtotal-value">35&nbsp;&euro;</span>
       </div>
       <div class="summary-line" id="summary-tax">
-        <span id="tax-label">MwSt. (7%)</span>
+        <span id="tax-label">davon MwSt. (7%)</span>
         <span id="tax-value">2&nbsp;&euro;</span>
       </div>
       <div class="summary-line shipping" id="summary-shipping">
@@ -3070,7 +3070,7 @@ body {
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-          <span>Lieferung per <strong>GLS</strong> innerhalb von <strong>3&ndash;5 Werktagen</strong></span>
+          <span>Lieferung per <strong>GLS</strong> innerhalb von <strong>3&ndash;4 Werktagen</strong></span>
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
@@ -3091,7 +3091,7 @@ body {
           <div class="summary-review-content">
             <div class="summary-review-stars">★★★★★</div>
             <div class="summary-review-text">"Innerhalb einer Woche f&uuml;hlte ich mich bereits leichter. Dieses Buch ist ein Muss."</div>
-            <div class="summary-review-author">Sabine L., M&uuml;nchen</div>
+            <div class="summary-review-author">Claudia M., Leipzig</div>
           </div>
         </div>
         <div class="summary-review">
@@ -3328,16 +3328,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'DE';
     var rate = TAX_RATES[countryCode] || TAX_RATES.DE;
     var total = getCurrentTotal();
-    var subtotal = total / (1 + rate / 100);
-    var tax = total - subtotal;
+    // Bruttopreise (B2C-Standard in DE): Zwischensumme inkl. MwSt.,
+    // Steuer nur informativ als "davon MwSt." ausweisen
+    var tax = total - total / (1 + rate / 100);
 
     // ─── DESKTOP SUMMARY ───
     var subtotalVal = document.getElementById('subtotal-value');
-    if (subtotalVal) subtotalVal.textContent = formatPrice(subtotal);
+    if (subtotalVal) subtotalVal.textContent = formatPrice(total);
 
     var taxLabel = document.getElementById('tax-label');
     var taxValue = document.getElementById('tax-value');
-    if (taxLabel) taxLabel.textContent = 'MwSt. (' + rate + '%)';
+    if (taxLabel) taxLabel.textContent = 'davon MwSt. (' + rate + '%)';
     if (taxValue) taxValue.textContent = formatPrice(tax);
 
     var totalEl = document.getElementById('desktop-total-price');
@@ -3397,9 +3398,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Zwischensumme, MwSt., Gesamt im aufgeklappten Panel
     var msbSubtotal = document.getElementById('msb-subtotal');
-    if (msbSubtotal) msbSubtotal.textContent = formatPrice(subtotal);
+    if (msbSubtotal) msbSubtotal.textContent = formatPrice(total);
     var msbTaxLabel = document.getElementById('msb-tax-label');
-    if (msbTaxLabel) msbTaxLabel.textContent = 'MwSt. (' + rate + '%)';
+    if (msbTaxLabel) msbTaxLabel.textContent = 'davon MwSt. (' + rate + '%)';
     var msbTaxVal = document.getElementById('msb-tax-val');
     if (msbTaxVal) msbTaxVal.textContent = formatPrice(tax);
     var msbTotal = document.getElementById('msb-total');
@@ -3582,17 +3583,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbPriceEl = document.getElementById('msb-price');
     if (msbPriceEl) msbPriceEl.textContent = formatPrice(total);
 
-    // Zwischensumme (exkl. MwSt.)
+    // Zwischensumme — brutto (inkl. MwSt.), B2C-Standard in DE
     var subtotalEl = document.getElementById('summary-subtotal');
     if (subtotalEl) {
-      subtotalEl.innerHTML = '<span>Zwischensumme (exkl. MwSt.)</span><span>' + formatPrice(subtotal) + '</span>';
+      subtotalEl.innerHTML = '<span>Zwischensumme</span><span>' + formatPrice(total - shippingTotal) + '</span>';
     }
 
     // MwSt.-Zeile
     var taxEl = document.getElementById('summary-tax');
     if (taxEl && taxTotal > 0) {
       taxEl.style.display = '';
-      taxEl.innerHTML = '<span>MwSt. (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
+      taxEl.innerHTML = '<span>davon MwSt. (' + taxRate + '%)</span><span>' + formatPrice(taxTotal) + '</span>';
     }
 
     // Shipping
@@ -4315,7 +4316,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // Show error in preloader (same UX as regular flow)
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Bei der Verarbeitung Ihrer Zahlung ist ein Fehler aufgetreten.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Bitte versuche es erneut oder kontaktiere uns.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Erneut versuchen</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Bei der Verarbeitung deiner Zahlung ist ein Fehler aufgetreten.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Bitte versuche es erneut oder kontaktiere uns.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Erneut versuchen</a></div>';
       } else {
         hideExpressPreloader();
         alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
@@ -4597,10 +4598,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               console.error('[Express PayPal] Completion error:', err);
               var preloader = document.querySelector('.payment-preloader');
               if (preloader) {
-                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Bei der Verarbeitung Ihrer PayPal-Zahlung ist ein Fehler aufgetreten.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Bitte versuche es erneut oder verwende das Formular unten.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Erneut versuchen</a></div>';
+                preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Bei der Verarbeitung deiner PayPal-Zahlung ist ein Fehler aufgetreten.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Bitte versuche es erneut oder verwende das Formular unten.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Erneut versuchen</a></div>';
               } else {
                 hideExpressPreloader();
-                alert('Bei der Abwicklung Ihrer PayPal-Zahlung ist ein Fehler aufgetreten.');
+                alert('Bei der Abwicklung deiner PayPal-Zahlung ist ein Fehler aufgetreten.');
               }
             });
         },
@@ -6783,7 +6784,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             abandoned_checkout: true,
             abandoned_at: new Date().toISOString(),
             checkout_url: window.location.href.split('?')[0],
-            project_id: PROJECT_CONFIG.projectId || 'slapptaget'
+            project_id: PROJECT_CONFIG.projectId || 'lass-los'
           }
         })
       });
@@ -7108,7 +7109,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       console.error('[Payment Return] Cart completion failed:', err);
       var preloader = document.querySelector('.payment-preloader');
       if (preloader) {
-        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Bei der Verarbeitung Ihrer Zahlung ist ein Fehler aufgetreten.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Bitte versuche es erneut oder kontaktiere uns.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Erneut versuchen</a></div>';
+        preloader.innerHTML = '<div style="text-align:center;padding:20px;"><p style="font-size:18px;color:#C0392B;font-family:DM Sans,sans-serif;">Bei der Verarbeitung deiner Zahlung ist ein Fehler aufgetreten.</p><p style="font-size:14px;color:#666;margin-top:10px;font-family:DM Sans,sans-serif;">' + (err.message || 'Bitte versuche es erneut oder kontaktiere uns.') + '</p><a href="' + window.location.pathname + '" style="display:inline-block;margin-top:20px;padding:12px 24px;background:#333;color:#fff;border-radius:8px;text-decoration:none;font-family:DM Sans,sans-serif;">Erneut versuchen</a></div>';
       }
     });
 
