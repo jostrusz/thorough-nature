@@ -2483,6 +2483,19 @@ body {
         .ob3-sub { font-size:12.5px; color:var(--muted); }
         .ob3-list { display:flex; flex-direction:column; gap:12px; }
         .ob3-list .order-bump { margin: 0; }
+        /* Responsive detail: tablet+ = pilíře ve 2 sloupcích, mobil = vzdušnější čtení */
+        @media (min-width: 640px) {
+          .ob3-list .ob-pillar-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+          .ob3-list .ob-pillar { margin:0; }
+        }
+        @media (max-width: 480px) {
+          .ob3-list .order-bump-detail-inner { padding-left:12px; padding-right:12px; }
+          .ob3-list .order-bump-description p { font-size:13.5px; line-height:1.65; }
+          .ob3-list .order-bump-detail-top { gap:12px; }
+          .ob3-list .order-bump-img { width:72px; height:100px; }
+          .ob3-list .order-bump-meta { gap:6px; }
+          .ob3-list .ob-combo-box { padding:12px 14px; }
+        }
         .ob3-card { cursor:pointer; background:#fff; border:2px dashed rgba(194,123,160,0.45); border-radius:14px; padding:14px; display:flex; gap:12px; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; -webkit-tap-highlight-color: transparent; }
         .ob3-card:hover { border-color: var(--cta); }
         .ob3-card.checked { border:2px solid var(--cta); background: rgba(194,123,160,0.04); box-shadow: 0 0 0 3px rgba(194,123,160,0.14); }
@@ -3334,69 +3347,69 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var BUMP_DETAILS = {
     pust: {
       meta: ['&#128214; 290 stran', '&#128221; Pracovn&iacute; se&scaron;it uvnit&#345;', '&#11088; 9,3/10 spokojenost'],
-      intro1: '<strong>Hlava, kter&aacute; nikdy nevypne?</strong> Bestseller Jorise de Vries u&#269;&iacute;, jak zastavit p&#345;&iacute;val my&scaron;lenek, zklidnit emoce a naj&iacute;t vnit&#345;n&iacute; klid. V&scaron;e postaven&eacute; na <u>neurov&#283;d&#283; a psychologii</u> &mdash; &#382;&aacute;dn&eacute; v&aacute;gn&iacute; rady ani spiritu&aacute;ln&iacute; sliby.',
-      intro2: '290 stran + kompletn&iacute; <strong>pracovn&iacute; se&scaron;it</strong> s cvi&#269;en&iacute;mi, kter&aacute; fungujou, i kdy&#382; jste &bdquo;u&#382; zkusili v&scaron;echno&ldquo;. <em>Nejobl&iacute;ben&#283;j&scaron;&iacute; &#269;esk&aacute; kniha o klidu v hlav&#283;.</em>',
-      pillarsTitle: 'Tato kniha v&aacute;m pom&#367;&#382;e s',
+      intro1: '<strong>Zn&aacute;te to.</strong> Ve&#269;er le&#382;&iacute;te v posteli, t&#283;lo vy&#269;erpan&eacute; &mdash; ale hlava jede d&aacute;l. P&#345;ehr&aacute;v&aacute;te si, co jste m&#283;li &#345;&iacute;ct jinak. Co kdyby. A r&aacute;no se bud&iacute;te unaven&#283;j&scaron;&iacute;, ne&#382; jste us&iacute;nali.',
+      intro2: 'P&#345;esn&#283; pro tyhle chv&iacute;le napsal Joris de Vries knihu <strong>Pus&#357; to, co t&#283; ni&#269;&iacute;</strong>. &#381;&aacute;dn&eacute; kli&scaron;&eacute;, &#382;&aacute;dn&eacute; &bdquo;mysli pozitivn&#283;&ldquo;. Konkr&eacute;tn&iacute; postupy podlo&#382;en&eacute; neurov&#283;dou, kter&eacute; zastav&iacute; p&#345;em&iacute;t&aacute;n&iacute; &mdash; <em>napsan&eacute; srozumiteln&#283; a lidsky</em>.',
+      pillarsTitle: 'S &#269;&iacute;m v&aacute;m pom&#367;&#382;e',
       pillars: [
-        ['&#127744;', 'P&#344;EM&Iacute;T&Aacute;N&Iacute;', 'Zastavte nekone&#269;nou smy&#269;ku my&scaron;lenek, kter&aacute; v&aacute;s vy&#269;erp&aacute;v&aacute;'],
-        ['&#128564;', 'SP&Aacute;NEK', 'Us&iacute;nejte bez hlavy pln&eacute; sc&eacute;n&aacute;&#345;&#367; &bdquo;co kdyby&ldquo;'],
-        ['&#128162;', 'VZTEK &amp; K&#344;IVDY', 'Pus&#357;te, co v&aacute;s dr&#382;&iacute; &mdash; bez povinnosti &bdquo;omluvit&ldquo; druh&eacute;'],
-        ['&#128532;', 'V&Yacute;&#268;ITKY', 'P&#345;esta&#328;te se trestat za minulost'],
-        ['&#128330;', 'VNIT&#344;N&Iacute; KLID', 'Techniky, kter&eacute; zaberou hned &mdash; ne za rok terapie']
+        ['&#127744;', 'NEKONE&#268;N&Eacute; P&#344;EM&Iacute;T&Aacute;N&Iacute;', 'Nau&#269;&iacute;te se smy&#269;ku zastavit &mdash; ne s n&iacute; do nekone&#269;na bojovat'],
+        ['&#128564;', 'HLAVA NEVYP&Iacute;N&Aacute;', 'Usnete bez p&#345;ehr&aacute;v&aacute;n&iacute; sc&eacute;n&aacute;&#345;&#367; &bdquo;co kdyby&ldquo;'],
+        ['&#128148;', 'STAR&Eacute; R&Aacute;NY', 'Pust&iacute;te k&#345;ivdu, ani&#382; byste ji museli omlouvat'],
+        ['&#128532;', 'V&Yacute;&#268;ITKY', 'P&#345;estanete se trestat za v&#283;ci, kter&eacute; u&#382; nezm&#283;n&iacute;te'],
+        ['&#128221;', 'PRACOVN&Iacute; SE&Scaron;IT', 'Cvi&#269;en&iacute; na dne&scaron;n&iacute; ve&#269;er &mdash; ne teorie &bdquo;na n&#283;kdy&ldquo;']
       ],
       results: [
-        'Ti&scaron;t&#283;nou knihu za zv&yacute;hodn&#283;n&yacute;ch <strong>599 K&#269;</strong> (b&#283;&#382;n&#283; 749 K&#269;)',
-        'Pracovn&iacute; se&scaron;it s praktick&yacute;mi cvi&#269;en&iacute;mi',
-        'Dopravu zdarma &mdash; p&#345;ibal&iacute;me ke Ko&#269;i&#269;&iacute; bibli',
-        '30denn&iacute; z&aacute;ruku vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek'
+        'Ti&scaron;t&#283;n&aacute; kniha za <strong>599 K&#269;</strong> m&iacute;sto 749 K&#269; &mdash; jen tady p&#345;i objedn&aacute;vce',
+        'Kompletn&iacute; pracovn&iacute; se&scaron;it s cvi&#269;en&iacute;mi',
+        'P&#345;ibal&iacute;me k va&scaron;&iacute; Ko&#269;i&#269;&iacute; bibli &mdash; &#382;&aacute;dn&eacute; dal&scaron;&iacute; po&scaron;tovn&eacute;',
+        'Nepom&#367;&#382;e? Do 30 dn&iacute; vr&aacute;t&iacute;me pen&iacute;ze. Bez &#345;e&#269;&iacute;.'
       ],
       comboIcon: '&#129504;',
-      combo: '<strong>Ko&#269;ka uklidn&iacute; dom&aacute;cnost &mdash; tahle kniha uklidn&iacute; hlavu.</strong> Nej&#269;ast&#283;j&scaron;&iacute; kombinace na&scaron;ich z&aacute;kazn&iacute;k&#367;.',
-      review: '&bdquo;Poprv&eacute; po letech jsem p&#345;estala v noci p&#345;em&iacute;tat. Ta kniha mi dala klid, kter&yacute; jsem si neum&#283;la p&#345;edstavit.&ldquo;',
+      combo: '<strong>Ko&#269;ka v&aacute;m uklidn&iacute; domov. Tahle kniha uklidn&iacute; to, co nos&iacute;te v hlav&#283;.</strong> Na&scaron;i z&aacute;kazn&iacute;ci je nej&#269;ast&#283;ji kupuj&iacute; spolu.',
+      review: '&bdquo;Poprv&eacute; po letech jsem p&#345;estala v noci p&#345;em&iacute;tat. &#381;&aacute;dn&eacute; z&aacute;zraky p&#345;es noc &mdash; ale ten klid stoj&iacute; za ka&#382;dou korunu.&ldquo;',
       reviewer: '&mdash; Lenka C., Brno'
     },
     zivot: {
-      meta: ['&#128214; 340 stran', '&#128197; 30denn&iacute; program', '&#11088; 4,9/5 hodnocen&iacute;'],
-      intro1: '<strong>Po&#345;&aacute;d se star&aacute;te o v&scaron;echny okolo &mdash; a na v&aacute;s nezb&yacute;v&aacute;?</strong> Anna de Vries spojila j&aacute;dro 10 sv&#283;tov&yacute;ch bestseller&#367; do metody <u>LIFE RESET&trade;</u>: 30 minut denn&#283;, 30 dn&iacute;, 5 oblast&iacute; &#382;ivota.',
-      intro2: '&#381;&aacute;dn&eacute; v&aacute;gn&iacute; afirmace. Konkr&eacute;tn&iacute; denn&iacute; kroky pro <strong>domov, hranice, hlavu, n&aacute;vyky a energii</strong> &mdash; navr&#382;en&eacute; pro zanepr&aacute;zdn&#283;n&eacute; &#382;eny, kter&eacute; nemaj&iacute; &#269;as na dal&scaron;&iacute; &uacute;koly. <em>Prost&#283; to funguje.</em>',
-      pillarsTitle: 'LIFE RESET&trade; &mdash; 5 pil&iacute;&#345;&#367;',
+      meta: ['&#128214; 340 stran', '&#128197; 30 minut denn&#283;, 30 dn&iacute;', '&#11088; 4,9/5 hodnocen&iacute;'],
+      intro1: '<strong>Ka&#382;d&yacute; den stejn&yacute; koloto&#269;:</strong> ukl&iacute;z&iacute;te, va&#345;&iacute;te, za&#345;izujete, star&aacute;te se o v&scaron;echny okolo. A na konci dne? Na v&aacute;s nezbyde nic. T&#283;lo bol&iacute;, hlava nevyp&iacute;n&aacute;.',
+      intro2: 'Anna de Vries si t&iacute;m pro&scaron;la &mdash; skoro vyho&#345;ela. Pak p&#345;e&#269;etla 10 nejprod&aacute;van&#283;j&scaron;&iacute;ch knih o osobn&iacute;m rozvoji a zjistila, &#382;e <em>v&scaron;echny &#345;&iacute;kaj&iacute; tot&eacute;&#382;, jen jin&yacute;mi slovy</em>. Spojila je do metody <strong>LIFE RESET&trade;</strong>: 30 minut denn&#283;, 30 dn&iacute;, 5 oblast&iacute; &#382;ivota. Bez obracen&iacute; v&scaron;eho vzh&#367;ru nohama.',
+      pillarsTitle: 'Co se za 30 dn&iacute; zm&#283;n&iacute;',
       pillars: [
-        ['&#127968;', 'PROSTOR', 'Ukli&#271;te chaos, kter&yacute; v&aacute;m denn&#283; krade energii'],
-        ['&#128679;', 'HRANICE', '&#344;&iacute;kejte &bdquo;ne&ldquo; bez v&yacute;&#269;itek &mdash; poprv&eacute; po letech'],
-        ['&#127769;', 'HLAVA', 'Stop my&scaron;lenkov&eacute; spir&aacute;le ve 3 r&aacute;no'],
-        ['&#128260;', 'N&Aacute;VYKY', 'Obnovte ritu&aacute;ly, po kter&yacute;ch zbyde energie i na v&aacute;s'],
-        ['&#9889;', 'ENERGIE', '&#381;ijte pro sebe &mdash; ne jen pro o&#269;ek&aacute;v&aacute;n&iacute; ostatn&iacute;ch']
+        ['&#127968;', 'PROSTOR', 'Otev&#345;ete n&aacute;v&scaron;t&#283;v&#283; dve&#345;e a nebudete se styd&#283;t, jak to doma vypad&aacute;'],
+        ['&#128679;', 'HRANICE', '&#344;eknete &bdquo;ne&ldquo; bez v&yacute;&#269;itek, co v&aacute;s jindy &#382;erou cel&eacute; dny'],
+        ['&#127769;', 'HLAVA', 'Konec my&scaron;lenkov&eacute; spir&aacute;ly ve t&#345;i r&aacute;no'],
+        ['&#128260;', 'N&Aacute;VYKY', 'Mal&eacute; ritu&aacute;ly, po kter&yacute;ch zbyde energie i na v&aacute;s'],
+        ['&#9889;', 'VY SAMA', 'Kone&#269;n&#283; budete v&#283;d&#283;t, kdo jste, kdy&#382; od v&aacute;s zrovna nikdo nic nechce']
       ],
       results: [
-        'Ti&scaron;t&#283;nou knihu za zv&yacute;hodn&#283;n&yacute;ch <strong>599 K&#269;</strong> (b&#283;&#382;n&#283; 749 K&#269;)',
-        '30denn&iacute; pl&aacute;n krok za krokem &mdash; sta&#269;&iacute; 30 minut denn&#283;',
-        'Dopravu zdarma ve stejn&eacute;m bal&iacute;ku',
-        '30denn&iacute; z&aacute;ruku vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek'
+        '340 stran + kompletn&iacute; metoda za <strong>599 K&#269;</strong> m&iacute;sto 749 K&#269;',
+        '30denn&iacute; pl&aacute;n krok za krokem &mdash; sta&#269;&iacute; p&#367;lhodina denn&#283;',
+        'Ve stejn&eacute;m bal&iacute;ku s Ko&#269;i&#269;&iacute; bibl&iacute; &mdash; po&scaron;tovn&eacute; neplat&iacute;te',
+        '30 dn&iacute; na vr&aacute;cen&iacute;. Bez ot&aacute;zek, bez komplikac&iacute;.'
       ],
       comboIcon: '&#127793;',
-      combo: '<strong>Spokojen&aacute; ko&#269;ka doma &mdash; a nov&yacute; za&#269;&aacute;tek pro v&aacute;s.</strong> Nejlep&scaron;&iacute; d&aacute;rek, kter&yacute; si m&#367;&#382;ete d&aacute;t k objedn&aacute;vce.',
-      review: '&bdquo;Pro&#269; mi tohle nikdo ne&#345;ekl d&#345;&iacute;v? Po dvou t&yacute;dnech se m&#283; man&#382;el ptal, co se se mnou stalo.&ldquo;',
+      combo: '<strong>Spokojen&aacute; ko&#269;ka je za&#269;&aacute;tek.</strong> Tohle je zbytek &mdash; &#382;ivot, ze kter&eacute;ho nebudete pot&#345;ebovat ut&iacute;kat.',
+      review: '&bdquo;Man&#382;el se m&#283; po dvou t&yacute;dnech ptal, co se se mnou stalo. Nic. Jen jsem kone&#269;n&#283; p&#345;estala v&scaron;echno tahat sama.&ldquo;',
       reviewer: '&mdash; Martina K., Praha'
     },
     psi: {
-      meta: ['&#128214; Ti&scaron;t&#283;n&aacute; kniha', '&#128054; Ps&iacute; behaviorista', '&#11088; 9,2/10 spokojenost'],
-      intro1: '<strong>M&aacute;te doma i psa?</strong> Kone&#269;n&#283; pochopte, pro&#269; v&aacute;&scaron; pes d&#283;l&aacute; to, co d&#283;l&aacute; &mdash; a vybudujte si s n&iacute;m klidn&yacute;, poslu&scaron;n&yacute; a harmonick&yacute; vztah. Nau&#269;te se <u>mluvit jeho &#345;e&#269;&iacute;</u>.',
-      intro2: 'Pokud v&aacute;s tr&aacute;p&iacute; tahan&iacute; na vod&iacute;tku, &scaron;t&#283;k&aacute;n&iacute;, neposlu&scaron;nost nebo agresivita &mdash; tato kniha v&aacute;m d&aacute; <strong>4pil&iacute;&#345;ov&yacute; syst&eacute;m</strong>, kter&yacute; funguje u v&scaron;ech plemen a v&#283;k&#367;. <em>Bez trest&#367;, bez elektrick&yacute;ch oboj&#367;, bez frustrace.</em>',
-      pillarsTitle: 'Tato kniha v&aacute;m pom&#367;&#382;e s',
+      meta: ['&#128214; Ti&scaron;t&#283;n&aacute; kniha', '&#128054; Od ps&iacute;ho behavioristy', '&#11088; 9,2/10 spokojenost'],
+      intro1: '<strong>Ka&#382;d&aacute; proch&aacute;zka jako boj?</strong> Vrac&iacute;te se dom&#367; vy&#269;erpan&iacute; m&iacute;sto odpo&#269;at&iacute;, soused&#367;m vad&iacute; &scaron;t&#283;k&aacute;n&iacute; a vy se c&iacute;t&iacute;te provinile, &#382;e v&aacute;s vlastn&iacute; pes n&#283;kdy &scaron;tve.',
+      intro2: '<strong>Ps&iacute; super&#382;ivot</strong> od Michala Peterky to &#345;e&scaron;&iacute; jinak ne&#382; kurzy a tipy z YouTube: <em>4pil&iacute;&#345;ov&yacute; syst&eacute;m postaven&yacute; na ps&iacute; psychologii</em>. Funguje u v&scaron;ech plemen a v&#283;k&#367; &mdash; bez trest&#367;, bez elektrick&yacute;ch oboj&#367;.',
+      pillarsTitle: 'S &#269;&iacute;m v&aacute;m pom&#367;&#382;e',
       pillars: [
-        ['&#128054;', 'TAH&Aacute;N&Iacute; NA VOD&Iacute;TKU', 'Klidn&aacute; proch&aacute;zka bez tah&aacute;n&iacute; &mdash; i u temperamentn&iacute;ch ps&#367;'],
-        ['&#128261;', 'NEKONE&#268;N&Eacute; &Scaron;T&#282;K&Aacute;N&Iacute;', 'Zjist&#283;te p&#345;&iacute;&#269;inu a nau&#269;te psa z&#367;stat v klidu'],
-        ['&#128062;', 'NEPOSLU&Scaron;NOST', 'Pochopte ps&iacute; psychologii &mdash; a z&iacute;skejte pozornost a respekt'],
-        ['&#129455;', 'AGRESE &amp; STRACH', '&#344;e&scaron;te ko&#345;en probl&eacute;mu, ne pouh&eacute; p&#345;&iacute;znaky'],
-        ['&#129505;', 'POROZUM&#282;N&Iacute; &amp; POUTO', 'Vztah zalo&#382;en&yacute; na d&#367;v&#283;&#345;e a vz&aacute;jemn&eacute;m respektu']
+        ['&#128054;', 'TAH&Aacute;N&Iacute; NA VOD&Iacute;TKU', 'Klidn&aacute; proch&aacute;zka i s temperamentn&iacute;m psem'],
+        ['&#128261;', '&Scaron;T&#282;K&Aacute;N&Iacute;', 'Najdete p&#345;&iacute;&#269;inu &mdash; ne jen zp&#367;sob, jak ho uml&#269;et'],
+        ['&#128062;', 'NEPOSLU&Scaron;NOST', 'Pes v&aacute;s za&#269;ne vn&iacute;mat &mdash; bez zvy&scaron;ov&aacute;n&iacute; hlasu'],
+        ['&#129455;', 'AGRESE &amp; STRACH', '&#344;e&scaron;&iacute;te ko&#345;en probl&eacute;mu, ne p&#345;&iacute;znaky'],
+        ['&#129505;', 'POUTO', 'Pes, co vedle v&aacute;s ve&#269;er prost&#283; le&#382;&iacute; na gau&#269;i']
       ],
       results: [
-        'Ti&scaron;t&#283;nou knihu za zv&yacute;hodn&#283;n&yacute;ch <strong>499 K&#269;</strong> (b&#283;&#382;n&#283; 550 K&#269;)',
-        'Dopravu zdarma &mdash; odes&iacute;l&aacute;me spole&#269;n&#283; s Ko&#269;i&#269;&iacute; bibl&iacute;',
-        '30denn&iacute; z&aacute;ruku vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek, bez komplikac&iacute;'
+        'Ti&scaron;t&#283;n&aacute; kniha za <strong>499 K&#269;</strong> m&iacute;sto 550 K&#269;',
+        'P&#345;ibal&iacute;me ke Ko&#269;i&#269;&iacute; bibli &mdash; jedna z&aacute;silka, jedno po&scaron;tovn&eacute; (&#382;&aacute;dn&eacute;)',
+        '30denn&iacute; z&aacute;ruka vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek'
       ],
       comboIcon: '&#128054;',
-      combo: '<strong>Spole&#269;n&#283; s Ko&#269;i&#269;&iacute; bibl&iacute; m&aacute;te kompletn&iacute; bal&iacute;&#269;ek:</strong> spokojen&aacute; ko&#269;ka i spokojen&yacute; pes. Perfektn&iacute; kombinace pro celou zv&iacute;&#345;ec&iacute; dom&aacute;cnost.',
+      combo: '<strong>Spole&#269;n&#283; s Ko&#269;i&#269;&iacute; bibl&iacute; m&aacute;te kompletn&iacute; bal&iacute;&#269;ek:</strong> spokojen&aacute; ko&#269;ka i spokojen&yacute; pes pod jednou st&#345;echou.',
       review: '&bdquo;Kone&#269;n&#283; klidn&eacute; proch&aacute;zky bez tah&aacute;n&iacute;. N&aacute;&scaron; Max (border collie) je &uacute;pln&#283; jin&yacute; pes &mdash; a j&aacute; si ve&#269;er kone&#269;n&#283; odpo&#269;inu.&ldquo;',
       reviewer: '&mdash; Petr H., Plze&#328;'
     }
