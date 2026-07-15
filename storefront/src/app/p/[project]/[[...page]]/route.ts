@@ -759,6 +759,8 @@ function generateProjectConfigScript(
     publishableApiKey: config.publishableApiKey,
     mainProduct: config.mainProduct,
     upsellProduct: config.upsellProduct,
+    // Multi-bump výběr (kocici-bible aj.) — pole upsell produktů pro checkout
+    upsellProducts: (config as any).upsellProducts || null,
     bundleOptions: config.bundleOptions,
     regions: config.regions,
     paymentProviders: config.paymentProviders,
