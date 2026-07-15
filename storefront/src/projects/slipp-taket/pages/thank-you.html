@@ -669,7 +669,7 @@ body { background: var(--bg); }
     </div>
     <div class="ty-order-total">
       <span class="ty-order-total-label">Betalt</span>
-      <span class="ty-order-total-price" id="ty-total-price">699 kr</span>
+      <span class="ty-order-total-price" id="ty-total-price">499 kr</span>
     </div>
   </div>
 
@@ -927,7 +927,7 @@ body { background: var(--bg); }
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
     }
   } else if (bundlePriceMap[bundleQty]) {
-    // Bundle pricing z config.json (NOK): 1=699, 2=1199, 3=1599, 4=1999
+    // Bundle pricing z config.json (NOK): 1=499, 2=899, 3=1199, 4=1499
     totalPrice = bundlePriceMap[bundleQty];
     if (upsellPurchased) {
       totalPrice += PROJECT_CONFIG.upsellProduct.price;
