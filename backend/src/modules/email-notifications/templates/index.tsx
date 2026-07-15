@@ -75,6 +75,9 @@ import { EngAbandonedCheckout1Template, ENG_ABANDONED_CHECKOUT_1, isEngAbandoned
 import { EngAbandonedCheckout2Template, ENG_ABANDONED_CHECKOUT_2, isEngAbandonedCheckout2Data } from './eng-abandoned-checkout-2'
 import { EngAbandonedCheckout3Template, ENG_ABANDONED_CHECKOUT_3, isEngAbandonedCheckout3Data } from './eng-abandoned-checkout-3'
 import { OdAbandonedCheckout1Template, OD_ABANDONED_CHECKOUT_1, isOdAbandonedCheckout1Data } from './od-abandoned-checkout-1'
+import { KbAbandonedCheckout1Template, KB_ABANDONED_CHECKOUT_1, isKbAbandonedCheckout1Data } from './kb-abandoned-checkout-1'
+import { KbAbandonedCheckout2Template, KB_ABANDONED_CHECKOUT_2, isKbAbandonedCheckout2Data } from './kb-abandoned-checkout-2'
+import { KbAbandonedCheckout3Template, KB_ABANDONED_CHECKOUT_3, isKbAbandonedCheckout3Data } from './kb-abandoned-checkout-3'
 import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
 import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
 // Pusti to, čo ťa ničí (pusti-to-sk) templates
@@ -189,6 +192,9 @@ export const EmailTemplates = {
   ENG_ABANDONED_CHECKOUT_2,
   ENG_ABANDONED_CHECKOUT_3,
   OD_ABANDONED_CHECKOUT_1,
+  KB_ABANDONED_CHECKOUT_1,
+  KB_ABANDONED_CHECKOUT_2,
+  KB_ABANDONED_CHECKOUT_3,
   OD_ABANDONED_CHECKOUT_2,
   OD_ABANDONED_CHECKOUT_3,
   SK_ORDER_PLACED,
@@ -1016,6 +1022,30 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <OdAbandonedCheckout1Template {...data} />
+    case EmailTemplates.KB_ABANDONED_CHECKOUT_1:
+      if (!isKbAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.KB_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <KbAbandonedCheckout1Template {...data} />
+    case EmailTemplates.KB_ABANDONED_CHECKOUT_2:
+      if (!isKbAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.KB_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <KbAbandonedCheckout2Template {...data} />
+    case EmailTemplates.KB_ABANDONED_CHECKOUT_3:
+      if (!isKbAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.KB_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <KbAbandonedCheckout3Template {...data} />
 
     case EmailTemplates.OD_ABANDONED_CHECKOUT_2:
       if (!isOdAbandonedCheckout2Data(data)) {
