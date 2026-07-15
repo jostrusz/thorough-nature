@@ -388,6 +388,9 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           // Order-bump upsell (Život → Pusť to cross-sell). Admin SKU has -3 suffix;
           // Dextrum holds only the parent barcode OTCCN64787237.
           "OTCCN64787237-3": { physicalSku: "OTCCN64787237", quantity: 1 },
+          // Kočičí bible — samostatný funnel (kocicibible.cz). Single-variant bundle
+          // (quantity=N na variantě); Dextrum zná fyzický kód 363682.
+          "KOCICI-BIBLE-OFICIAL-PB": { physicalSku: "363682", quantity: 1 },
         }
 
         // Filter out non-physical items (e.g. COD fee) that don't exist in the warehouse

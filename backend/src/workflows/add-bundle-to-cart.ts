@@ -107,9 +107,16 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 1199,  // 1199 Kč incl. DPH (save 451 Kč)
     4: 1499,  // 1499 Kč incl. DPH (save 701 Kč)
   },
-  // Kočičí bible — upsell produkt CZ
+  // Kočičí bible — upsell produkt CZ (psi-superzivot order bump)
   "kocici-bible": {
     1: 399,   // 399 Kč incl. DPH (upsell price, original 550 Kč)
+  },
+  // Kočičí bible — hlavní produkt CZ (samostatný funnel kocicibible.cz)
+  "kocici-bible-oficial": {
+    1: 550,   // 550 Kč incl. DPH
+    2: 899,   // 899 Kč incl. DPH (save 201 Kč)
+    3: 1199,  // 1199 Kč incl. DPH (save 451 Kč)
+    4: 1499,  // 1499 Kč incl. DPH (save 701 Kč)
   },
   // Fee products (added as line items so they appear in order.total + invoices)
   "doprava-na-adresu": {

@@ -5,7 +5,7 @@ var PROJECT_CONFIG = {
   "medusaUrl": "https://www.marketing-hq.eu",
   "publishableApiKey": "pk_5f6d223af5e4a06268b3845132ece0bc81528095902c7b381dd1339ed085811b",
   "mainProduct": {
-    "name": "Kočičí bible Oficial",
+    "name": "Kočičí bible",
     "handle": "kocici-bible-oficial",
     "variantId": "variant_01KPFP9X5PXD8WPMJPMMS2ZF02",
     "price": 550,
