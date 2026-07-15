@@ -108,10 +108,15 @@ export default async function orderPlacedPaymentMetadataHandler({
       }
 
       // Przelewy24
-      if (paymentData.p24SessionId || paymentData.p24Token) {
-        newMetadata.p24SessionId = paymentData.p24SessionId
-        newMetadata.p24Token = paymentData.p24Token
+      if (paymentData.p24SessionId || paymentData.p24Token || providerId.includes("przelewy24")) {
+        if (paymentData.p24SessionId || paymentData.sessionId) {
+          newMetadata.p24SessionId = paymentData.p24SessionId || paymentData.sessionId
+        }
+        if (paymentData.p24Token) newMetadata.p24Token = paymentData.p24Token
+        if (paymentData.p24OrderId) newMetadata.p24OrderId = paymentData.p24OrderId
+        if (paymentData.p24MethodId) newMetadata.p24MethodId = paymentData.p24MethodId
         newMetadata.payment_method = paymentData.method || "przelewy24"
+        newMetadata.payment_provider = "przelewy24"
         found = true
         break
       }

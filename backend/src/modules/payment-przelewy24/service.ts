@@ -4,62 +4,49 @@ import {
   MedusaError,
   PaymentSessionStatus,
 } from "@medusajs/framework/utils"
-import { Przelewy24ApiClient } from "./api-client"
-import crypto from "crypto"
-import { Client } from "pg"
-
-const GATEWAY_CONFIG_MODULE = "gatewayConfig"
-
-let _p24ConfigCache: any = null
-let _p24ConfigCacheTime = 0
-const CONFIG_CACHE_TTL = 5 * 60 * 1000
-
-export interface IP24PaymentSessionData {
-  token?: string
-  sessionId?: string
-  orderId?: string
-  amount?: number
-  currency?: string
-  status?: string
-  createdAt?: number
-}
+import { Pool } from "pg"
+import {
+  Przelewy24ApiClient,
+  credsFromGatewayConfig,
+  pickP24Config,
+} from "./api-client"
+import { logPaymentEvent } from "../payment-debug/utils/log"
 
 /**
- * Maps Przelewy24 payment statuses to Medusa payment session statuses
+ * Przelewy24 payment provider for Medusa v2 (REST API v1).
+ *
+ * Flow: POST /transaction/register → redirect to trnRequest/{token}
+ *       → P24 posts notification to /webhooks/przelewy24
+ *       → webhook calls PUT /transaction/verify (mandatory for settlement)
+ *
+ * Multi-tenant: credentials come from gateway_config (provider='przelewy24'),
+ * matched by project_slug (project_slugs JSON array), loaded via direct pg.Pool
+ * because the payment provider DI scope has no access to custom modules.
+ *
+ * Amounts are MAJOR units in this layer — minor conversion lives in api-client.
  */
-function mapP24StatusToMedusa(p24Status: string): PaymentSessionStatus {
-  switch (p24Status) {
-    case "completed":
-    case "success":
-    case "authorized":
+
+/** Map numeric P24 transaction status → Medusa payment session status.
+ *  0 = no payment, 1 = advance/pre-payment, 2 = paid & verified, 3 = returned */
+function mapP24StatusToMedusa(p24Status: number): PaymentSessionStatus {
+  switch (Number(p24Status)) {
+    case 2:
+      return PaymentSessionStatus.CAPTURED
+    case 1:
       return PaymentSessionStatus.AUTHORIZED
-    case "pending":
-    case "waiting":
-      return PaymentSessionStatus.PENDING
-    case "cancelled":
-    case "expired":
-      return PaymentSessionStatus.CANCELED
-    case "rejected":
-    case "error":
-    case "failed":
-      return PaymentSessionStatus.ERROR
+    case 3:
+      return PaymentSessionStatus.CANCELED // refunded
     default:
       return PaymentSessionStatus.PENDING
   }
 }
 
-/**
- * Przelewy24 payment provider service
- * Integrates with Przelewy24 REST API for Polish payments (BLIK, bank transfers, cards)
- * Supports PLN, EUR and other currencies
- * Flow: register transaction → redirect → customer pays → webhook verification
- */
 export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
-  protected container_: any
-  protected client_: Przelewy24ApiClient | null = null
-  protected logger_: any
-
   static identifier = "przelewy24"
+
+  protected logger_: any
+  protected container_: any
+  private pgPool_: Pool | null = null
 
   constructor(container: any, options?: any) {
     super(container, options)
@@ -67,209 +54,148 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     this.logger_ = container.logger || console
   }
 
-  private getLogger() {
-    return this.logger_ || console
+  private getPool(): Pool {
+    if (!this.pgPool_) {
+      const dbUrl = process.env.DATABASE_URL
+      if (!dbUrl) throw new Error("DATABASE_URL not set")
+      this.pgPool_ = new Pool({ connectionString: dbUrl, max: 3 })
+    }
+    return this.pgPool_
   }
 
   /**
-   * Lazily resolve the gateway config service from the container.
+   * Build a P24 API client for the given project slug.
+   * NEVER cache the client on `this` — the provider instance is shared across
+   * concurrent requests for different projects (see Airwallex pattern).
    */
-  private getGatewayConfigService() {
+  private async getP24Client(
+    projectSlug?: string | null
+  ): Promise<{ client: Przelewy24ApiClient; config: any }> {
+    let rows: any[] = []
     try {
-      return this.container_.resolve(GATEWAY_CONFIG_MODULE)
-    } catch {
-      return null
-    }
-  }
-
-  /**
-   * Get the active P24 gateway config from the database.
-   * Uses a 3-level fallback strategy (same as Comgate):
-   *   1. gatewayConfig module service
-   *   2. __pg_connection__ Knex instance
-   *   3. Raw pg Client via DATABASE_URL
-   */
-  private async getP24Config(): Promise<any> {
-    if (_p24ConfigCache && (Date.now() - _p24ConfigCacheTime) < CONFIG_CACHE_TTL) {
-      return _p24ConfigCache
-    }
-
-    // Method 1: Try gateway config module service
-    const gcService = this.getGatewayConfigService()
-    if (gcService) {
-      try {
-        const configs = await gcService.listGatewayConfigs(
-          { provider: "przelewy24", is_active: true },
-          { take: 1 }
-        )
-        if (configs[0]) {
-          this.getLogger().info("[Przelewy24] Config loaded via gatewayConfig module")
-          _p24ConfigCache = configs[0]
-          _p24ConfigCacheTime = Date.now()
-          return configs[0]
-        }
-      } catch (e: any) {
-        this.getLogger().warn(`[Przelewy24] Gateway config module query failed: ${e.message}`)
-      }
-    }
-
-    // Method 2: Direct DB query via Knex (__pg_connection__)
-    try {
-      const knex = this.container_.resolve("__pg_connection__")
-      const rows = await knex("gateway_config")
-        .where({ provider: "przelewy24", is_active: true })
-        .whereNull("deleted_at")
-        .limit(1)
-
-      if (rows && rows[0]) {
-        this.getLogger().info("[Przelewy24] Config loaded via __pg_connection__")
-        _p24ConfigCache = rows[0]
-        _p24ConfigCacheTime = Date.now()
-        return rows[0]
-      }
+      const res = await this.getPool().query(
+        `SELECT id, display_name, mode, live_keys, test_keys, project_slugs, priority
+         FROM gateway_config
+         WHERE provider = 'przelewy24' AND is_active = true AND deleted_at IS NULL
+         ORDER BY priority ASC`
+      )
+      rows = res.rows
     } catch (e: any) {
-      this.getLogger().warn(`[Przelewy24] __pg_connection__ query failed: ${e.message}`)
+      this.logger_.error(`[Przelewy24] gateway_config query failed: ${e.message}`)
     }
 
-    // Method 3: Raw pg Client via DATABASE_URL
-    const dbUrl = process.env.DATABASE_URL
-    if (dbUrl) {
-      let pgClient: Client | null = null
-      try {
-        pgClient = new Client({
-          connectionString: dbUrl,
-          ssl: dbUrl.includes("railway") ? { rejectUnauthorized: false } : undefined,
-        })
-        await pgClient.connect()
-        const result = await pgClient.query(
-          "SELECT * FROM gateway_config WHERE provider = $1 AND is_active = true AND deleted_at IS NULL LIMIT 1",
-          ["przelewy24"]
-        )
-        if (result.rows[0]) {
-          this.getLogger().info("[Przelewy24] Config loaded via raw pg (DATABASE_URL)")
-          _p24ConfigCache = result.rows[0]
-          _p24ConfigCacheTime = Date.now()
-          return result.rows[0]
-        }
-      } catch (e: any) {
-        this.getLogger().warn(`[Przelewy24] Raw pg query failed: ${e.message}`)
-      } finally {
-        if (pgClient) {
-          try { await pgClient.end() } catch {}
-        }
-      }
-    }
-
-    this.getLogger().warn("[Przelewy24] No gateway config found via any method")
-    return null
-  }
-
-  /**
-   * Initialize the P24 API client with credentials from gateway_config
-   */
-  private async getP24Client(): Promise<Przelewy24ApiClient> {
-    if (this.client_) return this.client_
-
-    const config = await this.getP24Config()
-    if (!config) {
+    const config = pickP24Config(rows, projectSlug)
+    const creds = credsFromGatewayConfig(config)
+    if (!creds) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        "Przelewy24 gateway not configured. Set credentials in admin gateway config."
+        "Przelewy24 credentials not configured. Set gateway_config keys {merchant_id, pos_id, api_key, crc}."
       )
     }
-    const isLive = config.mode === "live"
-    let keys = isLive ? config.live_keys : config.test_keys
-    let meta = config.metadata || {}
-    // Handle JSON strings from raw pg fallback
-    if (typeof keys === 'string') { try { keys = JSON.parse(keys) } catch {} }
-    if (typeof meta === 'string') { try { meta = JSON.parse(meta) } catch {} }
-    if (!keys?.api_key || !keys?.secret_key) {
-      throw new MedusaError(
-        MedusaError.Types.INVALID_DATA,
-        "Przelewy24 credentials not configured (need merchantId, api_key, CRC, and pos_id in metadata)"
-      )
-    }
-
-    const merchantId = keys.api_key
-    const posId = meta.pos_id || keys.api_key
-    const apiKey = keys.secret_key
-    const crc = meta.crc || ""
-    const testMode = !isLive
-
-    // Single-tenant cache; return the local so a concurrent call can't swap it.
-    const client = new Przelewy24ApiClient(
-      merchantId,
-      posId,
-      apiKey,
-      crc,
-      testMode
+    this.logger_.info(
+      `[Przelewy24] Using ${config.mode === "live" ? "LIVE" : "TEST"} gateway "${config.display_name}"` +
+        (projectSlug ? ` for project "${projectSlug}"` : "")
     )
-    this.client_ = client
-    return client
+    return { client: new Przelewy24ApiClient(creds), config }
   }
 
   /**
-   * Initiate a payment session — register transaction with P24
+   * Initiate payment — register a P24 transaction and hand the redirect URL
+   * back in session data (frontend reads `checkoutUrl` / `redirectUrl`).
    */
-  async initiatePayment(context: any): Promise<any> {
-    const { amount, currency_code, customer, cart, context: contextData } =
-      context
+  async initiatePayment(input: any): Promise<any> {
+    const { amount, currency_code, data, context } = input
+    const sessionData = data || {}
+    const projectSlug = sessionData?.project_slug || context?.project_slug || null
+    const cartId = sessionData?.cart_id || sessionData?.cartId || context?.cart?.id || null
+    const email =
+      sessionData?.email || context?.email || context?.customer?.email || ""
 
     try {
-      const client = await this.getP24Client()
-      const config = await this.getP24Config()
-      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
-      const meta = config?.metadata || {}
+      const { client } = await this.getP24Client(projectSlug)
 
-      const sessionId = cart?.id || `sess-${Date.now()}`
-      const merchantId = keys?.api_key
-      const posId = meta.pos_id || keys?.api_key
+      // sessionId ≤ 100 chars, unique per attempt
+      const rawCart = (cartId || "nocart").replace(/^cart_/, "")
+      const sessionId = `p24_${rawCart}_${Date.now()}`.slice(0, 100)
 
-      const registerParams = {
-        merchantId,
-        posId,
+      const backendUrl = process.env.BACKEND_PUBLIC_URL || "https://www.marketing-hq.eu"
+      const returnUrl =
+        sessionData?.return_url ||
+        context?.return_url ||
+        `${backendUrl}/store/payment-return`
+
+      const addr = sessionData?.billing_address || sessionData?.shipping_address || {}
+      const clientName = `${addr.first_name || ""} ${addr.last_name || ""}`.trim()
+
+      logPaymentEvent({
+        cart_id: cartId,
+        email,
+        project_slug: projectSlug,
+        event_type: "p24_register_request",
+        event_data: { sessionId, amount, currency: currency_code, method: sessionData?.method ?? null },
+      })
+
+      const result = await client.registerTransaction({
         sessionId,
-        amount, // already in grosze
-        currency: currency_code.toUpperCase(),
-        description: contextData?.statement_descriptor || `Order ${sessionId}`,
-        email: customer?.email || "customer@example.com",
-        country: customer?.billing_address?.country_code?.toUpperCase() || "PL",
-        urlReturn: `${contextData?.return_url || "https://example.com"}/payment/success`,
-        urlStatus: `${contextData?.webhook_url || "https://api.example.com"}/webhooks/przelewy24`,
-        crc: meta.crc || "",
-      }
+        amount, // MAJOR units — api-client converts to grosze
+        currency: (currency_code || "PLN").toUpperCase(),
+        description: (sessionData?.description || `Order ${rawCart}`).slice(0, 1024),
+        email: email || "unknown@customer.invalid",
+        country: (addr.country_code || "PL").toUpperCase(),
+        language: "pl",
+        urlReturn: returnUrl,
+        urlStatus: `${backendUrl}/webhooks/przelewy24`,
+        method: sessionData?.method != null && !isNaN(Number(sessionData.method))
+          ? Number(sessionData.method)
+          : undefined,
+        channel: sessionData?.channel != null ? Number(sessionData.channel) : undefined,
+        client: clientName || undefined,
+      })
 
-      const result = await client.registerTransaction(registerParams)
-      if (!result.success) {
+      logPaymentEvent({
+        intent_id: sessionId,
+        cart_id: cartId,
+        email,
+        project_slug: projectSlug,
+        event_type: "p24_register_response",
+        event_data: {
+          success: result.success,
+          token: result.data?.token ?? null,
+          error: result.error ?? null,
+        },
+        error_code: result.success ? null : String(result.errorCode ?? "register_failed"),
+      })
+
+      if (!result.success || !result.data?.token) {
         throw new MedusaError(
           MedusaError.Types.UNEXPECTED_STATE,
           result.error || "Failed to register P24 transaction"
         )
       }
 
-      if (!result.data?.transactionUrl) {
-        throw new MedusaError(
-          MedusaError.Types.UNEXPECTED_STATE,
-          "No transaction URL returned from P24"
-        )
-      }
-
-      this.getLogger().info(
-        `[Przelewy24] Transaction registered: sessionId=${sessionId}, redirect=${result.data.transactionUrl}`
+      this.logger_.info(
+        `[Przelewy24] Transaction registered: sessionId=${sessionId}, redirect=${result.data.redirectUrl}`
       )
 
       return {
-        session_data: {
-          token: result.data.token,
+        id: sessionId,
+        data: {
+          p24SessionId: sessionId,
           sessionId,
+          p24Token: result.data.token,
+          checkoutUrl: result.data.redirectUrl,
+          redirectUrl: result.data.redirectUrl,
           amount,
-          currency: currency_code,
+          currency: (currency_code || "PLN").toUpperCase(),
+          project_slug: projectSlug,
+          cart_id: cartId,
+          email,
+          method: sessionData?.method ?? null,
           createdAt: Date.now(),
-        } as IP24PaymentSessionData,
-        redirect_url: result.data.transactionUrl,
+        },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Payment initiation failed: ${error.message}`)
+      this.logger_.error(`[Przelewy24] Payment initiation failed: ${error.message}`)
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         error.message || "Failed to initiate Przelewy24 payment"
@@ -277,298 +203,219 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
     }
   }
 
+  /** Fetch live status from P24 and merge into session data. */
+  private async fetchStatus(sessionData: any): Promise<{ data: any; status: PaymentSessionStatus }> {
+    const sessionId = sessionData?.p24SessionId || sessionData?.sessionId
+    if (!sessionId) {
+      return { data: sessionData, status: PaymentSessionStatus.PENDING }
+    }
+    const { client } = await this.getP24Client(sessionData?.project_slug)
+    const result = await client.getTransactionBySessionId(sessionId)
+    if (!result.success) {
+      // No transaction yet (customer never started paying) → still pending
+      return { data: sessionData, status: PaymentSessionStatus.PENDING }
+    }
+    const tx = result.data
+    return {
+      data: {
+        ...sessionData,
+        p24OrderId: tx.orderId ?? sessionData?.p24OrderId,
+        p24MethodId: tx.paymentMethod ?? tx.methodId ?? sessionData?.p24MethodId,
+        p24Status: tx.status,
+      },
+      status: mapP24StatusToMedusa(tx.status),
+    }
+  }
+
   /**
-   * Authorize payment — verify with P24 after webhook
+   * Authorize — P24 is redirect-based auto-capture; treat paid/advance as
+   * authorized so completeCartWorkflow can proceed.
    */
-  async authorizePayment(
-    paymentSessionData: IP24PaymentSessionData,
-    context: any
-  ): Promise<any> {
+  async authorizePayment(input: any): Promise<any> {
     try {
-      const client = await this.getP24Client()
-      const config = await this.getP24Config()
-      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
-      const meta = config?.metadata || {}
-      const { sessionId, orderId, amount, currency } = paymentSessionData
+      const sessionData = input?.data || input
+      const { data, status } = await this.fetchStatus(sessionData)
+      // If webhook already verified the payment, trust it even if the API
+      // status read lags behind.
+      if (status === PaymentSessionStatus.PENDING && sessionData?.p24_verified) {
+        return { data, status: PaymentSessionStatus.CAPTURED }
+      }
+      return { data, status }
+    } catch (error: any) {
+      this.logger_.error(`[Przelewy24] Authorization check failed: ${error.message}`)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
+    }
+  }
+
+  /** Capture — P24 auto-captures after verify; report current status. */
+  async capturePayment(input: any): Promise<any> {
+    try {
+      const sessionData = input?.data || input
+      if (sessionData?.p24_verified) {
+        return { data: sessionData, status: PaymentSessionStatus.CAPTURED }
+      }
+      const { data, status } = await this.fetchStatus(sessionData)
+      return { data, status }
+    } catch (error: any) {
+      this.logger_.error(`[Przelewy24] Capture failed: ${error.message}`)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
+    }
+  }
+
+  /** Refund via POST /transaction/refund. Amount in MAJOR units. */
+  async refundPayment(input: any): Promise<any> {
+    try {
+      const sessionData = input?.data || input
+      const refundAmount = Number(input?.amount || 0)
+      const sessionId = sessionData?.p24SessionId || sessionData?.sessionId
+      const orderId = Number(sessionData?.p24OrderId || sessionData?.orderId || 0)
 
       if (!sessionId || !orderId) {
         throw new MedusaError(
           MedusaError.Types.INVALID_DATA,
-          "Missing sessionId or orderId in session data"
+          "Missing p24SessionId or p24OrderId for refund"
         )
       }
 
-      const verifyParams = {
-        merchantId: keys?.api_key,
-        posId: meta.pos_id || keys?.api_key,
-        sessionId,
+      const { client } = await this.getP24Client(sessionData?.project_slug)
+      const result = await client.refund({
         orderId,
-        amount,
-        currency,
-        crc: meta.crc || "",
-      }
+        sessionId,
+        amount: refundAmount,
+        description: `Refund ${refundAmount.toFixed(2)} ${sessionData?.currency || "PLN"}`,
+      })
 
-      const result = await client.verifyTransaction(verifyParams)
       if (!result.success) {
         throw new MedusaError(
           MedusaError.Types.UNEXPECTED_STATE,
-          result.error || "Failed to verify P24 transaction"
+          result.error || "Failed to create P24 refund"
         )
       }
 
-      const status = mapP24StatusToMedusa(
-        result.data?.status || "pending"
+      this.logger_.info(
+        `[Przelewy24] Refund created for orderId ${orderId}: ${refundAmount.toFixed(2)}`
       )
-
-      return {
-        session_data: {
-          ...paymentSessionData,
-          status: result.data?.status,
-        },
-        status,
-      }
+      return { data: sessionData }
     } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Authorization check failed: ${error.message}`)
+      this.logger_.error(`[Przelewy24] Refund failed: ${error.message}`)
+      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
+    }
+  }
+
+  /** Cancel — no P24 cancel API for registered transactions; no-op. */
+  async cancelPayment(input: any): Promise<any> {
+    const sessionData = input?.data || input
+    return { data: sessionData, status: PaymentSessionStatus.CANCELED }
+  }
+
+  /** Delete session — no-op. */
+  async deletePayment(input: any): Promise<any> {
+    const sessionData = input?.data || input
+    return { data: sessionData }
+  }
+
+  /** Live status via GET /transaction/by/sessionId. */
+  async getPaymentStatus(input: any): Promise<PaymentSessionStatus> {
+    try {
+      const sessionData = input?.data || input
+      if (sessionData?.p24_verified) return PaymentSessionStatus.CAPTURED
+      const { status } = await this.fetchStatus(sessionData)
+      return status
+    } catch (error: any) {
+      this.logger_.error(`[Przelewy24] Status check failed: ${error.message}`)
+      return PaymentSessionStatus.PENDING
+    }
+  }
+
+  /** Retrieve payment — live status merged into session data. */
+  async retrievePayment(input: any): Promise<any> {
+    try {
+      const sessionData = input?.data || input
+      const { data, status } = await this.fetchStatus(sessionData)
+      return { data, status }
+    } catch (error: any) {
+      this.logger_.error(`[Przelewy24] Retrieve failed: ${error.message}`)
       throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
     }
   }
 
   /**
-   * Capture payment — P24 captures immediately after payment
+   * Update payment. A P24 sessionId is bound to the registered amount —
+   * on amount change we re-register a fresh transaction (new sessionId + token).
    */
-  async capturePayment(
-    paymentSessionData: IP24PaymentSessionData,
-    context: any
-  ): Promise<any> {
-    // P24 auto-captures on successful payment
-    const status = mapP24StatusToMedusa(
-      paymentSessionData.status || "pending"
-    )
-
-    return {
-      session_data: paymentSessionData,
-      status,
-    }
-  }
-
-  /**
-   * Refund payment
-   */
-  async refundPayment(
-    paymentSessionData: IP24PaymentSessionData,
-    refundAmount: number,
-    context: any
-  ): Promise<any> {
-    try {
-      const client = await this.getP24Client()
-      const config = await this.getP24Config()
-      const meta = config?.metadata || {}
-      const { sessionId, orderId } = paymentSessionData
-
-      if (!orderId || !sessionId) {
-        throw new MedusaError(
-          MedusaError.Types.INVALID_DATA,
-          "Missing orderId or sessionId for refund"
-        )
-      }
-
-      const requestId = `refund-${Date.now()}`
-
-      const refundParams = {
-        requestId,
-        refunds: [
-          {
-            orderId,
-            sessionId,
-            amount: refundAmount,
-            description: `Refund ${(refundAmount / 100).toFixed(2)}`,
-          },
-        ],
-        urlStatus: `${meta?.webhook_url || "https://api.example.com"}/webhooks/przelewy24`,
-      }
-
-      const result = await client.createRefund(refundParams)
-      if (!result.success) {
-        throw new MedusaError(
-          MedusaError.Types.UNEXPECTED_STATE,
-          result.error || "Failed to create refund"
-        )
-      }
-
-      this.getLogger().info(
-        `[Przelewy24] Refund created for orderId ${orderId}: ${(refundAmount / 100).toFixed(2)}`
+  async updatePayment(input: any): Promise<any> {
+    const sessionData = input?.data || {}
+    const newAmount = input?.amount
+    if (newAmount != null && sessionData?.amount != null && Number(newAmount) !== Number(sessionData.amount)) {
+      this.logger_.info(
+        `[Przelewy24] Amount changed ${sessionData.amount} → ${newAmount}; re-registering transaction`
       )
-
-      return {
-        session_data: paymentSessionData,
-        status: PaymentSessionStatus.AUTHORIZED,
-      }
-    } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Refund failed: ${error.message}`)
-      throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, error.message)
+      return await this.initiatePayment({
+        amount: newAmount,
+        currency_code: input?.currency_code || sessionData?.currency,
+        data: sessionData,
+        context: input?.context,
+      })
     }
+    return { data: sessionData }
   }
 
   /**
-   * Cancel payment
+   * Webhook notification → verify sign + PUT /transaction/verify, then
+   * report captured. (Primary webhook handling lives in
+   * /webhooks/przelewy24/route.ts — this covers Medusa's generic hook path.)
    */
-  async cancelPayment(
-    paymentSessionData: IP24PaymentSessionData,
-    context: any
-  ): Promise<any> {
-    this.getLogger().info(
-      `[Przelewy24] Transaction ${paymentSessionData.sessionId} marked for cancellation`
-    )
-
-    return {
-      session_data: paymentSessionData,
-      status: PaymentSessionStatus.CANCELED,
-    }
-  }
-
-  /**
-   * Delete payment session
-   */
-  async deletePayment(
-    paymentSessionData: IP24PaymentSessionData,
-    context: any
-  ): Promise<any> {
-    // No-op for P24 — cleanup handled server-side
-    return {
-      session_data: paymentSessionData,
-      status: PaymentSessionStatus.CANCELED,
-    }
-  }
-
-  /**
-   * Get payment status
-   */
-  async getPaymentStatus(
-    paymentSessionData: IP24PaymentSessionData,
-    context: any
-  ): Promise<PaymentSessionStatus> {
+  async getWebhookActionAndData(payload: any): Promise<any> {
     try {
-      const status = paymentSessionData.status || "pending"
-      return mapP24StatusToMedusa(status)
-    } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Status check failed: ${error.message}`)
-      return PaymentSessionStatus.ERROR
-    }
-  }
-
-  /**
-   * Retrieve payment data
-   */
-  async retrievePayment(
-    paymentSessionData: IP24PaymentSessionData,
-    context: any
-  ): Promise<any> {
-    const status = mapP24StatusToMedusa(
-      paymentSessionData.status || "pending"
-    )
-
-    return {
-      session_data: paymentSessionData,
-      status,
-    }
-  }
-
-  /**
-   * Update payment session
-   */
-  async updatePayment(context: any): Promise<any> {
-    return await this.retrievePayment(context.paymentSessionData, context)
-  }
-
-  /**
-   * Process Przelewy24 webhook
-   */
-  async getWebhookActionAndData(webhookData: any): Promise<{
-    action: string
-    data: IP24PaymentSessionData
-  }> {
-    try {
-      const {
-        merchantId,
-        posId,
-        sessionId,
-        orderId,
-        amount,
-        currency,
-        sign,
-      } = webhookData
-
+      const body = payload?.data || payload
+      const sessionId = body?.sessionId
+      const orderId = Number(body?.orderId || 0)
       if (!sessionId || !orderId) {
-        return {
-          action: "neutral",
-          data: webhookData,
-        }
+        return { action: "not_supported" }
       }
 
-      const config = await this.getP24Config()
-      const keys = config?.mode === "live" ? config.live_keys : config.test_keys
-      const meta = config?.metadata || {}
-
-      // Verify signature: sign should be SHA384 of sessionId|orderId|amount|currency|crc
-      const expectedSign = crypto
-        .createHash("sha384")
-        .update(
-          `${sessionId}|${orderId}|${amount}|${currency}|${meta.crc || ""}`
+      // Resolve project slug from the session for correct credentials
+      let projectSlug: string | null = null
+      try {
+        const { rows } = await this.getPool().query(
+          `SELECT data FROM payment_session
+           WHERE data->>'p24SessionId' = $1 OR data->>'sessionId' = $1
+           LIMIT 1`,
+          [sessionId]
         )
-        .digest("hex")
+        projectSlug = rows[0]?.data?.project_slug || null
+      } catch { /* best effort */ }
 
-      if (sign !== expectedSign) {
-        this.getLogger().warn(
-          `[Przelewy24] Invalid webhook signature for sessionId ${sessionId}`
-        )
-        return {
-          action: "fail",
-          data: webhookData,
-        }
+      const { client, config } = await this.getP24Client(projectSlug)
+      const creds = credsFromGatewayConfig(config)
+
+      const { verifyNotificationSign } = await import("./api-client")
+      if (!verifyNotificationSign(body, creds.crc)) {
+        this.logger_.warn(`[Przelewy24] Invalid notification sign for sessionId ${sessionId}`)
+        return { action: "failed", data: { session_id: sessionId } }
       }
 
-      const client = await this.getP24Client()
-
-      const verifyParams = {
-        merchantId: keys?.api_key,
-        posId,
+      const amountMajor = Number(body.amount) / 100
+      const verify = await client.verifyTransaction({
         sessionId,
         orderId,
-        amount,
-        currency,
-        crc: meta.crc || "",
+        amount: amountMajor,
+        currency: body.currency || "PLN",
+      })
+      if (!verify.success) {
+        this.logger_.warn(`[Przelewy24] Verify failed for sessionId ${sessionId}: ${verify.error}`)
+        return { action: "failed", data: { session_id: sessionId } }
       }
-
-      const result = await client.verifyTransaction(verifyParams)
-
-      if (!result.success) {
-        this.getLogger().warn(
-          `[Przelewy24] Verification failed for orderId ${orderId}: ${result.error}`
-        )
-        return {
-          action: "fail",
-          data: webhookData,
-        }
-      }
-
-      const status = result.data?.status || "pending"
 
       return {
-        action: status === "completed" ? "succeed" : "fail",
-        data: {
-          sessionId,
-          orderId,
-          amount,
-          currency,
-          status,
-        } as IP24PaymentSessionData,
+        action: "captured",
+        data: { session_id: sessionId, amount: amountMajor },
       }
     } catch (error: any) {
-      this.getLogger().error(`[Przelewy24] Webhook processing failed: ${error.message}`)
-      return {
-        action: "fail",
-        data: webhookData,
-      }
+      this.logger_.error(`[Przelewy24] Webhook processing failed: ${error.message}`)
+      return { action: "failed", data: {} }
     }
   }
 }
+
+export default Przelewy24PaymentProvider
