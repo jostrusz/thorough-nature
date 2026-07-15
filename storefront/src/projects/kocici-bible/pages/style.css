@@ -472,56 +472,87 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE "9 REDENEN" — video + benefity ═══ */
 .redenen {
  padding: 88px 20px;
- background: var(--light);
+ background: #ffffff;
  position: relative;
  overflow: hidden;
 }
 .redenen::before {
  content: '';
  position: absolute;
- top: 10%; right: -10%;
- width: 400px; height: 400px;
- background: radial-gradient(circle, rgba(194,123,160,0.06) 0%, transparent 70%);
+ top: 8%; right: -12%;
+ width: 420px; height: 420px;
+ background: radial-gradient(circle, rgba(194,123,160,0.05) 0%, transparent 70%);
  border-radius: 50%;
  pointer-events: none;
 }
 .redenen-inner {
- max-width: 500px; margin: 0 auto;
+ max-width: 640px; margin: 0 auto; position: relative; z-index: 1;
 }
 .redenen h2 {
  text-align: center; font-family: 'Recoleta', serif; font-size: 32px;
- color: var(--heading); margin-bottom: 12px; line-height: 1.3;
+ color: var(--heading); margin-bottom: 14px; line-height: 1.3;
 }
 .redenen .redenen-sub {
  text-align: center; font-family: 'DM Sans', sans-serif; font-size: 16px;
- color: var(--body); line-height: 1.6; margin-bottom: 40px; max-width: 650px;
+ color: var(--body); line-height: 1.6; margin-bottom: 44px; max-width: 620px;
  margin-left: auto; margin-right: auto;
 }
 
 /* Video container */
 .redenen-video {
  margin: 0 auto 48px; max-width: 680px; border-radius: 16px;
- overflow: hidden;
+ overflow: hidden; box-shadow: 0 12px 34px rgba(45,27,61,0.10);
 }
 .redenen-video video {
  display: block; width: 100%; height: auto; border-radius: 16px;
 }
 
-/* 9 benefitů — seznam s šipkami */
+/* Benefity — čtecí karty */
 .redenen-list {
  list-style: none; padding: 0; margin: 0 0 48px 0;
- max-width: 500px; margin-left: auto; margin-right: auto;
+ max-width: 640px; margin-left: auto; margin-right: auto;
+ display: flex; flex-direction: column; gap: 14px;
 }
 .redenen-list li {
- display: flex; align-items: flex-start; gap: 14px;
- padding: 14px 0; border-bottom: 1px solid rgba(240,213,196,0.4);
- font-family: 'DM Sans', sans-serif; font-size: 16px;
- color: var(--body); line-height: 1.65;
+ display: flex; align-items: flex-start; gap: 15px;
+ background: #ffffff;
+ border: 1px solid rgba(194,123,160,0.16);
+ border-radius: 16px;
+ padding: 20px 22px;
+ box-shadow: 0 2px 12px rgba(45,27,61,0.045);
+ font-family: 'DM Sans', sans-serif; font-size: 16.5px;
+ color: var(--body); line-height: 1.72;
+ transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease, border-color .22s ease;
 }
-.redenen-list li:last-child { border-bottom: none; }
+.redenen-list li:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 10px 26px rgba(45,27,61,0.09);
+ border-color: rgba(194,123,160,0.34);
+}
 .redenen-list .arrow {
- flex-shrink: 0; color: var(--cta); font-size: 18px;
- font-weight: 700; margin-top: 1px;
+ flex-shrink: 0;
+ width: 30px; height: 30px; border-radius: 50%;
+ background: rgba(194,123,160,0.12); color: var(--cta);
+ display: inline-flex; align-items: center; justify-content: center;
+ font-size: 16px; font-weight: 700; margin-top: 2px;
+}
+/* Bonusové karty (🎁) — teplý akcent */
+.redenen-list li.is-bonus {
+ background: linear-gradient(135deg, rgba(255,247,224,0.75), rgba(194,123,160,0.045));
+ border-color: rgba(233,181,74,0.42);
+}
+.redenen-list li.is-bonus .arrow {
+ background: rgba(233,181,74,0.24); color: #B77900;
+}
+/* Emfáze uvnitř benefitů */
+.redenen-list strong { color: var(--heading); font-weight: 700; }
+.redenen-list em { font-style: italic; }
+.redenen-list u {
+ text-decoration: underline;
+ text-decoration-color: var(--cta);
+ text-decoration-thickness: 2px;
+ text-underline-offset: 3px;
+ font-weight: 600; color: var(--heading);
 }
 
 /* CTA blok pod benefity */
@@ -1776,6 +1807,13 @@ h2 { font-size: 38px; }
 
 /* ═══ RESPONSIVITA ═══ */
 @media (max-width: 768px) {
+ .redenen { padding: 60px 16px; }
+ .redenen h2 { font-size: 26px; }
+ .redenen .redenen-sub { font-size: 15px; margin-bottom: 32px; }
+ .redenen-video { margin-bottom: 36px; }
+ .redenen-list { gap: 12px; }
+ .redenen-list li { padding: 16px 16px; gap: 12px; font-size: 15.5px; line-height: 1.68; border-radius: 14px; }
+ .redenen-list .arrow { width: 26px; height: 26px; font-size: 14px; }
  .hero-section { padding-top: 40px; padding-bottom: 48px; }
  .hero { flex-direction: column; text-align: center; gap: 24px; }
  .hero-left { display: contents; }
