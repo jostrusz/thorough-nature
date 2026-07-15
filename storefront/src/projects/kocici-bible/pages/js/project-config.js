@@ -35,7 +35,7 @@ var PROJECT_CONFIG = {
             "originalPrice": 749,
             "currency": "CZK",
             "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/zivos jaky si zaslouzis-01KXD2TK20J0S6PT4NNJNXCA32.png",
-            "author": "LIFE RESET™ · 350 stran · 30denní plán",
+            "author": "Anna de Vries · 340 stran · LIFE RESET™",
             "desc": "30denní systém v 5 oblastech (domov, hranice, myšlenky, návyky, energie), který vám krok za krokem pomůže postavit život, co k vám opravdu sedí. Žádné vágní afirmace — praktický plán.",
             "hook": "Pro každého, kdo chce po úklidu v hlavě uklidit i život."
         },

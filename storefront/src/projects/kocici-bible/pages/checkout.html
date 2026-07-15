@@ -2457,7 +2457,8 @@ body {
         .ob3-badge { display:inline-block; background: var(--cta); color:#fff; font-size:11px; font-weight:700; letter-spacing:1px; padding:4px 14px; border-radius:20px; }
         .ob3-title { font-family:'Recoleta', serif; font-size:19px; color:var(--heading); margin:8px 0 2px; }
         .ob3-sub { font-size:12.5px; color:var(--muted); }
-        .ob3-list { display:flex; flex-direction:column; gap:10px; }
+        .ob3-list { display:flex; flex-direction:column; gap:12px; }
+        .ob3-list .order-bump { margin: 0; }
         .ob3-card { cursor:pointer; background:#fff; border:2px dashed rgba(194,123,160,0.45); border-radius:14px; padding:14px; display:flex; gap:12px; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; -webkit-tap-highlight-color: transparent; }
         .ob3-card:hover { border-color: var(--cta); }
         .ob3-card.checked { border:2px solid var(--cta); background: rgba(194,123,160,0.04); box-shadow: 0 0 0 3px rgba(194,123,160,0.14); }
@@ -3304,7 +3305,79 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  /* ─── ORDER BUMPY — 3 karty, multi-select (max všechny), delegace ─── */
+  /* ─── ORDER BUMPY — 3 accordiony (původní grafika), multi-select ─── */
+  // Prodejní detaily per kniha — copy převzato z landing pages projektů
+  var BUMP_DETAILS = {
+    pust: {
+      meta: ['&#128214; 290 stran', '&#128221; Pracovn&iacute; se&scaron;it uvnit&#345;', '&#11088; 9,3/10 spokojenost'],
+      intro1: '<strong>Hlava, kter&aacute; nikdy nevypne?</strong> Bestseller Jorise de Vries u&#269;&iacute;, jak zastavit p&#345;&iacute;val my&scaron;lenek, zklidnit emoce a naj&iacute;t vnit&#345;n&iacute; klid. V&scaron;e postaven&eacute; na <u>neurov&#283;d&#283; a psychologii</u> &mdash; &#382;&aacute;dn&eacute; v&aacute;gn&iacute; rady ani spiritu&aacute;ln&iacute; sliby.',
+      intro2: '290 stran + kompletn&iacute; <strong>pracovn&iacute; se&scaron;it</strong> s cvi&#269;en&iacute;mi, kter&aacute; fungujou, i kdy&#382; jste &bdquo;u&#382; zkusili v&scaron;echno&ldquo;. <em>Nejobl&iacute;ben&#283;j&scaron;&iacute; &#269;esk&aacute; kniha o klidu v hlav&#283;.</em>',
+      pillarsTitle: 'Tato kniha v&aacute;m pom&#367;&#382;e s',
+      pillars: [
+        ['&#127744;', 'P&#344;EM&Iacute;T&Aacute;N&Iacute;', 'Zastavte nekone&#269;nou smy&#269;ku my&scaron;lenek, kter&aacute; v&aacute;s vy&#269;erp&aacute;v&aacute;'],
+        ['&#128564;', 'SP&Aacute;NEK', 'Us&iacute;nejte bez hlavy pln&eacute; sc&eacute;n&aacute;&#345;&#367; &bdquo;co kdyby&ldquo;'],
+        ['&#128162;', 'VZTEK &amp; K&#344;IVDY', 'Pus&#357;te, co v&aacute;s dr&#382;&iacute; &mdash; bez povinnosti &bdquo;omluvit&ldquo; druh&eacute;'],
+        ['&#128532;', 'V&Yacute;&#268;ITKY', 'P&#345;esta&#328;te se trestat za minulost'],
+        ['&#128330;', 'VNIT&#344;N&Iacute; KLID', 'Techniky, kter&eacute; zaberou hned &mdash; ne za rok terapie']
+      ],
+      results: [
+        'Ti&scaron;t&#283;nou knihu za zv&yacute;hodn&#283;n&yacute;ch <strong>599 K&#269;</strong> (b&#283;&#382;n&#283; 749 K&#269;)',
+        'Pracovn&iacute; se&scaron;it s praktick&yacute;mi cvi&#269;en&iacute;mi',
+        'Dopravu zdarma &mdash; p&#345;ibal&iacute;me ke Ko&#269;i&#269;&iacute; bibli',
+        '30denn&iacute; z&aacute;ruku vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek'
+      ],
+      comboIcon: '&#129504;',
+      combo: '<strong>Ko&#269;ka uklidn&iacute; dom&aacute;cnost &mdash; tahle kniha uklidn&iacute; hlavu.</strong> Nej&#269;ast&#283;j&scaron;&iacute; kombinace na&scaron;ich z&aacute;kazn&iacute;k&#367;.',
+      review: '&bdquo;Poprv&eacute; po letech jsem p&#345;estala v noci p&#345;em&iacute;tat. Ta kniha mi dala klid, kter&yacute; jsem si neum&#283;la p&#345;edstavit.&ldquo;',
+      reviewer: '&mdash; Lenka C., Brno'
+    },
+    zivot: {
+      meta: ['&#128214; 340 stran', '&#128197; 30denn&iacute; program', '&#11088; 4,9/5 hodnocen&iacute;'],
+      intro1: '<strong>Po&#345;&aacute;d se star&aacute;te o v&scaron;echny okolo &mdash; a na v&aacute;s nezb&yacute;v&aacute;?</strong> Anna de Vries spojila j&aacute;dro 10 sv&#283;tov&yacute;ch bestseller&#367; do metody <u>LIFE RESET&trade;</u>: 30 minut denn&#283;, 30 dn&iacute;, 5 oblast&iacute; &#382;ivota.',
+      intro2: '&#381;&aacute;dn&eacute; v&aacute;gn&iacute; afirmace. Konkr&eacute;tn&iacute; denn&iacute; kroky pro <strong>domov, hranice, hlavu, n&aacute;vyky a energii</strong> &mdash; navr&#382;en&eacute; pro zanepr&aacute;zdn&#283;n&eacute; &#382;eny, kter&eacute; nemaj&iacute; &#269;as na dal&scaron;&iacute; &uacute;koly. <em>Prost&#283; to funguje.</em>',
+      pillarsTitle: 'LIFE RESET&trade; &mdash; 5 pil&iacute;&#345;&#367;',
+      pillars: [
+        ['&#127968;', 'PROSTOR', 'Ukli&#271;te chaos, kter&yacute; v&aacute;m denn&#283; krade energii'],
+        ['&#128679;', 'HRANICE', '&#344;&iacute;kejte &bdquo;ne&ldquo; bez v&yacute;&#269;itek &mdash; poprv&eacute; po letech'],
+        ['&#127769;', 'HLAVA', 'Stop my&scaron;lenkov&eacute; spir&aacute;le ve 3 r&aacute;no'],
+        ['&#128260;', 'N&Aacute;VYKY', 'Obnovte ritu&aacute;ly, po kter&yacute;ch zbyde energie i na v&aacute;s'],
+        ['&#9889;', 'ENERGIE', '&#381;ijte pro sebe &mdash; ne jen pro o&#269;ek&aacute;v&aacute;n&iacute; ostatn&iacute;ch']
+      ],
+      results: [
+        'Ti&scaron;t&#283;nou knihu za zv&yacute;hodn&#283;n&yacute;ch <strong>599 K&#269;</strong> (b&#283;&#382;n&#283; 749 K&#269;)',
+        '30denn&iacute; pl&aacute;n krok za krokem &mdash; sta&#269;&iacute; 30 minut denn&#283;',
+        'Dopravu zdarma ve stejn&eacute;m bal&iacute;ku',
+        '30denn&iacute; z&aacute;ruku vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek'
+      ],
+      comboIcon: '&#127793;',
+      combo: '<strong>Spokojen&aacute; ko&#269;ka doma &mdash; a nov&yacute; za&#269;&aacute;tek pro v&aacute;s.</strong> Nejlep&scaron;&iacute; d&aacute;rek, kter&yacute; si m&#367;&#382;ete d&aacute;t k objedn&aacute;vce.',
+      review: '&bdquo;Pro&#269; mi tohle nikdo ne&#345;ekl d&#345;&iacute;v? Po dvou t&yacute;dnech se m&#283; man&#382;el ptal, co se se mnou stalo.&ldquo;',
+      reviewer: '&mdash; Martina K., Praha'
+    },
+    psi: {
+      meta: ['&#128214; Ti&scaron;t&#283;n&aacute; kniha', '&#128054; Ps&iacute; behaviorista', '&#11088; 9,2/10 spokojenost'],
+      intro1: '<strong>M&aacute;te doma i psa?</strong> Kone&#269;n&#283; pochopte, pro&#269; v&aacute;&scaron; pes d&#283;l&aacute; to, co d&#283;l&aacute; &mdash; a vybudujte si s n&iacute;m klidn&yacute;, poslu&scaron;n&yacute; a harmonick&yacute; vztah. Nau&#269;te se <u>mluvit jeho &#345;e&#269;&iacute;</u>.',
+      intro2: 'Pokud v&aacute;s tr&aacute;p&iacute; tahan&iacute; na vod&iacute;tku, &scaron;t&#283;k&aacute;n&iacute;, neposlu&scaron;nost nebo agresivita &mdash; tato kniha v&aacute;m d&aacute; <strong>4pil&iacute;&#345;ov&yacute; syst&eacute;m</strong>, kter&yacute; funguje u v&scaron;ech plemen a v&#283;k&#367;. <em>Bez trest&#367;, bez elektrick&yacute;ch oboj&#367;, bez frustrace.</em>',
+      pillarsTitle: 'Tato kniha v&aacute;m pom&#367;&#382;e s',
+      pillars: [
+        ['&#128054;', 'TAH&Aacute;N&Iacute; NA VOD&Iacute;TKU', 'Klidn&aacute; proch&aacute;zka bez tah&aacute;n&iacute; &mdash; i u temperamentn&iacute;ch ps&#367;'],
+        ['&#128261;', 'NEKONE&#268;N&Eacute; &Scaron;T&#282;K&Aacute;N&Iacute;', 'Zjist&#283;te p&#345;&iacute;&#269;inu a nau&#269;te psa z&#367;stat v klidu'],
+        ['&#128062;', 'NEPOSLU&Scaron;NOST', 'Pochopte ps&iacute; psychologii &mdash; a z&iacute;skejte pozornost a respekt'],
+        ['&#129455;', 'AGRESE &amp; STRACH', '&#344;e&scaron;te ko&#345;en probl&eacute;mu, ne pouh&eacute; p&#345;&iacute;znaky'],
+        ['&#129505;', 'POROZUM&#282;N&Iacute; &amp; POUTO', 'Vztah zalo&#382;en&yacute; na d&#367;v&#283;&#345;e a vz&aacute;jemn&eacute;m respektu']
+      ],
+      results: [
+        'Ti&scaron;t&#283;nou knihu za zv&yacute;hodn&#283;n&yacute;ch <strong>499 K&#269;</strong> (b&#283;&#382;n&#283; 550 K&#269;)',
+        'Dopravu zdarma &mdash; odes&iacute;l&aacute;me spole&#269;n&#283; s Ko&#269;i&#269;&iacute; bibl&iacute;',
+        '30denn&iacute; z&aacute;ruku vr&aacute;cen&iacute; pen&#283;z &mdash; bez ot&aacute;zek, bez komplikac&iacute;'
+      ],
+      comboIcon: '&#128054;',
+      combo: '<strong>Spole&#269;n&#283; s Ko&#269;i&#269;&iacute; bibl&iacute; m&aacute;te kompletn&iacute; bal&iacute;&#269;ek:</strong> spokojen&aacute; ko&#269;ka i spokojen&yacute; pes. Perfektn&iacute; kombinace pro celou zv&iacute;&#345;ec&iacute; dom&aacute;cnost.',
+      review: '&bdquo;Kone&#269;n&#283; klidn&eacute; proch&aacute;zky bez tah&aacute;n&iacute;. N&aacute;&scaron; Max (border collie) je &uacute;pln&#283; jin&yacute; pes &mdash; a j&aacute; si ve&#269;er kone&#269;n&#283; odpo&#269;inu.&ldquo;',
+      reviewer: '&mdash; Petr H., Plze&#328;'
+    }
+  };
+
   function renderOrderBumps() {
     var listEl = document.getElementById('ob3-list');
     var section = document.getElementById('order-bumps-section');
@@ -3316,24 +3389,65 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return;
     }
     listEl.innerHTML = bumps.map(function(b) {
+      var d = BUMP_DETAILS[b.id] || {};
       var save = (Number(b.originalPrice) || 0) - (Number(b.price) || 0);
       var pct = b.originalPrice ? Math.round(save / b.originalPrice * 100) : 0;
       var on = selectedBumps.some(function(x) { return x.variantId === b.variantId; });
-      return '<div class="ob3-card' + (on ? ' checked' : '') + '" data-variant="' + b.variantId + '" role="checkbox" aria-checked="' + (on ? 'true' : 'false') + '" tabindex="0">'
-        + '<div class="ob3-left">'
-        +   '<div class="ob3-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>'
-        +   '<div class="ob3-cover"><img src="' + encodeURI(b.image || '') + '" alt="' + b.name + '" loading="lazy"></div>'
+      var img = '<img src="' + encodeURI(b.image || '') + '" alt="' + b.name + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;">';
+      var priceStr = Math.round(b.price) + ' K&#269;';
+      var oldStr = b.originalPrice ? Math.round(b.originalPrice) + ' K&#269;' : '';
+      return '<div class="order-bump' + (on ? ' checked' : '') + '" data-variant="' + b.variantId + '">'
+        // ── header (klik = toggle výběru) ──
+        + '<div class="order-bump-header" data-role="bump-header">'
+        +   '<div class="order-bump-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>'
+        +   '<div class="order-bump-thumb">' + img + '</div>'
+        +   '<div class="order-bump-header-text">'
+        +     '<div class="order-bump-top-row">'
+        +       '<div class="order-bump-tag">Jednor&aacute;zov&aacute; nab&iacute;dka</div>'
+        +       (pct > 0 ? '<div class="order-bump-save-tag">-' + pct + '%</div>' : '')
+        +     '</div>'
+        +     '<div class="order-bump-title">P&#345;idej <em>' + b.name + '</em></div>'
+        +     '<div class="order-bump-prices-inline">'
+        +       (oldStr ? '<span class="order-bump-old-price">' + oldStr + '</span>' : '')
+        +       '<span class="order-bump-new-price">' + priceStr + '</span>'
+        +       (save > 0 ? '<span class="order-bump-inline-save">U&scaron;et&#345;&iacute;te ' + save + ' K&#269;</span>' : '')
+        +     '</div>'
+        +   '</div>'
+        +   '<button type="button" class="order-bump-expand" data-role="bump-expand" aria-expanded="false" aria-label="V&iacute;ce informac&iacute;">'
+        +     '<span class="expand-label">V&iacute;ce info</span>'
+        +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>'
+        +   '</button>'
         + '</div>'
-        + '<div class="ob3-body">'
-        +   '<div class="ob3-toprow"><span class="ob3-name">' + b.name + '</span>'
-        +   (pct > 0 ? '<span class="ob3-pct">-' + pct + '%</span>' : '') + '</div>'
-        +   (b.author ? '<div class="ob3-author">' + b.author + '</div>' : '')
-        +   (b.desc ? '<div class="ob3-desc">' + b.desc + '</div>' : '')
-        +   (b.hook ? '<div class="ob3-hook">&rarr; ' + b.hook + '</div>' : '')
-        +   '<div class="ob3-prices">'
-        +     (b.originalPrice ? '<span class="ob3-old">' + Math.round(b.originalPrice) + ' K&#269;</span>' : '')
-        +     '<span class="ob3-new">' + Math.round(b.price) + ' K&#269;</span>'
-        +     (save > 0 ? '<span class="ob3-save">U&scaron;et&#345;&iacute;te ' + save + ' K&#269;</span>' : '')
+        // ── accordion detail — plný prodejní obsah ──
+        + '<div class="order-bump-detail" data-role="bump-detail">'
+        +   '<div class="order-bump-detail-inner">'
+        +     '<div class="order-bump-detail-top">'
+        +       '<div class="order-bump-img">' + img + '</div>'
+        +       '<div class="order-bump-detail-info">'
+        +         '<div class="order-bump-name">' + b.name + '</div>'
+        +         (b.author ? '<div class="order-bump-author">' + b.author + '</div>' : '')
+        +         '<div class="order-bump-meta">' + (d.meta || []).map(function(m) { return '<span>' + m + '</span>'; }).join('') + '</div>'
+        +         '<div class="order-bump-prices">'
+        +           (oldStr ? '<span class="order-bump-old-price">' + oldStr + '</span>' : '')
+        +           '<span class="order-bump-new-price">' + priceStr + '</span>'
+        +           (save > 0 ? '<span class="order-bump-save">U&scaron;et&#345;&iacute;te ' + save + ' K&#269;</span>' : '')
+        +         '</div>'
+        +       '</div>'
+        +     '</div>'
+        +     '<div class="order-bump-description">'
+        +       (d.intro1 ? '<p class="ob-intro">' + d.intro1 + '</p>' : '')
+        +       (d.intro2 ? '<p>' + d.intro2 + '</p>' : '')
+        +     '</div>'
+        +     (d.pillars ? '<div class="ob-pillars"><div class="ob-pillars-title">' + (d.pillarsTitle || '') + '</div><div class="ob-pillar-grid">'
+        +       d.pillars.map(function(p) {
+                  return '<div class="ob-pillar"><span class="ob-pillar-icon">' + p[0] + '</span><div><strong>' + p[1] + '</strong><span>' + p[2] + '</span></div></div>';
+                }).join('') + '</div></div>' : '')
+        +     (d.results ? '<div class="ob-results"><div class="ob-results-title">Co z&iacute;sk&aacute;te&hellip;</div>'
+        +       d.results.map(function(r) {
+                  return '<div class="ob-result-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg><span>' + r + '</span></div>';
+                }).join('') + '</div>' : '')
+        +     (d.combo ? '<div class="ob-combo-box"><div class="ob-combo-icon">' + (d.comboIcon || '&#127873;') + '</div><div class="ob-combo-text">' + d.combo + '</div></div>' : '')
+        +     (d.review ? '<div class="ob-social-proof"><span>&#11088;&#11088;&#11088;&#11088;&#11088;</span><span>' + d.review + '</span><span class="ob-reviewer">' + (d.reviewer || '') + '</span></div>' : '')
         +   '</div>'
         + '</div>'
         + '</div>';
@@ -3343,29 +3457,34 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   (function setupOrderBumps() {
     var listEl = document.getElementById('ob3-list');
     if (!listEl) return;
-    function toggleBump(card) {
-      var vid = card.getAttribute('data-variant');
+    function findBump(vid) {
       var bumps = PROJECT_CONFIG.upsellProducts || [];
-      var bump = null;
-      for (var i = 0; i < bumps.length; i++) if (bumps[i].variantId === vid) bump = bumps[i];
+      for (var i = 0; i < bumps.length; i++) if (bumps[i].variantId === vid) return bumps[i];
+      return null;
+    }
+    listEl.addEventListener('click', function(e) {
+      var card = e.target.closest('.order-bump');
+      if (!card) return;
+      // "Více info" → toggle accordion detail (nemění výběr)
+      var expandBtn = e.target.closest('[data-role="bump-expand"]');
+      if (expandBtn) {
+        e.preventDefault();
+        var detail = card.querySelector('[data-role="bump-detail"]');
+        var isOpen = detail.classList.contains('open');
+        detail.classList.toggle('open', !isOpen);
+        expandBtn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+        return;
+      }
+      // klik kamkoli jinam na kartu → toggle výběru
+      var bump = findBump(card.getAttribute('data-variant'));
       if (!bump) return;
       var idx = -1;
-      for (var j = 0; j < selectedBumps.length; j++) if (selectedBumps[j].variantId === vid) idx = j;
+      for (var j = 0; j < selectedBumps.length; j++) if (selectedBumps[j].variantId === bump.variantId) idx = j;
       if (idx >= 0) selectedBumps.splice(idx, 1); else selectedBumps.push(bump);
       orderBumpActive = selectedBumps.length > 0;
       card.classList.toggle('checked', idx < 0);
-      card.setAttribute('aria-checked', idx < 0 ? 'true' : 'false');
       recalculateOrderSummary();
-      try { track('order_bump_toggled', { payload: { name: bump.name, selected: idx < 0, total_bumps: selectedBumps.length } }); } catch (e) {}
-    }
-    listEl.addEventListener('click', function(e) {
-      var card = e.target.closest('.ob3-card');
-      if (card) toggleBump(card);
-    });
-    listEl.addEventListener('keydown', function(e) {
-      if (e.key !== ' ' && e.key !== 'Enter') return;
-      var card = e.target.closest('.ob3-card');
-      if (card) { e.preventDefault(); toggleBump(card); }
+      try { track('order_bump_toggled', { payload: { name: bump.name, selected: idx < 0, total_bumps: selectedBumps.length } }); } catch (e2) {}
     });
   })();
 
