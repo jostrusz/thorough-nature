@@ -702,6 +702,110 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
           </div>
         </div>
 
+        {/* ====== CROSS-SELL — knihy, které v objednávce NEJSOU (plná cena) ====== */}
+        {(() => {
+          const CATALOG = [
+            {
+              match: ['pusť to', 'pust to'],
+              title: 'Pusť to, co tě ničí',
+              tagline: 'Hlava, která nikdy nevypne? Bestseller o klidu v hlavě — od přemítání k vnitřnímu klidu.',
+              price: '749 Kč',
+              url: 'https://www.pusttocotenici.cz/',
+              image: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/pust-to-co-te-nici-admin-01KTYC1V1ZYVZ92WZYE7SA8X2Z.png',
+            },
+            {
+              match: ['život, jaký', 'zivot, jaky', 'zasloužíš', 'zasluzis'],
+              title: 'Život, jaký si zasloužíš',
+              tagline: 'Metoda LIFE RESET™ — 30 minut denně, 30 dní. Pro ženy, na které na konci dne nezbyde nic.',
+              price: '749 Kč',
+              url: 'https://www.nejdriv-ja.cz/',
+              image: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/zivos jaky si zaslouzis-01KXD2TK20J0S6PT4NNJNXCA32.png',
+            },
+            {
+              match: ['psí superživot', 'psi superzivot'],
+              title: 'Psí superživot',
+              tagline: 'Máte doma i psa? Klidné procházky a pes, co večer prostě leží na gauči. Bez trestů.',
+              price: '550 Kč',
+              url: 'https://www.psi-superzivot.cz/',
+              image: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/psi-superzivot-coverr-01KKBV5XSNXVFB49XWWKSZRBVE.png',
+            },
+          ]
+          const orderedTitles = items
+            .map((it: any) => `${it.product_title || ''} ${it.title || ''}`.toLowerCase())
+            .join(' | ')
+          const missing = CATALOG.filter(
+            (c) => !c.match.some((m) => orderedTitles.includes(m))
+          )
+          if (!missing.length) return null
+          return (
+            <div style={{ padding: `8px ${pad} 0` }}>
+              <Text style={{
+                fontFamily: font,
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase' as const,
+                letterSpacing: '1.5px',
+                color: colors.textMuted,
+                margin: '0 0 4px',
+              }}>
+                Mohlo by tě zajímat
+              </Text>
+              <Text style={{
+                fontFamily: font,
+                fontSize: '13px',
+                color: colors.textBody,
+                margin: '0 0 14px',
+                lineHeight: '1.5',
+              }}>
+                Čtenáři Kočičí bible si nejčastěji přikupují tyhle knihy:
+              </Text>
+              {missing.map((c) => (
+                <div key={c.title} style={{
+                  border: `1px solid ${colors.boxBorder}`,
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  marginBottom: '10px',
+                  backgroundColor: '#FFFFFF',
+                }}>
+                  <table role="presentation" width="100%" cellPadding="0" cellSpacing="0" style={{ borderCollapse: 'collapse' as const }}>
+                    <tbody>
+                      <tr>
+                        <td width="56" valign="top" style={{ paddingRight: '14px' }}>
+                          <Link href={c.url}>
+                            <Img src={c.image} alt={c.title} width="56" height="78"
+                              style={{ width: '56px', height: '78px', objectFit: 'contain' as const, display: 'block' }} />
+                          </Link>
+                        </td>
+                        <td valign="top">
+                          <Text style={{ fontFamily: font, fontSize: '15px', fontWeight: 700, color: colors.textDark, margin: '0 0 3px' }}>
+                            {c.title}
+                          </Text>
+                          <Text style={{ fontFamily: font, fontSize: '12.5px', color: colors.textBody, lineHeight: '1.5', margin: '0 0 8px' }}>
+                            {c.tagline}
+                          </Text>
+                          <Link href={c.url} style={{
+                            fontFamily: font,
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            backgroundColor: colors.accent,
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            display: 'inline-block',
+                          }}>
+                            Koupit za {c.price} &rarr;
+                          </Link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          )
+        })()}
+
         {/* ====== SIGNATURE ====== */}
         <div style={{ padding: `24px ${pad} 28px` }}>
           <Text style={{
