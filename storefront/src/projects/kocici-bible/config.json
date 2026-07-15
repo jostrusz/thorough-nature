@@ -81,5 +81,47 @@
     "voorwaarden": "voorwaarden.html",
     "verzending": "verzending.html",
     "retourbeleid": "retourbeleid.html"
-  }
+  },
+  "upsellProducts": [
+    {
+      "id": "pust",
+      "name": "Pusť to, co tě ničí",
+      "handle": "pust-to-co-te-nici-kb",
+      "variantId": "variant_01KXJ13PRW1SJCDBPSVZKKCDDP",
+      "price": 599,
+      "originalPrice": 749,
+      "currency": "CZK",
+      "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/pust-to-co-te-nici-admin-01KTYC1V1ZYVZ92WZYE7SA8X2Z.png",
+      "author": "Joris de Vries · 290 stran + pracovní sešit",
+      "desc": "Bestseller pro každého, komu v hlavě jede nekonečný proud myšlenek. Jak zastavit přemítání, zklidnit emoce a najít vnitřní klid — postaveno na neurovědě a psychologii, žádné vágní rady.",
+      "hook": "Ideální pro vás nebo jako dárek pro někoho, kdo „nedokáže vypnout“."
+    },
+    {
+      "id": "zivot",
+      "name": "Život, jaký si zasloužíš",
+      "handle": "zivot-ktery-si-zasluzis-kb",
+      "variantId": "variant_01KXJ141PFX74JEGZKEG1HD3ZE",
+      "price": 599,
+      "originalPrice": 749,
+      "currency": "CZK",
+      "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/zivos jaky si zaslouzis-01KXD2TK20J0S6PT4NNJNXCA32.png",
+      "author": "LIFE RESET™ · 350 stran · 30denní plán",
+      "desc": "30denní systém v 5 oblastech (domov, hranice, myšlenky, návyky, energie), který vám krok za krokem pomůže postavit život, co k vám opravdu sedí. Žádné vágní afirmace — praktický plán.",
+      "hook": "Pro každého, kdo chce po úklidu v hlavě uklidit i život."
+    },
+    {
+      "id": "psi",
+      "name": "Psí superživot",
+      "handle": "psi-superzivot-kb",
+      "variantId": "variant_01KXJ14CKSB3WQFS7XE30QTW6S",
+      "price": 499,
+      "originalPrice": 550,
+      "currency": "CZK",
+      "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/psi-superzivot-coverr-01KKBV5XSNXVFB49XWWKSZRBVE.png",
+      "author": "Michal Peterka · zdraví, výživa & dlouhověkost",
+      "desc": "Máte doma i psa? Kompletní průvodce zdravím, výživou a dlouhověkostí vašeho psa od stejného autora. Silná imunita, lesklá srst a spokojený parťák na dlouhá léta.",
+      "hook": "Kočka + pes pod jednou střechou = kompletní zvířecí knihovna."
+    }
+  ],
+  "orderBumpEnabled": true
 }

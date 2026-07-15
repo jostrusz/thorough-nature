@@ -872,6 +872,21 @@ body { background: var(--bg); }
                 : 'Tištěná kniha — posíláme Zásilkovnou';
             }
           }
+          // Order bumpy — autoritativně z položek objednávky
+          var bumpRows = [];
+          for (var bj = 0; bj < orderItems.length; bj++) {
+            var bit = orderItems[bj];
+            var bTitle = (bit.product_title || bit.title || '');
+            var bSku = (bit.variant_sku || bit.variant && bit.variant.sku || '');
+            if (/^FEE-/.test(bSku)) continue;                              // poplatky (dobírka/doprava)
+            if (bTitle.toLowerCase().indexOf('kočičí bible') !== -1) continue; // hlavní kniha
+            bumpRows.push({
+              name: bTitle.replace(/\s*[–—-]\s*upsell.*$/i, ''),
+              price: (Number(bit.unit_price) || 0) * (bit.quantity || 1)
+            });
+          }
+          renderTyBumps(bumpRows.length ? bumpRows : null);
+
           // Autoritativní celková cena z objednávky
           if (data.order.total != null) {
             var totalEl = document.getElementById('ty-total-price');
@@ -946,6 +961,32 @@ body { background: var(--bg); }
 
   // 2e. Aktualizuj hlavní položku podle bundle qty
   var orderItemsEl = document.getElementById('ty-order-items');
+
+  /** Order bumpy v souhrnu — vykreslí řádky za hlavní knihu (idempotentní).
+   *  rows = [{name, price}]; null = nechat stávající beze změny. */
+  function renderTyBumps(rows) {
+    if (rows == null || !orderItemsEl) return;
+    orderItemsEl.querySelectorAll('.ty-bump-row').forEach(function(el) { el.remove(); });
+    var mainRow = orderItemsEl.querySelector('.ty-order-item');
+    rows.slice().reverse().forEach(function(b) {
+      if (!b || !b.name) return;
+      var row = document.createElement('div');
+      row.className = 'ty-order-item ty-bump-row';
+      row.innerHTML = '<div class="ty-order-icon book">&#127873;</div><div>'
+        + '<div class="ty-order-name"></div>'
+        + '<div class="ty-order-desc">Bonusov&aacute; kniha &mdash; ve stejn&eacute;m bal&iacute;ku'
+        + (b.price ? ' &middot; ' + formatCzk(b.price) : '') + '</div></div>';
+      row.querySelector('.ty-order-name').textContent = b.name;
+      if (mainRow && mainRow.nextSibling) mainRow.parentNode.insertBefore(row, mainRow.nextSibling);
+      else orderItemsEl.appendChild(row);
+    });
+  }
+
+  // Okamžitý render z localStorage (API sync později přepíše autoritativními daty)
+  try {
+    var lsBumps = JSON.parse(localStorage.getItem('medusa_order_bumps') || '[]');
+    if (lsBumps.length) renderTyBumps(lsBumps);
+  } catch (e) {}
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {

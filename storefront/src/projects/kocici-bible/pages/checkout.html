@@ -2382,14 +2382,8 @@ body {
         <span class="msb-line-label" id="msb-product-name">Kočičí bible</span>
         <span class="msb-line-val" id="msb-product-price">550&nbsp;Kč</span>
       </div>
-      <!-- Order bump (skrytý pokud není vybrán) -->
-      <div class="msb-line bump" id="msb-bump-line" style="display:none;">
-        <span class="msb-line-label" id="msb-bump-name">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Bonusová kniha
-        </span>
-        <span class="msb-line-val" id="msb-bump-price">399&nbsp;Kč</span>
-      </div>
+      <!-- Order bumpy (dynamicky) -->
+      <div id="msb-bumps"></div>
       <!-- Mezisoučet -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
         <span class="msb-line-label">Mezisoučet</span>
@@ -2456,130 +2450,44 @@ body {
           </div>
         </div>
 
-        <!-- ═══ ORDER BUMP — accordion s detailem produktu ═══ -->
-        <div class="order-bump animate-in" id="order-bump">
-          <!-- Hlavička — obrázek + checkbox + info + šipka (vždy viditelné) -->
-          <div class="order-bump-header" id="order-bump-header">
-            <div class="order-bump-checkbox" id="order-bump-check">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="order-bump-thumb" id="order-bump-thumb">
-              <!-- Obrázek z Medusa admin — malý thumbnail v headeru -->
-            </div>
-            <div class="order-bump-header-text">
-              <div class="order-bump-top-row">
-                <div class="order-bump-tag">Jednorázová nabídka</div>
-                <div class="order-bump-save-tag" id="order-bump-pct-tag">-27%</div>
-              </div>
-              <div class="order-bump-title">Přidej <em id="order-bump-title-name">bonusovou knihu</em></div>
-              <div class="order-bump-prices-inline">
-                <span class="order-bump-old-price" id="order-bump-old-price">550&nbsp;Kč</span>
-                <span class="order-bump-new-price" id="order-bump-new-price">399&nbsp;Kč</span>
-                <span class="order-bump-inline-save" id="order-bump-inline-save">Ušetříte 151&nbsp;Kč</span>
-              </div>
-            </div>
-            <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="Více informací">
-              <span class="expand-label">Více info</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
+        <!-- ═══ ORDER BUMPY — výběr bonusových knih (multi-select) ═══ -->
+        <style>
+        .ob3-section { margin: 18px 0 22px; }
+        .ob3-head { text-align: center; margin-bottom: 12px; }
+        .ob3-badge { display:inline-block; background: var(--cta); color:#fff; font-size:11px; font-weight:700; letter-spacing:1px; padding:4px 14px; border-radius:20px; }
+        .ob3-title { font-family:'Recoleta', serif; font-size:19px; color:var(--heading); margin:8px 0 2px; }
+        .ob3-sub { font-size:12.5px; color:var(--muted); }
+        .ob3-list { display:flex; flex-direction:column; gap:10px; }
+        .ob3-card { cursor:pointer; background:#fff; border:2px dashed rgba(194,123,160,0.45); border-radius:14px; padding:14px; display:flex; gap:12px; transition: border-color .2s ease, box-shadow .2s ease, background .2s ease; -webkit-tap-highlight-color: transparent; }
+        .ob3-card:hover { border-color: var(--cta); }
+        .ob3-card.checked { border:2px solid var(--cta); background: rgba(194,123,160,0.04); box-shadow: 0 0 0 3px rgba(194,123,160,0.14); }
+        .ob3-left { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .ob3-check { width:22px; height:22px; border-radius:6px; border:2px solid rgba(45,27,61,0.25); background:#fff; display:flex; align-items:center; justify-content:center; transition: all .2s ease; }
+        .ob3-card.checked .ob3-check { border-color: var(--cta); background: var(--cta); }
+        .ob3-check svg { width:14px; height:14px; color:#fff; opacity:0; transition: opacity .15s ease; }
+        .ob3-card.checked .ob3-check svg { opacity:1; }
+        .ob3-cover { width:58px; height:82px; border-radius:6px; overflow:hidden; box-shadow:0 3px 8px rgba(45,27,61,0.25); background:#EDD9E5; }
+        .ob3-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+        .ob3-body { flex:1; min-width:0; }
+        .ob3-toprow { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+        .ob3-name { font-size:15px; font-weight:700; color:var(--heading); font-family:'DM Sans', sans-serif; }
+        .ob3-pct { background:rgba(39,174,96,0.12); color:#1e8449; font-size:10px; font-weight:800; padding:2px 8px; border-radius:12px; }
+        .ob3-author { font-size:11px; color:var(--muted); margin:2px 0 6px; }
+        .ob3-desc { font-size:12.5px; line-height:1.55; color:var(--body); }
+        .ob3-hook { font-size:11.5px; color:var(--heading); margin-top:5px; font-style:italic; }
+        .ob3-prices { margin-top:8px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+        .ob3-old { font-size:12.5px; color:var(--muted); text-decoration:line-through; }
+        .ob3-new { font-size:17px; font-weight:800; color:var(--cta); }
+        .ob3-save { font-size:11px; color:#1e8449; font-weight:700; }
+        @media (max-width:480px){ .ob3-card { padding:12px; gap:10px; } .ob3-cover { width:50px; height:72px; } .ob3-desc { font-size:12px; } }
+        </style>
+        <div class="ob3-section animate-in" id="order-bumps-section">
+          <div class="ob3-head">
+            <span class="ob3-badge">&#127873; JEDNOR&Aacute;ZOV&Aacute; NAB&Iacute;DKA JEN TE&#270;</span>
+            <div class="ob3-title">P&#345;idejte si dal&#353;&iacute; bestseller do bal&iacute;ku</div>
+            <div class="ob3-sub">Po&scaron;leme ho ve stejn&eacute;m bal&iacute;ku &mdash; bez dal&scaron;&iacute;ho po&scaron;tovn&eacute;ho. Sta&#269;&iacute; kliknout:</div>
           </div>
-
-          <!-- Accordion detail — rozbalovací info o produktu -->
-          <div class="order-bump-detail" id="order-bump-detail">
-            <div class="order-bump-detail-inner">
-
-              <!-- Kniha info + obrázek -->
-              <div class="order-bump-detail-top">
-                <div class="order-bump-img" id="order-bump-img">
-                  <!-- Obrázek z Medusa admin -->
-                </div>
-                <div class="order-bump-detail-info">
-                  <div class="order-bump-name" id="order-bump-name">Bonusová kniha</div>
-                  <div class="order-bump-author"></div>
-                  <div class="order-bump-meta">
-                    <span>&#128214; Tištěná kniha</span>
-                    <span>&#128054; Psí behaviorista</span>
-                    <span>&#11088; 9,2/10 spokojenost zákazníků</span>
-                  </div>
-                  <div class="order-bump-prices">
-                    <span class="order-bump-old-price" id="order-bump-detail-old">550&nbsp;Kč</span>
-                    <span class="order-bump-new-price" id="order-bump-detail-new">399&nbsp;Kč</span>
-                    <span class="order-bump-save" id="order-bump-detail-save">Ušetříte 151&nbsp;Kč</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Úvod -->
-              <div class="order-bump-description">
-                <p class="ob-intro"><strong>Máte doma i psa?</strong> Konečně pochopte, proč váš pes dělá to, co dělá &mdash; a vybudujte si s ním klidný, poslušný a harmonický vztah. Naučte se <u>mluvit jeho řečí</u>.</p>
-                <p>Pokud vás trápí tahání na vodítku, štěkání, neposlušnost nebo agresivita &mdash; tato kniha vám dá <strong>4-pilířový systém</strong>, který funguje u všech plemen a věků. Psychologie psa, srozumitelně. <em>Bez trestů, bez elektrických obojků, bez frustrace.</em></p>
-              </div>
-
-              <!-- Klíčové body -->
-              <div class="ob-pillars">
-                <div class="ob-pillars-title">Tato kniha vám pomůže s</div>
-                <div class="ob-pillar-grid">
-                  <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#128054;</span>
-                    <div><strong>TAHÁNÍ NA VODÍTKU</strong><span>Klidná procházka bez tahání &mdash; i u temperamentních psů</span></div>
-                  </div>
-                  <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#128261;</span>
-                    <div><strong>NEKONEČNÉ ŠTĚKÁNÍ</strong><span>Zjistěte příčinu a naučte psa zůstat v klidu</span></div>
-                  </div>
-                  <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#128062;</span>
-                    <div><strong>NEPOSLUŠNOST</strong><span>Pochopte psí psychologii &mdash; a získejte pozornost a respekt</span></div>
-                  </div>
-                  <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#129455;</span>
-                    <div><strong>AGRESE &amp; STRACH</strong><span>Řešte kořen problému, ne pouhé příznaky</span></div>
-                  </div>
-                  <div class="ob-pillar">
-                    <span class="ob-pillar-icon">&#129505;</span>
-                    <div><strong>POROZUMĚNÍ &amp; POUTO</strong><span>Vybudujte vztah založený na důvěře a vzájemném respektu</span></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Co dosáhneš -->
-              <div class="ob-results">
-                <div class="ob-results-title">Co získáte&hellip;</div>
-                <div class="ob-result-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Tištěnou bonusovou knihu za zvýhodněnou cenu</span>
-                </div>
-                <div class="ob-result-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Dopravu zdarma a 30denní záruku vrácení peněz</span>
-                </div>
-                <div class="ob-result-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>Dopravu zdarma &mdash; odesíláme společně s tvou objednávkou knihy Kočičí bible</span>
-                </div>
-                <div class="ob-result-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>30denní záruku vrácení peněz &mdash; bez otázek, bez komplikací</span>
-                </div>
-              </div>
-
-              <!-- Highlight / CTA box -->
-              <div class="ob-combo-box">
-                <div class="ob-combo-icon">&#128054;</div>
-                <div class="ob-combo-text">
-                  <strong>Společně s knihou <em>Kočičí bible</em> máš kompletní balíček:</strong> spokojená kočka i spokojený pes. Perfektní kombinace pro celou zvířecí domácnost.
-                </div>
-              </div>
-
-              <!-- Social proof mini -->
-              <div class="ob-social-proof">
-                <span>&#11088;&#11088;&#11088;&#11088;&#11088;</span>
-                <span>&ldquo;Konečně klidné procházky bez tahání. Náš Max (border collie) je úplně jiný pes &mdash; a já si večer konečně odpočinu.&rdquo;</span>
-                <span class="ob-reviewer">&mdash; Petr H., Plzeň</span>
-              </div>
-
-            </div>
-          </div>
+          <div class="ob3-list" id="ob3-list"><!-- karty generuje JS z PROJECT_CONFIG.upsellProducts --></div>
         </div>
 
         <!-- ═══ SEKCE 1: KONTAKT ═══ -->
@@ -2912,14 +2820,8 @@ body {
         <span class="bonus-text">Doprava zdarma + 30denní záruka vrácení peněz</span>
       </div>
 
-      <!-- Order bump řádek v summary (skrytý dokud nezaškrtne) -->
-      <div class="summary-line" id="summary-order-bump" style="display:none;padding:8px 0;border-top:1px dashed rgba(194,123,160,0.2);">
-        <span id="summary-bump-name" style="font-size:13px;display:flex;align-items:center;gap:4px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-          Bonusová kniha
-        </span>
-        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">399&nbsp;Kč</span>
-      </div>
+      <!-- Order bumpy v summary (dynamicky) -->
+      <div id="summary-bumps"></div>
 
       <div class="summary-line" id="summary-subtotal">
         <span>Mezisoučet</span>
@@ -3184,7 +3086,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /* ─── STAV: Bundle + Order Bump ─── */
   var selectedBundleQty = 1;       // Aktuálně vybraný počet knih (1-4)
   var selectedBundlePrice = PROJECT_CONFIG.bundleOptions[0].price; // Cena za bundle
-  var orderBumpActive = false;      // Je order bump zaškrtnutý?
+  var orderBumpActive = false;      // Odvozeno: je vybraný aspoň jeden bump?
+  var selectedBumps = [];           // Vybrané order bumpy (objekty z PROJECT_CONFIG.upsellProducts)
+  function bumpTotal() { var t = 0; for (var i = 0; i < selectedBumps.length; i++) t += Number(selectedBumps[i].price) || 0; return t; }
 
   // FB Pixel + CAPI: InitiateCheckout on page load (skip on payment return to avoid double firing)
   var isPaymentReturn = window.location.search.indexOf('payment_return=1') !== -1 || window.location.search.indexOf('redirect_status=') !== -1;
@@ -3211,7 +3115,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Získej aktuální celkovou cenu (bundle + order bump)
   function getCurrentTotal() {
     var total = selectedBundlePrice;
-    if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    total += bumpTotal();
     if (selectedMethod === 'cod') total += 30;
     if (selectedShipping === 'home') total += 20;
     return total;
@@ -3249,11 +3153,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var desktopName = document.getElementById('desktop-product-name');
     if (desktopName) desktopName.textContent = productName;
 
-    // Order bump řádek v desktop summary
-    var bumpSummary = document.getElementById('summary-order-bump');
-    if (bumpSummary) {
-      bumpSummary.style.display = orderBumpActive ? 'flex' : 'none';
-    }
+    // Order bumpy — dynamické řádky v desktop summary + mobilním panelu
+    var bumpRowsHtml = selectedBumps.map(function(b) {
+      return '<div class="summary-line" style="padding:6px 0;border-top:1px dashed rgba(194,123,160,0.2);">'
+        + '<span style="font-size:13px;display:flex;align-items:center;gap:4px;">'
+        + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+        + b.name + '</span>'
+        + '<span style="font-weight:600;color:var(--cta);">' + formatPrice(b.price) + '</span></div>';
+    }).join('');
+    var summaryBumps = document.getElementById('summary-bumps');
+    if (summaryBumps) summaryBumps.innerHTML = bumpRowsHtml;
+    var msbBumps = document.getElementById('msb-bumps');
+    if (msbBumps) msbBumps.innerHTML = selectedBumps.map(function(b) {
+      return '<div class="msb-line bump"><span class="msb-line-label">+ ' + b.name + '</span>'
+        + '<span class="msb-line-val">' + formatPrice(b.price) + '</span></div>';
+    }).join('');
 
     // COD fee řádek — zobraz/skryj podle vybrané platební metody
     var isCod = selectedMethod === 'cod';
@@ -3303,15 +3217,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
       var parts = ['Paperback · ' + selectedBundleQty + '× kniha'];
-      if (orderBumpActive) parts.push('+ ' + ((PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'bonusová kniha'));
+      for (var bi = 0; bi < selectedBumps.length; bi++) parts.push('+ ' + selectedBumps[bi].name);
       msbSubtitle.textContent = parts.join(' ');
     }
 
     // Items label pod cenou
     var msbItemsLabel = document.getElementById('msb-items-label');
     if (msbItemsLabel) {
-      var itemCount = orderBumpActive ? 2 : 1;
-      msbItemsLabel.textContent = itemCount === 1 ? 'Celkem' : itemCount + ' položky';
+      var itemCount = 1 + selectedBumps.length;
+      msbItemsLabel.textContent = itemCount === 1 ? 'Celkem' : itemCount + (itemCount >= 5 ? ' položek' : ' položky');
     }
 
     // Produkt v rozevřeném panelu
@@ -3320,9 +3234,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbProductPrice = document.getElementById('msb-product-price');
     if (msbProductPrice) msbProductPrice.textContent = formatPrice(selectedBundlePrice);
 
-    // Order bump v rozevřeném panelu
-    var msbBumpLine = document.getElementById('msb-bump-line');
-    if (msbBumpLine) msbBumpLine.style.display = orderBumpActive ? 'flex' : 'none';
+    // Order bumpy v rozevřeném panelu se renderují výše (#msb-bumps)
 
     // Mezisoučet, DPH, celkem v rozevřeném panelu
     var msbSubtotal = document.getElementById('msb-subtotal');
@@ -3392,123 +3304,90 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  /* ─── ORDER BUMP — event handling (delegace) ─── */
-  // Čistá event delegace — žádné inline onclick
-  (function setupOrderBump() {
-    var header = document.getElementById('order-bump-header');
-    var expandBtn = document.getElementById('order-bump-expand-btn');
-    if (!header) return;
-
-    // Klik na EXPAND tlačítko → toggle accordion detail (NE checkbox)
-    if (expandBtn) {
-      expandBtn.addEventListener('click', function(e) {
-        e.stopPropagation(); // Zabraň propagaci na header
-        e.preventDefault();
-        var detail = document.getElementById('order-bump-detail');
-        if (!detail) return;
-        var isOpen = detail.classList.contains('open');
-        detail.classList.toggle('open', !isOpen);
-        expandBtn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
-      });
+  /* ─── ORDER BUMPY — 3 karty, multi-select (max všechny), delegace ─── */
+  function renderOrderBumps() {
+    var listEl = document.getElementById('ob3-list');
+    var section = document.getElementById('order-bumps-section');
+    var bumps = (PROJECT_CONFIG.upsellProducts || []).filter(function(b) { return b && b.variantId; });
+    if (!listEl || !section) return;
+    if (!bumps.length || PROJECT_CONFIG.orderBumpEnabled === false) {
+      section.style.display = 'none';
+      selectedBumps = []; orderBumpActive = false;
+      return;
     }
+    listEl.innerHTML = bumps.map(function(b) {
+      var save = (Number(b.originalPrice) || 0) - (Number(b.price) || 0);
+      var pct = b.originalPrice ? Math.round(save / b.originalPrice * 100) : 0;
+      var on = selectedBumps.some(function(x) { return x.variantId === b.variantId; });
+      return '<div class="ob3-card' + (on ? ' checked' : '') + '" data-variant="' + b.variantId + '" role="checkbox" aria-checked="' + (on ? 'true' : 'false') + '" tabindex="0">'
+        + '<div class="ob3-left">'
+        +   '<div class="ob3-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg></div>'
+        +   '<div class="ob3-cover"><img src="' + encodeURI(b.image || '') + '" alt="' + b.name + '" loading="lazy"></div>'
+        + '</div>'
+        + '<div class="ob3-body">'
+        +   '<div class="ob3-toprow"><span class="ob3-name">' + b.name + '</span>'
+        +   (pct > 0 ? '<span class="ob3-pct">-' + pct + '%</span>' : '') + '</div>'
+        +   (b.author ? '<div class="ob3-author">' + b.author + '</div>' : '')
+        +   (b.desc ? '<div class="ob3-desc">' + b.desc + '</div>' : '')
+        +   (b.hook ? '<div class="ob3-hook">&rarr; ' + b.hook + '</div>' : '')
+        +   '<div class="ob3-prices">'
+        +     (b.originalPrice ? '<span class="ob3-old">' + Math.round(b.originalPrice) + ' K&#269;</span>' : '')
+        +     '<span class="ob3-new">' + Math.round(b.price) + ' K&#269;</span>'
+        +     (save > 0 ? '<span class="ob3-save">U&scaron;et&#345;&iacute;te ' + save + ' K&#269;</span>' : '')
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
 
-    // Klik na HEADER (mimo expand button) → toggle checkbox
-    header.addEventListener('click', function(e) {
-      // Pokud uživatel klikl na expand button, nic nedělej (řeší se výše)
-      if (e.target.closest('.order-bump-expand')) return;
-      orderBumpActive = !orderBumpActive;
-      var bumpEl = document.getElementById('order-bump');
-      if (bumpEl) bumpEl.classList.toggle('checked', orderBumpActive);
+  (function setupOrderBumps() {
+    var listEl = document.getElementById('ob3-list');
+    if (!listEl) return;
+    function toggleBump(card) {
+      var vid = card.getAttribute('data-variant');
+      var bumps = PROJECT_CONFIG.upsellProducts || [];
+      var bump = null;
+      for (var i = 0; i < bumps.length; i++) if (bumps[i].variantId === vid) bump = bumps[i];
+      if (!bump) return;
+      var idx = -1;
+      for (var j = 0; j < selectedBumps.length; j++) if (selectedBumps[j].variantId === vid) idx = j;
+      if (idx >= 0) selectedBumps.splice(idx, 1); else selectedBumps.push(bump);
+      orderBumpActive = selectedBumps.length > 0;
+      card.classList.toggle('checked', idx < 0);
+      card.setAttribute('aria-checked', idx < 0 ? 'true' : 'false');
       recalculateOrderSummary();
+      try { track('order_bump_toggled', { payload: { name: bump.name, selected: idx < 0, total_bumps: selectedBumps.length } }); } catch (e) {}
+    }
+    listEl.addEventListener('click', function(e) {
+      var card = e.target.closest('.ob3-card');
+      if (card) toggleBump(card);
+    });
+    listEl.addEventListener('keydown', function(e) {
+      if (e.key !== ' ' && e.key !== 'Enter') return;
+      var card = e.target.closest('.ob3-card');
+      if (card) { e.preventDefault(); toggleBump(card); }
     });
   })();
 
-  /* ─── ORDER BUMP — načtení obrázku z Medusa admin (plná kvalita) ─── */
-  function loadOrderBumpImage() {
-    var thumbContainer = document.getElementById('order-bump-thumb');  // Malý v headeru
-    var imgContainer = document.getElementById('order-bump-img');      // Velký v detailu
-
-    // Načti plný obrázek z Medusa API (ne thumbnail — ten je nízké kvality)
-    var upsellHandle = PROJECT_CONFIG.upsellProduct.handle;
-    if (upsellHandle) {
-      medusaFetch('/store/products?handle=' + upsellHandle + '&fields=thumbnail,images')
-      .then(function(data) {
-        var product = data.products && data.products[0];
-        if (!product) return;
-        // Preferuj plný obrázek pro ostrost
-        var imgUrl = (product.images && product.images.length > 0 && product.images[0].url)
-          ? product.images[0].url
-          : product.thumbnail;
-        if (!imgUrl) return;
-        var fullUrl = imgUrl.indexOf('http') === 0 ? imgUrl : MEDUSA_URL + imgUrl;
-        var imgTag = '<img src="' + fullUrl + '" alt="' + (product.title || 'Kočičí bible') + '" style="width:100%;height:100%;object-fit:cover;">';
-        if (thumbContainer) thumbContainer.innerHTML = imgTag;
-        if (imgContainer) imgContainer.innerHTML = imgTag;
-      }).catch(function(err) {
-        console.warn('Načtení obrázku order bump selhalo:', err);
-      });
-    }
+  /** Persist vybraných bumpů pro thank-you stránku */
+  function persistBumps(bumps) {
+    try {
+      if (bumps && bumps.length) {
+        localStorage.setItem('medusa_order_bumps', JSON.stringify(bumps.map(function(b) {
+          return { name: b.name, price: b.price, variantId: b.variantId, image: b.image || '' };
+        })));
+        localStorage.setItem('medusa_order_bump', 'true');
+      } else {
+        localStorage.removeItem('medusa_order_bumps');
+        localStorage.removeItem('medusa_order_bump');
+      }
+    } catch (e) {}
   }
 
-  // ─── ORDER BUMP — dynamické ceny z config.json ───
-  (function populateOrderBumpFromConfig() {
-    var up = PROJECT_CONFIG.upsellProduct;
-    if (!up || !up.name) return;
-    var saveAmt = (up.originalPrice || 0) - (up.price || 0);
-    var savePct = up.originalPrice ? Math.round((saveAmt / up.originalPrice) * 100) : 0;
-
-    // Header
-    var titleEl = document.getElementById('order-bump-title-name');
-    if (titleEl) titleEl.textContent = up.name;
-    var pctTag = document.getElementById('order-bump-pct-tag');
-    if (pctTag) pctTag.textContent = '-' + savePct + '%';
-    var oldPrice = document.getElementById('order-bump-old-price');
-    if (oldPrice) oldPrice.innerHTML = Math.round(Number(up.originalPrice)) + ' K&#269;';
-    var newPrice = document.getElementById('order-bump-new-price');
-    if (newPrice) newPrice.innerHTML = Math.round(Number(up.price)) + ' K&#269;';
-    var inlineSave = document.getElementById('order-bump-inline-save');
-    if (inlineSave) inlineSave.innerHTML = 'U&#353;et&#345;&#237;te ' + saveAmt.toFixed(0) + ' K&#269;';
-
-    // Detail
-    var nameEl = document.getElementById('order-bump-name');
-    if (nameEl) nameEl.textContent = up.name;
-    var detailOld = document.getElementById('order-bump-detail-old');
-    if (detailOld) detailOld.innerHTML = Math.round(Number(up.originalPrice)) + ' K&#269;';
-    var detailNew = document.getElementById('order-bump-detail-new');
-    if (detailNew) detailNew.innerHTML = Math.round(Number(up.price)) + ' K&#269;';
-    var detailSave = document.getElementById('order-bump-detail-save');
-    if (detailSave) detailSave.innerHTML = 'U&#353;et&#345;&#237;te ' + saveAmt.toFixed(0) + ' K&#269;';
-
-    // Summary + Mobile sticky bar — aktualizuj název a cenu
-    var priceStr = Math.round(Number(up.price)) + ' K&#269;';
-    var summaryBumpName = document.getElementById('summary-bump-name');
-    if (summaryBumpName) {
-      var svgHtml = summaryBumpName.querySelector('svg') ? summaryBumpName.querySelector('svg').outerHTML + ' ' : '';
-      summaryBumpName.innerHTML = svgHtml + up.name;
-    }
-    var summaryBumpPrice = document.getElementById('summary-bump-price');
-    if (summaryBumpPrice) summaryBumpPrice.innerHTML = priceStr;
-    var msbBumpName = document.getElementById('msb-bump-name');
-    if (msbBumpName) {
-      var msbSvg = msbBumpName.querySelector('svg') ? msbBumpName.querySelector('svg').outerHTML + ' ' : '';
-      msbBumpName.innerHTML = msbSvg + up.name;
-    }
-    var msbBumpPrice = document.getElementById('msb-bump-price');
-    if (msbBumpPrice) msbBumpPrice.innerHTML = priceStr;
-  })();
-
-  // Inicializace — vygeneruj bundle, zobraz daně, načti obrázek
+  // Inicializace — vygeneruj bundle, bumpy, zobraz daně
   renderBundleOptions();
+  renderOrderBumps();
   recalculateOrderSummary();
-  loadOrderBumpImage();
-
-  // ─── Admin toggles: hide order bump if disabled ───
-  if (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.orderBumpEnabled === false) {
-    var orderBumpEl = document.getElementById('order-bump');
-    if (orderBumpEl) orderBumpEl.style.display = 'none';
-    orderBumpActive = false;
-    recalculateOrderSummary();
-  }
 
   // Aktualizuj order summary na základě cart dat z Medusa API
   function updateOrderSummary(cart) {
@@ -4068,16 +3947,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         method: 'POST',
         body: JSON.stringify({ variant_id: VARIANT_ID, quantity: bundleQty })
       }).then(function() {
-        // Add order bump if active (uses bundle endpoint for tax-inclusive pricing + discounted price)
-        if (isOrderBump && PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.variantId) {
-          return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
-            method: 'POST',
-            body: JSON.stringify({
-              variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-              quantity: 1
-            })
+        // Add selected order bumps sequentially (bundle endpoint = tax-inclusive variant price)
+        var bumpChain = Promise.resolve();
+        selectedBumps.forEach(function(b) {
+          bumpChain = bumpChain.then(function() {
+            return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+              method: 'POST',
+              body: JSON.stringify({ variant_id: b.variantId, quantity: 1 })
+            });
           });
-        }
+        });
+        return bumpChain;
       }).then(function() {
         // Apply promo code if set
         if (promoCode) {
@@ -4142,11 +4022,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     localStorage.setItem('medusa_cart_id', cartId);
     localStorage.setItem('medusa_bundle_qty', selectedBundleQty);
     localStorage.setItem('medusa_bundle_price', selectedBundlePrice);
-    if (orderBumpActive) {
-      localStorage.setItem('medusa_order_bump', 'true');
-    } else {
-      localStorage.removeItem('medusa_order_bump');
-    }
+    persistBumps(selectedBumps);
 
     console.log('[Express] Completing cart:', cartId);
     return medusaFetch('/store/carts/' + cartId + '/complete', {
@@ -4501,11 +4377,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           localStorage.setItem('medusa_cart_id', cartId);
           localStorage.setItem('medusa_bundle_qty', selectedBundleQty);
           localStorage.setItem('medusa_bundle_price', selectedBundlePrice);
-          if (orderBumpActive) {
-            localStorage.setItem('medusa_order_bump', 'true');
-          } else {
-            localStorage.removeItem('medusa_order_bump');
-          }
+          persistBumps(selectedBumps);
 
           return createExpressPaymentSession(cartId, method.provider_id, {
             method: method.code,
@@ -7595,6 +7467,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var checkoutBundleQty = selectedBundleQty;
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
+    var checkoutBumps = selectedBumps.slice();
     var checkoutTotal = getCurrentTotal();
 
     // Krok 1: Vytvořit nebo znovu použít cart (promo cart → background cart → nový)
@@ -7639,16 +7512,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           quantity: checkoutBundleQty
         })
       }).then(function() {
-        // Krok 2b: Přidat order bump produkt (bundle endpoint = cena včetně daně + se slevou)
-        if (checkoutOrderBump) {
-          return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
-            method: 'POST',
-            body: JSON.stringify({
-              variant_id: PROJECT_CONFIG.upsellProduct.variantId,
-              quantity: 1
-            })
+        // Krok 2b: Přidat vybrané order bumpy (bundle endpoint = cena včetně daně)
+        var bumpChain = Promise.resolve();
+        checkoutBumps.forEach(function(b) {
+          bumpChain = bumpChain.then(function() {
+            return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
+              method: 'POST',
+              body: JSON.stringify({ variant_id: b.variantId, quantity: 1 })
+            });
           });
-        }
+        });
+        return bumpChain;
       }).then(function() {
         // Krok 2c: Přidat poplatky jako line items
         // Doprava na adresu se NEPŘIDÁVÁ — shipping option "Zásilkovna - Na adresu" už má cenu 20 Kč
@@ -7828,6 +7702,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       localStorage.setItem('medusa_bundle_qty', checkoutBundleQty);
       localStorage.setItem('medusa_bundle_price', checkoutBundlePrice);
       localStorage.setItem('medusa_order_bump', checkoutOrderBump ? 'true' : 'false');
+      persistBumps(checkoutBumps);
       localStorage.setItem('medusa_checkout_total', checkoutTotal);
 
       // Note: AddPaymentInfo already fired on email blur (earlier in the funnel)
