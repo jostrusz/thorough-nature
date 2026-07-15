@@ -406,6 +406,9 @@ h2 { font-size: 38px; }
 }
 .trust-bar-item .icon { font-size: 18px; }
 .trust-bar-item .trust-flags { font-size: 16px; letter-spacing: -2px; margin-right: 4px; }
+.tb-flags { display: inline-flex; align-items: center; vertical-align: middle; margin-right: 7px; }
+.tb-flags .tb-flag { width: 19px; height: 19px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; line-height: 1; background: #fff; box-shadow: 0 0 0 1.5px #fff, 0 1px 2px rgba(45,27,61,0.18); margin-left: -8px; }
+.tb-flags .tb-flag:first-child { margin-left: 0; }
 
 /* ═══ SEKCE "DIT BOEK IS VOOR JOU" — karusel karet ═══ */
 .voor-jou { padding: 80px 20px; background: var(--white); position: relative; }
