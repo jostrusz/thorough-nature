@@ -118,6 +118,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 1199,  // 1199 Kč incl. DPH (save 451 Kč)
     4: 1499,  // 1499 Kč incl. DPH (save 701 Kč)
   },
+  // Biblia kotów — hlavní produkt PL (samostatný funnel biblia-kotow.pl)
+  "biblia-kotow": {
+    1: 89,    // 89 zł incl. VAT
+    2: 149,   // 149 zł incl. VAT (save 29 zł)
+    3: 199,   // 199 zł incl. VAT (save 68 zł)
+    4: 249,   // 249 zł incl. VAT (save 107 zł)
+  },
   // Fee products (added as line items so they appear in order.total + invoices)
   "doprava-na-adresu": {
     1: 20,    // 20 Kč incl. DPH — home delivery surcharge

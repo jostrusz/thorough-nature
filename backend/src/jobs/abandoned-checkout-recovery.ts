@@ -210,6 +210,34 @@ const KB_STEPS: StepConfig[] = [
   },
 ]
 
+/** Biblia kotów (biblia-kotow) 3-step sequence */
+const BK_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.BK_ABANDONED_CHECKOUT_1,
+    subject: (name) => name ? `Cześć ${name}, Twoja książka na Ciebie czeka! 📦` : `Twoja książka na Ciebie czeka! 📦`,
+    preview: "Biblia kotów jest spakowana i czeka tylko na Ciebie!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.BK_ABANDONED_CHECKOUT_2,
+    subject: (name) => name ? `${name}, historia, która stoi za tą książką` : `Historia, która stoi za tą książką`,
+    preview: "Kot sikał nam za kanapę przez trzy lata. Po dwóch tygodniach jest spokój...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.BK_ABANDONED_CHECKOUT_3,
+    subject: (name) => name ? `Ostatnia szansa, ${name} — wkrótce zwolnimy Twój koszyk` : `Ostatnia szansa — wkrótce zwolnimy Twój koszyk`,
+    preview: "Zostały 24 godziny — potem muszę zwolnić Twój koszyk.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Pusti to, čo ťa ničí (pusti-to-sk) 3-step sequence */
 const SK_STEPS: StepConfig[] = [
   {
@@ -916,6 +944,79 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send KB step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Biblia kotów: 3-step sequence ──
+      if (projectId === "biblia-kotow") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = BK_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || ""
+        const checkoutUrl = meta.checkout_url || "https://biblia-kotow.pl/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Biblia kotów"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "89"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Michał Peterka - Biblia kotów <peterka@biblia-kotow.pl>",
+            data: {
+              emailOptions: {
+                replyTo: "peterka@biblia-kotow.pl",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] BK step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send BK step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue

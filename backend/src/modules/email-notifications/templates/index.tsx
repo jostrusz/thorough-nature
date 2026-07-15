@@ -63,6 +63,10 @@ import { PsUpsellConfirmedTemplate, PS_UPSELL_CONFIRMED, isPsUpsellConfirmedData
 import { KbOrderPlacedTemplate, KB_ORDER_PLACED, isKbOrderPlacedTemplateData } from './kb-order-placed'
 import { KbShipmentNotificationTemplate, KB_SHIPMENT_NOTIFICATION, isKbShipmentNotificationData } from './kb-shipment-notification'
 import { KbEbookDeliveryTemplate, KB_EBOOK_DELIVERY, isKbEbookDeliveryData } from './kb-ebook-delivery'
+// Biblia kotów (biblia-kotow, PL) templates
+import { BkOrderPlacedTemplate, BK_ORDER_PLACED, isBkOrderPlacedTemplateData } from './bk-order-placed'
+import { BkShipmentNotificationTemplate, BK_SHIPMENT_NOTIFICATION, isBkShipmentNotificationData } from './bk-shipment-notification'
+import { BkEbookDeliveryTemplate, BK_EBOOK_DELIVERY, isBkEbookDeliveryData } from './bk-ebook-delivery'
 // Pusť to, co tě ničí (odpust-knizka) templates
 import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
 import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
@@ -78,6 +82,9 @@ import { OdAbandonedCheckout1Template, OD_ABANDONED_CHECKOUT_1, isOdAbandonedChe
 import { KbAbandonedCheckout1Template, KB_ABANDONED_CHECKOUT_1, isKbAbandonedCheckout1Data } from './kb-abandoned-checkout-1'
 import { KbAbandonedCheckout2Template, KB_ABANDONED_CHECKOUT_2, isKbAbandonedCheckout2Data } from './kb-abandoned-checkout-2'
 import { KbAbandonedCheckout3Template, KB_ABANDONED_CHECKOUT_3, isKbAbandonedCheckout3Data } from './kb-abandoned-checkout-3'
+import { BkAbandonedCheckout1Template, BK_ABANDONED_CHECKOUT_1, isBkAbandonedCheckout1Data } from './bk-abandoned-checkout-1'
+import { BkAbandonedCheckout2Template, BK_ABANDONED_CHECKOUT_2, isBkAbandonedCheckout2Data } from './bk-abandoned-checkout-2'
+import { BkAbandonedCheckout3Template, BK_ABANDONED_CHECKOUT_3, isBkAbandonedCheckout3Data } from './bk-abandoned-checkout-3'
 import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
 import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
 // Pusti to, čo ťa ničí (pusti-to-sk) templates
@@ -180,6 +187,10 @@ export const EmailTemplates = {
   KB_ORDER_PLACED,
   KB_SHIPMENT_NOTIFICATION,
   KB_EBOOK_DELIVERY,
+  // Biblia kotów (PL)
+  BK_ORDER_PLACED,
+  BK_SHIPMENT_NOTIFICATION,
+  BK_EBOOK_DELIVERY,
   // Odpusť to, co tě ničí
   OD_ORDER_PLACED,
   OD_EBOOK_DELIVERY,
@@ -195,6 +206,9 @@ export const EmailTemplates = {
   KB_ABANDONED_CHECKOUT_1,
   KB_ABANDONED_CHECKOUT_2,
   KB_ABANDONED_CHECKOUT_3,
+  BK_ABANDONED_CHECKOUT_1,
+  BK_ABANDONED_CHECKOUT_2,
+  BK_ABANDONED_CHECKOUT_3,
   OD_ABANDONED_CHECKOUT_2,
   OD_ABANDONED_CHECKOUT_3,
   SK_ORDER_PLACED,
@@ -290,6 +304,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const psKey = `ps-${templateKey}`
     if (allKeys.includes(psKey)) {
       return psKey
+    }
+  }
+  if (project === 'biblia-kotow') {
+    const bkKey = `bk-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(bkKey)) {
+      return bkKey
     }
   }
   if (project === 'odpust-knizka') {
@@ -931,6 +952,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <KbEbookDeliveryTemplate {...data} />
 
+    // ── Biblia kotów (PL) templates ──────────────────────────
+    case EmailTemplates.BK_ORDER_PLACED:
+      if (!isBkOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.BK_ORDER_PLACED}"`
+        )
+      }
+      return <BkOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.BK_SHIPMENT_NOTIFICATION:
+      if (!isBkShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.BK_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <BkShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.BK_EBOOK_DELIVERY:
+      if (!isBkEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.BK_EBOOK_DELIVERY}"`
+        )
+      }
+      return <BkEbookDeliveryTemplate {...data} />
+
     // ── Odpusť to, co tě ničí templates ──────────────────────
     case EmailTemplates.OD_ORDER_PLACED:
       if (!isOdOrderPlacedTemplateData(data)) {
@@ -1046,6 +1095,30 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <KbAbandonedCheckout3Template {...data} />
+    case EmailTemplates.BK_ABANDONED_CHECKOUT_1:
+      if (!isBkAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.BK_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <BkAbandonedCheckout1Template {...data} />
+    case EmailTemplates.BK_ABANDONED_CHECKOUT_2:
+      if (!isBkAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.BK_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <BkAbandonedCheckout2Template {...data} />
+    case EmailTemplates.BK_ABANDONED_CHECKOUT_3:
+      if (!isBkAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.BK_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <BkAbandonedCheckout3Template {...data} />
 
     case EmailTemplates.OD_ABANDONED_CHECKOUT_2:
       if (!isOdAbandonedCheckout2Data(data)) {
@@ -1306,6 +1379,10 @@ export {
   KbOrderPlacedTemplate,
   KbShipmentNotificationTemplate,
   KbEbookDeliveryTemplate,
+  // Biblia kotów (PL)
+  BkOrderPlacedTemplate,
+  BkShipmentNotificationTemplate,
+  BkEbookDeliveryTemplate,
   // Odpusť to, co tě ničí
   OdOrderPlacedTemplate,
   OdEbookDeliveryTemplate,

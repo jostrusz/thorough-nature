@@ -4,126 +4,281 @@
     {
       "name": "storefront-only",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["next", "dev", "-p", "8000"],
+      "runtimeArgs": [
+        "next",
+        "dev",
+        "-p",
+        "8000"
+      ],
       "port": 8000,
       "cwd": "storefront"
     },
     {
       "name": "backend",
       "runtimeExecutable": "/opt/homebrew/bin/pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeArgs": [
+        "dev"
+      ],
       "port": 9000,
       "cwd": "backend"
     },
     {
       "name": "storefront",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 8000,
       "cwd": "storefront"
     },
     {
       "name": "email-dev",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["email", "dev", "--dir", "src/modules/email-notifications/templates", "--port", "3002"],
+      "runtimeArgs": [
+        "email",
+        "dev",
+        "--dir",
+        "src/modules/email-notifications/templates",
+        "--port",
+        "3002"
+      ],
       "port": 3002,
       "cwd": "backend",
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "dashboard-preview",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", ".", "-p", "8080", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        ".",
+        "-p",
+        "8080",
+        "-c-1"
+      ],
       "port": 8080
     },
     {
       "name": "loslatenboek",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/loslatenboek/pages", "-p", "8090", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/loslatenboek/pages",
+        "-p",
+        "8090",
+        "-c-1"
+      ],
       "port": 8090,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "preview-html",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "storefront/public", "-p", "8095", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/public",
+        "-p",
+        "8095",
+        "-c-1"
+      ],
       "port": 8095
     },
     {
       "name": "slapp-taget",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/slapp-taget/pages", "-p", "8096", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/slapp-taget/pages",
+        "-p",
+        "8096",
+        "-c-1"
+      ],
       "port": 8096,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "email-preview",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "email-previews", "-p", "8097", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "email-previews",
+        "-p",
+        "8097",
+        "-c-1"
+      ],
       "port": 8097,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "odpusc-ksiazka",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/odpusc-ksiazka/pages", "-p", "8098", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/odpusc-ksiazka/pages",
+        "-p",
+        "8098",
+        "-c-1"
+      ],
       "port": 8098
     },
     {
       "name": "lass-los",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/lass-los/pages", "-p", "8099", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/lass-los/pages",
+        "-p",
+        "8099",
+        "-c-1"
+      ],
       "port": 8099,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "psi-superzivot",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/psi-superzivot/pages", "-p", "8100", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/psi-superzivot/pages",
+        "-p",
+        "8100",
+        "-c-1"
+      ],
       "port": 8100,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "het-leven",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/het-leven/pages", "-p", "8102", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/het-leven/pages",
+        "-p",
+        "8102",
+        "-c-1"
+      ],
       "port": 8102,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "dehondenbijbel",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/dehondenbijbel/pages", "-p", "8101", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/dehondenbijbel/pages",
+        "-p",
+        "8101",
+        "-c-1"
+      ],
       "port": 8101,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "zycie-zaslugy",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/zycie-zaslugy/pages", "-p", "8103", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/zycie-zaslugy/pages",
+        "-p",
+        "8103",
+        "-c-1"
+      ],
       "port": 8103,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "slipp-taket",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/slipp-taket/pages", "-p", "8104", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/slipp-taket/pages",
+        "-p",
+        "8104",
+        "-c-1"
+      ],
       "port": 8104,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "engedd-el",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "storefront/src/projects/engedd-el/pages", "-p", "8105", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/engedd-el/pages",
+        "-p",
+        "8105",
+        "-c-1"
+      ],
       "port": 8105,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    },
+    {
+      "name": "kocici-bible",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/kocici-bible/pages",
+        "-p",
+        "8107",
+        "-c-1"
+      ],
+      "port": 8107,
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     },
     {
       "name": "engedd-el-full",
       "runtimeExecutable": "/opt/homebrew/bin/npx",
-      "runtimeArgs": ["http-server", "/private/tmp/claude-501/-Users-jaroslavostruszka-thorough-nature--claude-worktrees-priceless-archimedes-fa62c5/87ac0a29-6383-4c96-99ca-f17248564380/scratchpad/engedd-preview", "-p", "8106", "-c-1"],
+      "runtimeArgs": [
+        "http-server",
+        "/private/tmp/claude-501/-Users-jaroslavostruszka-thorough-nature--claude-worktrees-priceless-archimedes-fa62c5/87ac0a29-6383-4c96-99ca-f17248564380/scratchpad/engedd-preview",
+        "-p",
+        "8106",
+        "-c-1"
+      ],
       "port": 8106,
-      "env": {"PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    },
+    {
+      "name": "biblia-kotow",
+      "runtimeExecutable": "/opt/homebrew/bin/npx",
+      "runtimeArgs": [
+        "http-server",
+        "storefront/src/projects/biblia-kotow/pages",
+        "-p",
+        "8108",
+        "-c-1"
+      ],
+      "port": 8108,
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+      }
     }
   ]
 }

@@ -1,0 +1,78 @@
+{
+  "slug": "biblia-kotow",
+  "name": "Biblia kotów",
+  "domain": "biblia-kotow.pl",
+  "locale": "pl",
+  "defaultCountry": "PL",
+  "defaultPhonePrefix": "48",
+  "phonePrefixByCountry": {
+    "PL": "48"
+  },
+  "salesChannelName": "Biblia Kotow",
+  "medusaUrl": "https://www.marketing-hq.eu",
+  "publishableApiKey": "pk_e58360fe1501bfbfb1fab760cb5bf69f4c8cc97c20321c43b468e9c5b819136e",
+  "facebookPixelId": "",
+  "regions": {
+    "PL": "reg_01KK8N9GTWQK7A55SXAH07KNK1"
+  },
+  "mainProduct": {
+    "name": "Biblia kotów",
+    "handle": "biblia-kotow",
+    "variantId": "variant_01KXJ6MGB6M9YZKN41EFWNJ1N5",
+    "price": 89,
+    "currency": "PLN",
+    "thumbnail": ""
+  },
+  "bundleOptions": [
+    {
+      "qty": 1,
+      "price": 89,
+      "label": "1 książka + 4× bonusowe e-booki",
+      "sublabel": "Dla siebie",
+      "badge": "BESTSELLER",
+      "save": 0
+    },
+    {
+      "qty": 2,
+      "price": 149,
+      "label": "2 książki + 4× bonusowe e-booki",
+      "sublabel": "Dla mnie i na prezent",
+      "badge": "NAJPOPULARNIEJSZE",
+      "save": 29,
+      "savings": 29
+    },
+    {
+      "qty": 3,
+      "price": 199,
+      "label": "3 książki + 4× bonusowe e-booki",
+      "sublabel": "Dla całej rodziny kociarzy",
+      "badge": "NAJWIĘCEJ OSZCZĘDZASZ",
+      "save": 68,
+      "savings": 68
+    },
+    {
+      "qty": 4,
+      "price": 249,
+      "label": "4 książki + 4× bonusowe e-booki",
+      "sublabel": "Idealny zestaw prezentowy",
+      "badge": "",
+      "save": 107,
+      "savings": 107
+    }
+  ],
+  "mollieProfileId": "",
+  "packetaApiKey": "cbb760f552ef87b3",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "upsell": "upsell.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  },
+  "orderBumpEnabled": false
+}

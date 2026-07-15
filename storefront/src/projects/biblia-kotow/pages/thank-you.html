@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dziękujemy za zamówienie!</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://biblia-kotow.pl/thank-you">
+  <link rel="icon" href="images/biblia-kotow-logo.png" type="image/png">
+
+  <!-- Sdílená konfigurace projektu -->
+  <script src="js/project-config.js"></script>
+  <!-- Facebook Pixel -->
+  <script src="js/pixel.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STRONA PODZIĘKOWANIA — Biblia kotów
+     Souhrn objednávky + kontrola adresy + editační formulář
+     ═══════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══ Kočičí bible design system ══ */
+:root {
+  --bg: #FFFFFF;
+  --heading: #1A1A1A;
+  --cta: #DC3522;
+  --section: #F3E8FF;
+  --body: #374151;
+  --highlight: #C4B5FD;
+  --dark: #1A1A1A;
+  --white: #FFFFFF;
+  --light: #F9FAFB;
+  --muted: #6B7280;
+  --cta-hover: #C62E1C;
+  --accent: #6B21A8;
+  --success: #27AE60;
+  --warning: #E67E22;
+  --error: #E74C3C;
+}
+
+/* ══ Reset & Base ══ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); }
+.ty-page {
+  font-family: 'Cabin', sans-serif;
+  color: var(--body);
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ══ Scroll-reveal ══ */
+.ty-reveal {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 0.7s cubic-bezier(.16,1,.3,1), transform 0.7s cubic-bezier(.16,1,.3,1);
+}
+.js-reveal-ready .ty-reveal { opacity: 0; transform: translateY(24px); }
+.js-reveal-ready .ty-reveal.is-visible { opacity: 1; transform: translateY(0); }
+.ty-d1 { transition-delay: 0.06s; }
+.ty-d2 { transition-delay: 0.12s; }
+.ty-d3 { transition-delay: 0.18s; }
+.ty-d4 { transition-delay: 0.24s; }
+.ty-d5 { transition-delay: 0.30s; }
+.ty-d6 { transition-delay: 0.36s; }
+
+/* ══ 1. Hero ══ */
+.ty-hero { text-align: center; margin-bottom: 36px; }
+.ty-check-circle {
+  width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 24px;
+  background: linear-gradient(135deg, var(--cta), #E8604F);
+  display: flex; align-items: center; justify-content: center;
+  animation: ty-pop 0.6s cubic-bezier(.16,1,.3,1) 0.3s both;
+  box-shadow: 0 8px 32px rgba(220,53,34,0.3);
+}
+.ty-check-circle svg { width: 36px; height: 36px; color: #fff; stroke-dasharray: 50; stroke-dashoffset: 50; animation: ty-draw 0.8s ease 0.7s forwards; }
+@keyframes ty-pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes ty-draw { to { stroke-dashoffset: 0; } }
+.ty-eyebrow {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.16em; color: var(--success); margin-bottom: 12px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(39,174,96,0.08); padding: 6px 14px; border-radius: 8px;
+}
+.ty-title {
+  font-family: 'Inter', sans-serif; font-weight: 800;
+  font-size: 34px; line-height: 1.18; color: var(--heading); margin-bottom: 12px;
+}
+.ty-title .accent { color: var(--cta); }
+.ty-subtitle { font-size: 17px; color: var(--body); line-height: 1.65; max-width: 560px; margin: 0 auto; }
+.ty-subtitle strong { color: var(--heading); font-weight: 600; }
+
+/* ══ 2. Upozornění na kontrolu adresy ══ */
+.ty-address-alert {
+  background: linear-gradient(135deg, #FFF3E0, #FFF8E1);
+  border: 2px solid #FFB74D;
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.ty-address-alert-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #FF9800; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 20px;
+}
+.ty-address-alert-text { flex: 1; }
+.ty-address-alert-title {
+  font-weight: 700; color: #E65100; font-size: 15px; margin-bottom: 4px;
+}
+.ty-address-alert-desc { font-size: 14px; color: #6D4C41; line-height: 1.5; }
+
+/* ══ 3. Karta údajů zákazníka ══ */
+.ty-details-card {
+  background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(26,26,26,0.04);
+}
+.ty-details-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1.5px solid var(--light);
+}
+.ty-details-title {
+  font-family: 'Inter', sans-serif; font-weight: 700;
+  font-size: 18px; color: var(--heading);
+  display: flex; align-items: center; gap: 8px;
+}
+.ty-edit-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--light); color: var(--cta);
+  font-family: 'Cabin', sans-serif;
+  font-size: 13px; font-weight: 600;
+  padding: 8px 16px; border-radius: 10px; border: 1.5px solid rgba(220,53,34,0.35);
+  cursor: pointer; transition: all 0.3s ease;
+}
+.ty-edit-btn:hover { background: var(--cta); color: var(--white); border-color: var(--cta); }
+.ty-edit-btn svg { width: 14px; height: 14px; }
+
+.ty-details-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+.ty-detail-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); margin-bottom: 4px;
+}
+.ty-detail-value { font-size: 15px; font-weight: 500; color: var(--heading); line-height: 1.45; }
+.ty-detail-full { grid-column: 1 / -1; }
+
+/* ══ 4. Editační formulář (skrytý) ══ */
+.ty-edit-form { display: none; margin-bottom: 24px; }
+.ty-edit-form.is-open { display: block; animation: ty-slideDown 0.35s cubic-bezier(.16,1,.3,1); }
+@keyframes ty-slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ty-edit-form-inner {
+  background: var(--white); border: 2px solid var(--cta);
+  border-radius: 20px; padding: 28px 32px;
+  box-shadow: 0 4px 24px rgba(220,53,34,0.12);
+}
+.ty-edit-form-title {
+  font-family: 'Inter', sans-serif; font-weight: 700;
+  font-size: 18px; color: var(--heading); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ty-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 0; }
+.ty-form-group { position: relative; margin-bottom: 14px; }
+.ty-form-group.full { grid-column: 1 / -1; }
+/* Floating label styl */
+.ty-float-field { position: relative; }
+.ty-float-field input {
+  width: 100%; height: 54px;
+  padding: 22px 16px 8px;
+  font-family: 'Cabin', sans-serif;
+  font-size: 15px; font-weight: 400;
+  color: var(--heading); background: var(--white);
+  border: 1px solid rgba(26,26,26,0.18);
+  border-radius: 10px; outline: none;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.ty-float-field label {
+  position: absolute; left: 16px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px; font-weight: 400; color: var(--muted);
+  pointer-events: none; z-index: 1;
+  transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+  background: transparent; padding: 0;
+}
+.ty-float-field input:focus ~ label,
+.ty-float-field input:not(:placeholder-shown) ~ label {
+  top: 10px; transform: translateY(0);
+  font-size: 11px; font-weight: 600; color: var(--cta);
+}
+.ty-float-field input:not(:focus):not(:placeholder-shown) ~ label {
+  color: var(--muted);
+}
+.ty-float-field input::placeholder { color: transparent; }
+.ty-float-field input:focus {
+  border-color: var(--cta);
+  box-shadow: 0 0 0 3px rgba(220,53,34,0.12);
+  background: var(--white);
+}
+.ty-form-actions {
+  display: flex; gap: 12px; margin-top: 8px;
+}
+.ty-form-save {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--cta); color: var(--white);
+  font-family: 'Cabin', sans-serif; font-size: 15px; font-weight: 700;
+  padding: 14px 24px; border-radius: 12px; border: none;
+  cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 3px 12px rgba(220,53,34,0.25);
+}
+.ty-form-save:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(220,53,34,0.35); }
+.ty-form-save:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(220,53,34,0.2); }
+.ty-form-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.ty-form-cancel {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--light); color: var(--body);
+  font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 14px 20px; border-radius: 12px; border: 1.5px solid rgba(26,26,26,0.1);
+  cursor: pointer; transition: all 0.3s cubic-bezier(.16,1,.3,1);
+}
+.ty-form-cancel:hover { background: rgba(26,26,26,0.06); transform: translateY(-1px); }
+
+/* Zpětná vazba po uložení */
+.ty-feedback {
+  display: none; padding: 14px 18px; border-radius: 12px;
+  margin-bottom: 24px; font-size: 14px; font-weight: 500;
+  align-items: center; gap: 10px;
+}
+.ty-feedback.is-visible { display: flex; }
+.ty-feedback.success { background: rgba(39,174,96,0.08); border: 1.5px solid rgba(39,174,96,0.3); color: #1B7A3D; }
+.ty-feedback.error { background: rgba(231,76,60,0.08); border: 1.5px solid rgba(231,76,60,0.3); color: #C0392B; }
+.ty-feedback svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Spinner */
+.btn-spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══ 5. Souhrn objednávky ══ */
+.ty-order-box {
+  background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
+  border-radius: 20px; padding: 28px 32px; margin-bottom: 28px;
+  box-shadow: 0 2px 12px rgba(26,26,26,0.04);
+}
+.ty-order-label {
+  font-size: 13px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--muted); margin-bottom: 16px;
+}
+.ty-order-items { display: flex; flex-direction: column; gap: 12px; }
+.ty-order-item { display: flex; align-items: center; gap: 14px; padding: 10px; border-radius: 12px; }
+.ty-order-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 20px;
+}
+.ty-order-icon.book { background: linear-gradient(135deg, rgba(220,53,34,0.14), rgba(232,96,79,0.10)); }
+.ty-order-icon.ship { background: rgba(26,26,26,0.06); }
+/* Bonusové e-booky — CSS dlaždice (gradient + emoji), žádné obálky */
+.ty-order-icon.ebook-1 { background: linear-gradient(135deg, #F3E8FF, #DDC7F7); }
+.ty-order-icon.ebook-2 { background: linear-gradient(135deg, #FFE8D6, #FFD1B0); }
+.ty-order-icon.ebook-3 { background: linear-gradient(135deg, #DCF3E4, #B8E6C8); }
+.ty-order-icon.ebook-4 { background: linear-gradient(135deg, #FFE0EC, #F7C1D9); }
+.ty-order-name { font-size: 15px; font-weight: 600; color: var(--heading); }
+.ty-order-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.ty-order-total {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-top: 16px; padding-top: 16px;
+  border-top: 2px solid var(--light);
+}
+.ty-order-total-label { font-family: 'Inter', sans-serif; font-size: 17px; font-weight: 700; color: var(--heading); }
+.ty-order-total-price { font-family: 'Inter', sans-serif; font-size: 28px; font-weight: 800; color: var(--cta); }
+
+/* ══ 5a. Bonusové e-booky — info box ══ */
+.ty-ebooks {
+  background: var(--section); border: 1.5px solid rgba(107,33,168,0.12);
+  border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
+}
+.ty-ebooks-title {
+  font-family: 'Inter', sans-serif; font-weight: 700; font-size: 18px;
+  color: var(--heading); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ty-ebooks-desc { font-size: 14.5px; color: var(--body); line-height: 1.6; margin-bottom: 18px; }
+.ty-ebooks-desc strong { color: var(--heading); }
+.ty-ebook-tiles { display: flex; gap: 12px; }
+.ty-ebook-tile {
+  flex: 1; border-radius: 14px; padding: 18px 14px; text-align: center;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
+}
+.ty-ebook-tile:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(26,26,26,0.10); }
+.ty-ebook-tile.t1 { background: linear-gradient(150deg, #6B21A8, #9D5BD2); }
+.ty-ebook-tile.t2 { background: linear-gradient(150deg, #DC3522, #F07B4F); }
+.ty-ebook-tile.t3 { background: linear-gradient(150deg, #1B7A3D, #4CBF72); }
+.ty-ebook-tile.t4 { background: linear-gradient(150deg, #B4236E, #E060A3); }
+.ty-ebook-tile-emoji { font-size: 30px; margin-bottom: 8px; }
+.ty-ebook-tile-name { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.4; }
+.ty-ebooks-note {
+  margin-top: 16px; font-size: 13px; color: var(--muted); line-height: 1.55;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+
+/* ══ 5b. Kontakt na podporu ══ */
+.ty-support {
+  background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
+  border-radius: 20px; padding: 26px 28px; margin-bottom: 28px;
+  display: flex; align-items: center; gap: 20px;
+  box-shadow: 0 2px 12px rgba(26,26,26,0.04);
+  transition: all 0.35s cubic-bezier(.16,1,.3,1);
+}
+.ty-support:hover { border-color: var(--highlight); box-shadow: 0 8px 32px rgba(26,26,26,0.08); transform: translateY(-2px); }
+.ty-support-icon {
+  width: 54px; height: 54px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--section), var(--light));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 24px;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1);
+}
+.ty-support:hover .ty-support-icon { transform: scale(1.08) rotate(-3deg); }
+.ty-support-text { flex: 1; }
+.ty-support-title { font-weight: 700; font-size: 16px; color: var(--heading); margin-bottom: 4px; }
+.ty-support-desc { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+.ty-support-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cta); color: var(--white);
+  font-family: 'Cabin', sans-serif; font-size: 14px; font-weight: 700;
+  padding: 13px 24px; border-radius: 12px; border: none;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.35s cubic-bezier(.16,1,.3,1); flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(220,53,34,0.25);
+  position: relative; overflow: hidden;
+}
+.ty-support-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.ty-support-btn:hover::after { opacity: 1; }
+.ty-support-btn:hover { background: var(--cta-hover); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(220,53,34,0.35); }
+.ty-support-btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(220,53,34,0.2); }
+@media (max-width: 600px) {
+  .ty-support { flex-direction: column; text-align: center; padding: 24px 20px; }
+  .ty-support-btn { width: 100%; justify-content: center; }
+}
+
+/* ══ 6. Co bude dál — 3 kroky ══ */
+.ty-steps { margin-bottom: 32px; }
+.ty-steps-title {
+  font-family: 'Inter', sans-serif; font-size: 24px;
+  font-weight: 800; color: var(--heading); margin-bottom: 20px; text-align: center;
+}
+.ty-steps-grid { display: flex; gap: 16px; }
+.ty-step {
+  flex: 1; background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
+  border-radius: 18px; padding: 24px 20px; text-align: center;
+  transition: transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s ease;
+}
+.ty-step:hover { transform: translateY(-4px); box-shadow: 0 8px 28px rgba(26,26,26,0.1); }
+.ty-step-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--cta), #E8604F);
+  color: #fff; font-weight: 700; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px;
+}
+.ty-step-icon { font-size: 28px; margin-bottom: 10px; }
+.ty-step-title { font-size: 15px; font-weight: 700; color: var(--heading); margin-bottom: 6px; }
+.ty-step-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ══ 7. Recenze ══ */
+.ty-reviews { margin-bottom: 32px; }
+.ty-reviews-title {
+  font-family: 'Inter', sans-serif; font-size: 22px;
+  font-weight: 800; color: var(--heading); margin-bottom: 16px; text-align: center;
+}
+.ty-review-cards { display: flex; gap: 16px; }
+.ty-review {
+  flex: 1; background: var(--white); border: 1.5px solid rgba(26,26,26,0.08);
+  border-radius: 16px; padding: 22px;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
+}
+.ty-review:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(26,26,26,0.08); }
+.ty-review-stars { color: var(--cta); font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; }
+.ty-review-text { font-size: 14px; color: var(--body); line-height: 1.6; font-style: italic; margin-bottom: 12px; }
+.ty-review-author { font-size: 13px; font-weight: 600; color: var(--heading); }
+.ty-review-loc { font-size: 12px; color: var(--muted); }
+
+/* ══ 8. Sdílení ══ */
+.ty-share {
+  text-align: center; background: var(--light);
+  border-radius: 20px; padding: 32px; margin-bottom: 32px;
+  border: 1px solid rgba(26,26,26,0.04);
+}
+.ty-share-title {
+  font-family: 'Inter', sans-serif; font-size: 22px;
+  font-weight: 800; color: var(--heading); margin-bottom: 8px;
+}
+.ty-share-desc { font-size: 15px; color: var(--body); margin-bottom: 20px; line-height: 1.55; }
+.ty-share-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.ty-share-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 14px 26px; border-radius: 14px; font-size: 15px;
+  font-family: 'Cabin', sans-serif;
+  font-weight: 600; border: none; cursor: pointer;
+  text-decoration: none; position: relative; overflow: hidden;
+  transition: transform 0.35s cubic-bezier(.16,1,.3,1), box-shadow 0.35s ease;
+}
+.ty-share-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0; transition: opacity 0.3s ease;
+}
+.ty-share-btn:hover::after { opacity: 1; }
+.ty-share-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.15); }
+.ty-share-btn:active { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.ty-share-btn.wa { background: #25D366; color: #fff; }
+.ty-share-btn.wa:hover { box-shadow: 0 8px 28px rgba(37,211,102,0.3); }
+.ty-share-btn.fb { background: #1877F2; color: #fff; }
+.ty-share-btn.fb:hover { box-shadow: 0 8px 28px rgba(24,119,242,0.3); }
+.ty-share-btn.mail { background: var(--dark); color: #fff; }
+.ty-share-btn.mail:hover { box-shadow: 0 8px 28px rgba(26,26,26,0.3); }
+.ty-share-btn svg { width: 18px; height: 18px; position: relative; z-index: 1; }
+.ty-share-btn span { position: relative; z-index: 1; }
+
+/* ══ 9. Patička ══ */
+.ty-footer {
+  text-align: center; padding-top: 24px;
+  border-top: 1.5px solid var(--light);
+  font-size: 12.5px; color: var(--muted); line-height: 1.7;
+}
+.ty-footer a { color: var(--muted); text-decoration: underline; }
+.ty-footer a:hover { color: var(--cta); }
+
+/* ══ Konfety ══ */
+.ty-confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: hidden; }
+.ty-confetti-piece {
+  position: absolute; width: 10px; height: 10px; top: -20px;
+  opacity: 0; animation: ty-fall 3.5s ease-in forwards;
+}
+@keyframes ty-fall {
+  0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(100vh) rotate(720deg) scale(0.3); }
+}
+
+/* ══ Responsivita ══ */
+@media (prefers-reduced-motion: reduce) {
+  .ty-reveal { opacity: 1; transform: none; transition: none; }
+  .ty-check-circle { animation: none; }
+  .ty-check-circle svg { animation: none; stroke-dashoffset: 0; }
+  .ty-confetti { display: none; }
+}
+@media (max-width: 600px) {
+  .ty-page { padding: 28px 16px 40px; }
+  .ty-title { font-size: 26px; }
+  .ty-subtitle { font-size: 15px; }
+  .ty-steps-grid { flex-direction: column; }
+  .ty-review-cards { flex-direction: column; }
+  .ty-ebook-tiles { flex-direction: column; }
+  .ty-order-box { padding: 22px 20px; }
+  .ty-ebooks { padding: 22px 20px; }
+  .ty-details-card { padding: 22px 20px; }
+  .ty-details-grid { grid-template-columns: 1fr; }
+  .ty-details-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .ty-edit-form-inner { padding: 22px 20px; }
+  .ty-form-row { grid-template-columns: 1fr; }
+  .ty-form-actions { flex-direction: column; }
+  .ty-check-circle { width: 64px; height: 64px; }
+  .ty-check-circle svg { width: 28px; height: 28px; }
+  .ty-share-buttons { flex-direction: column; align-items: center; }
+  .ty-share-btn { width: 100%; justify-content: center; }
+  .ty-address-alert { flex-direction: column; gap: 10px; }
+}
+@media (max-width: 380px) {
+  .ty-title { font-size: 23px; }
+  .ty-order-total-price { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Konfety -->
+<div class="ty-confetti" id="ty-confetti"></div>
+
+<div class="ty-page">
+
+  <!-- ═══════════════════════════════════════
+       1. HERO — potvrzení
+       ═══════════════════════════════════════ -->
+  <div class="ty-hero ty-reveal">
+    <div class="ty-check-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="ty-eyebrow">&#x2705; Zamówienie przyjęte</div>
+    <h1 class="ty-title" id="ty-main-title">Dziękujemy za Twoje <span class="accent">zamówienie!</span></h1>
+    <p class="ty-subtitle">Twoje zamówienie zostało pomyślnie złożone. Jak najszybciej przygotujemy paczkę i przekażemy ją przewoźnikowi.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       2. UPOZORNĚNÍ — KONTROLA ÚDAJŮ
+       ═══════════════════════════════════════ -->
+  <div class="ty-address-alert ty-reveal ty-d1">
+    <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
+    <div class="ty-address-alert-text">
+      <div class="ty-address-alert-title">Sprawdź proszę dane do wysyłki</div>
+      <div class="ty-address-alert-desc">Chcemy wysłać Twoje zamówienie jak najszybciej. Sprawdź proszę poniżej, czy poprawnie podano <strong>adres</strong>, <strong>e-mail</strong> i <strong>numer telefonu</strong>.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       3. KARTA ÚDAJŮ ZÁKAZNÍKA
+       ═══════════════════════════════════════ -->
+  <div class="ty-details-card ty-reveal ty-d2" id="ty-details-card">
+    <div class="ty-details-header">
+      <div class="ty-details-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Twoje dane
+      </div>
+      <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edytuj dane
+      </button>
+    </div>
+    <div class="ty-details-grid" id="ty-details-grid">
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">Imię</div>
+        <div class="ty-detail-value" id="ty-show-firstname">—</div>
+      </div>
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">Nazwisko</div>
+        <div class="ty-detail-value" id="ty-show-lastname">—</div>
+      </div>
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">E-mail</div>
+        <div class="ty-detail-value" id="ty-show-email">—</div>
+      </div>
+      <div class="ty-detail-item">
+        <div class="ty-detail-label">Telefon</div>
+        <div class="ty-detail-value" id="ty-show-phone">—</div>
+      </div>
+      <div class="ty-detail-item ty-detail-full">
+        <div class="ty-detail-label">Adres dostawy</div>
+        <div class="ty-detail-value" id="ty-show-address">—</div>
+      </div>
+      <div class="ty-detail-item ty-detail-full" id="ty-pickup-row" style="display:none;">
+        <div class="ty-detail-label">Punkt odbioru</div>
+        <div class="ty-detail-value" id="ty-show-pickup">—</div>
+      </div>
+      <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
+        <div class="ty-detail-label">Dane firmy</div>
+        <div class="ty-detail-value" id="ty-show-company">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       4. EDITAČNÍ FORMULÁŘ (skrytý)
+       ═══════════════════════════════════════ -->
+  <div class="ty-edit-form" id="ty-edit-form">
+    <div class="ty-edit-form-inner">
+      <div class="ty-edit-form-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edycja danych
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-firstname" placeholder=" ">
+          <label for="edit-firstname">Imię</label>
+        </div>
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-lastname" placeholder=" ">
+          <label for="edit-lastname">Nazwisko</label>
+        </div>
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field">
+          <input type="email" id="edit-email" placeholder=" ">
+          <label for="edit-email">E-mail</label>
+        </div>
+        <div class="ty-form-group ty-float-field">
+          <input type="tel" id="edit-phone" placeholder=" ">
+          <label for="edit-phone">Telefon</label>
+        </div>
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field full">
+          <input type="text" id="edit-address" placeholder=" ">
+          <label for="edit-address">Ulica i numer domu</label>
+        </div>
+      </div>
+      <div class="ty-form-row">
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-postal" placeholder=" ">
+          <label for="edit-postal">Kod pocztowy</label>
+        </div>
+        <div class="ty-form-group ty-float-field">
+          <input type="text" id="edit-city" placeholder=" ">
+          <label for="edit-city">Miejscowość</label>
+        </div>
+      </div>
+      <!-- Firemní pole (B2B) -->
+      <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
+        <div style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Dane firmy</div>
+        <div class="ty-form-row">
+          <div class="ty-form-group ty-float-field full">
+            <input type="text" id="edit-company" placeholder=" ">
+            <label for="edit-company">Nazwa firmy</label>
+          </div>
+        </div>
+        <div class="ty-form-row">
+          <div class="ty-form-group ty-float-field">
+            <input type="text" id="edit-ico" placeholder=" ">
+            <label for="edit-ico">REGON</label>
+          </div>
+          <div class="ty-form-group ty-float-field">
+            <input type="text" id="edit-dic" placeholder=" ">
+            <label for="edit-dic">NIP</label>
+          </div>
+        </div>
+      </div>
+      <div class="ty-form-actions">
+        <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
+          Zapisz zmiany
+        </button>
+        <button class="ty-form-cancel" onclick="toggleEditForm()">Anuluj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zpětná vazba (po uložení) -->
+  <div class="ty-feedback" id="ty-feedback">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="ty-feedback-text"></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       5. SOUHRN OBJEDNÁVKY
+       ═══════════════════════════════════════ -->
+  <div class="ty-order-box ty-reveal ty-d3">
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Twoje zamówienie</div>
+    <div class="ty-order-items" id="ty-order-items">
+      <div class="ty-order-item">
+        <div class="ty-order-icon book">&#x1F4D6;</div>
+        <div>
+          <div class="ty-order-name">Biblia kotów</div>
+          <div class="ty-order-desc">Książka drukowana &mdash; wysyłamy kurierem lub do paczkomatu</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook-1">&#x1F3AF;</div>
+        <div>
+          <div class="ty-order-name">Szkolenie kota</div>
+          <div class="ty-order-desc">Bonusowy e-book &mdash; wyślemy e-mailem</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook-2">&#x1F35B;</div>
+        <div>
+          <div class="ty-order-name">Sekret wysokiej jakości żywienia kota</div>
+          <div class="ty-order-desc">Bonusowy e-book &mdash; wyślemy e-mailem</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook-3">&#x1FA79;</div>
+        <div>
+          <div class="ty-order-name">PETCARE — Opieka nad kotem</div>
+          <div class="ty-order-desc">Bonusowy e-book &mdash; wyślemy e-mailem</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ebook-4">&#x1F431;</div>
+        <div>
+          <div class="ty-order-name">999 imion dla kotów</div>
+          <div class="ty-order-desc">Bonusowy e-book &mdash; wyślemy e-mailem</div>
+        </div>
+      </div>
+      <div class="ty-order-item">
+        <div class="ty-order-icon ship">&#x1F69A;</div>
+        <div>
+          <div class="ty-order-name">Dostawa</div>
+          <div class="ty-order-desc" id="ty-shipping-desc">Dostawa w ciągu 2&ndash;3 dni roboczych</div>
+        </div>
+      </div>
+    </div>
+    <div class="ty-order-total">
+      <span class="ty-order-total-label">Zapłacono</span>
+      <span class="ty-order-total-price" id="ty-total-price">89&nbsp;zł</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       5a. BONUSOVÉ E-BOOKY
+       ═══════════════════════════════════════ -->
+  <div class="ty-ebooks ty-reveal ty-d4">
+    <div class="ty-ebooks-title">&#x1F381; Twoje 4 bonusowe e-booki</div>
+    <div class="ty-ebooks-desc">Po zaksięgowaniu płatności <strong>wyślemy Ci e-mailem link do pobrania</strong> wszystkich czterech bonusowych e-booków. Jeśli nie widzisz wiadomości, sprawdź proszę folder <strong>spam lub oferty</strong>.</div>
+    <div class="ty-ebook-tiles">
+      <div class="ty-ebook-tile t1">
+        <div class="ty-ebook-tile-emoji">&#x1F3AF;</div>
+        <div class="ty-ebook-tile-name">Szkolenie kota</div>
+      </div>
+      <div class="ty-ebook-tile t2">
+        <div class="ty-ebook-tile-emoji">&#x1F35B;</div>
+        <div class="ty-ebook-tile-name">Sekret wysokiej jakości żywienia kota</div>
+      </div>
+      <div class="ty-ebook-tile t3">
+        <div class="ty-ebook-tile-emoji">&#x1FA79;</div>
+        <div class="ty-ebook-tile-name">PETCARE &mdash; Opieka nad&nbsp;kotem</div>
+      </div>
+      <div class="ty-ebook-tile t4">
+        <div class="ty-ebook-tile-emoji">&#x1F431;</div>
+        <div class="ty-ebook-tile-name">999 imion dla kotów</div>
+      </div>
+    </div>
+    <div class="ty-ebooks-note">&#x23F3;&nbsp;Link do pobrania jest ważny 30 dni od otrzymania e-maila. Gdyby wygasł, napisz do nas, a wyślemy nowy.</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       5b. KONTAKT NA PODPORU
+       ═══════════════════════════════════════ -->
+  <div class="ty-support ty-reveal ty-d4">
+    <div class="ty-support-icon">&#x1F4E9;</div>
+    <div class="ty-support-text">
+      <div class="ty-support-title">Masz pytanie lub coś się nie zgadza?</div>
+      <div class="ty-support-desc">Znalazłeś błąd w zamówieniu albo potrzebujesz pomocy? Napisz do nas &mdash; chętnie pomożemy.</div>
+    </div>
+    <a href="mailto:peterka@biblia-kotow.pl?subject=Pytanie%20do%20zam%C3%B3wienia%20%23&body=Dzie%C5%84%20dobry%2C%0A%0Amam%20pytanie%20dotycz%C4%85ce%20mojego%20zam%C3%B3wienia.%0A%0ANumer%20zam%C3%B3wienia%3A%20%0A%0AMoje%20pytanie%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napisz do nas</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       6. CO BUDE DÁL — 3 kroky
+       ═══════════════════════════════════════ -->
+  <div class="ty-steps ty-reveal ty-d5">
+    <div class="ty-steps-title">Co dalej?</div>
+    <div class="ty-steps-grid">
+      <div class="ty-step">
+        <div class="ty-step-num">1</div>
+        <div class="ty-step-icon">&#x1F4E7;</div>
+        <div class="ty-step-title">Sprawdź e-mail</div>
+        <div class="ty-step-desc">Za chwilę otrzymasz potwierdzenie zamówienia, a po zaksięgowaniu płatności e-mail z linkiem do 4 bonusowych e-booków. Link jest ważny 30 dni.</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-num">2</div>
+        <div class="ty-step-icon">&#x1F4E6;</div>
+        <div class="ty-step-title">Książka jest w drodze</div>
+        <div class="ty-step-desc">Przekażemy książkę przewoźnikowi, a dotrze do Ciebie w ciągu 2&ndash;3 dni roboczych &mdash; do paczkomatu lub pod drzwi. Numer śledzenia przesyłki otrzymasz e-mailem.</div>
+      </div>
+      <div class="ty-step">
+        <div class="ty-step-num">3</div>
+        <div class="ty-step-icon">&#x1F431;</div>
+        <div class="ty-step-title">Zacznij czytać</div>
+        <div class="ty-step-desc">Z e-bookami możesz zacząć już dziś. Gdy dotrze książka, zrozumiesz swojego kota jak nigdy dotąd.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════
+       8. SDÍLENÍ
+       ═══════════════════════════════════════ -->
+  <div class="ty-share ty-reveal ty-d6">
+    <div class="ty-share-title">Znasz kogoś, kto ma w domu kota?</div>
+    <div class="ty-share-desc">Wyślij mu link do Biblii kotów &mdash; sprawisz radość jemu i jego kotu.</div>
+    <div class="ty-share-buttons">
+      <a href="https://wa.me/?text=W%C5%82a%C5%9Bnie%20zam%C3%B3wi%C5%82em%2Fam%20Bibli%C4%99%20kot%C3%B3w%20i%20my%C5%9Bl%C4%99%2C%20%C5%BCe%20spodoba%20si%C4%99%20te%C5%BC%20Tobie%20i%20Twojemu%20kotu%20%F0%9F%90%B1%20https%3A%2F%2Fbiblia-kotow.pl" target="_blank" class="ty-share-btn wa">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+        WhatsApp
+      </a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fbiblia-kotow.pl" target="_blank" class="ty-share-btn fb">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Facebook
+      </a>
+      <a href="mailto:?subject=Ta%20ksi%C4%85%C5%BCka%20o%20kotach%20Ci%C4%99%20zachwyci&body=Cze%C5%9B%C4%87%2C%0A%0Aw%C5%82a%C5%9Bnie%20zam%C3%B3wi%C5%82em%2Fam%20Bibli%C4%99%20kot%C3%B3w%20i%20my%C5%9Bl%C4%99%2C%20%C5%BCe%20spodoba%20si%C4%99%20te%C5%BC%20Tobie%3A%20https%3A%2F%2Fbiblia-kotow.pl" class="ty-share-btn mail">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4L12 13 2 4"/></svg>
+        E-mail
+      </a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       9. PATIČKA
+       ═══════════════════════════════════════ -->
+  <div class="ty-footer">
+    <strong>Biblia kotów</strong> &mdash; biblia-kotow.pl<br>
+    Performance Marketing Solution s.r.o., Rybná 716/24, 110&nbsp;00 Praga, Czechy<br>
+    REGON/IČO: 06259928 &middot; NIP UE: CZ06259928 &middot; <a href="mailto:peterka@biblia-kotow.pl">peterka@biblia-kotow.pl</a>
+  </div>
+
+</div>
+
+<!-- ══ JS: Data z objednávky, editační formulář, FB Pixel, konfety, scroll reveal ══ -->
+<script>
+(function(){
+  // ────────────────────────────────────────────────────
+  // 1. Načtení dat z localStorage
+  // ────────────────────────────────────────────────────
+  var orderId = localStorage.getItem('medusa_order_id') || '';
+  var displayId = localStorage.getItem('medusa_order_display_id') || '';
+  var customerStr = localStorage.getItem('medusa_customer');
+
+  // Bundle data z checkoutu
+  var bundleQty = parseInt(localStorage.getItem('medusa_bundle_qty') || '1');
+  var checkoutTotal = parseFloat(localStorage.getItem('medusa_checkout_total') || '0');
+
+  // Doprava — Zásilkovna (výdejní místo / doručení na adresu)
+  var shippingMethod = localStorage.getItem('checkout_shipping_method') || '';
+  var packetaPoint = null;
+  try { packetaPoint = JSON.parse(localStorage.getItem('checkout_packeta_point') || 'null'); } catch(e) {}
+
+  var customer = null;
+  if (customerStr) {
+    try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nie można sparsować danych klienta'); }
+  }
+
+  // Formatowanie kwoty: 89 -> "89 zł"
+  function formatCzk(amount) {
+    var n = Math.round(Number(amount) || 0);
+    var s = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return s + ' zł';
+  }
+
+  // Fetch skutečných dat objednávky z API — přepíše localStorage (může být zastaralý)
+  if (orderId && PROJECT_CONFIG.medusaUrl) {
+    fetch(PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/details', {
+      headers: { 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success && data.order) {
+        var sa = data.order.shipping_address || {};
+        var updated = {
+          email: data.order.email || (customer && customer.email) || '',
+          first_name: sa.first_name || (customer && customer.first_name) || '',
+          last_name: sa.last_name || (customer && customer.last_name) || '',
+          address_1: sa.address_1 || (customer && customer.address_1) || '',
+          city: sa.city || (customer && customer.city) || '',
+          postal_code: sa.postal_code || (customer && customer.postal_code) || '',
+          country_code: sa.country_code || (customer && customer.country_code) || '',
+          phone: sa.phone || (customer && customer.phone) || '',
+        };
+        customer = updated;
+        localStorage.setItem('medusa_customer', JSON.stringify(updated));
+        updateDetailsDisplay();
+        console.log('TY: Customer data synced from order API (country: ' + updated.country_code + ')');
+
+        // ─── Autoritativní oprava počtu knih + celkové ceny ───
+        // localStorage (medusa_bundle_qty / medusa_checkout_total) není spolehlivý —
+        // objednávka je zdroj pravdy. Počet knih odvodíme z variant_title
+        // ("1 kniha" / "2 knihy" / ...) hlavní položky.
+        try {
+          var orderItems = data.order.items || [];
+          var mainItem = null;
+          var derivedBookCount = 0;
+          for (var i = 0; i < orderItems.length; i++) {
+            var it = orderItems[i];
+            var title = (it.product_title || it.title || '').toLowerCase();
+            // Přeskoč vedlejší položky, hledáme hlavní knihu
+            if (title.indexOf('biblia') === -1) continue;
+
+            var variantTitle = (it.variant_title || '').toLowerCase();
+            var titleMatch = /^([1-4])\s*ksi/.exec(variantTitle);
+            var bundleSize = titleMatch ? parseInt(titleMatch[1], 10) : 1;
+            mainItem = it;
+            derivedBookCount = bundleSize * (it.quantity || 1);
+            break;
+          }
+          if (mainItem && derivedBookCount > 0) {
+            bundleQty = derivedBookCount;
+            var nameEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-name');
+            var descEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-desc');
+            if (nameEl) {
+              nameEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '× Biblia kotów')
+                : 'Biblia kotów';
+            }
+            if (descEl) {
+              descEl.textContent = derivedBookCount > 1
+                ? (derivedBookCount + '× książka drukowana — wysyłamy w jednej paczce')
+                : 'Książka drukowana — wysyłamy kurierem lub do paczkomatu';
+            }
+          }
+          // Order bumpy — autoritativně z položek objednávky
+          var bumpRows = [];
+          for (var bj = 0; bj < orderItems.length; bj++) {
+            var bit = orderItems[bj];
+            var bTitle = (bit.product_title || bit.title || '');
+            var bSku = (bit.variant_sku || bit.variant && bit.variant.sku || '');
+            if (/^FEE-/.test(bSku)) continue;                              // poplatky (dobírka/doprava)
+            if (bTitle.toLowerCase().indexOf('biblia kotów') !== -1) continue; // główna książka
+            bumpRows.push({
+              name: bTitle.replace(/\s*[–—-]\s*upsell.*$/i, ''),
+              price: (Number(bit.unit_price) || 0) * (bit.quantity || 1)
+            });
+          }
+          renderTyBumps(bumpRows.length ? bumpRows : null);
+
+          // Autoritativní celková cena z objednávky
+          if (data.order.total != null) {
+            var totalEl = document.getElementById('ty-total-price');
+            if (totalEl) totalEl.textContent = formatCzk(data.order.total);
+          }
+          console.log('TY: Order items synced (books: ' + derivedBookCount + ', total: ' + data.order.total + ')');
+        } catch (e) {
+          console.warn('TY: Could not sync order items:', e && e.message);
+        }
+      }
+    })
+    .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });
+  }
+
+  // Firemní údaje (B2B)
+  var companyStr = localStorage.getItem('medusa_company');
+  var companyData = null;
+  if (companyStr) {
+    try { companyData = JSON.parse(companyStr); } catch(e) { console.warn('TY: Nie można sparsować danych firmy'); }
+  }
+
+  // Mapování country kódů na názvy
+  var countryNames = {
+    PL: 'Polska', CZ: 'Czechy', SK: 'Słowacja',
+  };
+
+  // ────────────────────────────────────────────────────
+  // 2. Vyplnění dynamických dat
+  // ────────────────────────────────────────────────────
+
+  // 2a. Personalizovaný nadpis
+  var titleEl = document.getElementById('ty-main-title');
+  if (titleEl && customer && customer.first_name) {
+    titleEl.innerHTML = 'Dziękujemy, <span class="accent">' + customer.first_name + '!</span>';
+  }
+
+  // 2b. Číslo objednávky
+  var orderLabelEl = document.getElementById('ty-order-label');
+  if (orderLabelEl && displayId) {
+    orderLabelEl.textContent = '📦 Zamówienie #' + displayId;
+  } else if (orderLabelEl && orderId) {
+    var shortId = orderId.replace('order_', '').substring(0, 8).toUpperCase();
+    orderLabelEl.textContent = '📦 Zamówienie #' + shortId;
+  }
+
+  // 2c. Mailto odkaz — doplň číslo objednávky
+  var mailtoEl = document.getElementById('ty-support-mailto');
+  if (mailtoEl) {
+    var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
+    var subject = encodeURIComponent('Pytanie do zamówienia #' + orderNum);
+    var body = encodeURIComponent('Dzień dobry,\n\nmam pytanie dotyczące mojego zamówienia.\n\nNumer zamówienia: #' + orderNum + '\n\nMoje pytanie: ');
+    mailtoEl.href = 'mailto:peterka@biblia-kotow.pl?subject=' + subject + '&body=' + body;
+  }
+
+  // 2d. Celková cena — bundle ceník z konfigurace jako fallback
+  var bundlePriceMap = {};
+  if (PROJECT_CONFIG.bundleOptions) {
+    PROJECT_CONFIG.bundleOptions.forEach(function(opt) { bundlePriceMap[opt.qty] = opt.price; });
+  }
+  var totalPrice;
+  if (checkoutTotal > 0) {
+    totalPrice = checkoutTotal;
+  } else if (bundlePriceMap[bundleQty]) {
+    totalPrice = bundlePriceMap[bundleQty];
+  } else {
+    totalPrice = PROJECT_CONFIG.mainProduct.price;
+  }
+  var totalPriceEl = document.getElementById('ty-total-price');
+  if (totalPriceEl) {
+    totalPriceEl.textContent = formatCzk(totalPrice);
+  }
+
+  // 2e. Aktualizuj hlavní položku podle bundle qty
+  var orderItemsEl = document.getElementById('ty-order-items');
+
+  /** Order bumpy v souhrnu — vykreslí řádky za hlavní knihu (idempotentní).
+   *  rows = [{name, price}]; null = nechat stávající beze změny. */
+  function renderTyBumps(rows) {
+    if (rows == null || !orderItemsEl) return;
+    orderItemsEl.querySelectorAll('.ty-bump-row').forEach(function(el) { el.remove(); });
+    var mainRow = orderItemsEl.querySelector('.ty-order-item');
+    rows.slice().reverse().forEach(function(b) {
+      if (!b || !b.name) return;
+      var row = document.createElement('div');
+      row.className = 'ty-order-item ty-bump-row';
+      row.innerHTML = '<div class="ty-order-icon book">&#127873;</div><div>'
+        + '<div class="ty-order-name"></div>'
+        + '<div class="ty-order-desc">Bonusowa ksi&#261;&#380;ka &mdash; w tej samej paczce'
+        + (b.price ? ' &middot; ' + formatCzk(b.price) : '') + '</div></div>';
+      row.querySelector('.ty-order-name').textContent = b.name;
+      if (mainRow && mainRow.nextSibling) mainRow.parentNode.insertBefore(row, mainRow.nextSibling);
+      else orderItemsEl.appendChild(row);
+    });
+  }
+
+  // Okamžitý render z localStorage (API sync později přepíše autoritativními daty)
+  try {
+    var lsBumps = JSON.parse(localStorage.getItem('medusa_order_bumps') || '[]');
+    if (lsBumps.length) renderTyBumps(lsBumps);
+  } catch (e) {}
+  if (orderItemsEl && bundleQty > 1) {
+    var mainItemName = orderItemsEl.querySelector('.ty-order-name');
+    if (mainItemName) {
+      mainItemName.textContent = bundleQty + '× Biblia kotów';
+    }
+    var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
+    if (mainItemDesc) {
+      mainItemDesc.textContent = bundleQty + '× książka drukowana — wysyłamy w jednej paczce';
+    }
+  }
+
+  // 2f. Text dopravy podle zvolené metody (výdejní místo / doručení domů)
+  var shippingDescEl = document.getElementById('ty-shipping-desc');
+  if (shippingDescEl) {
+    if (shippingMethod === 'home') {
+      shippingDescEl.textContent = 'Dostawa pod Twój adres w ciągu 2–3 dni roboczych';
+    } else if (shippingMethod === 'pickup') {
+      shippingDescEl.textContent = 'Dostawa do punktu odbioru w ciągu 2–3 dni roboczych';
+    }
+  }
+  // Zobraz zvolené výdejní místo v kartě údajů
+  if (shippingMethod === 'pickup' && packetaPoint && packetaPoint.name) {
+    var pickupRow = document.getElementById('ty-pickup-row');
+    var pickupVal = document.getElementById('ty-show-pickup');
+    if (pickupRow && pickupVal) {
+      pickupRow.style.display = '';
+      var pParts = [packetaPoint.name];
+      var pLine2 = [];
+      if (packetaPoint.address) pLine2.push(packetaPoint.address);
+      if (packetaPoint.zip || packetaPoint.city) pLine2.push([packetaPoint.zip, packetaPoint.city].filter(Boolean).join(' '));
+      if (pLine2.length) pParts.push(pLine2.join(', '));
+      pickupVal.textContent = pParts.join(' — ');
+    }
+  }
+
+  // 2g. Vyplnění zákaznických údajů
+  function updateDetailsDisplay() {
+    if (!customer) return;
+    var el = function(id) { return document.getElementById(id); };
+    if (el('ty-show-firstname')) el('ty-show-firstname').textContent = customer.first_name || '—';
+    if (el('ty-show-lastname')) el('ty-show-lastname').textContent = customer.last_name || '—';
+    if (el('ty-show-email')) el('ty-show-email').textContent = customer.email || '—';
+    if (el('ty-show-phone')) el('ty-show-phone').textContent = customer.phone || '—';
+    if (el('ty-show-address')) {
+      var parts = [];
+      if (customer.address_1) parts.push(customer.address_1);
+      var line2 = [];
+      if (customer.postal_code) line2.push(customer.postal_code);
+      if (customer.city) line2.push(customer.city);
+      if (line2.length) parts.push(line2.join(' '));
+      var cc = (customer.country_code || '').toUpperCase();
+      if (cc && countryNames[cc]) parts.push(countryNames[cc]);
+      else if (cc) parts.push(cc);
+      el('ty-show-address').innerHTML = parts.join('<br>');
+    }
+    // Firemní údaje (B2B)
+    if (companyData && companyData.company_name) {
+      var companyRow = el('ty-company-row');
+      var companyVal = el('ty-show-company');
+      if (companyRow && companyVal) {
+        companyRow.style.display = '';
+        var cParts = [companyData.company_name];
+        if (companyData.ico) cParts.push('REGON: ' + companyData.ico);
+        if (companyData.dic) cParts.push('NIP: ' + companyData.dic);
+        companyVal.innerHTML = cParts.join('<br>');
+      }
+      // Ukaž firemní sekci v editačním formuláři
+      var editCompSection = el('ty-edit-company-section');
+      if (editCompSection) editCompSection.style.display = '';
+    }
+  }
+  updateDetailsDisplay();
+
+  // ────────────────────────────────────────────────────
+  // 2h. 5minutové okno pro úpravy — poté skryj tlačítko
+  // ────────────────────────────────────────────────────
+  (function() {
+    if (!localStorage.getItem('medusa_edit_started_at')) {
+      localStorage.setItem('medusa_edit_started_at', new Date().toISOString());
+    }
+    var editStarted = localStorage.getItem('medusa_edit_started_at');
+    var elapsedMs = Date.now() - new Date(editStarted).getTime();
+    var editBtn = document.getElementById('ty-edit-toggle');
+    var editForm = document.getElementById('ty-edit-form');
+
+    if (elapsedMs >= 5 * 60 * 1000) {
+      // Okno už vypršelo — skryj tlačítko
+      if (editBtn) editBtn.style.display = 'none';
+      if (editForm) editForm.classList.remove('is-open');
+    } else {
+      // Nastav timeout na skrytí po vypršení 5 minut
+      var remaining = (5 * 60 * 1000) - elapsedMs;
+      setTimeout(function() {
+        if (editBtn) editBtn.style.display = 'none';
+        if (editForm) { editForm.classList.remove('is-open'); }
+        var card = document.getElementById('ty-details-card');
+        if (card) card.style.display = '';
+      }, remaining);
+    }
+  })();
+
+  // ────────────────────────────────────────────────────
+  // 3. Editační formulář — toggle + uložení
+  // ────────────────────────────────────────────────────
+  window.toggleEditForm = function() {
+    var form = document.getElementById('ty-edit-form');
+    var card = document.getElementById('ty-details-card');
+    var isOpen = form.classList.contains('is-open');
+
+    if (isOpen) {
+      // Zavři formulář, ukaž kartu
+      form.classList.remove('is-open');
+      card.style.display = '';
+    } else {
+      // Otevři formulář, skryj kartu, předvyplň pole
+      card.style.display = 'none';
+      form.classList.add('is-open');
+      if (customer) {
+        document.getElementById('edit-firstname').value = customer.first_name || '';
+        document.getElementById('edit-lastname').value = customer.last_name || '';
+        document.getElementById('edit-email').value = customer.email || '';
+        document.getElementById('edit-phone').value = customer.phone || '';
+        document.getElementById('edit-address').value = customer.address_1 || '';
+        document.getElementById('edit-postal').value = customer.postal_code || '';
+        document.getElementById('edit-city').value = customer.city || '';
+      }
+      // Firemní pole předvyplnit
+      if (companyData && companyData.company_name) {
+        var ec = document.getElementById('edit-company');
+        var ei = document.getElementById('edit-ico');
+        var ed = document.getElementById('edit-dic');
+        if (ec) ec.value = companyData.company_name || '';
+        if (ei) ei.value = companyData.ico || '';
+        if (ed) ed.value = companyData.dic || '';
+      }
+      // Scroll k formuláři
+      form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  window.saveDetails = function() {
+    var btn = document.getElementById('ty-save-btn');
+
+    // Načti hodnoty z formuláře
+    var newData = {
+      first_name: document.getElementById('edit-firstname').value.trim(),
+      last_name: document.getElementById('edit-lastname').value.trim(),
+      email: document.getElementById('edit-email').value.trim(),
+      phone: document.getElementById('edit-phone').value.trim(),
+      address_1: document.getElementById('edit-address').value.trim(),
+      postal_code: document.getElementById('edit-postal').value.trim(),
+      city: document.getElementById('edit-city').value.trim(),
+    };
+
+    // Validace — alespoň e-mail a jméno
+    if (!newData.email || !newData.first_name) {
+      showFeedback('Podaj proszę przynajmniej imię i adres e-mail.', 'error');
+      return;
+    }
+
+    // Stav načítání
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-spinner"></span> Zapisywanie...';
+
+    // Aktualizuj lokální data ihned (pro lepší UX)
+    customer = {
+      email: newData.email,
+      first_name: newData.first_name,
+      last_name: newData.last_name,
+      phone: newData.phone,
+      address_1: newData.address_1,
+      city: newData.city,
+      postal_code: newData.postal_code,
+      country_code: customer ? customer.country_code : 'PL',
+    };
+
+    // Aktualizuj localStorage
+    localStorage.setItem('medusa_customer', JSON.stringify(customer));
+
+    // Firemní údaje aktualizovat
+    var ecEl = document.getElementById('edit-company');
+    if (ecEl) {
+      var cName = ecEl.value.trim();
+      var cIco = (document.getElementById('edit-ico') || {}).value || '';
+      var cDic = (document.getElementById('edit-dic') || {}).value || '';
+      if (cName) {
+        companyData = { company_name: cName, ico: cIco.trim(), dic: cDic.trim() };
+        localStorage.setItem('medusa_company', JSON.stringify(companyData));
+      }
+    }
+
+    // Aktualizuj zobrazení na stránce
+    updateDetailsDisplay();
+
+    // Pokud nemáme order ID, přeskočíme API volání (preview/test mód)
+    if (!orderId) {
+      console.log('TY: Brak order ID — zapisuję tylko lokalnie');
+      finishSave(true);
+      return;
+    }
+
+    // Volání Medusa API — aktualizace objednávky
+    var apiUrl = PROJECT_CONFIG.medusaUrl + '/store/custom/orders/' + orderId + '/update-details';
+    var headers = {
+      'Content-Type': 'application/json',
+      'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey,
+    };
+
+    // Sestav API payload
+    var apiPayload = {
+      email: newData.email,
+      shipping_address: {
+        first_name: newData.first_name,
+        last_name: newData.last_name,
+        phone: newData.phone,
+        address_1: newData.address_1,
+        city: newData.city,
+        postal_code: newData.postal_code,
+      }
+    };
+    // Přidej firemní údaje pokud existují
+    if (companyData && companyData.company_name) {
+      apiPayload.shipping_address.company = companyData.company_name;
+      apiPayload.metadata = {};
+      if (companyData.ico) apiPayload.metadata.ico = companyData.ico;
+      if (companyData.dic) apiPayload.metadata.dic = companyData.dic;
+    }
+
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(apiPayload)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.success) {
+        console.log('TY: Zamówienie zaktualizowane w Medusa');
+        finishSave(true);
+      } else {
+        console.warn('TY: API vrátilo chybu:', data.message);
+        // Data jsou uložená lokálně, ale API selhalo
+        finishSave(true, 'Zapisaliśmy dane. Gdyby coś się nie zgadzało, napisz do nas e-mail.');
+      }
+    })
+    .catch(function(err) {
+      console.error('TY: Chyba při API volání:', err);
+      // Lokální data jsou uložená, API nedostupné
+      finishSave(true, 'Zapisaliśmy dane. Serwer jest chwilowo niedostępny — gdyby coś się nie zgadzało, napisz do nas.');
+    });
+  };
+
+  function finishSave(success, customMessage) {
+    var btn = document.getElementById('ty-save-btn');
+    btn.disabled = false;
+    btn.innerHTML = 'Zapisz zmiany';
+
+    // Zavři formulář, ukaž kartu
+    document.getElementById('ty-edit-form').classList.remove('is-open');
+    document.getElementById('ty-details-card').style.display = '';
+
+    // Ukaž zpětnou vazbu
+    if (success) {
+      showFeedback(customMessage || 'Zaktualizowaliśmy Twoje dane! Paczkę wyślemy na właściwy adres.', 'success');
+    } else {
+      showFeedback(customMessage || 'Coś poszło nie tak. Spróbuj ponownie.', 'error');
+    }
+  }
+
+  function showFeedback(message, type) {
+    var feedback = document.getElementById('ty-feedback');
+    var feedbackText = document.getElementById('ty-feedback-text');
+    feedbackText.textContent = message;
+    feedback.className = 'ty-feedback is-visible ' + type;
+
+    // Scroll ke zpětné vazbě
+    feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Automaticky skryj po 8 sekundách
+    setTimeout(function() {
+      feedback.classList.remove('is-visible');
+    }, 8000);
+  }
+
+  // ────────────────────────────────────────────────────
+  // 4. Facebook Pixel + CAPI — Purchase event (deduplikace přes MetaTracker)
+  // ────────────────────────────────────────────────────
+  // Guard: přeskoč Purchase event pokud objednávka nemá hodnotu (failed/prázdné objednávky)
+  if (!totalPrice || totalPrice <= 0 || !orderId) {
+    console.warn('TY: Skipping Purchase event — no valid order (totalPrice=' + totalPrice + ', orderId=' + orderId + ')');
+  } else if (typeof MetaTracker !== 'undefined') {
+    var purchaseContentIds = PROJECT_CONFIG.catalogContentIds || [PROJECT_CONFIG.mainProduct.handle];
+    var purchaseNumItems = bundleQty;
+
+    // Sestav user_data ze zákaznických údajů pro maximální EMQ
+    var purchaseUserData = {};
+    if (customer) {
+      if (customer.email) purchaseUserData.em = customer.email;
+      if (customer.firstName) purchaseUserData.fn = customer.firstName;
+      if (customer.lastName) purchaseUserData.ln = customer.lastName;
+      if (customer.phone) purchaseUserData.ph = customer.phone;
+      if (customer.city) purchaseUserData.ct = customer.city;
+      if (customer.postalCode) purchaseUserData.zp = customer.postalCode;
+      if (customer.country) purchaseUserData.country = customer.country;
+      if (customer.region) purchaseUserData.st = customer.region;
+    }
+
+    var purchaseEventId = 'purchase_' + orderId;
+    var mainPrice = PROJECT_CONFIG.mainProduct.price || 0;
+    /* Reload guard: přeskoč Purchase pokud už byl pro tuto objednávku odeslán (bezpečné při reloadu stránky) */
+    if (orderId && localStorage.getItem('meta_purchase_fired_' + orderId) === 'true') {
+      console.log('TY: Purchase already fired for ' + orderId + ' — skipping (likely page reload)');
+    } else {
+      if (orderId) localStorage.setItem('meta_purchase_fired_' + orderId, 'true');
+      MetaTracker.trackPurchase({
+        content_ids: purchaseContentIds,
+        contents: purchaseContentIds.map(function(id) {
+          return { id: id, quantity: 1, item_price: mainPrice };
+        }),
+        value: totalPrice,
+        currency: PROJECT_CONFIG.mainProduct.currency || 'PLN',
+        num_items: purchaseNumItems,
+        order_id: orderId
+      }, purchaseUserData, { event_id: purchaseEventId });
+    }
+    console.log('TY: Purchase event (browser + CAPI) — ' + totalPrice + ' PLN (' + purchaseNumItems + ' items) event_id=' + purchaseEventId);
+  }
+
+  // ────────────────────────────────────────────────────
+  // 5. Vyčisti localStorage — odloženo o 5 minut (aby zákazník stihl upravit údaje)
+  // ────────────────────────────────────────────────────
+  setTimeout(function() {
+    localStorage.removeItem('medusa_cart_id');
+    localStorage.removeItem('medusa_customer');
+    localStorage.removeItem('medusa_payment_provider');
+    localStorage.removeItem('medusa_order_id');
+    localStorage.removeItem('medusa_order_display_id');
+    localStorage.removeItem('medusa_bundle_qty');
+    localStorage.removeItem('medusa_bundle_price');
+    localStorage.removeItem('medusa_order_bump');
+    localStorage.removeItem('medusa_checkout_total');
+    localStorage.removeItem('checkout_shipping_method');
+    localStorage.removeItem('checkout_packeta_point');
+    console.log('TY: localStorage vyčištěn (po 5 min)');
+  }, 5 * 60 * 1000);
+
+  // ────────────────────────────────────────────────────
+  // 6. Konfety
+  // ────────────────────────────────────────────────────
+  var confettiEl = document.getElementById('ty-confetti');
+  if (confettiEl && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var colors = ['#DC3522','#E8604F','#6B21A8','#F3E8FF','#C4B5FD','#FFD1B0','#fff'];
+    var shapes = ['circle','square','triangle'];
+    for (var i = 0; i < 60; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'ty-confetti-piece';
+      var c = colors[Math.floor(Math.random()*colors.length)];
+      var s = shapes[Math.floor(Math.random()*shapes.length)];
+      var size = 6 + Math.random()*10;
+      piece.style.left = Math.random()*100 + '%';
+      piece.style.width = size + 'px';
+      piece.style.height = size + 'px';
+      piece.style.animationDelay = (Math.random()*1.5) + 's';
+      piece.style.animationDuration = (2.5 + Math.random()*2) + 's';
+      if (s === 'circle') { piece.style.borderRadius = '50%'; piece.style.background = c; }
+      else if (s === 'square') { piece.style.background = c; piece.style.borderRadius = '2px'; }
+      else { piece.style.width = '0'; piece.style.height = '0'; piece.style.borderLeft = size/2+'px solid transparent'; piece.style.borderRight = size/2+'px solid transparent'; piece.style.borderBottom = size+'px solid '+c; piece.style.background = 'none'; }
+      confettiEl.appendChild(piece);
+    }
+    setTimeout(function(){ confettiEl.remove(); }, 5000);
+  }
+
+  // ────────────────────────────────────────────────────
+  // 7. Scroll reveal
+  // ────────────────────────────────────────────────────
+  if ('IntersectionObserver' in window) {
+    var wrapper = document.querySelector('.ty-page');
+    if (wrapper) wrapper.classList.add('js-reveal-ready');
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.ty-reveal').forEach(function(el){ obs.observe(el); });
+  } else {
+    document.querySelectorAll('.ty-reveal').forEach(function(el){ el.classList.add('is-visible'); });
+  }
+})();
+</script>
+
+</body>
+</html>
