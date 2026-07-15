@@ -385,17 +385,18 @@ h2 { font-size: 38px; }
  text-align: center;
 }
 .trust-bar-inner {
- max-width: 1000px; margin: 0 auto;
+ max-width: 1200px; margin: 0 auto;
  display: flex; align-items: center; justify-content: center;
- gap: 0; flex-wrap: wrap;
+ gap: 0; flex-wrap: nowrap;
 }
 .trust-bar-item {
  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
  color: #2D1B3D; display: flex; align-items: center; gap: 8px;
  white-space: nowrap;
- padding: 0 20px;
+ padding: 0 16px;
  position: relative;
 }
+@media (max-width: 1040px) { .trust-bar-inner { flex-wrap: wrap; } }
 .trust-bar-item:not(:last-child)::after {
  content: '';
  position: absolute;
