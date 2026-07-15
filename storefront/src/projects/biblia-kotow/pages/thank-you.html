@@ -684,7 +684,7 @@ body { background: var(--bg); }
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
           <div class="ty-order-name">Dostawa</div>
-          <div class="ty-order-desc" id="ty-shipping-desc">Dostawa w ciągu 2&ndash;3 dni roboczych</div>
+          <div class="ty-order-desc" id="ty-shipping-desc">Dostawa w ciągu 2&ndash;4 dni roboczych</div>
         </div>
       </div>
     </div>
@@ -730,7 +730,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Masz pytanie lub coś się nie zgadza?</div>
       <div class="ty-support-desc">Znalazłeś błąd w zamówieniu albo potrzebujesz pomocy? Napisz do nas &mdash; chętnie pomożemy.</div>
     </div>
-    <a href="mailto:peterka@biblia-kotow.pl?subject=Pytanie%20do%20zam%C3%B3wienia%20%23&body=Dzie%C5%84%20dobry%2C%0A%0Amam%20pytanie%20dotycz%C4%85ce%20mojego%20zam%C3%B3wienia.%0A%0ANumer%20zam%C3%B3wienia%3A%20%0A%0AMoje%20pytanie%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napisz do nas</a>
+    <a href="mailto:kontakt@biblia-kotow.pl?subject=Pytanie%20do%20zam%C3%B3wienia%20%23&body=Dzie%C5%84%20dobry%2C%0A%0Amam%20pytanie%20dotycz%C4%85ce%20mojego%20zam%C3%B3wienia.%0A%0ANumer%20zam%C3%B3wienia%3A%20%0A%0AMoje%20pytanie%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napisz do nas</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -749,7 +749,7 @@ body { background: var(--bg); }
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
         <div class="ty-step-title">Książka jest w drodze</div>
-        <div class="ty-step-desc">Przekażemy książkę przewoźnikowi, a dotrze do Ciebie w ciągu 2&ndash;3 dni roboczych &mdash; do paczkomatu lub pod drzwi. Numer śledzenia przesyłki otrzymasz e-mailem.</div>
+        <div class="ty-step-desc">Przekażemy książkę przewoźnikowi, a dotrze do Ciebie w ciągu 2&ndash;4 dni roboczych &mdash; do paczkomatu lub pod drzwi. Numer śledzenia przesyłki otrzymasz e-mailem.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
@@ -789,7 +789,7 @@ body { background: var(--bg); }
   <div class="ty-footer">
     <strong>Biblia kotów</strong> &mdash; biblia-kotow.pl<br>
     Performance Marketing Solution s.r.o., Rybná 716/24, 110&nbsp;00 Praga, Czechy<br>
-    REGON/IČO: 06259928 &middot; NIP UE: CZ06259928 &middot; <a href="mailto:peterka@biblia-kotow.pl">peterka@biblia-kotow.pl</a>
+    REGON/IČO: 06259928 &middot; NIP UE: CZ06259928 &middot; <a href="mailto:kontakt@biblia-kotow.pl">kontakt@biblia-kotow.pl</a>
   </div>
 
 </div>
@@ -951,7 +951,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Pytanie do zamówienia #' + orderNum);
     var body = encodeURIComponent('Dzień dobry,\n\nmam pytanie dotyczące mojego zamówienia.\n\nNumer zamówienia: #' + orderNum + '\n\nMoje pytanie: ');
-    mailtoEl.href = 'mailto:peterka@biblia-kotow.pl?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:kontakt@biblia-kotow.pl?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bundle ceník z konfigurace jako fallback
@@ -1015,9 +1015,9 @@ body { background: var(--bg); }
   var shippingDescEl = document.getElementById('ty-shipping-desc');
   if (shippingDescEl) {
     if (shippingMethod === 'home') {
-      shippingDescEl.textContent = 'Dostawa pod Twój adres w ciągu 2–3 dni roboczych';
+      shippingDescEl.textContent = 'Dostawa pod Twój adres w ciągu 2–4 dni roboczych';
     } else if (shippingMethod === 'pickup') {
-      shippingDescEl.textContent = 'Dostawa do punktu odbioru w ciągu 2–3 dni roboczych';
+      shippingDescEl.textContent = 'Dostawa do punktu odbioru w ciągu 2–4 dni roboczych';
     }
   }
   // Zobraz zvolené výdejní místo v kartě údajů

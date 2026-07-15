@@ -44,7 +44,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .preloader-logo {
  width: auto;
- height: 180px;
+ height: 76px;
  aspect-ratio: 500 / 225;
  animation: preloaderPulse 1.4s ease-in-out infinite;
 }
@@ -89,9 +89,9 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 10px;
 }
 .nav-logo img {
- height: 56px;
+ height: 42px;
  width: auto;
- aspect-ratio: 500 / 225;
+ aspect-ratio: 500 / 118;
 }
 .nav-logo-text {
  font-family: 'Recoleta', serif;
@@ -1739,9 +1739,9 @@ h2 { font-size: 38px; }
  gap: 16px;
 }
 .footer-logo {
- height: 56px;
- width: 210px;
- aspect-ratio: 600 / 160;
+ height: auto;
+ width: 190px;
+ aspect-ratio: 500 / 118;
 }
 .footer-brand-text {
  font-family: 'Recoleta', serif;
@@ -2033,7 +2033,7 @@ h2 { font-size: 38px; }
 
 /* ─── Mobile horizontal-overflow fixes ─── */
 @media (max-width: 768px) {
-  .preloader-logo { height: auto; width: min(300px, 78vw); aspect-ratio: 500 / 225; }
+  .preloader-logo { height: auto; width: min(300px, 78vw); aspect-ratio: 500 / 118; }
   .trust-bar-item { white-space: normal; padding: 0 12px; text-align: center; justify-content: center; }
   .trust-bar-item:not(:last-child)::after { display: none; }
 }
