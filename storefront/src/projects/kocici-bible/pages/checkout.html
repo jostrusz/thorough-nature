@@ -1842,6 +1842,7 @@ body {
   animation: shimmer 3s ease infinite;
 }
 .order-bump:hover { border-color: var(--cta); }
+.order-bump, .order-bump-header, .order-bump-detail-top { overflow: visible; }
 .order-bump.checked {
   border-style: solid;
   border-color: var(--cta);
@@ -1870,12 +1871,24 @@ body {
 
 /* Thumbnail v headeru — malý obrázek obálky */
 .order-bump-thumb {
-  width: 44px; height: 60px; border-radius: 5px;
-  overflow: hidden; flex-shrink: 0;
-  background: var(--section);
-  box-shadow: 0 2px 8px rgba(45,27,61,0.12);
+  width: 44px; height: 60px;
+  flex-shrink: 0;
+  position: relative;
 }
-.order-bump-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.order-bump-thumb img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left center;
+}
+/* Hover = plynulé zvětšení obálky, ať si ji zákazník prohlédne */
+@media (hover: hover) {
+  .order-bump-thumb:hover img {
+    transform: scale(2.6);
+    position: relative; z-index: 30;
+    filter: drop-shadow(0 8px 22px rgba(45,27,61,0.28));
+  }
+  .order-bump-thumb:hover { z-index: 30; }
+}
 
 .order-bump-header-text { flex: 1; min-width: 0; }
 .order-bump-top-row {
@@ -1947,12 +1960,23 @@ body {
   display: flex; gap: 16px; margin-bottom: 16px;
 }
 .order-bump-img {
-  width: 90px; height: 124px; border-radius: 8px;
-  overflow: hidden; flex-shrink: 0;
-  background: var(--section);
-  box-shadow: 0 4px 16px rgba(45,27,61,0.12);
+  width: 90px; height: 124px;
+  flex-shrink: 0;
+  position: relative;
 }
-.order-bump-img img { width: 100%; height: 100%; object-fit: contain; }
+.order-bump-img img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: left top;
+}
+@media (hover: hover) {
+  .order-bump-img:hover img {
+    transform: scale(1.9);
+    position: relative; z-index: 30;
+    filter: drop-shadow(0 10px 26px rgba(45,27,61,0.3));
+  }
+  .order-bump-img:hover { z-index: 30; }
+}
 .order-bump-detail-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .order-bump-name { font-family: 'Recoleta', serif; font-size: 17px; font-weight: 600; color: var(--heading); margin-bottom: 2px; }
 .order-bump-author { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
