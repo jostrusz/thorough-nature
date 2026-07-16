@@ -1641,24 +1641,6 @@ body {
   background: linear-gradient(135deg, rgba(194,123,160,0.07), rgba(212,152,181,0.04));
   box-shadow: 0 0 0 3px rgba(194,123,160,0.12);
 }
-/* Highlighted recommended option (BESTE VERDI = 4 bøker) */
-.bundle-option.recommended {
-  border-color: var(--cta);
-  background: linear-gradient(135deg, rgba(194,123,160,0.06), rgba(245,237,242,0.6));
-}
-.bundle-option.recommended::before {
-  content: '';
-  position: absolute;
-  inset: -1.5px;
-  border-radius: 12px;
-  padding: 1.5px;
-  background: linear-gradient(135deg, var(--cta), var(--highlight));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.7;
-}
 .bundle-radio {
   width: 20px; height: 20px; border-radius: 50%;
   border: 2px solid rgba(155,122,173,0.4);
@@ -1706,7 +1688,9 @@ body {
   border: 1px solid rgba(194,123,160,0.25);
   white-space: nowrap;
 }
-.bundle-option.recommended .bundle-badge {
+/* "BESTE VERDI" — zvýrazní se POUZE badge, nikdy rámeček možnosti.
+   Rámeček/výběr řídí výhradně .selected podle kliknutí zákazníka. */
+.bundle-option.best-value .bundle-badge {
   background: var(--cta);
   color: var(--white);
   border-color: var(--cta);
@@ -3163,10 +3147,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var totalBundles = PROJECT_CONFIG.bundleOptions.length;
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0);
-      var isRecommended = (idx === totalBundles - 1); // Last = best value
       var originalPrice = opt.qty * unitPrice;
       var qtyLabel = opt.qty === 1 ? '1 bok' : opt.qty + ' bøker';
-      var classes = 'bundle-option' + (isSelected ? ' selected' : '') + (isRecommended ? ' recommended' : '');
+      // Zvýraznění řídí VÝHRADNĚ .selected (co zákazník klikl). Poslední možnost
+      // se odlišuje jen badgem "BESTE VERDI" (.best-value), ne rámečkem — jinak
+      // vypadá trvale vybraná.
+      var isBestValue = (idx === totalBundles - 1);
+      var classes = 'bundle-option' + (isSelected ? ' selected' : '') + (isBestValue ? ' best-value' : '');
       html += '<label class="' + classes + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
