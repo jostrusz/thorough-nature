@@ -133,6 +133,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       "ZKZ-2": { physicalSku: "ZJSZ9827982789", quantity: 2 },
       "ZKZ-3": { physicalSku: "ZJSZ9827982789", quantity: 3 },
       "ZKZ-4": { physicalSku: "ZJSZ9827982789", quantity: 4 },
+      // ─── Hungarian: Engedd el, ami tönkretesz (engedd-el) ───
+      // Jediná varianta "Puhakötés" (ENGEDD-EL-PB), bundle 1–4 jede přes množství
+      // na řádku — proto quantity: 1, route ho násobí line quantity.
+      // Dextrum zná knihu pod kódem EEAT89789272462 (sortiment 00512375), ne pod
+      // medusím SKU "ENGEDD-EL-PB".
+      "ENGEDD-EL-PB": { physicalSku: "EEAT89789272462", quantity: 1 },
       // Kočičí bible — samostatný funnel (kocicibible.cz). Single-variant bundle
       // (quantity=N na variantě); Dextrum zná fyzický kód 363682 (stejná kniha
       // jako psi-superzivot upsell variant 363682).
