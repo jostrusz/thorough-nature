@@ -5990,15 +5990,26 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
         Packeta.Widget.pick(apiKey, function(point) {
           if (point) {
+            // Külső futár pontja (FoxPost 32970, Magyar Posta 29760) → elutasítjuk.
+            // A vendors szűrő erre NEM elég: a { country: 'hu' } nem szűr semmit, és
+            // nincs olyan group érték, ami csak a Packeta saját magyar pontjait adná.
+            // Ezek a rendelések a mySTOCK-ban némán elvesztek (HU2026-27559, -27404,
+            // -27392, -27360, -27281): a mySTOCK 200 OK + ID-t ad vissza, de a
+            // rendelés nem jön létre. Amíg a FoxPost nincs engedélyezve a Packeta
+            // fiókban (allowed branch settings, HU/EUR), csak saját pontot fogadunk el.
+            if (point.carrierId) {
+              alert('Ezt az átvevőhelyet sajnos jelenleg nem tudjuk kiszolgálni. '
+                + 'Kérlek, válassz Packeta csomagpontot, vagy válaszd a házhozszállítást.');
+              return;
+            }
             selectedPacketaPoint = {
               id: point.id,
               name: point.name,
               address: point.place || point.street,
               zip: point.zip,
               city: point.city,
-              // carrierId === null → saját Zásilkovna csomagpont/Z-BOX (érvényes a pickupPlaceCode-hoz).
-              // Kitöltött carrierId → külső futár (az alábbi vendors szűrővel ez nem fordulhat elő).
-              carrierId: (point.carrierId === undefined ? null : point.carrierId),
+              // carrierId === null → saját Packeta csomagpont (érvényes a pickupPlaceCode-hoz).
+              carrierId: null,
             };
             // Show selected point
             var display = document.getElementById('packeta-selected-point');
@@ -6024,12 +6035,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'hu',
           country: 'hu',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // Csak a Packeta saját magyar hálózata (1270 Z-Pont).
-          // FIGYELEM a "group" mezőre: a Packeta dokumentációja szerint az érvényes
-          // értékek "zbox", "alzabox", vagy ÜRES a Z-Pontokhoz. A "zpoint" NEM létezik,
-          // ezért a korábbi { group: 'zpoint' } szűrő érvénytelen volt és a widget
-          // külső futárok pontjait is felkínálta (FoxPost 32970, Magyar Posta 29760).
-          // A 'zbox' sem való ide: a Packetának Magyarországon 0 Z-BOX-a van.
+          // FIGYELEM: ez a szűrő NEM zárja ki a külső futárokat — a { country: 'hu' }
+          // group nélkül minden magyar pontot felkínál, a FoxPost boxokat is. Nincs
+          // olyan group érték, ami csak a Packeta saját magyar pontjait adná vissza
+          // ('zpoint' nem létezik, 'zbox'-ból 0 van Magyarországon). A tényleges
+          // szűrést ezért a fenti callback végzi a point.carrierId alapján.
           vendors: [
             { country: 'hu' },
           ],
@@ -6051,6 +6061,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var savedPoint = localStorage.getItem('checkout_packeta_point');
       if (savedPoint) {
         var pt = JSON.parse(savedPoint);
+        // Korábban elmentett külső futár pontja (FoxPost) — eldobjuk, különben a
+        // widget szűrése megkerülhető lenne egy régi localStorage bejegyzéssel.
+        if (pt && pt.carrierId) {
+          localStorage.removeItem('checkout_packeta_point');
+          pt = null;
+        }
         if (pt && pt.id && pt.name) {
           selectedPacketaPoint = pt;
           var display = document.getElementById('packeta-selected-point');
