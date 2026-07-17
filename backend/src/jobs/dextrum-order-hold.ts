@@ -641,6 +641,19 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           note: orderNote || undefined,
         })
 
+        // mySTOCK umí odpovědět 200 OK, a přesto objednávku nevytvořit — typicky když
+        // nezná kód zboží nebo chybí metoda dopravy. Bez téhle kontroly se níž zapíše
+        // IMPORTED s mystock_order_id = null: v adminu svítí „odesláno", ve skladu nic.
+        // Přesně tak zmizely HU2026-27404 a HU2026-27429. Throw spadne do catchu níž,
+        // který zapíše last_error a naplánuje retry (zastropovaný retry_max_attempts).
+        if (!wmsResult.id) {
+          throw new Error(
+            `mySTOCK nevrátil ID objednávky pro ${orderCode} — objednávka NEBYLA vytvořena. ` +
+            `Zkontroluj kódy zboží (${orderItems.map((i: any) => `${i.productCode}×${i.quantity}`).join(", ")}) ` +
+            `a metodu dopravy (deliveryMethodId=${deliveryMethodId || "CHYBÍ"}, paymentMethodId=${paymentMethodId || "CHYBÍ"}).`
+          )
+        }
+
         // 7. Update dextrum_order_map
         const sentAt = new Date().toISOString()
         await dextrumService.updateDextrumOrderMaps({ id: orderMap.id,
