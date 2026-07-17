@@ -6024,12 +6024,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'hu',
           country: 'hu',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // Korlátozás csak a Zásilkovna saját hálózatára (csomagpontok + Z-BOX-ok).
-          // Így nem ajánl fel külső futárok pontjait, amelyek a csomag feladásakor
-          // "aktivní výdejní místo nenalezeno" (nem található aktív csomagpont) hibát okoztak.
+          // Csak a Packeta saját magyar hálózata (1270 Z-Pont).
+          // FIGYELEM a "group" mezőre: a Packeta dokumentációja szerint az érvényes
+          // értékek "zbox", "alzabox", vagy ÜRES a Z-Pontokhoz. A "zpoint" NEM létezik,
+          // ezért a korábbi { group: 'zpoint' } szűrő érvénytelen volt és a widget
+          // külső futárok pontjait is felkínálta (FoxPost 32970, Magyar Posta 29760).
+          // A 'zbox' sem való ide: a Packetának Magyarországon 0 Z-BOX-a van.
           vendors: [
-            { country: 'hu', group: 'zpoint' },
-            { country: 'hu', group: 'zbox' },
+            { country: 'hu' },
           ],
         });
       });

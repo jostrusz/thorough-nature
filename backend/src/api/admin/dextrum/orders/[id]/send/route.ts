@@ -296,6 +296,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       externalCarrierCode = soMeta.mystock_external_carrier_code || ""
     }
 
+    // Kód cizího dopravce patří ke KONKRÉTNÍMU vybranému bodu, ne k trhu.
+    // Packeta (dokumentace „Carrier Pick-up point"): u vlastního výdejního místa jde
+    // kód bodu do addressId; u bodu cizího dopravce jde do addressId ID DOPRAVCE
+    // a kód bodu do carrierPickupPoint. V mySTOCKu tomu odpovídá dvojice
+    // externalCarrierCode + pickupPlaceCode.
+    //
+    // Statická hodnota z mapování stačí jen tam, kde má trh jediného dopravce
+    // (PL = InPost 3060). Maďarsko má v jedné síti vlastní body Packety (1270)
+    // i cizí boxy (FoxPost 32970, Magyar Posta 29760), takže se musí brát
+    // z objednávky — checkout ho ukládá do packeta_carrier_id (prázdný = vlastní bod).
+    // Bez toho mySTOCK hledá kód cizího boxu mezi body Packety, nenajde ho a vrátí
+    // "Invalid entry / partyIdentification.pickupPlaceCode" (viz HU2026-27410, -27559).
+    const orderCarrierId = String(orderMeta.packeta_carrier_id || "").trim()
+    if (orderCarrierId) {
+      externalCarrierCode = orderCarrierId
+    }
+
     // Set pickupPlaceCode from any available metadata source
     const pickupCode = orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || ""
     if (pickupCode) {
@@ -307,6 +324,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         console.warn(`[Dextrum Send] ${orderCode}: Carrier ${externalCarrierCode} set but no pickupPlaceCode found in metadata`)
       }
     }
+    console.log(
+      `[Dextrum Send] ${orderCode}: pickupPlaceCode=${pickupCode || "—"} ` +
+      `externalCarrierCode=${externalCarrierCode || "—"} ` +
+      `(z objednávky=${orderCarrierId || "—"}, z mapování=${(mapping?.external_carrier_code || "").trim() || "—"})`
+    )
 
     const wmsResult = await client.createOrder({
       orderCode,

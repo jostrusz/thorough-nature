@@ -606,6 +606,25 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         const pickupCode = isHomeDelivery
           ? ""
           : (orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || "")
+
+        // Kód cizího dopravce patří ke KONKRÉTNÍMU vybranému bodu, ne k trhu.
+        // Packeta (dokumentace „Carrier Pick-up point"): u vlastního výdejního místa
+        // jde kód bodu do addressId; u bodu cizího dopravce jde do addressId ID
+        // DOPRAVCE a kód bodu do carrierPickupPoint. V mySTOCKu tomu odpovídá dvojice
+        // externalCarrierCode + pickupPlaceCode.
+        //
+        // Statická hodnota z mapování stačí jen tam, kde má trh jediného dopravce
+        // (PL = InPost 3060). Maďarsko má v jedné síti vlastní body Packety (1270)
+        // i cizí boxy (FoxPost 32970, Magyar Posta 29760), takže se bere z objednávky —
+        // checkout ho ukládá do packeta_carrier_id (prázdný = vlastní bod Packety).
+        // Bez toho mySTOCK hledá kód cizího boxu mezi body Packety, nenajde ho a vrátí
+        // "Invalid entry / partyIdentification.pickupPlaceCode" (viz HU2026-27410, -27559).
+        // U doručení domů se dopravce neposílá — pickupCode je tam prázdný.
+        const orderCarrierId = pickupCode ? String(orderMeta.packeta_carrier_id || "").trim() : ""
+        if (orderCarrierId) {
+          externalCarrierCode = orderCarrierId
+        }
+
         if (pickupCode) {
           deliveryAddress.pickupPlaceCode = pickupCode
         }
@@ -616,6 +635,11 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
             console.warn(`[Dextrum Hold] ${orderCode}: Carrier ${externalCarrierCode} set but no pickupPlaceCode found in metadata`)
           }
         }
+        console.log(
+          `[Dextrum Hold] ${orderCode}: pickupPlaceCode=${pickupCode || "—"} ` +
+          `externalCarrierCode=${externalCarrierCode || "—"} ` +
+          `(z objednávky=${orderCarrierId || "—"}, z mapování=${(mapping?.external_carrier_code || "").trim() || "—"})`
+        )
 
         const wmsResult = await client.createOrder({
           orderCode,
