@@ -17,6 +17,10 @@ export const BUNDLE_BOOK_COUNT: Record<string, number> = {
   "LLWJK-1": 1, "LLWJK-2": 2, "LLWJK-3": 3, "LLWJK-4": 4,
   "HLDV-1": 1, "HLDV-2": 2, "HLDV-3": 3, "HLDV-4": 4,
   "ZJN-1": 1, "ZJN-2": 2, "ZJN-3": 3, "ZJN-4": 4,
+  // Život, jaký si zasloužíš (CZ). Pozor: varianta "1 kniha" nese v Meduse rovnou
+  // fyzické SKU ZJSZ9827982789, ne "ZKZ-1" — a záměrně tu není. Bez záznamu spadne
+  // displayBookQty na line quantity (=1), což je správně, a e-mail navíc ukáže
+  // popisek "1 kniha • Množství: 1". "ZKZ-1" zůstává pro případ přeseedování.
   "ZKZ-1": 1, "ZKZ-2": 2, "ZKZ-3": 3, "ZKZ-4": 4,
 }
 

@@ -1,6 +1,7 @@
 import { Text, Section, Button, Img, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { ZvBase } from './zv-base'
+import { czBooks } from './zv-abandoned-checkout-1'
 
 export const ZV_ABANDONED_CHECKOUT_3 = 'zv-abandoned-checkout-3'
 
@@ -10,6 +11,8 @@ export interface ZvAbandonedCheckout3Props {
   productName: string
   productPrice: string
   productImage?: string
+  /** Počet knih v košíku — bundle 1–4 je jedna položka s quantity=1, viz utils/bundle-book-count. */
+  bookCount?: number
   preview?: string
 }
 
@@ -52,6 +55,7 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
   productName,
   productPrice,
   productImage,
+  bookCount = 1,
   preview = 'Zbývá 24 hodin — pak musím tvůj košík uvolnit.',
 }) => {
   return (
@@ -226,7 +230,15 @@ export const ZvAbandonedCheckout3Template: React.FC<ZvAbandonedCheckout3Props> &
             color: colors.heading,
             lineHeight: '1.25',
           }}>
-            {productName}
+            {bookCount > 1 ? `${bookCount}× ${productName}` : productName}
+          </Text>
+          <Text style={{
+            fontFamily: fontBody,
+            fontSize: '14px',
+            margin: '0 0 8px',
+            color: colors.muted,
+          }}>
+            {czBooks(bookCount)} v košíku
           </Text>
           <Text style={{
             fontFamily: fontSerif,
@@ -380,8 +392,9 @@ ZvAbandonedCheckout3Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.nejdriv-ja.cz/checkout',
   productName: 'Život, jaký si zasloužíš',
-  productPrice: '749',
+  productPrice: '1149',
   productImage: '',
+  bookCount: 2,
   preview: 'Zbývá 24 hodin — pak musím tvůj košík uvolnit.',
 } as ZvAbandonedCheckout3Props
 

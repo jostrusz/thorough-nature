@@ -10,8 +10,14 @@ export interface ZvAbandonedCheckout1Props {
   productName: string
   productPrice: string
   productImage?: string
+  /** Počet knih v košíku — bundle 1–4 je jedna položka s quantity=1, viz utils/bundle-book-count. */
+  bookCount?: number
   preview?: string
 }
+
+/** „1 kniha" / „2 knihy" / „5 knih" — české skloňování. */
+export const czBooks = (n: number): string =>
+  n === 1 ? '1 kniha' : n >= 2 && n <= 4 ? `${n} knihy` : `${n} knih`
 
 export const isZvAbandonedCheckout1Data = (data: any): data is ZvAbandonedCheckout1Props =>
   typeof data.firstName === 'string' && typeof data.checkoutUrl === 'string'
@@ -47,6 +53,7 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
   productName,
   productPrice,
   productImage,
+  bookCount = 1,
   preview = 'Tvoje kniha je zabalená a čeká jen na tebe!',
 }) => {
   return (
@@ -147,7 +154,15 @@ export const ZvAbandonedCheckout1Template: React.FC<ZvAbandonedCheckout1Props> &
             color: colors.heading,
             lineHeight: '1.25',
           }}>
-            {productName}
+            {bookCount > 1 ? `${bookCount}× ${productName}` : productName}
+          </Text>
+          <Text style={{
+            fontFamily: fontBody,
+            fontSize: '14px',
+            margin: '0 0 8px',
+            color: colors.muted,
+          }}>
+            {czBooks(bookCount)} v košíku
           </Text>
           <Text style={{
             fontFamily: fontSerif,
@@ -275,8 +290,9 @@ ZvAbandonedCheckout1Template.PreviewProps = {
   firstName: 'Petra',
   checkoutUrl: 'https://www.nejdriv-ja.cz/checkout',
   productName: 'Život, jaký si zasloužíš',
-  productPrice: '749',
+  productPrice: '1149',
   productImage: '',
+  bookCount: 2,
   preview: 'Tvoje kniha je zabalená a čeká jen na tebe!',
 } as ZvAbandonedCheckout1Props
 

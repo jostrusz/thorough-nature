@@ -1,6 +1,7 @@
 import { MedusaContainer } from "@medusajs/framework/types"
 import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { EmailTemplates, resolveTemplateKey } from "../modules/email-notifications/templates"
+import { displayBookQty } from "../utils/bundle-book-count"
 
 /**
  * Abandoned Checkout Recovery — 3-email sequence
@@ -1392,6 +1393,9 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         const checkoutUrl = meta.checkout_url || "https://www.nejdriv-ja.cz/checkout"
         const mainItem = (cart.items || [])[0]
         const productName = mainItem?.variant?.product?.title || mainItem?.title || "Život, jaký si zasloužíš"
+        // Zákazník si v košíku vybírá bundle 1–4 knih jako JEDNU položku s quantity=1,
+        // takže surové množství počet knih neřekne — musí se odvodit ze SKU varianty.
+        const bookCount = mainItem ? displayBookQty(mainItem) : 1
         const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
           return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
         }, 0)
@@ -1416,6 +1420,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
               productName,
               productPrice,
               productImage,
+              bookCount,
               preview: nextStepConfig.preview,
             },
           })
@@ -1432,7 +1437,7 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
 
           sentCount++
           logger.info(
-            `[Abandoned Cart] ZV step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+            `[Abandoned Cart] ZV step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id} (${bookCount}× kniha)`
           )
         } catch (emailError: any) {
           logger.error(

@@ -124,6 +124,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       // Order-bump upsell (Život → Pusť to cross-sell). Admin SKU has -3 suffix;
       // Dextrum holds only the parent barcode OTCCN64787237.
       "OTCCN64787237-3": { physicalSku: "OTCCN64787237", quantity: 1 },
+      // ─── Czech: Život, jaký si zasloužíš (zivot-zaslugy) ───
+      // Dextrum zná jediný fyzický kód knihy: ZJSZ9827982789.
+      // Varianta "1 kniha" nese rovnou fyzické SKU, bundly 2–4 mají ZKZ-{N}.
+      // Bez tohoto mapování by se do WMS poslal neexistující kód "ZKZ-2" v počtu 1 ks.
+      "ZJSZ9827982789": { physicalSku: "ZJSZ9827982789", quantity: 1 },
+      "ZKZ-1": { physicalSku: "ZJSZ9827982789", quantity: 1 },
+      "ZKZ-2": { physicalSku: "ZJSZ9827982789", quantity: 2 },
+      "ZKZ-3": { physicalSku: "ZJSZ9827982789", quantity: 3 },
+      "ZKZ-4": { physicalSku: "ZJSZ9827982789", quantity: 4 },
       // Kočičí bible — samostatný funnel (kocicibible.cz). Single-variant bundle
       // (quantity=N na variantě); Dextrum zná fyzický kód 363682 (stejná kniha
       // jako psi-superzivot upsell variant 363682).
