@@ -12,7 +12,7 @@
   <script src="js/pixel.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     BEDANKPAGINA — Velvet Dusk Design
+     THANK-YOU PAGE — Velvet Dusk Design
      Objednávkový souhrn + kontrola adresy + edit formulář
      ═══════════════════════════════════════════════════════════ -->
 <style>
@@ -459,7 +459,7 @@ body { background: var(--bg); }
 <div class="ty-page">
 
   <!-- ═══════════════════════════════════════
-       1. HERO — bevestiging
+       1. HERO — confirmation
        ═══════════════════════════════════════ -->
   <div class="ty-hero ty-reveal">
     <div class="ty-check-circle">
@@ -524,7 +524,7 @@ body { background: var(--bg); }
   </div>
 
   <!-- ═══════════════════════════════════════
-       4. EDIT FORM (standaard verborgen)
+       4. EDIT FORM (caché par défaut)
        ═══════════════════════════════════════ -->
   <div class="ty-edit-form" id="ty-edit-form">
     <div class="ty-edit-form-inner">
@@ -597,7 +597,7 @@ body { background: var(--bg); }
     </div>
   </div>
 
-  <!-- Feedback bericht (na opslaan) -->
+  <!-- Message de feedback (après enregistrement) -->
   <div class="ty-feedback" id="ty-feedback">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     <span id="ty-feedback-text"></span>
@@ -619,8 +619,8 @@ body { background: var(--bg); }
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
-          <div class="ty-order-name">Livraison gratuite</div>
-          <div class="ty-order-desc">Livré sous 5 jours ouvrés</div>
+          <div class="ty-order-name">Livraison offerte</div>
+          <div class="ty-order-desc">Livré sous 3 à 5 jours ouvrés</div>
         </div>
       </div>
     </div>
@@ -639,11 +639,11 @@ body { background: var(--bg); }
       <div class="ty-support-title">Une question ou un problème ?</div>
       <div class="ty-support-desc">Tu as repéré une erreur, tu as une question sur ta commande ou tu bloques quelque part ? N'hésite pas à nous contacter &mdash; nous serons ravis de t'aider !</div>
     </div>
-    <a href="mailto:support@lacheprise-livre.fr?subject=Question%20sur%20ma%20commande%20%23&body=Bonjour%2C%0A%0AJ%27ai%20une%20question%20sur%20ma%20commande.%0A%0ANum%C3%A9ro%20de%20commande%C2%A0%3A%20%0A%0AMa%20question%C2%A0%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envoie-nous un e-mail</a>
+    <a href="mailto:contact@lacheprise-livre.fr?subject=Question%20sur%20ma%20commande%20%23&body=Bonjour%2C%0A%0AJ%27ai%20une%20question%20sur%20ma%20commande.%0A%0ANum%C3%A9ro%20de%20commande%C2%A0%3A%20%0A%0AMa%20question%C2%A0%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envoie-nous un e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
-       6. WHAT HAPPENS NOW — 3 stappen
+       6. WHAT HAPPENS NOW — 3 étapes
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
     <div class="ty-steps-title">Que se passe-t-il maintenant ?</div>
@@ -658,7 +658,7 @@ body { background: var(--bg); }
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
         <div class="ty-step-title">Livre en route</div>
-        <div class="ty-step-desc">Ton livre papier est expédié sous 24&ndash;48 h et livré sous 5 jours ouvrés. Tu reçois un lien de suivi par e-mail.</div>
+        <div class="ty-step-desc">Ton livre papier est expédié sous 24&ndash;48 h et livré sous 3 à 5 jours ouvrés. Tu reçois un lien de suivi par e-mail.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
@@ -866,7 +866,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Question sur ma commande #' + orderNum);
     var body = encodeURIComponent('Bonjour,\n\nJ\'ai une question sur ma commande.\n\nNuméro de commande : #' + orderNum + '\n\nMa question : ');
-    mailtoEl.href = 'mailto:support@lacheprise-livre.fr?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:contact@lacheprise-livre.fr?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell

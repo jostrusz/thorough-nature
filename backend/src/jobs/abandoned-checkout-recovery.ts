@@ -316,8 +316,8 @@ const FR_STEPS: StepConfig[] = [
   {
     step: 3,
     templateKey: EmailTemplates.FR_ABANDONED_CHECKOUT_3,
-    subject: (name) => `Dernière chance, ${name} — ton panier sera bientôt libéré`,
-    preview: "Il reste 24 heures — ensuite je dois libérer ton panier.",
+    subject: (name) => `Dernière chance, ${name} — ton panier sera bientôt vidé`,
+    preview: "Il reste 24 heures — ensuite ton panier sera vidé.",
     delayMs: TWENTY_FOUR_HOURS_MS,
     delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
   },

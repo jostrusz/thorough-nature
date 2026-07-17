@@ -157,7 +157,7 @@ export const FrAbandonedCheckout2Template: React.FC<FrAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Un livre complet avec un cahier d&rsquo;exercices pratiques. Le tout fondé sur les neurosciences, la philosophie et la psychologie comportementale. Ce n&rsquo;est pas un guide de motivation qui te dit de «&nbsp;penser positif&nbsp;». C&rsquo;est un système concret qui te transforme vraiment.
+            C&rsquo;est pourquoi j&rsquo;ai écrit autre chose&nbsp;: un livre complet avec un cahier d&rsquo;exercices pratiques. Le tout fondé sur les neurosciences, la philosophie et la psychologie comportementale. Ce n&rsquo;est pas un guide de motivation qui te dit de «&nbsp;penser positif&nbsp;». C&rsquo;est un système concret qui te transforme vraiment.
           </Text>
         </div>
 

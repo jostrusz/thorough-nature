@@ -143,6 +143,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       // (quantity=N na variantě); Dextrum zná fyzický kód 363682 (stejná kniha
       // jako psi-superzivot upsell variant 363682).
       "KOCICI-BIBLE-OFICIAL-PB": { physicalSku: "363682", quantity: 1 },
+      // Lâche prise (FR) bundle varianty — fyzicky N kusů téže knihy LACHE-1
+      "LACHE-2": { physicalSku: "LACHE-1", quantity: 2 },
+      "LACHE-3": { physicalSku: "LACHE-1", quantity: 3 },
+      "LACHE-4": { physicalSku: "LACHE-1", quantity: 4 },
       // Kočičí bible order bumpy — admin SKU má suffix -2, Dextrum drží rodičovský kód.
       "PTCTN2876287672-2": { physicalSku: "PTCTN2876287672", quantity: 1 },
       "ZJSZ9827982789-2": { physicalSku: "ZJSZ9827982789", quantity: 1 },

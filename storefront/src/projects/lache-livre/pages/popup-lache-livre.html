@@ -458,7 +458,7 @@
   .benefits li strong { color: var(--ink); font-weight: 600; }
 
   /* ═══ INTRO / HOOK obrazovka (step 1) ═══════════════════════════ */
-  /* Badge — "Gratis · 7-daagse challenge · 5 min per dag" */
+  /* Badge — « Gratuit · défi de 7 jours · 5 min par jour » */
   .intro-badge {
     display: inline-flex; align-items: center; gap: 7px;
     font-family: -apple-system, system-ui, sans-serif;
@@ -908,7 +908,7 @@
   }
   .success-social strong { color: var(--rose-700); font-weight: 700; }
 
-  /* ── Success v2 — "open je inbox NU" ─────────────────────────── */
+  /* ── Success v2 — « ouvre ta boîte mail MAINTENANT » ─────────── */
   .success-lead em { font-style: italic; color: var(--rose-700); font-weight: 600; }
   /* Zelený "live / právě odesláno" indikátor */
   .success-live {
@@ -1060,8 +1060,8 @@
     <div class="step active" data-step="1">
       <div class="popup-header">
         <span class="intro-badge"><span class="dot"></span> Gratuit · défi de 7 jours · 5 min par jour</span>
-        <h2 class="question" id="popup-q"><strong>Sept jours, sept petits pas.</strong> Et ce poids qui te tire depuis des années <span class="gold-underline">commence enfin à se relâcher</span>.</h2>
-        <p class="intro-subhead">Chaque jour, tu reçois une petite mission de cinq minutes. Tu sens toi-même à quel point ta tête se libère.</p>
+        <h2 class="question" id="popup-q"><strong>Sept jours, sept petits pas.</strong> Et ce poids qui te tire vers le bas depuis des années <span class="gold-underline">commence enfin à se relâcher</span>.</h2>
+        <p class="intro-subhead">Chaque jour, tu reçois une petite mission de cinq minutes. Et tu verras par toi-même à quel point ta tête s'allège.</p>
         <ul class="benefits" style="margin-top:6px;margin-bottom:20px;">
           <li>Tu reçois chaque jour <strong>un exercice de cinq minutes</strong></li>
           <li>Tu apprends à <strong>lâcher prise sur ce que tu retiens encore</strong></li>
@@ -1110,7 +1110,7 @@
     <div class="step" data-step="3">
       <div class="success">
         <div class="success-icon">📨</div>
-        <div class="success-kicker">Voilà, tu es inscrit·e.</div>
+        <div class="success-kicker">Voilà, ton inscription est confirmée.</div>
         <h3 class="success-title">Ta première mission est en route</h3>
 
         <p class="success-lead">
@@ -1162,7 +1162,7 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-//  POPUP QUIZ ENGINE — Laat los wat je kapotmaakt (loslatenboek.nl)
+//  POPUP QUIZ ENGINE — Lâche prise sur ce qui te détruit (lacheprise-livre.fr)
 // ═══════════════════════════════════════════════════════════════
 // Jedna personalizační otázka na step 2 (záložní, defaultní flow jde
 // rovnou na success). Tón: vřelý, přímý — Joris de Vries. Vybraná
@@ -1452,7 +1452,7 @@ function buildStep2() {
 }
 
 // API base URL — Medusa backend public URL (marketing-hq.eu) při embedu
-// na loslatenboek.nl. Pro lokální dev preview nech prázdné.
+// na lacheprise-livre.fr. Pro lokální dev preview nech prázdné.
 const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-hq.eu"
 
 // ═══════════════════════════════════════════════════════════════
@@ -1463,7 +1463,7 @@ const API_BASE = "https://www.marketing-hq.eu"  // e.g. "https://www.marketing-h
 //   Backend hledá formulář podle brand_slug + form_id.
 // Křestní jméno + e-mail jsou zachyceny na step 1 (intro obrazovka).
 
-// Map the user's e-mail domain to their own webmail, so "Open mijn inbox"
+// Map the user's e-mail domain to their own webmail, so "Ouvrir ma boîte mail"
 // opens where they actually read mail. Unknown domain → null (button hidden).
 function webmailUrlFor(email) {
   var d = (String(email).split("@")[1] || "").toLowerCase();
@@ -1490,7 +1490,7 @@ async function submitForm(e) {
   const gdpr = !!state.introGdpr;
   if (!email || !firstName || !gdpr) return false;
 
-  // Point "Open mijn inbox" at the user's own webmail provider (or hide it).
+  // Point "Ouvrir ma boîte mail" at the user's own webmail provider (or hide it).
   const inboxBtn = document.querySelector(".success-open-btn");
   if (inboxBtn) {
     const wm = webmailUrlFor(email);

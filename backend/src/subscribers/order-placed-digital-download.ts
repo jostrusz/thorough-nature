@@ -215,6 +215,21 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "4.1 MB",
     },
   ],
+  // Lâche prise sur ce qui te détruit (FR) — 2 bonusové e-booky
+  'lache-livre': [
+    {
+      key: "e-books/La-Solution-anti-rumination.pdf",
+      title: "La Solution anti-rumination",
+      description: "E-book (PDF)",
+      size: "1.5 MB",
+    },
+    {
+      key: "e-books/L-Amour-sans-faux-semblants.pdf",
+      title: "L'Amour sans faux-semblants",
+      description: "E-book (PDF)",
+      size: "14 MB",
+    },
+  ],
   'engedd-el': [
     {
       key: "e-books/A-tulgondolas-ellenszere.pdf",
@@ -250,6 +265,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'pusti-to-sk': process.env.PUSTI_TO_SK_STOREFRONT_URL || "https://www.pustitocotanici.sk",
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
   'kocici-bible': process.env.KB_STOREFRONT_URL || "https://www.kocicibible.cz",
+  'lache-livre': process.env.FR_STOREFRONT_URL || "https://www.lacheprise-livre.fr",
 }
 
 // Localized email subjects per project
@@ -268,6 +284,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
   'kocici-bible': 'Tvoje 3 bonusové e-booky jsou připravené! 📖',
+  'lache-livre': 'Tes e-books sont prêts ! 📖',
 }
 
 // Localized fallback first names
@@ -286,6 +303,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'odpust-knizka': 'tam',
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',
+  'lache-livre': 'toi',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

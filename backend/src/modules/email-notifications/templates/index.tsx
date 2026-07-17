@@ -96,6 +96,7 @@ import { SkAbandonedCheckout2Template, SK_ABANDONED_CHECKOUT_2, isSkAbandonedChe
 import { SkAbandonedCheckout3Template, SK_ABANDONED_CHECKOUT_3, isSkAbandonedCheckout3Data } from './sk-abandoned-checkout-3'
 // Lâche prise sur ce qui te détruit (lache-livre) templates
 import { FrOrderPlacedTemplate, FR_ORDER_PLACED, isFrOrderPlacedTemplateData } from './fr-order-placed'
+import { FrEbookDeliveryTemplate, FR_EBOOK_DELIVERY, isFrEbookDeliveryData } from './fr-ebook-delivery'
 import { FrShipmentNotificationTemplate, FR_SHIPMENT_NOTIFICATION, isFrShipmentNotificationData } from './fr-shipment-notification'
 import { FrAbandonedCheckout1Template, FR_ABANDONED_CHECKOUT_1, isFrAbandonedCheckout1Data } from './fr-abandoned-checkout-1'
 import { FrAbandonedCheckout2Template, FR_ABANDONED_CHECKOUT_2, isFrAbandonedCheckout2Data } from './fr-abandoned-checkout-2'
@@ -219,6 +220,7 @@ export const EmailTemplates = {
   SK_ABANDONED_CHECKOUT_3,
   // Lâche prise sur ce qui te détruit (FR)
   FR_ORDER_PLACED,
+  FR_EBOOK_DELIVERY,
   FR_SHIPMENT_NOTIFICATION,
   FR_ABANDONED_CHECKOUT_1,
   FR_ABANDONED_CHECKOUT_2,
@@ -1203,6 +1205,15 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <FrOrderPlacedTemplate {...data} />
 
+    case EmailTemplates.FR_EBOOK_DELIVERY:
+      if (!isFrEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.FR_EBOOK_DELIVERY}"`
+        )
+      }
+      return <FrEbookDeliveryTemplate {...data} />
+
     case EmailTemplates.FR_SHIPMENT_NOTIFICATION:
       if (!isFrShipmentNotificationData(data)) {
         throw new MedusaError(
@@ -1406,6 +1417,7 @@ export {
   SkAbandonedCheckout3Template,
   // Lâche prise sur ce qui te détruit (FR)
   FrOrderPlacedTemplate,
+  FrEbookDeliveryTemplate,
   FrShipmentNotificationTemplate,
   FrAbandonedCheckout1Template,
   FrAbandonedCheckout2Template,

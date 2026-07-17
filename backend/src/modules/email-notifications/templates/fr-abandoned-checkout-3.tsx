@@ -45,7 +45,7 @@ export const FrAbandonedCheckout3Template: React.FC<FrAbandonedCheckout3Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'Il reste 24 heures — ensuite je dois libérer ton panier.',
+  preview = 'Il reste 24 heures — ensuite ton panier sera vidé.',
 }) => {
   return (
     <Base preview={preview}>
@@ -98,7 +98,7 @@ export const FrAbandonedCheckout3Template: React.FC<FrAbandonedCheckout3Props> &
               margin: '0',
               lineHeight: '1.5',
             }}>
-              ⏰ Ton panier sera libéré dans 24 heures
+              ⏰ Ton panier sera vidé dans 24 heures
             </Text>
           </div>
         </div>
@@ -121,7 +121,7 @@ export const FrAbandonedCheckout3Template: React.FC<FrAbandonedCheckout3Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            C&rsquo;est mon dernier rappel. Demain, ton panier sera automatiquement libéré et je ne pourrai plus garder ta commande de côté.
+            C&rsquo;est mon dernier rappel. Demain, ton panier sera automatiquement vidé et je ne pourrai plus garder ta commande de côté.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -301,7 +301,7 @@ FrAbandonedCheckout3Template.PreviewProps = {
   productName: 'Lâche prise sur ce qui te détruit',
   productPrice: '36',
   productImage: '',
-  preview: 'Il reste 24 heures — ensuite je dois libérer ton panier.',
+  preview: 'Il reste 24 heures — ensuite ton panier sera vidé.',
 } as FrAbandonedCheckout3Props
 
 export default FrAbandonedCheckout3Template

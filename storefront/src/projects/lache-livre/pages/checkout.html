@@ -34,6 +34,9 @@ if (window.location.search.indexOf('payment_return=1') !== -1) {
 <!-- QR code library (bank-transfer SEPA QR popup) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" async></script>
 
+<!-- Packeta widget (choix du point relais) -->
+<script src="https://widget.packeta.com/v6/www/js/library.js"></script>
+
 <style>
 /* ─── FONTS ─── */
 @font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
@@ -1589,8 +1592,8 @@ body {
 /* Malý GLS badge v baru */
 .msb-gls {
   display: inline-block;
-  background: #003399;
-  color: #FFDC00;
+  background: #BA1B02;
+  color: #fff;
   font-size: 8px;
   font-weight: 700;
   padding: 1px 5px;
@@ -2650,12 +2653,12 @@ body {
         <span class="msb-line-label" id="msb-tax-label">TVA (5,5 %)</span>
         <span class="msb-line-val" id="msb-tax-val">&euro;2,89</span>
       </div>
-      <!-- Verzending -->
+      <!-- Livraison -->
       <div class="msb-line shipping">
         <span class="msb-line-label">Livraison <span class="msb-gls">Packeta</span></span>
-        <span class="msb-line-val">Gratuit</span>
+        <span class="msb-line-val">Offerte</span>
       </div>
-      <!-- Totaal -->
+      <!-- Total -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Total</span>
         <span class="msb-line-val" id="msb-total">&euro;36,00</span>
@@ -2983,15 +2986,49 @@ body {
             </div>
           </div>
 
-          <!-- GLS Gratis verzending info -->
-          <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="flex-shrink:0;">
-            <div style="flex:1;">
-              <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Livraison gratuite</span>
-              <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">€0,00</span>
-              <div style="color:#666;font-size:12px;margin-top:2px;">Expédié sous 24 h via Packeta</div>
+          <!-- ═══ MODE DE LIVRAISON (Packeta FR — point relais / domicile) ═══ -->
+          <div style="margin-top:16px;">
+            <div style="font-weight:700;font-size:14px;color:#1a1a2e;margin-bottom:10px;">Mode de livraison</div>
+
+            <!-- Option 1 : Point relais (Packeta pickup) -->
+            <div class="shipping-option selected" id="shipping-pickup" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--accent);border-radius:10px;cursor:pointer;background:rgba(194,123,160,0.03);transition:all 0.15s ease;">
+              <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
+                <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Point relais</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Points relais et consignes partout en France</div>
+              </div>
+              <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Offerte</span>
             </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2.5" stroke-linecap="round" width="20" height="20"><path d="M20 6L9 17l-5-5"/></svg>
+
+            <!-- Packeta point selection (shown when pickup selected) -->
+            <div id="packeta-point-section" style="margin:8px 0 8px 0;padding-left:28px;">
+              <button type="button" id="packeta-select-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed var(--accent);border-radius:8px;background:rgba(194,123,160,0.04);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease;" onmouseover="this.style.background='rgba(194,123,160,0.08)'" onmouseout="this.style.background='rgba(194,123,160,0.04)'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Choisir un point relais
+              </button>
+              <div id="packeta-selected-point" style="display:none;margin-top:8px;padding:10px 14px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:8px;">
+                <!-- Filled by Packeta Widget callback -->
+              </div>
+              <div id="packeta-error" style="display:none;margin-top:6px;color:var(--error);font-size:12px;font-weight:500;">
+                Choisis un point relais pour continuer
+              </div>
+            </div>
+
+            <!-- Option 2 : Livraison à domicile -->
+            <div class="shipping-option" id="shipping-home" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;background:transparent;transition:all 0.15s ease;margin-top:8px;">
+              <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
+                <div style="width:10px;height:10px;border-radius:50%;background:transparent;"></div>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Livraison à domicile</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Le transporteur livre directement chez toi</div>
+              </div>
+              <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Offerte</span>
+            </div>
           </div>
 
         </div>
@@ -3120,9 +3157,9 @@ body {
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
           Livraison
-          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;">
+          <span style="display:inline-flex;align-items:center;background:#BA1B02;color:#fff;font-size:10px;font-weight:700;letter-spacing:.3px;border-radius:3px;padding:2px 6px;vertical-align:middle;">Packeta</span>
         </span>
-        <span style="color:#27AE60;font-weight:600;">Gratuit</span>
+        <span style="color:#27AE60;font-weight:600;">Offerte</span>
       </div>
       <div class="summary-line discount" id="summary-discount" style="display:none;">
         <span style="display:flex;align-items:center;gap:6px;">Remise <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
@@ -3147,7 +3184,7 @@ body {
       <div class="summary-shipping-info">
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Des questions ? <strong>support@lacheprise-livre.fr</strong></span>
+          <span>Des questions ? <strong>contact@lacheprise-livre.fr</strong></span>
         </div>
       </div>
 
@@ -3184,7 +3221,7 @@ body {
 
       <!-- Return policy link -->
       <div class="summary-return-link">
-        <a href="retourbeleid.html">Consulte notre politique de retour &rarr;</a>
+        <a href="retours.html">Consulte notre politique de retour &rarr;</a>
       </div>
     </div>
 
@@ -3205,7 +3242,7 @@ body {
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Lâche prise sur ce qui te détruit · Joris De Vries<br>
-    <a href="voorwaarden.html">Conditions générales</a> · <a href="privacy.html">Politique de confidentialité</a> · <a href="retourbeleid.html">Politique de retour</a> · <a href="verzending.html">Expédition &amp; Livraison</a>
+    <a href="conditions-generales.html">Conditions générales</a> · <a href="confidentialite.html">Politique de confidentialité</a> · <a href="retours.html">Politique de retour</a> · <a href="livraison.html">Expédition &amp; Livraison</a>
   </div>
 </div>
 
@@ -3424,9 +3461,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     sk: { created:'Objednávka je vytvorená', awaiting:'čaká na úhradu', reserved:'Rezervované ešte', qrTitle:'Platíte z počítača alebo iného zariadenia?', qrScanApp:'Naskenujte tento QR bankovou aplikáciou.', saveQr:'Uložiť QR do galérie', amountToPay:'Suma na úhradu', detailsTitle:'Údaje na prevod', tapCopy:'ťuknite = skopíruje', refLabel:'Referencia (dôležité!)', vsLabel:'Variabilný symbol (dôležité!)', amountLabel:'Suma', copy:'Kopírovať', copied:'✓ Skopírované', howTitle:'Ako zaplatiť', s1t:'Skopírujte údaje vyššie', s1d:'Ťuknite na Kopírovať pri IBANe a referencii', s2t:'Otvorte svoju bankovú aplikáciu', s2d:'Nová platba → vložte údaje', s3t:'Potvrďte platbu', s3d:'Tovar odošleme ihneď po pripísaní', footEmail:'Tieto údaje sme práve poslali na váš e-mail — po zatvorení okna ich nestratíte.', footNotify:'Ozveme sa, keď platba dorazí.', footGuarantee:'30-dní záruka vrátenia peňazí.', paid:'Zaplatil som →', later:'Zaplatím neskôr', close:'Zavrieť', payFor:'Platba za objednávku', scanOrEnter:'Naskenujte QR alebo zadajte údaje vo svojej banke.' },
     cs: { created:'Objednávka byla vytvořena', awaiting:'čeká na úhradu', reserved:'Rezervováno ještě', qrTitle:'Platíte z počítače nebo jiného zařízení?', qrScanApp:'Naskenujte tento QR v bankovní aplikaci.', saveQr:'Uložit QR do galerie', amountToPay:'Částka k úhradě', detailsTitle:'Údaje k platbě', tapCopy:'klepnutí = zkopíruje', refLabel:'Reference (důležité!)', vsLabel:'Variabilní symbol (důležité!)', amountLabel:'Částka', copy:'Kopírovat', copied:'✓ Zkopírováno', howTitle:'Jak zaplatit', s1t:'Zkopírujte údaje výše', s1d:'Klepněte na Kopírovat u IBANu a reference', s2t:'Otevřete svou bankovní aplikaci', s2d:'Nová platba → vložte údaje', s3t:'Potvrďte platbu', s3d:'Zboží odešleme ihned po připsání', footEmail:'Tyto údaje jsme právě poslali na váš e-mail — po zavření okna je neztratíte.', footNotify:'Ozveme se, jakmile platba dorazí.', footGuarantee:'30denní záruka vrácení peněz.', paid:'Zaplatil jsem →', later:'Zaplatím později', close:'Zavřít', payFor:'Platba za objednávku', scanOrEnter:'Naskenujte QR nebo zadejte údaje ve své bance.' },
     hu: { created:'A rendelés létrejött', awaiting:'fizetésre vár', reserved:'Fenntartva még', qrTitle:'Számítógépről vagy másik eszközről fizet?', qrScanApp:'Olvassa be ezt a QR-kódot a banki alkalmazással.', saveQr:'QR mentése a galériába', amountToPay:'Fizetendő összeg', detailsTitle:'Átutalási adatok', tapCopy:'koppintás = másolás', refLabel:'Közlemény (fontos!)', vsLabel:'Közlemény (fontos!)', amountLabel:'Összeg', copy:'Másolás', copied:'✓ Másolva', howTitle:'Hogyan fizessen', s1t:'Másolja ki a fenti adatokat', s1d:'Koppintson a Másolás gombra az IBAN-nál és a közleménynél', s2t:'Nyissa meg a banki alkalmazását', s2d:'Új utalás → illessze be az adatokat', s3t:'Erősítse meg az utalást', s3d:'Jóváírás után azonnal küldjük a terméket', footEmail:'Ezeket az adatokat épp most elküldtük az e-mail-címére — az ablak bezárása után sem vesznek el.', footNotify:'Jelezni fogunk, amint a fizetés megérkezik.', footGuarantee:'30 napos pénzvisszafizetési garancia.', paid:'Fizettem →', later:'Később fizetek', close:'Bezárás', payFor:'Fizetés a rendelésért', scanOrEnter:'Olvassa be a QR-kódot, vagy adja meg az adatokat a bankjában.' },
-    fr: { created:'Commande créée', awaiting:'en attente de paiement', reserved:'Réservé encore', qrTitle:'Vous payez depuis un ordinateur ou un autre appareil ?', qrScanApp:'Scannez ce QR code avec votre application bancaire.', saveQr:'Enregistrer le QR dans la galerie', amountToPay:'Montant à payer', detailsTitle:'Coordonnées du virement', tapCopy:'appuyer = copier', refLabel:'Référence (important !)', vsLabel:'Référence (important !)', amountLabel:'Montant', copy:'Copier', copied:'✓ Copié', howTitle:'Comment payer', s1t:'Copiez les informations ci-dessus', s1d:'Appuyez sur Copier pour l\'IBAN et la référence', s2t:'Ouvrez votre application bancaire', s2d:'Nouveau virement → collez les informations', s3t:'Confirmez le paiement', s3d:'Nous expédions dès réception', footEmail:'Nous venons d\'envoyer ces informations par e-mail — vous ne les perdrez pas en fermant cette fenêtre.', footNotify:'Nous vous préviendrons dès réception du paiement.', footGuarantee:'Garantie de remboursement de 30 jours.', paid:'J\'ai payé →', later:'Je paierai plus tard', close:'Fermer', payFor:'Paiement de la commande', scanOrEnter:'Scannez le QR ou saisissez les informations dans votre banque.' },
+    fr: { created:'Commande créée', awaiting:'en attente de paiement', reserved:'Réservé encore', qrTitle:'Tu paies depuis un ordinateur ou un autre appareil ?', qrScanApp:'Scanne ce QR code avec ton application bancaire.', saveQr:'Enregistrer le QR dans la galerie', amountToPay:'Montant à payer', detailsTitle:'Coordonnées du virement', tapCopy:'appuie = copie', refLabel:'Référence (important !)', vsLabel:'Référence (important !)', amountLabel:'Montant', copy:'Copier', copied:'✓ Copié', howTitle:'Comment payer', s1t:'Copie les informations ci-dessus', s1d:'Appuie sur Copier pour l\'IBAN et la référence', s2t:'Ouvre ton application bancaire', s2d:'Nouveau virement → colle les informations', s3t:'Confirme le paiement', s3d:'Nous expédions dès réception', footEmail:'Nous venons de t\'envoyer ces informations par e-mail — tu ne les perdras pas en fermant cette fenêtre.', footNotify:'Nous te préviendrons dès réception du paiement.', footGuarantee:'Garantie de remboursement de 30 jours.', paid:'J\'ai payé →', later:'Je paierai plus tard', close:'Fermer', payFor:'Paiement de la commande', scanOrEnter:'Scanne le QR ou saisis les informations dans ta banque.' },
     es: { created:'Pedido creado', awaiting:'pendiente de pago', reserved:'Reservado aún', qrTitle:'¿Pagas desde un ordenador u otro dispositivo?', qrScanApp:'Escanea este QR con tu aplicación bancaria.', saveQr:'Guardar QR en la galería', amountToPay:'Importe a pagar', detailsTitle:'Datos de la transferencia', tapCopy:'tocar = copiar', refLabel:'Concepto (¡importante!)', vsLabel:'Concepto (¡importante!)', amountLabel:'Importe', copy:'Copiar', copied:'✓ Copiado', howTitle:'Cómo pagar', s1t:'Copia los datos de arriba', s1d:'Toca Copiar en el IBAN y el concepto', s2t:'Abre tu aplicación bancaria', s2d:'Nueva transferencia → pega los datos', s3t:'Confirma el pago', s3d:'Enviamos en cuanto se reciba', footEmail:'Acabamos de enviarte estos datos por correo — no los perderás al cerrar esta ventana.', footNotify:'Te avisaremos cuando llegue el pago.', footGuarantee:'Garantía de devolución de 30 días.', paid:'Ya he pagado →', later:'Pagaré más tarde', close:'Cerrar', payFor:'Pago del pedido', scanOrEnter:'Escanea el QR o introduce los datos en tu banco.' },
-    nl: { created:'Bestelling aangemaakt', awaiting:'wacht op betaling', reserved:'Nog gereserveerd', qrTitle:'Betaalt u vanaf een computer of ander apparaat?', qrScanApp:'Scan deze QR-code met uw bank-app.', saveQr:'QR opslaan in galerij', amountToPay:'Te betalen bedrag', detailsTitle:'Overschrijvingsgegevens', tapCopy:'tik = kopiëren', refLabel:'Kenmerk (belangrijk!)', vsLabel:'Kenmerk (belangrijk!)', amountLabel:'Bedrag', copy:'Kopiëren', copied:'✓ Gekopieerd', howTitle:'Zo betaalt u', s1t:'Kopieer de gegevens hierboven', s1d:'Tik op Kopiëren bij IBAN en kenmerk', s2t:'Open uw bank-app', s2d:'Nieuwe betaling → plak de gegevens', s3t:'Bevestig de betaling', s3d:'We verzenden zodra we het ontvangen', footEmail:'We hebben deze gegevens zojuist naar uw e-mail gestuurd — u verliest ze niet als u dit venster sluit.', footNotify:'We laten het weten zodra uw betaling binnen is.', footGuarantee:'30 dagen niet-goed-geld-terug.', paid:'Ik heb betaald →', later:'Ik betaal later', close:'Sluiten', payFor:'Betaling voor bestelling', scanOrEnter:'Scan de QR of voer de gegevens in bij uw bank.' },
     no: { created:'Bestillingen er opprettet', awaiting:'venter på betaling', reserved:'Reservert ennå', qrTitle:'Betaler du fra en datamaskin eller en annen enhet?', qrScanApp:'Skann denne QR-koden med bankappen din.', saveQr:'Lagre QR i galleriet', amountToPay:'Beløp å betale', detailsTitle:'Betalingsdetaljer', tapCopy:'trykk = kopier', refLabel:'Referanse (viktig!)', vsLabel:'Melding (viktig!)', amountLabel:'Beløp', copy:'Kopier', copied:'✓ Kopiert', howTitle:'Slik betaler du', s1t:'Kopier detaljene ovenfor', s1d:'Trykk Kopier ved IBAN og referanse', s2t:'Åpne bankappen din', s2d:'Ny betaling → lim inn detaljene', s3t:'Bekreft betalingen', s3d:'Vi sender så snart den er mottatt', footEmail:'Vi har nettopp sendt disse detaljene til e-posten din — du mister dem ikke når du lukker vinduet.', footNotify:'Vi gir beskjed når betalingen er mottatt.', footGuarantee:'30 dagers pengene-tilbake-garanti.', paid:'Jeg har betalt →', later:'Jeg betaler senere', close:'Lukk', payFor:'Betaling for bestilling', scanOrEnter:'Skann QR-koden eller skriv inn detaljene i banken din.' },
     sv: { created:'Beställningen är skapad', awaiting:'väntar på betalning', reserved:'Reserverad ännu', qrTitle:'Betalar du från en dator eller annan enhet?', qrScanApp:'Skanna denna QR-kod med din bankapp.', saveQr:'Spara QR i galleriet', amountToPay:'Belopp att betala', detailsTitle:'Betalningsuppgifter', tapCopy:'tryck = kopiera', refLabel:'Referens (viktigt!)', vsLabel:'Meddelande (viktigt!)', amountLabel:'Belopp', copy:'Kopiera', copied:'✓ Kopierat', howTitle:'Så betalar du', s1t:'Kopiera uppgifterna ovan', s1d:'Tryck på Kopiera vid IBAN och referens', s2t:'Öppna din bankapp', s2d:'Ny betalning → klistra in uppgifterna', s3t:'Bekräfta betalningen', s3d:'Vi skickar så snart den kommit in', footEmail:'Vi har precis skickat dessa uppgifter till din e-post — du förlorar dem inte när du stänger fönstret.', footNotify:'Vi hör av oss när betalningen kommit in.', footGuarantee:'30 dagars pengarna-tillbaka-garanti.', paid:'Jag har betalat →', later:'Jag betalar senare', close:'Stäng', payFor:'Betalning för beställning', scanOrEnter:'Skanna QR-koden eller ange uppgifterna i din bank.' },
     pl: { created:'Zamówienie utworzone', awaiting:'oczekuje na płatność', reserved:'Zarezerwowane jeszcze', qrTitle:'Płacisz z komputera lub innego urządzenia?', qrScanApp:'Zeskanuj ten kod QR w aplikacji bankowej.', saveQr:'Zapisz QR w galerii', amountToPay:'Kwota do zapłaty', detailsTitle:'Dane do przelewu', tapCopy:'dotknij = kopiuj', refLabel:'Tytuł przelewu (ważne!)', vsLabel:'Tytuł przelewu (ważne!)', amountLabel:'Kwota', copy:'Kopiuj', copied:'✓ Skopiowano', howTitle:'Jak zapłacić', s1t:'Skopiuj powyższe dane', s1d:'Dotknij Kopiuj przy IBAN i tytule', s2t:'Otwórz swoją aplikację bankową', s2d:'Nowy przelew → wklej dane', s3t:'Potwierdź płatność', s3d:'Wyślemy towar zaraz po zaksięgowaniu', footEmail:'Właśnie wysłaliśmy te dane na Twój e-mail — nie stracisz ich po zamknięciu tego okna.', footNotify:'Odezwiemy się, gdy płatność dotrze.', footGuarantee:'30-dniowa gwarancja zwrotu pieniędzy.', paid:'Zapłaciłem →', later:'Zapłacę później', close:'Zamknij', payFor:'Płatność za zamówienie', scanOrEnter:'Zeskanuj kod QR lub wpisz dane w swoim banku.' }
@@ -3439,12 +3475,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       sk: { waitTitle:'Čakáme na vašu platbu', waitSub:'Objednávka je vytvorená. Hneď ako platba dorazí, potvrdíme ju a odošleme tovar.', waitEmail:'Platobné údaje sme vám poslali aj na e-mail.', checking:'Overujeme platbu…', paidTitle:'Platba prijatá!', paidSub:'Ďakujeme! Vašu objednávku pripravujeme na odoslanie.', orderLabel:'Objednávka' },
       cs: { waitTitle:'Čekáme na vaši platbu', waitSub:'Objednávka je vytvořená. Jakmile platba dorazí, potvrdíme ji a odešleme zboží.', waitEmail:'Platební údaje jsme vám poslali i na e-mail.', checking:'Ověřujeme platbu…', paidTitle:'Platba přijata!', paidSub:'Děkujeme! Vaši objednávku připravujeme k odeslání.', orderLabel:'Objednávka' },
       de: { waitTitle:'Wir warten auf Ihre Zahlung', waitSub:'Ihre Bestellung ist angelegt. Sobald die Zahlung eingeht, bestätigen wir sie und versenden die Ware.', waitEmail:'Die Zahlungsdaten haben wir Ihnen auch per E-Mail geschickt.', checking:'Zahlung wird geprüft…', paidTitle:'Zahlung erhalten!', paidSub:'Danke! Wir bereiten Ihre Bestellung für den Versand vor.', orderLabel:'Bestellung' },
-      nl: { waitTitle:'We wachten op uw betaling', waitSub:'Uw bestelling is aangemaakt. Zodra de betaling binnen is, bevestigen we deze en verzenden we uw pakket.', waitEmail:'De betaalgegevens hebben we u ook per e-mail gestuurd.', checking:'Betaling controleren…', paidTitle:'Betaling ontvangen!', paidSub:'Bedankt! We maken uw bestelling klaar voor verzending.', orderLabel:'Bestelling' },
       pl: { waitTitle:'Czekamy na Twoją płatność', waitSub:'Zamówienie zostało utworzone. Gdy tylko płatność dotrze, potwierdzimy ją i wyślemy towar.', waitEmail:'Dane do płatności wysłaliśmy również na Twój e-mail.', checking:'Weryfikujemy płatność…', paidTitle:'Płatność otrzymana!', paidSub:'Dziękujemy! Przygotowujemy zamówienie do wysyłki.', orderLabel:'Zamówienie' },
       sv: { waitTitle:'Vi väntar på din betalning', waitSub:'Din beställning är skapad. Så snart betalningen kommit in bekräftar vi den och skickar varan.', waitEmail:'Betalningsuppgifterna har vi även skickat till din e-post.', checking:'Verifierar betalning…', paidTitle:'Betalning mottagen!', paidSub:'Tack! Vi förbereder din beställning för leverans.', orderLabel:'Beställning' },
       no: { waitTitle:'Vi venter på betalingen din', waitSub:'Bestillingen din er opprettet. Så snart betalingen kommer, bekrefter vi den og sender varen.', waitEmail:'Betalingsdetaljene har vi også sendt til e-posten din.', checking:'Kontrollerer betaling…', paidTitle:'Betaling mottatt!', paidSub:'Takk! Vi gjør bestillingen klar for sending.', orderLabel:'Bestilling' },
       hu: { waitTitle:'Várunk a fizetésére', waitSub:'A rendelése létrejött. Amint a fizetés megérkezik, megerősítjük és elküldjük a terméket.', waitEmail:'A fizetési adatokat e-mailben is elküldtük.', checking:'Fizetés ellenőrzése…', paidTitle:'Fizetés megérkezett!', paidSub:'Köszönjük! Előkészítjük a rendelését a küldéshez.', orderLabel:'Rendelés' },
-      fr: { waitTitle:'Nous attendons votre paiement', waitSub:'Votre commande est créée. Dès réception du paiement, nous la confirmons et expédions.', waitEmail:'Nous vous avons aussi envoyé les informations de paiement par e-mail.', checking:'Vérification du paiement…', paidTitle:'Paiement reçu !', paidSub:'Merci ! Nous préparons votre commande pour l\'expédition.', orderLabel:'Commande' },
+      fr: { waitTitle:'Nous attendons ton paiement', waitSub:'Ta commande est créée. Dès réception du paiement, nous la confirmons et l\'expédions.', waitEmail:'Nous t\'avons aussi envoyé les informations de paiement par e-mail.', checking:'Vérification du paiement…', paidTitle:'Paiement reçu !', paidSub:'Merci ! Nous préparons ta commande pour l\'expédition.', orderLabel:'Commande' },
       es: { waitTitle:'Esperando tu pago', waitSub:'Tu pedido está creado. En cuanto llegue el pago, lo confirmamos y enviamos.', waitEmail:'También te hemos enviado los datos de pago por correo.', checking:'Verificando el pago…', paidTitle:'¡Pago recibido!', paidSub:'¡Gracias! Estamos preparando tu pedido para el envío.', orderLabel:'Pedido' }
     };
     for (var k in W) { if (BT_I18N[k]) { for (var kk in W[k]) BT_I18N[k][kk] = W[k][kk]; } }
@@ -3460,18 +3495,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       sv: { toTitle:'Betalningen har inte kommit än', toSub:'Vi hör av oss via e-post så snart betalningen kommit in (oftast inom 1 arbetsdag).', cont:'Fortsätt →' },
       no: { toTitle:'Betalingen har ikke kommet ennå', toSub:'Vi gir beskjed på e-post så snart betalingen kommer (vanligvis innen 1 virkedag).', cont:'Fortsett →' },
       hu: { toTitle:'A fizetés még nem érkezett meg', toSub:'E-mailben jelentkezünk, amint a fizetés megérkezik (általában 1 munkanapon belül).', cont:'Tovább →' },
-      fr: { toTitle:'Paiement pas encore reçu', toSub:'Nous vous préviendrons par e-mail dès réception du paiement (généralement sous 1 jour ouvré).', cont:'Continuer →' },
+      fr: { toTitle:'Paiement pas encore reçu', toSub:'Nous te préviendrons par e-mail dès réception du paiement (généralement sous 1 jour ouvré).', cont:'Continuer →' },
       es: { toTitle:'El pago aún no ha llegado', toSub:'Te avisaremos por correo en cuanto llegue el pago (normalmente en 1 día hábil).', cont:'Continuar →' }
     };
     for (var k in T) { if (BT_I18N[k]) { for (var kk in T[k]) BT_I18N[k][kk] = T[k][kk]; } }
   })();
-  function btLocale() { var L = (PROJECT_CONFIG.locale || 'sk').toLowerCase(); return BT_I18N[L] ? L : 'sk'; }
-  function btT(k) { return (BT_I18N[btLocale()] || BT_I18N.sk)[k] || BT_I18N.sk[k] || k; }
+  function btLocale() { var L = (PROJECT_CONFIG.locale || 'fr').toLowerCase(); return BT_I18N[L] ? L : 'fr'; }
+  function btT(k) { return (BT_I18N[btLocale()] || BT_I18N.fr)[k] || BT_I18N.fr[k] || k; }
   function btCurrency() { var bt = btCfg() || {}; return String(bt.currency || (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.currency) || 'EUR').toUpperCase(); }
   // Suma naformátovaná podľa locale + meny (Intl → správny oddeľovač, symbol, počet desatín).
   function btFmtAmount(amount) {
     var tags = { sk:'sk-SK', cs:'cs-CZ', hu:'hu-HU', fr:'fr-FR', es:'es-ES', nl:'nl-NL', no:'nb-NO', sv:'sv-SE', pl:'pl-PL' };
-    try { return new Intl.NumberFormat(tags[btLocale()] || 'sk-SK', { style: 'currency', currency: btCurrency() }).format(Number(amount)); }
+    try { return new Intl.NumberFormat(tags[btLocale()] || 'fr-FR', { style: 'currency', currency: btCurrency() }).format(Number(amount)); }
     catch (e) { return Number(amount).toFixed(2) + ' ' + btCurrency(); }
   }
   // ISO 11649 RF Creditor Reference (structured SEPA reference — EUR).
@@ -3589,7 +3624,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var ref = btReference(displayId);
     var qr = btQrString(amount, ref);
     var amtDisplay = btFmtAmount(amount);
-    var orderCode = (PROJECT_CONFIG.orderPrefix || 'SK2026') + '-' + displayId;
+    var orderCode = (PROJECT_CONFIG.orderPrefix || 'FR2026') + '-' + displayId;
     btEnsureStyles();
     var ibanClean = (bt.iban || '').replace(/\s/g, '');
     var amt2 = Number(amount).toFixed(2);
@@ -4577,7 +4612,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var selectedProviderId = ''; // Full Medusa provider_id e.g. "pp_mollie_mollie"
   var allPaymentOptions = []; // Flat list: [{ code, display_name, icon, provider, provider_id, available_countries, sort_order }]
   var mollieComponentsInitialized = false;
-  var cardProvider = ''; // 'mollie' | 'airwallex' | 'stripe' | 'paypal' — detected from payment-options
+  var cardProvider = ''; // 'mollie' | 'airwallex' | 'stripe' | 'paypal' | 'revolut' — detected from payment-options
+  // ── Revolut inline card (owns the "Carte bancaire" tile) ──
+  var revolutCardInst = null;      // RevolutCheckout instance
+  var revolutCardField = null;     // createCardField() handle (.submit / .destroy)
+  var revolutCardToken = null;     // order public token the field is mounted against
+  var revolutCardCartId = null;    // cart the Revolut order/session belongs to
+  var revolutCardAmountKey = null; // amount signature the current field was built for
+  var revolutCardMounting = false; // guard against concurrent mounts
+  // Language of the Revolut card-field labels (Numéro de carte / MM/AA / CVV). Derived from
+  // PROJECT_CONFIG.locale; Revolut supports sk/cs/de/nl/pl/sv/hu/fr/es.
+  var REVOLUT_CARD_LOCALE = (function () {
+    var map = { sk: 'sk', cs: 'cs', de: 'de', nl: 'nl', pl: 'pl', sv: 'sv', hu: 'hu', fr: 'fr', es: 'es' };
+    return map[(PROJECT_CONFIG.locale || 'fr').toLowerCase()] || 'fr';
+  })();
+  var _revolutSdkPromise = null;   // pre-warmed @revolut/checkout module (loaded on card select)
+  var revolutPublicKey = null;     // pk_... — needed by the payments() module (Revolut Pay)
+  var revolutEnv = 'prod';         // 'prod' | 'sandbox'
   var airwallexCardElements = {};
   var airwallexCardReady = false;
   var stripeInstance = null;
@@ -4887,7 +4938,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     expressMethods = Object.keys(deduped).map(function(k) { return deduped[k]; });
 
     // Filter out creditcard — not an express method
-    expressMethods = expressMethods.filter(function(m) { return m.code !== 'creditcard'; });
+    // Also exclude Revolut — its methods are inline-only (card field / Revolut Pay),
+    // never the redirect-based express button flow.
+    expressMethods = expressMethods.filter(function(m) { return m.code !== 'creditcard' && m.provider !== 'revolut'; });
 
     // Apple Pay: device check
     expressMethods = expressMethods.filter(function(m) {
@@ -5492,7 +5545,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             console.log('[Express Apple Pay] Validating merchant:', event.validationURL);
             applepay.validateMerchant({
               validationUrl: event.validationURL,
-              displayName: PROJECT_CONFIG.name || 'Loslatenboek',
+              displayName: PROJECT_CONFIG.name || 'Lâche prise',
             }).then(function(result) {
               session.completeMerchantValidation(result.merchantSession);
             }).catch(function(err) {
@@ -5596,7 +5649,338 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  // Method descriptions (Dutch)
+  /* ─── REVOLUT INLINE CARD — owns the "Carte bancaire" tile ─────────────────
+   * Unlike Mollie/Airwallex/Stripe (which collect card data client-side and
+   * create the payment intent on submit), Revolut requires the order token
+   * BEFORE the card field can mount. So when the customer confirms the order
+   * we build a cart with the current items, create a Revolut payment session
+   * (→ order token) and mount a single combined card field under the tile.
+   * The customer enters the card and pays inline — no redirect at any point.
+   * ─────────────────────────────────────────────────────────────────────────*/
+  function revolutAmountKey() {
+    return [getCurrentTotal(), selectedBundleQty, (orderBumpActive ? 1 : 0)].join('|');
+  }
+
+  function teardownRevolutCard() {
+    if (revolutCardField && revolutCardField.destroy) { try { revolutCardField.destroy(); } catch (e) {} }
+    revolutCardField = null; revolutCardInst = null; revolutCardToken = null; revolutCardAmountKey = null;
+  }
+
+  // Container-state styling for the Revolut card field (border/box-shadow can't be
+  // set from inside the sandboxed iframe — they live on the #card-number container).
+  // ── Localisation du bloc carte (chrome autour du champ Revolut). Langue = PROJECT_CONFIG.locale. ──
+  var CARD_I18N = {
+    fr: { ship:'Livraison', pay:'Paiement', title:'Carte bancaire', secureNote:'Tu saisis les informations directement dans le champ sécurisé Revolut — nous ne les voyons pas.', c1:'Chiffrement 256 bits', c2:'Vérification 3D Secure', c3:'Nous ne stockons pas les cartes', payBtn:'Payer', securedBy:'Sécurisé via Revolut', guarantee:'30 jours satisfait ou remboursé', enterCard:'Saisis les informations de ta carte et confirme le paiement.', connecting:'🔒 Connexion au paiement sécurisé…' }
+  };
+  function cardLocale() {
+    var L = (PROJECT_CONFIG.locale || 'fr').toLowerCase();
+    if (CARD_I18N[L]) return L;
+    var s = L.slice(0, 2);
+    if (CARD_I18N[s]) return s;
+    return 'fr';
+  }
+  function cardT(k) { return (CARD_I18N[cardLocale()] || CARD_I18N.fr)[k] || CARD_I18N.fr[k] || k; }
+  function ensureRevolutCardStyles() {
+    if (document.getElementById('revolut-card-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'revolut-card-styles';
+    st.textContent =
+      // Elevated premium card wrapping the whole payment block
+      '#card-fields.rc-card-wrap{background:#fff !important;border:1px solid #EDD9E5 !important;border-radius:16px !important;padding:20px !important;box-shadow:0 6px 24px rgba(45,27,61,.06);}' +
+      '#card-number{transition:border-color .2s ease,box-shadow .2s ease;position:relative;height:56px;border-radius:12px !important;}' +
+      '#card-number.rc-focused{border-color:var(--cta) !important;box-shadow:0 0 0 4px rgba(194,123,160,.14);}' +
+      '#card-number.rc-invalid{border-color:var(--error) !important;}' +
+      '#card-number.rc-shake{animation:rcShakeError .4s ease;}' +
+      '@keyframes rcShakeError{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}' +
+      '.rc-skeleton{height:100%;width:100%;border-radius:12px;background:linear-gradient(90deg,#EFEFEF 25%,#E4E4E4 37%,#EFEFEF 63%);background-size:200% 100%;animation:shimmer 1.4s ease infinite;}' +
+      // Header: progress + order line + secure/logos
+      '#rc-head{margin-bottom:14px;animation:fadeIn .3s ease;}' +
+      '.rc-prog{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#9B7AAD;margin-bottom:8px;}' +
+      '.rc-dot{width:7px;height:7px;border-radius:50%;background:#C27BA0;display:inline-block;}' +
+      '.rc-dot.done{background:#2E7D32;}' +
+      '.rc-prog .rc-chk{color:#2E7D32;}' +
+      '.rc-line{display:flex;align-items:center;justify-content:space-between;background:#FAF5F8;border-radius:12px;padding:12px 14px;margin-bottom:14px;}' +
+      '.rc-line-p{font-size:13px;color:#5A3D6B;}' +
+      '.rc-line-a{font-size:15px;font-weight:700;color:#2D1B3D;}' +
+      '.rc-head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}' +
+      '.rc-secure{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#2E7D32;}' +
+      '.rc-logos{display:inline-flex;gap:5px;align-items:center;}' +
+      '.rc-logos svg{border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.05);}' +
+      '.rc-label-check{display:inline-flex;opacity:0;transform:scale(0);transition:opacity .2s ease;color:#2E7D32;font-weight:700;}' +
+      '.rc-label-check.on{opacity:1;transform:scale(1);animation:checkmark .3s ease;}' +
+      // Trust chips
+      '.rc-secure-note{font-size:12px;color:#8A7290;margin:9px 2px 0;line-height:1.45;}' +
+      '#rc-trust{display:flex;gap:7px;margin-top:16px;}' +
+      '.rc-chip{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 4px;background:#FAF5F8;border:1px solid #EDD9E5;border-radius:11px;text-align:center;font-size:10.5px;font-weight:600;color:#6B5473;line-height:1.25;}.rc-chip .rc-ic{font-size:16px;}' +
+      '#revolut-pay-btn{margin-top:16px;}' +
+      // Guarantee row
+      '#rc-reassure{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;font-size:12px;color:#5A3D6B;margin-top:12px;}' +
+      '#rc-reassure strong{color:#2D1B3D;font-weight:600;}';
+    document.head.appendChild(st);
+  }
+
+  // Toggle the little green ✓ next to the card label when the card is complete.
+  function toggleCardCompleteCheck(on) {
+    var c = document.querySelector('.rc-label-check');
+    if (c) c.classList.toggle('on', !!on);
+  }
+
+  // Restart the shake animation on the card box (payment error nudge).
+  function shakeCardBox() {
+    var box = document.getElementById('card-number');
+    if (!box) return;
+    box.classList.remove('rc-shake');
+    void box.offsetWidth; // force reflow so the animation replays
+    box.classList.add('rc-shake');
+  }
+
+  // Pre-load the Revolut Web SDK the moment the card tile is selected, so the card
+  // field mounts almost instantly on submit — kills the "Préparation du paiement…" wait.
+  function prewarmRevolutSdk() {
+    if (!_revolutSdkPromise) {
+      _revolutSdkPromise = import('https://esm.sh/@revolut/checkout@1.1.25').catch(function (e) {
+        _revolutSdkPromise = null; // allow a retry on the real submit
+        throw e;
+      });
+    }
+    return _revolutSdkPromise;
+  }
+
+  // Small Visa / Mastercard / Maestro marks shown next to the card label (trust).
+  function revolutCardLogos() {
+    return '<span class="rc-logos">'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Visa"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><text x="16" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.5" font-weight="700" font-style="italic" fill="#1A1F71">VISA</text></svg>'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Mastercard"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><circle cx="13.5" cy="10" r="5.2" fill="#EB001B"/><circle cx="18.5" cy="10" r="5.2" fill="#F79E1B" fill-opacity="0.9"/></svg>'
+      + '<svg viewBox="0 0 32 20" width="30" height="19" role="img" aria-label="Maestro"><rect width="32" height="20" rx="3" fill="#fff" stroke="#E6E6E6"/><circle cx="13.5" cy="10" r="5.2" fill="#0099DF"/><circle cx="18.5" cy="10" r="5.2" fill="#ED0006" fill-opacity="0.85"/></svg>'
+      + '</span>';
+  }
+
+  // Premium trust chrome around the Revolut card field (idempotent):
+  // elevated card wrapper + progress + order line + secure/logos header + trust chips.
+  function decorateRevolutCardForm(cardFieldsEl, amountLabel) {
+    if (!cardFieldsEl) return;
+    var productName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Commande';
+    cardFieldsEl.classList.add('rc-card-wrap');
+    // Header: progress → order line → secure + card logos
+    var oldHead = document.getElementById('rc-head'); if (oldHead) oldHead.remove();
+    var head = document.createElement('div');
+    head.id = 'rc-head';
+    head.innerHTML =
+      '<div class="rc-prog"><span class="rc-dot done"></span>' + cardT('ship') + ' <span class="rc-chk">✓</span> · <span class="rc-dot"></span>' + cardT('pay') + '</div>'
+      + '<div class="rc-line"><span class="rc-line-p">' + productName + ' · ' + selectedBundleQty + (selectedBundleQty > 1 ? ' livres' : ' livre') + '</span><span class="rc-line-a">' + amountLabel + '</span></div>'
+      + '<div class="rc-head-row"><span class="rc-secure">🔒 ' + cardT('title') + '<span class="rc-label-check">✓</span></span>' + revolutCardLogos() + '</div>';
+    cardFieldsEl.insertBefore(head, cardFieldsEl.firstChild);
+    // Secure micro-note under the field (reassures where the card data goes)
+    var oldNote = document.getElementById('rc-secure-note'); if (oldNote) oldNote.remove();
+    var note = document.createElement('div');
+    note.id = 'rc-secure-note'; note.className = 'rc-secure-note';
+    note.innerHTML = '🔒 ' + cardT('secureNote');
+    // Trust chips (3 columns) under the field
+    var oldTrust = document.getElementById('rc-trust'); if (oldTrust) oldTrust.remove();
+    var trust = document.createElement('div');
+    trust.id = 'rc-trust';
+    trust.innerHTML = '<span class="rc-chip"><span class="rc-ic">🔐</span>' + cardT('c1') + '</span><span class="rc-chip"><span class="rc-ic">🛡️</span>' + cardT('c2') + '</span><span class="rc-chip"><span class="rc-ic">🚫</span>' + cardT('c3') + '</span>';
+    var errEl = document.getElementById('card-errors');
+    if (errEl && errEl.parentNode) { errEl.parentNode.insertBefore(note, errEl.nextSibling); note.parentNode.insertBefore(trust, note.nextSibling); }
+    else { cardFieldsEl.appendChild(note); cardFieldsEl.appendChild(trust); }
+  }
+
+  // Build a fresh cart holding the current items (main product + order bump + promo).
+  function buildRevolutCardCart() {
+    return createExpressCart();
+  }
+
+  // Reshape the shared #card-fields form into a single combined field for Revolut.
+  function prepareRevolutCardLayout() {
+    var box = document.getElementById('card-number');
+    // Revolut renders one combined iframe → hide the split expiry/cvc/name boxes.
+    ['expiry-date', 'verification-code', 'card-holder'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el && el.parentElement) el.parentElement.style.display = 'none';
+    });
+    if (box) { box.innerHTML = ''; box.style.height = '56px'; box.style.width = '100%'; box.style.position = 'relative'; }
+    // The built-in "Numéro de carte" label is redundant — the new header (secure + logos)
+    // replaces it, and the ✓ completed indicator lives in that header.
+    var lbl = box && box.parentElement ? box.parentElement.querySelector('label') : null;
+    if (lbl) lbl.style.display = 'none';
+    return box;
+  }
+
+  function setCardStatus(msg, isError) {
+    var errEl = document.getElementById('card-errors');
+    if (!errEl) return;
+    errEl.textContent = msg || '';
+    errEl.style.color = isError ? 'var(--error)' : '#9B7AAD';
+  }
+
+  // Attach customer data + the right shipping method to a cart (point relais / domicile).
+  // customerData.metadata already carries the Packeta point (shipping_method + packeta_*).
+  function applyShippingToRevolutCart(cartId, customerData) {
+    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(customerData) })
+      .then(function () { return medusaFetch('/store/shipping-options?cart_id=' + cartId, { method: 'GET' }); })
+      .then(function (shipRes) {
+        var options = shipRes.shipping_options || [];
+        if (options.length === 0) throw new Error('Aucune option de livraison disponible');
+        var selectedOption = options[0];
+        if (selectedShipping === 'home') {
+          var homeOpt = options.filter(function (o) { return /domicile/i.test(o.name || ''); })[0];
+          if (homeOpt) selectedOption = homeOpt;
+        } else {
+          var pickupOpt = options.filter(function (o) {
+            var n = (o.name || '').toLowerCase();
+            return n.indexOf('relais') !== -1 || n.indexOf('point') !== -1 || n.indexOf('pickup') !== -1;
+          })[0];
+          if (pickupOpt) selectedOption = pickupOpt;
+        }
+        return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
+          method: 'POST', body: JSON.stringify({ option_id: selectedOption.id })
+        });
+      });
+  }
+
+  function resetSubmitButton() {
+    if (submitBtn) { submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
+  }
+
+  // Revolut card field authorised the payment → complete the same cart.
+  function onRevolutCardSuccess() {
+    if (!revolutCardCartId) { resetSubmitButton(); return; }
+    handleExpressOrderComplete(revolutCardCartId);
+  }
+
+  // Submit handler for the Revolut card tile (Revolut-hosted-style flow):
+  // customer confirms the order (main "Payer avec …") → we build the cart for the
+  // current amount, attach the address + shipping, then REVEAL the card form
+  // (dropdown) with its own confirm button. Payment fires only when they enter
+  // their card and press "Payer". Building fresh here means the amount
+  // and address are always current — no stale-token handling needed.
+  function revolutCardPay(customerData) {
+    var cardFieldsEl = document.getElementById('card-fields');
+    var amountLabel = formatPrice(getCurrentTotal());
+    teardownRevolutCard();
+    ensureRevolutCardStyles();
+
+    // Keep the card form HIDDEN while the cart + session + SDK load. The main
+    // button stays in its spinner state so the customer knows we're working — the
+    // input fields only appear once they're actually ready to be filled in.
+    if (cardFieldsEl) cardFieldsEl.style.display = 'none';
+    var mainTxt = submitBtn ? submitBtn.querySelector('.btn-text') : null;
+    var mainTxtOrig = mainTxt ? mainTxt.textContent : '';
+    if (mainTxt) mainTxt.textContent = 'Préparation du paiement…';
+
+    buildRevolutCardCart()
+      .then(function (cartId) {
+        revolutCardCartId = cartId;
+        return applyShippingToRevolutCart(cartId, customerData);
+      })
+      .then(function () {
+        return createExpressPaymentSession(revolutCardCartId, 'pp_revolut_revolut', {
+          method: 'card', amount: getCurrentTotal(),
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
+        });
+      })
+      .then(function (sessionData) {
+        if (!sessionData || !sessionData.revolutPublicToken) throw new Error('Session Revolut sans token');
+        revolutCardToken = sessionData.revolutPublicToken;
+        var mode = sessionData.environment === 'prod' ? 'prod' : 'sandbox';
+        // Reuse the SDK pre-warmed on card-tile select (near-instant here).
+        return prewarmRevolutSdk().then(function (m) {
+          return m.default(revolutCardToken, mode).then(function (inst) {
+            revolutCardInst = inst;
+            // Fields are ready → NOW reveal the form (slide-down) and mount into it.
+            if (cardFieldsEl) {
+              cardFieldsEl.style.display = 'block';
+              cardFieldsEl.style.animation = 'slideDown 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
+            }
+            var box = prepareRevolutCardLayout();
+            revolutCardField = inst.createCardField({
+              target: box,
+              locale: REVOLUT_CARD_LOCALE,
+              theme: 'light',
+              styles: {
+                default: { color: '#1A1A1A', fontFamily: '"DM Sans", system-ui, sans-serif', fontSize: '14px', fontWeight: '500' },
+                completed: { color: '#1A1A1A' },
+                autofilled: { color: '#1A1A1A' },
+                invalid: { color: '#DC2626' }
+              },
+              classes: { focused: 'rc-focused', invalid: 'rc-invalid' },
+              onStatusChange: function (st) { toggleCardCompleteCheck(st && st.completed); },
+              onSuccess: function () { onRevolutCardSuccess(); },
+              onError: function () {
+                // Friendly, non-technical message — keep the customer in the flow.
+                setCardStatus('Le paiement a échoué — vérifie les informations de ta carte et réessaie.', true);
+                shakeCardBox();
+                var b = document.getElementById('revolut-pay-btn');
+                if (b) { b.classList.remove('loading'); b.disabled = false; }
+              },
+              onValidation: function (errs) { setCardStatus((errs && errs.length) ? (errs[0].message || '') : '', true); }
+            });
+            // Trust + reassurance chrome (step, secure badge, mini summary, card logos, SSL line)
+            decorateRevolutCardForm(cardFieldsEl, amountLabel);
+            // Confirm button inside the dropdown — styled as the native checkout CTA.
+            var oldBtn = document.getElementById('revolut-pay-btn'); if (oldBtn) oldBtn.remove();
+            var payBtn = document.createElement('button');
+            payBtn.id = 'revolut-pay-btn'; payBtn.type = 'button'; payBtn.className = 'checkout-btn';
+            payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">' + cardT('payBtn') + ' ' + amountLabel + ' →</span>';
+            payBtn.onclick = function () {
+              payBtn.classList.add('loading'); payBtn.disabled = true;
+              setCardStatus(cardT('connecting'), false);
+              var name = (customerData.shipping_address.first_name + ' ' + customerData.shipping_address.last_name).trim();
+              revolutCardField.submit({ name: name, email: customerData.email });
+            };
+            cardFieldsEl.appendChild(payBtn);
+            // Reassurance directly under the pay button
+            var oldReassure = document.getElementById('rc-reassure'); if (oldReassure) oldReassure.remove();
+            var reassure = document.createElement('div');
+            reassure.id = 'rc-reassure';
+            reassure.innerHTML = '<span>✅ ' + cardT('securedBy') + '</span><span>↩️ ' + cardT('guarantee') + '</span>';
+            cardFieldsEl.appendChild(reassure);
+            setCardStatus(cardT('enterCard'), false);
+            // Smoothly hand off from the main button (+ redirect subtext) to the card form's confirm button.
+            var btnSubtext = document.querySelector('.btn-subtext');
+            if (btnSubtext) btnSubtext.style.display = 'none';
+            if (submitBtn) {
+              submitBtn.classList.remove('loading');
+              submitBtn.style.transition = 'opacity 0.25s ease';
+              submitBtn.style.opacity = '0';
+              setTimeout(function () { submitBtn.style.display = 'none'; }, 250);
+            }
+            cardFieldsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          });
+        });
+      })
+      .catch(function (err) {
+        errorEl.textContent = 'Une erreur est survenue lors du traitement du paiement. ' + (err.message || 'Réessaie.');
+        // Build failed before the form was shown — restore the main button for retry.
+        if (mainTxt) mainTxt.textContent = mainTxtOrig;
+        var btnSubtextErr = document.querySelector('.btn-subtext');
+        if (btnSubtextErr) btnSubtextErr.style.display = '';
+        resetSubmitButton();
+      });
+  }
+
+  // Restore the main submit button + subtext after the Revolut card form was revealed
+  // (customer switched to another payment method) — undo revolutCardPay's hand-off.
+  function restoreSubmitFromRevolutCard() {
+    teardownRevolutCard();
+    var payBtn = document.getElementById('revolut-pay-btn'); if (payBtn) payBtn.remove();
+    var head = document.getElementById('rc-head'); if (head) head.remove();
+    var note = document.getElementById('rc-secure-note'); if (note) note.remove();
+    var trust = document.getElementById('rc-trust'); if (trust) trust.remove();
+    var reassure = document.getElementById('rc-reassure'); if (reassure) reassure.remove();
+    var cardFieldsEl = document.getElementById('card-fields');
+    if (cardFieldsEl) cardFieldsEl.classList.remove('rc-card-wrap');
+    var btnSubtext = document.querySelector('.btn-subtext');
+    if (btnSubtext) btnSubtext.style.display = '';
+    if (submitBtn) {
+      submitBtn.style.display = '';
+      submitBtn.style.opacity = '';
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+  }
+
+  // Method descriptions (French)
   var METHOD_DESCRIPTIONS = {
     ideal: 'Paie directement via ta banque',
     bancontact: 'Système de paiement belge',
@@ -5604,6 +5988,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     klarna_later: 'Reçois d\'abord, paie plus tard',
     klarna_slice: 'Paie en plusieurs fois',
     creditcard: 'Visa, Mastercard, American Express',
+    card: 'Visa, Mastercard — paie en toute sécurité sans redirection',
     paypal: 'Paie avec ton compte PayPal',
     eps: 'Paie via ta banque autrichienne',
     przelewy24: 'Système de paiement polonais',
@@ -5615,7 +6000,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     trustly: 'Paiement bancaire en ligne',
     applepay: 'Paie avec Apple Pay',
     googlepay: 'Paie avec Google Pay',
+    apple_pay: 'Paie vite et en sécurité avec Apple Pay',
+    google_pay: 'Paie vite et en sécurité avec Google Pay',
     bank_transfer: 'Paie par virement bancaire',
+    bank_transfer_sepa: 'Virement SEPA avec QR code — expédition dès réception',
     sepa_debit: 'Prélèvement automatique SEPA',
     swish: 'Paie avec Swish (Suède)',
     revolut_pay: 'Paie avec Revolut',
@@ -5637,13 +6025,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
   function getMethodIconHTML(code) {
-    if (code === 'creditcard') {
-      return '<svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/><rect x="2" y="5" width="28" height="4" fill="#2D3748"/><rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/><rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/><rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/><rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/></svg>';
+    if (code === 'creditcard' || code === 'card') {
+      return '<span class="pm-icon" style="width:auto;display:inline-flex;gap:3px;align-items:center;flex-shrink:0;">' +
+        '<img src="/icons/visa.svg" alt="Visa" style="height:20px;width:auto;border-radius:3px;border:1px solid rgba(194,123,160,0.12);" onerror="this.style.display=\'none\'">' +
+        '<img src="/icons/mastercard.svg" alt="Mastercard" style="height:20px;width:auto;border-radius:3px;border:1px solid rgba(194,123,160,0.12);" onerror="this.style.display=\'none\'">' +
+        '</span>';
     }
     // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer_sepa'];
+    var ICON_FILE_MAP = { 'google_pay': 'googlepay', 'apple_pay': 'applepay' };
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'apple_pay', 'google_pay', 'eps', 'swish', 'revolut_pay', 'bank_transfer_sepa'];
     if (iconMethods.indexOf(code) !== -1) {
-      return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
+      var iconFile = ICON_FILE_MAP[code] || code;
+      return '<img src="/icons/' + iconFile + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
     // Colored badge fallback
     var badges = {
@@ -5709,9 +6102,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           window.__bankTransferConfig = gw.bank_transfer || null;
           return;
         }
+        // Revolut gateway: capture the public key + environment for the Web SDK.
+        if (gw.provider === 'revolut') {
+          revolutPublicKey = gw.public_key || null;
+          revolutEnv = gw.environment === 'sandbox' ? 'sandbox' : 'prod';
+        }
         (gw.methods || []).forEach(function(m) {
           var NL_NAMES = {
-            'creditcard': 'Creditcard',
+            'creditcard': 'Carte bancaire',
+            'card': 'Carte bancaire',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
@@ -5726,11 +6125,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             'trustly': 'Trustly',
             'applepay': 'Apple Pay',
             'googlepay': 'Google Pay',
-            'bank_transfer': 'Virement bancaire',
+            'apple_pay': 'Apple Pay',
+            'google_pay': 'Google Pay',
+            'bank_transfer': 'Virement bancaire (SEPA)',
             'sepa_debit': 'Prélèvement automatique SEPA',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
-            'bank_transfer_sepa': 'Virement bancaire / QR',
+            'bank_transfer_sepa': 'Virement bancaire (SEPA)',
           };
           allPaymentOptions.push({
             code: m.code,
@@ -5755,9 +6156,34 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         });
       });
 
-      // Detect which provider handles credit cards
-      var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
-      cardProvider = ccOption ? ccOption.provider : '';
+      // Detect which provider handles credit cards.
+      // lache-livre: Revolut owns the "Carte bancaire" tile with an inline card
+      // field. If a Revolut card method is active, drop any redirect-based card
+      // tile + the standalone Revolut card tile and expose ONE unified
+      // 'creditcard' tile backed by Revolut (no redirect — inline flow).
+      var revolutCardOpt = allPaymentOptions.find(function(m) { return m.provider === 'revolut' && m.code === 'card'; });
+      if (revolutCardOpt) {
+        allPaymentOptions = allPaymentOptions.filter(function(m) {
+          if (m.code === 'creditcard') return false;                        // remove other providers' card tile
+          if (m.provider === 'revolut' && m.code === 'card') return false;   // remove standalone Revolut card
+          return true;
+        });
+        allPaymentOptions.unshift({
+          code: 'creditcard',
+          provider: 'revolut',
+          provider_id: 'pp_revolut_revolut',
+          display_name: 'Carte bancaire',
+          icon: 'creditcard',
+          sort_order: -1,
+          environment: revolutCardOpt.environment || 'prod'
+        });
+        cardProvider = 'revolut';
+        // Inline flow → no redirect. Override the generic card description.
+        METHOD_DESCRIPTIONS.creditcard = 'Visa, Mastercard — paie en toute sécurité sans redirection';
+      } else {
+        var ccOption = allPaymentOptions.find(function(m) { return m.code === 'creditcard'; });
+        cardProvider = ccOption ? ccOption.provider : '';
+      }
       console.log('[CardForm] Card provider detected:', cardProvider || 'none');
 
       // Virement bancaire (SEPA QR) — z gateway_config brány 'bank_transfer'. Vlastný
@@ -5766,7 +6192,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (btEnabled()) {
         allPaymentOptions.push({
           code: 'bank_transfer_sepa', provider: 'bank_transfer', provider_id: 'pp_bank_transfer_bank_transfer',
-          display_name: 'Virement bancaire / QR', icon: 'bank_transfer_sepa', sort_order: 60
+          display_name: 'Virement bancaire (SEPA)', icon: 'bank_transfer_sepa', sort_order: 60
         });
       }
 
@@ -5815,7 +6241,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Apple Pay: only show if device supports it
     methods = methods.filter(function(m) {
-      if (m.code === 'applepay') {
+      if (m.code === 'applepay' || m.code === 'apple_pay') {
         return window.ApplePaySession && ApplePaySession.canMakePayments();
       }
       if (m.code === 'googlepay') {
@@ -5986,9 +6412,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (!hasCreditCard) {
         cardFieldsEl.style.display = 'none';
       } else if (selectedMethod === 'creditcard') {
-        // Stripe, PayPal, and Airwallex use hosted checkout (redirect), no inline card fields needed
-        if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'airwallex') {
+        // Stripe, PayPal, and Airwallex use hosted checkout (redirect), no inline card fields needed.
+        // Revolut reveals its inline card form only AFTER the customer confirms the
+        // order (see revolutCardPay) — just pre-warm the SDK now.
+        if (cardProvider === 'stripe' || cardProvider === 'paypal' || cardProvider === 'airwallex' || cardProvider === 'revolut') {
           cardFieldsEl.style.display = 'none';
+          if (cardProvider === 'revolut') prewarmRevolutSdk();
         } else {
           cardFieldsEl.style.display = 'block';
           // Init the correct card provider's form
@@ -6006,8 +6435,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Bind click events on newly rendered methods
     bindPaymentMethodEvents();
 
-    // Update button text
+    // Update button text + subtext (Revolut card = inline, no redirect note)
     updateButtonText();
+    updateSubtext();
   }
 
   /**
@@ -6061,10 +6491,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         selectedProvider = method.getAttribute('data-provider');
         selectedProviderId = method.getAttribute('data-provider-id') || ('pp_' + selectedProvider + '_' + selectedProvider);
 
+        // Undo any revealed Revolut card form from a previous selection (accordion teardown)
+        restoreSubmitFromRevolutCard();
+
         // Show/hide card fields — init the right provider's card elements
         var cardFields = document.getElementById('card-fields');
         if (cardFields) {
-          if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'airwallex') {
+          if (selectedMethod === 'creditcard' && cardProvider === 'revolut') {
+            // Revolut reveals its inline form only AFTER the customer confirms the
+            // order (see revolutCardPay) — pre-warm the SDK so it mounts instantly.
+            cardFields.style.display = 'none';
+            prewarmRevolutSdk();
+          } else if (selectedMethod === 'creditcard' && cardProvider !== 'stripe' && cardProvider !== 'paypal' && cardProvider !== 'airwallex') {
             // Stripe, PayPal, and Airwallex use hosted checkout (redirect/drop-in), no inline card fields
             cardFields.style.display = 'block';
             if (cardProvider === 'mollie') {
@@ -6102,7 +6540,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               selectedProviderId = firstSub.getAttribute('data-provider-id');
               klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
             }
-            // Hide credit card fields
+            // Hide credit card fields + undo any Revolut inline form
+            restoreSubmitFromRevolutCard();
             var cardFields = document.getElementById('card-fields');
             if (cardFields) cardFields.style.display = 'none';
             updateButtonText();
@@ -6127,6 +6566,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             selectedProviderId = firstSub.getAttribute('data-provider-id');
             klarnaSelectedCategory = firstSub.getAttribute('data-klarna-category');
           }
+          restoreSubmitFromRevolutCard();
           var cardFields = document.getElementById('card-fields');
           if (cardFields) cardFields.style.display = 'none';
           updateButtonText();
@@ -6150,6 +6590,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         selectedProviderId = sub.getAttribute('data-provider-id');
         klarnaSelectedCategory = sub.getAttribute('data-klarna-category');
 
+        restoreSubmitFromRevolutCard();
         var cardFields = document.getElementById('card-fields');
         if (cardFields) cardFields.style.display = 'none';
         updateButtonText();
@@ -6166,8 +6607,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var providerName = cardProvider === 'stripe' ? 'Stripe'
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
+        : cardProvider === 'revolut' ? 'Revolut'
         : 'Mollie';
-      subtext.textContent = 'Tes données de carte sont traitées de manière sécurisée via ' + providerName + '.';
+      // Revolut = inline card form on this page — no redirect ever happens.
+      subtext.textContent = cardProvider === 'revolut'
+        ? 'Tu paies en toute sécurité sur cette page — aucune redirection.'
+        : 'Tes données de carte sont traitées de manière sécurisée via ' + providerName + '.';
+    } else if (selectedMethod === 'bank_transfer_sepa') {
+      subtext.textContent = 'Les coordonnées du virement s\'affichent directement sur cette page.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
       subtext.textContent = 'Nous allons te rediriger vers Klarna pour finaliser le paiement.';
     } else {
@@ -6181,10 +6628,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var trustProvider = cardProvider === 'stripe' ? 'Stripe'
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
+          : cardProvider === 'revolut' ? 'Revolut'
           : 'Mollie';
         trustText.textContent = 'Sécurisé via ' + trustProvider;
+      } else if (selectedMethod === 'bank_transfer_sepa') {
+        trustText.textContent = 'Virement SEPA sécurisé';
       } else {
-        trustText.textContent = 'Sécurisé via ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Mollie');
+        trustText.textContent = 'Sécurisé via ' + (selectedProvider === 'paypal' ? 'PayPal'
+          : selectedProvider === 'stripe' ? 'Stripe'
+          : selectedProvider === 'revolut' ? 'Revolut'
+          : selectedProvider === 'klarna' ? 'Klarna'
+          : 'Mollie');
       }
     }
   }
@@ -6213,6 +6667,144 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Load payment methods on page init
   loadPaymentMethods();
 
+  /* ─── MODE DE LIVRAISON — Packeta FR (point relais / domicile) ───
+   * FR utilise les transporteurs externes de Packeta (points relais) → PAS de
+   * filtre vendors dans le widget ; point.carrierId est enregistré dans
+   * cartMeta.packeta_carrier_id (pattern biblia-kotow / odpusc-ksiazka). */
+  var selectedShipping = 'pickup'; // 'pickup' (point relais) ou 'home' (domicile)
+  var selectedPacketaPoint = null; // { id, name, address, zip, city, carrierId }
+
+  function renderSelectedPacketaPoint(pt) {
+    var display = document.getElementById('packeta-selected-point');
+    if (!display || !pt) return;
+    display.style.display = 'block';
+    display.innerHTML = '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round" width="16" height="16" style="flex-shrink:0;"><path d="M20 6L9 17l-5-5"/></svg>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="font-weight:600;font-size:13px;color:#1a1a2e;">' + pt.name + '</div>'
+      + '<div style="font-size:12px;color:#666;">' + (pt.address || '') + ', ' + pt.zip + ' ' + pt.city + '</div>'
+      + '</div>'
+      + '</div>';
+    var packetaBtn = document.getElementById('packeta-select-btn');
+    if (packetaBtn) {
+      packetaBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Changer de point relais';
+    }
+  }
+
+  function bindShippingEvents() {
+    var pickupOpt = document.getElementById('shipping-pickup');
+    var homeOpt = document.getElementById('shipping-home');
+    var packetaSection = document.getElementById('packeta-point-section');
+
+    if (pickupOpt) {
+      pickupOpt.addEventListener('click', function() {
+        if (selectedShipping === 'pickup') return;
+        selectedShipping = 'pickup';
+        try { localStorage.setItem('checkout_shipping_method', 'pickup'); } catch(e) {}
+        // Visual: activate pickup, deactivate home
+        pickupOpt.style.borderColor = 'var(--accent)';
+        pickupOpt.style.background = 'rgba(194,123,160,0.03)';
+        pickupOpt.querySelector('.shipping-radio div').style.background = 'var(--accent)';
+        pickupOpt.querySelector('.shipping-radio').style.borderColor = 'var(--accent)';
+        homeOpt.style.borderColor = 'var(--border)';
+        homeOpt.style.background = 'transparent';
+        homeOpt.querySelector('.shipping-radio div').style.background = 'transparent';
+        homeOpt.querySelector('.shipping-radio').style.borderColor = 'var(--border)';
+        if (packetaSection) packetaSection.style.display = '';
+      });
+    }
+    if (homeOpt) {
+      homeOpt.addEventListener('click', function() {
+        if (selectedShipping === 'home') return;
+        selectedShipping = 'home';
+        try { localStorage.setItem('checkout_shipping_method', 'home'); } catch(e) {}
+        // Visual: activate home, deactivate pickup
+        homeOpt.style.borderColor = 'var(--accent)';
+        homeOpt.style.background = 'rgba(194,123,160,0.03)';
+        homeOpt.querySelector('.shipping-radio div').style.background = 'var(--accent)';
+        homeOpt.querySelector('.shipping-radio').style.borderColor = 'var(--accent)';
+        pickupOpt.style.borderColor = 'var(--border)';
+        pickupOpt.style.background = 'transparent';
+        pickupOpt.querySelector('.shipping-radio div').style.background = 'transparent';
+        pickupOpt.querySelector('.shipping-radio').style.borderColor = 'var(--border)';
+        if (packetaSection) packetaSection.style.display = 'none';
+        // Hide packeta error if shown
+        var packetaErr = document.getElementById('packeta-error');
+        if (packetaErr) packetaErr.style.display = 'none';
+      });
+    }
+
+    // Packeta Widget — choix du point relais
+    var packetaBtn = document.getElementById('packeta-select-btn');
+    if (packetaBtn) {
+      packetaBtn.addEventListener('click', function() {
+        var apiKey = PROJECT_CONFIG.packetaApiKey;
+        if (!apiKey) {
+          console.error('[Packeta] API key not set in PROJECT_CONFIG.packetaApiKey');
+          return;
+        }
+        if (typeof Packeta === 'undefined' || !Packeta.Widget) {
+          console.error('[Packeta] Widget library not loaded');
+          alert('Le widget de choix du point relais ne s\'est pas chargé. Actualise la page.');
+          return;
+        }
+
+        Packeta.Widget.pick(apiKey, function(point) {
+          if (point) {
+            selectedPacketaPoint = {
+              id: point.id,
+              name: point.name,
+              address: point.place || point.street,
+              zip: point.zip,
+              city: point.city,
+              // FR = transporteurs externes (points relais) → carrierId renseigné.
+              // On l'enregistre tel quel dans cartMeta.packeta_carrier_id (pattern biblia-kotow).
+              carrierId: (point.carrierId === undefined ? null : point.carrierId),
+            };
+            renderSelectedPacketaPoint(selectedPacketaPoint);
+            // Save to localStorage for persistence
+            try { localStorage.setItem('checkout_packeta_point', JSON.stringify(selectedPacketaPoint)); } catch(e) {}
+            // Hide error
+            var packetaErr = document.getElementById('packeta-error');
+            if (packetaErr) packetaErr.style.display = 'none';
+          }
+        }, {
+          language: 'fr',
+          country: 'fr',
+          appIdentity: PROJECT_CONFIG.domain || 'checkout',
+          // FR: PAS de filtre vendors — les points relais français passent par des
+          // transporteurs externes (Colis Privé, etc.), pas par les points propres Packeta.
+        });
+      });
+    }
+  }
+
+  // Bind shipping method events
+  bindShippingEvents();
+
+  // ─── RESTORE SHIPPING + PACKETA from localStorage ───
+  (function restoreShippingFromStorage() {
+    try {
+      // Restore Packeta pickup point
+      var savedPoint = localStorage.getItem('checkout_packeta_point');
+      if (savedPoint) {
+        var pt = JSON.parse(savedPoint);
+        if (pt && pt.id && pt.name) {
+          selectedPacketaPoint = pt;
+          renderSelectedPacketaPoint(pt);
+        }
+      }
+
+      // Restore shipping method
+      var savedMethod = localStorage.getItem('checkout_shipping_method');
+      if (savedMethod === 'home') {
+        var homeOpt = document.getElementById('shipping-home');
+        if (homeOpt) homeOpt.click();
+      }
+      // 'pickup' is default, no need to click
+    } catch(e) {}
+  })();
+
   /* ─── FLOATING LABEL — select element needs has-value class ─── */
   var selects = document.querySelectorAll('.float-field select');
   selects.forEach(function(sel) {
@@ -6223,24 +6815,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   /* ─── SMART EMAIL VALIDATIE — typfouten detectie ─── */
   var COMMON_DOMAINS = {
-    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.nl','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com','gmai.c','gmail.c','gmal.c','gmil.com','g mail.com','gamail.com','gimail.com','gmsil.com','gmqil.com'],
-    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.nl','hotmail.c','hotmai.c','hotmal.c','htomail.com','htmail.com','hotmil.com'],
+    'gmail.com': ['gmial.com','gmai.com','gmal.com','gamil.com','gmail.fr','gmail.co','gnail.com','gmaill.com','gmali.com','gmaik.com','gmail.con','gmail.cmo','gmeil.com','gemail.com','gmai.c','gmail.c','gmal.c','gmil.com','g mail.com','gamail.com','gimail.com','gmsil.com','gmqil.com'],
+    'hotmail.fr': ['hotmai.fr','hotmal.fr','homail.fr','hotmail.f','hotamil.fr','hotmaill.fr','hotmial.fr','hotmail.frr'],
+    'hotmail.com': ['hotmai.com','hotmal.com','homail.com','hotmail.co','hotamil.com','hotmaill.com','hotmial.com','hotmail.con','hotmail.c','hotmai.c','hotmal.c','htomail.com','htmail.com','hotmil.com'],
+    'outlook.fr': ['outlok.fr','outllook.fr','outook.fr','outlook.f','outlool.fr'],
     'outlook.com': ['outlok.com','outllook.com','outook.com','outlook.co','outlool.com','outlouk.com','outlook.c','outlok.c','outloook.com','outlokk.com'],
-    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.nl','yahoo.c','yaho.c','yaoo.com','yhaoo.com'],
-    'live.nl': ['live.nl.com','lve.nl','live.n','live.nll','live.l'],
-    'ziggo.nl': ['zigo.nl','ziggo.n','ziggo.nll','zigggo.nl','ziggo.l','zigo.n'],
-    'kpnmail.nl': ['kpnmal.nl','kpnmail.n','kpnmai.nl','kpnmail.nll','kpnmail.l','kpnmal.n'],
-    'upcmail.nl': ['upcmal.nl','upcmail.n','upcmail.l'],
-    'hetnet.nl': ['hetnet.n','henet.nl','hetnet.l'],
-    'telenet.be': ['telenet.b','telnet.be','telenet.bee'],
-    'skynet.be': ['skynet.b','sknet.be'],
-    'proximus.be': ['proximus.b','proxmus.be'],
-    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con','icloud.c','iclod.c'],
+    'yahoo.fr': ['yaho.fr','yahooo.fr','yahoo.f','yaahoo.fr','yhoo.fr'],
+    'yahoo.com': ['yaho.com','yahooo.com','yahoo.co','yaahoo.com','yhoo.com','yahoo.c','yaho.c','yaoo.com','yhaoo.com'],
+    'orange.fr': ['orange.f','ornage.fr','orage.fr','orange.frr','oragne.fr'],
+    'wanadoo.fr': ['wanadoo.f','wanado.fr','wandoo.fr','wanadou.fr','wannadoo.fr'],
+    'free.fr': ['free.f','fre.fr','frre.fr','free.frr'],
+    'sfr.fr': ['sfr.f','srf.fr','sffr.fr'],
+    'laposte.net': ['laposte.ne','laposte.nt','lapost.net','laposte.fr','laposte.net.fr'],
+    'live.fr': ['live.f','lve.fr','live.frr'],
+    'neuf.fr': ['neuf.f','nuef.fr'],
+    'bbox.fr': ['bbox.f','box.fr','bboxx.fr'],
+    'icloud.com': ['iclod.com','icloud.co','icoud.com','icloud.con','icloud.c','iclod.c','icloud.fr'],
     'protonmail.com': ['protonmal.com','protonmail.co','protonmail.con','protonmail.c'],
-    'online.nl': ['online.n','onlne.nl','online.l'],
-    'xs4all.nl': ['xs4all.n','xs4al.nl','xs4all.l'],
-    'planet.nl': ['planet.n','plnet.nl','planet.l'],
-    'casema.nl': ['casema.n','casma.nl','casema.l'],
   };
   var TYPO_MAP = {};
   Object.keys(COMMON_DOMAINS).forEach(function(correct) {
@@ -7904,13 +8495,22 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Valideer alle velden
+    // Valider tous les champs
     if (!validateAllFields()) {
       var firstError = form.querySelector('.invalid');
       if (firstError) {
         firstError.focus();
         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+      return;
+    }
+
+    // Validation du point relais (pickup)
+    if (selectedShipping === 'pickup' && !selectedPacketaPoint) {
+      var packetaErr = document.getElementById('packeta-error');
+      if (packetaErr) packetaErr.style.display = 'block';
+      var packetaSection = document.getElementById('packeta-point-section');
+      if (packetaSection) packetaSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -7938,11 +8538,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         body: JSON.stringify({
           project_slug: PROJECT_CONFIG.slug,
           email: (document.getElementById('email').value || '').trim(),
-          first_name: (document.getElementById('firstName').value || '').trim(),
-          last_name: (document.getElementById('lastName').value || '').trim(),
+          first_name: (document.getElementById('first_name').value || '').trim(),
+          last_name: (document.getElementById('last_name').value || '').trim(),
           phone: (document.getElementById('phone').value || '').trim(),
           city: (document.getElementById('city').value || '').trim(),
-          postal_code: (document.getElementById('postcode').value || '').trim(),
+          postal_code: (document.getElementById('postal_code').value || '').trim(),
           country_code: document.getElementById('country') ? document.getElementById('country').value : '',
           payment_method: selectedMethod || 'none',
           payment_provider: selectedProvider || '',
@@ -8014,6 +8614,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     customerData.metadata.source_url = window.location.href;
     customerData.metadata.client_user_agent = navigator.userAgent || '';
 
+    // ─── Mode de livraison (Packeta point relais / domicile) → cart metadata ───
+    // Backend (Dextrum hold job) lit shipping_method + packeta_point_id/name/address.
+    customerData.metadata.shipping_method = selectedShipping === 'pickup' ? 'zasilkovna_pickup' : 'zasilkovna_home';
+    if (selectedShipping === 'pickup' && selectedPacketaPoint) {
+      customerData.metadata.packeta_point_id = String(selectedPacketaPoint.id);
+      customerData.metadata.packeta_point_name = selectedPacketaPoint.name;
+      customerData.metadata.packeta_point_address = selectedPacketaPoint.address + ', ' + selectedPacketaPoint.zip + ' ' + selectedPacketaPoint.city;
+      // Diagnostic transporteur : FR = transporteurs externes → carrierId renseigné.
+      // Vide = point propre Packeta (Z-BOX). Pattern biblia-kotow/odpusc-ksiazka.
+      customerData.metadata.packeta_carrier_id = (selectedPacketaPoint.carrierId === null || selectedPacketaPoint.carrierId === undefined)
+        ? '' : String(selectedPacketaPoint.carrierId);
+    }
+
     // ─── Firemní údaje (B2B) ───
     var isCompany = document.getElementById('company-checkbox').checked;
     if (isCompany) {
@@ -8065,6 +8678,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var checkoutBundlePrice = selectedBundlePrice;
     var checkoutOrderBump = orderBumpActive;
     var checkoutTotal = getCurrentTotal();
+
+    // ── REVOLUT INLINE CARD ── Build a dedicated cart + Revolut order, attach the
+    // shipping address, then reveal the inline card form under the tile (its own
+    // Pay button; onSuccess completes the cart). Skips the generic flow below —
+    // the customer is NEVER redirected.
+    if (cardProvider === 'revolut' && selectedMethod === 'creditcard') {
+      revolutCardPay(customerData);
+      return;
+    }
 
     // Stap 1: Cart aanmaken of hergebruiken (promo cart → background cart → nieuw)
     var reuseCartId = promoCartId || backgroundCartId;
@@ -8201,9 +8823,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         if (options.length === 0) {
           throw new Error('Aucune option de livraison disponible');
         }
+        // Choisir la shipping option selon le mode de livraison (point relais / domicile)
+        var selectedOption = options[0]; // fallback
+        if (selectedShipping === 'home') {
+          var homeOpt = options.filter(function(o){ return /domicile/i.test(o.name || ''); })[0];
+          if (homeOpt) selectedOption = homeOpt;
+        } else {
+          var pickupOpt = options.filter(function(o){
+            var n = (o.name || '').toLowerCase();
+            return n.indexOf('relais') !== -1 || n.indexOf('point') !== -1 || n.indexOf('pickup') !== -1;
+          })[0];
+          if (pickupOpt) selectedOption = pickupOpt;
+        }
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
-          body: JSON.stringify({ option_id: (options.filter(function(o){ return /domicile/i.test(o.name || ''); })[0] || options[0]).id })
+          body: JSON.stringify({ option_id: selectedOption.id })
         });
       }).then(function() {
         return medusaFetch('/store/carts/' + cartId, { method: 'GET' });
@@ -8711,6 +9345,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           });
         }
 
+        // ─── REVOLUT INLINE — embedded card field / Revolut Pay, NO redirect ───
+        // Backend returns a token (+ public key + method); the Revolut Web SDK
+        // renders the chosen method inline against the token. On success we
+        // complete the same Medusa cart. We must run this BEFORE the generic
+        // redirect below (Revolut also returns a checkoutUrl we deliberately skip).
+        if (selectedProviderId && selectedProviderId.indexOf('revolut') !== -1 && providerData.revolutPublicToken) {
+          return handleRevolutInline(result.cartId, providerData);
+        }
+
+        // Revolut without a token → session broken. NEVER fall through to the
+        // generic redirect for Revolut (card and revolut_pay are inline-only).
+        if (selectedProviderId && selectedProviderId.indexOf('revolut') !== -1) {
+          throw new Error('La session de paiement Revolut n\'a pas été créée correctement. Réessaie.');
+        }
+
         if (redirectUrl) {
           window.location.href = redirectUrl;
         } else if (selectedProviderId && selectedProviderId.indexOf('airwallex') !== -1) {
@@ -8728,6 +9377,177 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       submitBtn.disabled = false;
     });
   });
+
+  /* ─── REVOLUT INLINE (generic-flow fallback) — embedded widget, NO redirect ───
+   * Used when the payment session was created via the generic flow (e.g. a
+   * standalone revolut_pay tile). Renders the chosen Revolut method inline in a
+   * secure overlay against the order token; on success completes the same cart. */
+  function handleRevolutInline(cartId, providerData) {
+    var token    = providerData.revolutPublicToken;
+    var pubKey   = providerData.revolutPublicKey || revolutPublicKey || '';
+    var mode     = providerData.environment === 'prod' ? 'prod' : 'sandbox';
+    var method   = providerData.method || 'card';
+    var amtMajor = Number(providerData.amount || 0);
+    var amtMinor = Math.round(amtMajor * 100);
+    var currency = String(providerData.currency || providerData.currency_code || PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
+    var amtLabel = formatPrice(amtMajor);
+    var custEmail = (document.getElementById('email') || {}).value || '';
+    var custName  = (((document.getElementById('first_name') || {}).value || '') + ' ' +
+                     ((document.getElementById('last_name') || {}).value || '')).trim() || 'Client';
+
+    var ov = document.createElement('div');
+    ov.id = 'revolut-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(45,27,61,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:DM Sans,system-ui,sans-serif;';
+    ov.innerHTML =
+      '<div style="background:#fff;max-width:440px;width:100%;border-radius:14px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);">'
+      + '<div style="font-size:16px;font-weight:700;color:#2D1B3D;">Payer ' + amtLabel + '</div>'
+      + '<div style="font-size:12.5px;color:#9B7AAD;margin:2px 0 16px;">🔒 Sécurisé via Revolut</div>'
+      + '<div id="rev-mount"></div>'
+      + '<div id="rev-status" style="font-size:13px;margin-top:10px;min-height:16px;"></div>'
+      + '<button id="rev-cancel" type="button" style="margin-top:12px;width:100%;background:none;border:none;color:#9B7AAD;font-size:13px;cursor:pointer;">Annuler</button>'
+      + '</div>';
+    document.body.appendChild(ov);
+    var mount = ov.querySelector('#rev-mount');
+    var statusEl = ov.querySelector('#rev-status');
+    function setRevStatus(m, c) { statusEl.textContent = m || ''; statusEl.style.color = c === 'err' ? '#C0392B' : (c === 'ok' ? '#27AE60' : '#5A3D6B'); }
+    function closeRevOverlay() { if (ov.parentNode) ov.parentNode.removeChild(ov); submitBtn.classList.remove('loading'); submitBtn.disabled = false; }
+    ov.querySelector('#rev-cancel').onclick = closeRevOverlay;
+
+    function completeAndGo() {
+      setRevStatus('Finalisation de la commande…', 'ok');
+      return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+        .then(function (res) {
+          var order = window.__extractOrderOrThrow(res);
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          if (PROJECT_CONFIG.upsellEnabled === false || orderBumpActive) {
+            if (orderBumpActive) localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        })
+        .catch(function () {
+          setRevStatus('Le paiement est passé, mais la commande n\'a pas pu être finalisée — contacte-nous à ' + (PROJECT_CONFIG.supportEmail || 'notre service client') + '.', 'err');
+        });
+    }
+
+    // A function that hands the Revolut Web SDK our already-created order token.
+    function createRevOrder() { return Promise.resolve({ publicId: token }); }
+
+    // Last-resort on-page pop-up (secure Revolut window, NOT a full-page redirect).
+    // Used for methods with no dedicated inline widget (SEPA) or as graceful
+    // fallback when a wallet is unavailable in the current browser.
+    function payWithPopupFallback(RevolutCheckout) {
+      return RevolutCheckout(token, mode).then(function (inst) {
+        inst.payWithPopup({
+          email: custEmail, name: custName,
+          onSuccess: function () { completeAndGo(); },
+          onError: function (e) { setRevStatus((e && e.message) || 'Le paiement a échoué.', 'err'); },
+          onCancel: function () { setRevStatus('Le paiement a été annulé.', ''); }
+        });
+      });
+    }
+
+    import('https://esm.sh/@revolut/checkout@1.1.25').then(function (m) {
+      var RevolutCheckout = m.default;
+
+      // ── CARD → embedded PCI card field + Pay button (legacy instance) ──
+      if (method === 'card') {
+        return RevolutCheckout(token, mode).then(function (inst) {
+          var cardBox = document.createElement('div');
+          cardBox.style.cssText = 'border:1.5px solid #EDD9E5;border-radius:8px;padding:14px 12px;min-height:46px;background:#fff;';
+          mount.appendChild(cardBox);
+          var payBtn = document.createElement('button');
+          payBtn.type = 'button'; payBtn.className = 'checkout-btn';
+          payBtn.innerHTML = '<span class="spinner"></span><span class="btn-text">Payer ' + amtLabel + '</span>';
+          payBtn.style.marginTop = '14px';
+          mount.appendChild(payBtn);
+          var card = inst.createCardField({
+            target: cardBox,
+            locale: REVOLUT_CARD_LOCALE,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (msg) { setRevStatus('Erreur : ' + ((msg && msg.message) || msg), 'err'); payBtn.classList.remove('loading'); payBtn.disabled = false; },
+            onValidation: function (errs) { setRevStatus(errs && errs.length ? (errs[0].message || '') : '', errs && errs.length ? 'err' : ''); }
+          });
+          payBtn.onclick = function () { setRevStatus('Traitement du paiement…'); payBtn.classList.add('loading'); payBtn.disabled = true; card.submit({ name: custName, email: custEmail }); };
+        });
+      }
+
+      // ── All other methods use the payments() module (Revolut Pay v2) ──
+      return RevolutCheckout.payments({ locale: 'auto', publicToken: pubKey, mode: mode }).then(function (rp) {
+
+        // ── REVOLUT PAY → inline button. Desktop: secure popup. Mobile: deep-links
+        // straight into the Revolut app, then returns via appReturnUrl. On return the
+        // existing ?payment_return handler polls /complete (covers async webhook auth). ──
+        if (method === 'revolut_pay') {
+          var rEl = document.createElement('div'); mount.appendChild(rEl);
+          var revBase = window.location.href.split('?')[0];
+          var revSuccess = revBase + '?payment_return=1&cart_id=' + encodeURIComponent(cartId);
+          try { localStorage.setItem('medusa_cart_id', cartId); } catch (e) {}
+          rp.revolutPay.mount(rEl, {
+            currency: currency,
+            totalAmount: amtMinor,
+            createOrder: createRevOrder,
+            // Mobile → open Revolut app, return here. success completes the cart;
+            // failure/cancel land back on the checkout so the customer can retry.
+            mobileRedirectUrls: { success: revSuccess, failure: revBase, cancel: revBase },
+            appReturnUrl: revSuccess
+          });
+          // Desktop popup path still resolves via events (mobile navigates away instead).
+          rp.revolutPay.on('payment', function (ev) {
+            if (ev.type === 'success') completeAndGo();
+            else if (ev.type === 'error') setRevStatus('Le paiement a échoué : ' + ((ev.error && ev.error.message) || ''), 'err');
+            else if (ev.type === 'cancel') setRevStatus('Le paiement a été annulé.', '');
+          });
+          return;
+        }
+
+        // ── APPLE PAY / GOOGLE PAY → payment request button (gated by canMakePayment) ──
+        if (method === 'apple_pay' || method === 'google_pay') {
+          var walletLabel = method === 'apple_pay' ? 'Apple Pay' : 'Google Pay';
+          var prefer = method === 'apple_pay' ? 'applePay' : 'googlePay';
+          var wEl = document.createElement('div'); mount.appendChild(wEl);
+          var pr = rp.paymentRequest(wEl, {
+            amount: amtMinor, currency: currency,
+            preferredPaymentMethod: prefer,
+            createOrder: createRevOrder,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (e) { setRevStatus('Le paiement a échoué : ' + ((e && e.message) || ''), 'err'); },
+            onCancel: function () { setRevStatus('Le paiement a été annulé.', ''); }
+          });
+          return pr.canMakePayment().then(function (avail) {
+            if (avail) { setRevStatus(''); return pr.render(); }
+            // Wallet not available here (browser/device unsupported or domain not
+            // registered in Revolut) → graceful on-page pop-up so the sale isn't lost.
+            setRevStatus(walletLabel + ' n\'est pas disponible dans ce navigateur — ouverture d\'une alternative…', '');
+            return payWithPopupFallback(RevolutCheckout);
+          });
+        }
+
+        // ── PAY BY BANK → inline open-banking widget ──
+        if (method === 'pay_by_bank') {
+          var pbb = rp.payByBank({
+            createOrder: createRevOrder,
+            onSuccess: function () { completeAndGo(); },
+            onError: function (p) { setRevStatus('Le paiement a échoué : ' + ((p && p.error && p.error.message) || ''), 'err'); },
+            onCancel: function () { setRevStatus('Le paiement a été annulé.', ''); }
+          });
+          setRevStatus('Ouverture du paiement bancaire…');
+          return pbb.show();
+        }
+
+        // ── SEPA (+ any unknown) → on-page pop-up (no dedicated inline widget) ──
+        return payWithPopupFallback(RevolutCheckout);
+      });
+    }).catch(function (e) {
+      setRevStatus('Impossible de charger Revolut : ' + (e && e.message || e), 'err');
+    });
+
+    return Promise.resolve();
+  }
 
   /* ─── LAND SELECTIE — region + betaalmethoden ─── */
   var countrySelect = document.getElementById('country');

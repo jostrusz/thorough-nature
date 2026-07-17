@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Politique de livraison et d'expédition — Lâche prise sur ce qui te détruit</title>
-<meta name="description" content="Tout savoir sur l'expédition, les délais et la livraison du livre Lâche prise sur ce qui te détruit.">
+<title>Politique de retour et de garantie — Lâche prise sur ce qui te détruit</title>
+<meta name="description" content="Politique de retour et de garantie du livre Lâche prise sur ce qui te détruit. Garantie satisfait ou remboursé 30 jours, procédure de retour et vos droits.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
 
@@ -102,7 +102,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
 .info-box ul { list-style: none; padding: 0; }
 .info-box ul li { padding: 4px 0; }
-.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+.info-box ul li::before { content: '\2192\0020'; color: var(--cta); font-weight: 700; }
 
 /* Sekce */
 .section-block { margin-bottom: 40px; }
@@ -118,6 +118,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 10px;
 }
 .section-block h2 .icon { font-size: 28px; }
+.section-block h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 17px;
+ font-weight: 700;
+ color: var(--heading);
+ margin: 24px 0 12px;
+}
 .section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
 .section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
 .section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
@@ -132,42 +139,134 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .highlight-box p { margin: 0; font-size: 15px; }
 
-/* Tabulka levertijden */
-.delivery-table {
- width: 100%;
- border-collapse: collapse;
- margin: 16px 0;
- border-radius: 12px;
- overflow: hidden;
- border: 1px solid var(--section);
+.warning-box {
+ background: linear-gradient(135deg, #FFF8F0, #FFEDDB);
+ border-left: 4px solid #E8A050;
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
 }
-.delivery-table th {
- background: var(--dark);
- color: var(--white);
- font-family: 'DM Sans', sans-serif;
- font-size: 14px;
- font-weight: 600;
- padding: 12px 16px;
- text-align: left;
+.warning-box p { margin: 0; font-size: 15px; color: var(--body); }
+
+/* Guarantee box */
+.guarantee-box {
+ background: var(--white);
+ border: 2px solid var(--cta);
+ border-radius: 20px;
+ padding: 32px;
+ text-align: center;
+ margin: 40px 0;
+ position: relative;
 }
-.delivery-table td {
+.guarantee-seal {
+ width: 72px;
+ height: 72px;
+ background: radial-gradient(circle, var(--cta), var(--cta-hover));
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 32px;
+ margin: 0 auto 16px;
+ border: 3px solid var(--highlight);
+}
+.guarantee-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 22px;
+ color: var(--heading);
+ margin-bottom: 12px;
+}
+.guarantee-box p {
  font-family: 'DM Sans', sans-serif;
- font-size: 14px;
+ font-size: 15px;
  color: var(--body);
- padding: 12px 16px;
- border-bottom: 1px solid var(--section);
- line-height: 1.5;
+ line-height: 1.7;
+ max-width: 520px;
+ margin: 0 auto;
 }
-.delivery-table tr:last-child td { border-bottom: none; }
-.delivery-table tr:nth-child(even) td { background: var(--light); }
-.delivery-table .free-tag {
- display: inline-block;
+
+/* Retour stappen */
+.steps {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 20px;
+ margin: 24px 0;
+}
+.step {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 24px 20px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.step:hover {
+ transform: translateY(-3px);
+ box-shadow: 0 8px 24px rgba(45, 27, 61, 0.08);
+ border-color: var(--highlight);
+}
+.step-num {
+ width: 40px;
+ height: 40px;
  background: var(--cta);
  color: var(--white);
- font-size: 11px;
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 16px;
  font-weight: 700;
- padding: 2px 8px;
- border-radius: 4px;
+ margin: 0 auto 14px;
+}
+.step h4 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.step p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--muted);
+ line-height: 1.6;
+ margin: 0;
+}
+
+/* Conditions list */
+.conditions-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+ gap: 12px;
+ margin: 16px 0;
+}
+.condition-item {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 12px;
+ padding: 16px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.condition-item:hover {
+ border-color: var(--highlight);
+ box-shadow: 0 4px 16px rgba(45, 27, 61, 0.06);
+}
+.condition-icon { font-size: 24px; margin-bottom: 8px; }
+.condition-item strong {
+ display: block;
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 4px;
+}
+.condition-item span {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 13px;
+ color: var(--muted);
+ line-height: 1.4;
 }
 
 /* FAQ */
@@ -232,29 +331,15 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .company-info h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
 .company-info p { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; margin: 0 0 6px; }
 
-/* Cross-link note */
-.cross-link-note {
- background: var(--white);
- border: 1px solid var(--section);
- border-radius: 12px;
- padding: 20px 24px;
- margin-top: 32px;
+/* Last updated */
+.last-updated {
  text-align: center;
-}
-.cross-link-note p {
  font-family: 'DM Sans', sans-serif;
- font-size: 15px;
- color: var(--body);
- line-height: 1.7;
- margin: 0;
-}
-.cross-link-note a {
- color: var(--cta);
- font-weight: 600;
- text-decoration: underline;
-}
-.cross-link-note a:hover {
- color: var(--cta-hover);
+ font-size: 13px;
+ color: var(--muted);
+ margin-top: 40px;
+ padding-top: 20px;
+ border-top: 1px solid var(--section);
 }
 
 /* ═══ FOOTER ═══ */
@@ -273,8 +358,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 @media (max-width: 768px) {
  .page-header h1 { font-size: 28px; }
  .section-block h2 { font-size: 20px; }
- .delivery-table { font-size: 13px; }
- .delivery-table th, .delivery-table td { padding: 10px 12px; }
+ .steps { grid-template-columns: 1fr; }
+ .conditions-grid { grid-template-columns: repeat(2, 1fr); }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
 }
@@ -282,7 +367,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  .page-header h1 { font-size: 24px; }
  .page-header { padding: 40px 16px 36px; }
  .page-content { padding: 32px 16px 60px; }
- .delivery-table { display: block; overflow-x: auto; }
+ .conditions-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
 <script src="js/project-config.js"></script>
@@ -302,14 +387,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div class="nav-inner">
   <a href="index.html" class="nav-logo">
    <img src="/laat-los-wat-je-kapotmaakt-logo.webp" alt="Lâche prise sur ce qui te détruit" width="150" height="40">
-
   </a>
   <div class="nav-links">
-   <a href="verzending.html" class="active">Livraison</a>
-   <a href="retourbeleid.html">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">CGV</a>
-   <a href="privacy.html">Confidentialité</a>
-   <a href="contact.html">Service client</a>
+   <a href="livraison.html">Livraison</a>
+   <a href="retours.html" class="active">Retour &amp; Garantie</a>
+   <a href="conditions-generales.html">CGV</a>
+   <a href="confidentialite.html">Confidentialité</a>
+   <a href="contact.html">Contact</a>
    <a href="index.html" class="nav-cta">Commander &rarr;</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
@@ -319,129 +403,282 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="verzending.html">Livraison</a>
- <a href="retourbeleid.html">Retour &amp; Garantie</a>
- <a href="voorwaarden.html">CGV</a>
- <a href="privacy.html">Confidentialité</a>
+ <a href="livraison.html">Livraison</a>
+ <a href="retours.html">Retour &amp; Garantie</a>
+ <a href="conditions-generales.html">CGV</a>
+ <a href="confidentialite.html">Confidentialité</a>
  <a href="contact.html">Service client</a>
  <a href="index.html" class="nav-cta-mobile">Commander &rarr;</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📦 Livraison &amp; Expédition</div>
- <h1>Politique de livraison et d'expédition</h1>
- <p>Tout savoir sur l'expédition, les délais et la livraison</p>
+ <div class="badge">Retour &amp; Garantie</div>
+ <h1>Politique de retour et de garantie</h1>
+ <p>Vos droits et notre promesse de satisfaction</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
+ <!-- Samenvatting -->
  <div class="info-box">
-  <h3>📌 Résumé</h3>
+  <h3>Résumé</h3>
   <ul>
-   <li>Livraison gratuite en France</li>
-   <li>Délai de livraison : 4 à 7 jours ouvrés</li>
-   <li>Numéro de suivi envoyé par e-mail après l'expédition</li>
-   <li>Expédition sous 24 h après le paiement</li>
+   <li>Garantie satisfait ou remboursé étendue de 30 jours</li>
+   <li>14 jours de droit de rétractation légal</li>
+   <li>Remboursement à 100 % en cas d'insatisfaction</li>
+   <li>Procédure de retour en 5 étapes simples</li>
   </ul>
  </div>
 
- <!-- Verzending -->
+ <!-- Garantie -->
+ <div class="guarantee-box">
+  <div class="guarantee-seal">30</div>
+  <h3>Garantie satisfait ou remboursé 30 jours</h3>
+  <p>Pas satisfait ? Vous êtes remboursé. <strong>Sans question. Sans complication.</strong> La loi vous garantit 14 jours de rétractation. Nous vous offrons 30 jours à compter de la réception du livre.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sectie 1: Herroepingsrecht -->
  <div class="section-block">
-  <h2><span class="icon">📦</span> Expédition</h2>
-  <p>Nous expédions toutes les commandes depuis notre entrepôt en Europe. Dès réception de ton paiement, ta commande est traitée et expédiée sous <strong>24 h</strong> (jours ouvrés).</p>
+  <h2><span class="icon">1.</span> Droit de rétractation</h2>
 
-  <table class="delivery-table">
-   <thead>
-    <tr>
-     <th>Pays</th>
-     <th>Délai de livraison</th>
-     <th>Frais de livraison</th>
-    </tr>
-   </thead>
-   <tbody>
-    <tr><td>🇫🇷 France</td><td>4 à 7 jours ouvrés</td><td><span class="free-tag">GRATUIT</span></td></tr>
-   </tbody>
-  </table>
+  <h3>1.1 Vos droits légaux</h3>
+  <p>Conformément à l'article L221-18 du Code de la consommation, vous disposez d'un délai de <strong>14 jours</strong> à compter de la réception pour vous rétracter de votre achat, sans avoir à vous justifier. Nous allons toutefois plus loin en vous offrant un délai étendu de <strong>30 jours</strong>.</p>
 
-  <p>La livraison est assurée par <strong>Packeta</strong>, en point relais ou à domicile selon l'option choisie lors de la commande.</p>
+  <h3>1.2 Conditions de retour</h3>
+  <p>Pour bénéficier d'un remboursement intégral, le livre doit remplir les conditions suivantes :</p>
+
+  <div class="conditions-grid">
+   <div class="condition-item">
+    <div class="condition-icon">&#128214;</div>
+    <strong>Non lu</strong>
+    <span>Ni lu ni feuilleté</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#9989;</div>
+    <strong>Intact</strong>
+    <span>Sans pli, rayure ni tache</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#9998;</div>
+    <strong>Sans annotation</strong>
+    <span>Aucune note ni marquage</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#128230;</div>
+    <strong>Complet</strong>
+    <span>Tous les éléments présents</span>
+   </div>
+   <div class="condition-item">
+    <div class="condition-icon">&#10024;</div>
+    <strong>État d'origine</strong>
+    <span>Tel que vous l'avez reçu</span>
+   </div>
+  </div>
+
+  <div class="warning-box">
+   <p><strong>À noter :</strong> votre responsabilité peut être engagée en cas de dépréciation du livre résultant de manipulations autres que celles nécessaires pour établir sa nature et ses caractéristiques. Un livre manifestement lu ou utilisé peut ainsi faire l'objet d'un remboursement partiel.</p>
+  </div>
+
+  <h3>1.3 Produits numériques (e-books)</h3>
+  <p>En téléchargeant les produits numériques, vous acceptez de renoncer à votre droit de rétractation (conformément à l'article L221-28 13° du Code de la consommation, transposant la directive 2011/83/UE). Cela s'applique uniquement aux produits numériques.</p>
+  <p>Cela <strong>n'a aucune incidence</strong> sur votre droit de retourner le livre physique. La valeur des éventuels bonus gratuits n'est pas déduite de votre remboursement.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sectie 2: Retourneren -->
+ <div class="section-block">
+  <h2><span class="icon">2.</span> Retourner &mdash; étape par étape</h2>
+
+  <h3>2.1 Comment retourner en 5 étapes</h3>
+
+  <div class="steps">
+   <div class="step">
+    <div class="step-num">1</div>
+    <h4>Écrivez-nous</h4>
+    <p>Envoyez un e-mail à contact@lacheprise-livre.fr avec votre nom, votre numéro de commande et le motif du retour.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">2</div>
+    <h4>Confirmation</h4>
+    <p>Vous recevez sous 1 à 2 jours ouvrés une confirmation avec les instructions de retour.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">3</div>
+    <h4>Emballez avec soin</h4>
+    <p>Emballez le livre soigneusement pour éviter tout dommage pendant le transport.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">4</div>
+    <h4>Expédiez</h4>
+    <p>Expédiez le colis à l'adresse de retour dans un délai de 14 jours.</p>
+   </div>
+   <div class="step">
+    <div class="step-num">5</div>
+    <h4>Remboursement</h4>
+    <p>Vous êtes remboursé dans les 14 jours suivant la réception du livre.</p>
+   </div>
+  </div>
+
+  <h3>2.2 Adresse de retour</h3>
+  <div class="highlight-box">
+   <p><strong>Performance Marketing Solution s.r.o. &mdash; Retours</strong><br>
+   c/o Dextrum Fulfillment a.s.<br>
+   Kirilovova 181<br>
+   739 21 Paskov<br>
+   République tchèque</p>
+  </div>
+
+  <div class="warning-box">
+   <p><strong>Important :</strong> indiquez toujours <strong>&laquo; Retour &mdash; N° de commande : [votre numéro de commande] &raquo;</strong> sur l'extérieur du colis.</p>
+  </div>
+
+  <h3>2.3 Frais de retour</h3>
+  <p>Les frais de retour sont à la charge du client, <strong>sauf si</strong> :</p>
+  <ul>
+   <li>Le produit est défectueux</li>
+   <li>Vous avez reçu un produit erroné</li>
+   <li>Le produit a été endommagé par le transporteur</li>
+  </ul>
+  <p>Frais d'expédition estimés : <strong>10 à 15 &euro;</strong> (envoi suivi vers la République tchèque).</p>
 
   <div class="highlight-box">
-   <p><strong>Produits numériques (e-books, PDF) :</strong> tu reçois un lien de téléchargement par e-mail immédiatement après le paiement. Aucun délai d'attente !</p>
+   <p><strong>Conseil :</strong> utilisez toujours un mode d'expédition avec suivi, afin de pouvoir prouver que le colis a bien été envoyé et livré.</p>
+  </div>
+
+  <h3>2.4 Que mentionner dans votre e-mail de retour ?</h3>
+  <ul>
+   <li>Votre nom complet</li>
+   <li>Votre numéro de commande</li>
+   <li>La date de réception</li>
+   <li>Le motif du retour (facultatif)</li>
+   <li>Votre IBAN pour le remboursement</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sectie 3: Terugbetaling -->
+ <div class="section-block">
+  <h2><span class="icon">3.</span> Remboursement</h2>
+
+  <h3>3.1 Quand recevrez-vous votre remboursement ?</h3>
+  <p>Dans les <strong>14 jours</strong> suivant la réception du livre retourné, nous procédons à votre remboursement de <strong>36 &euro;</strong>.</p>
+
+  <h3>3.2 Comment s'effectue le remboursement ?</h3>
+  <p>Le remboursement est effectué via le même moyen de paiement que celui utilisé lors de la commande :</p>
+  <ul>
+   <li><strong>Carte bancaire</strong> &rarr; remboursement sur votre carte</li>
+   <li><strong>PayPal</strong> &rarr; remboursement sur votre compte PayPal</li>
+   <li><strong>Virement / autre moyen</strong> &rarr; remboursement sur votre compte bancaire</li>
+  </ul>
+  <p>Une fois le remboursement traité, le crédit peut prendre <strong>3 à 5 jours ouvrés</strong> pour apparaître sur votre compte, selon votre banque.</p>
+
+  <h3>3.3 Remboursement partiel</h3>
+  <p>Un remboursement partiel peut s'appliquer dans les cas suivants :</p>
+  <ul>
+   <li>Le livre présente des traces d'utilisation</li>
+   <li>Le livre a été endommagé par le client</li>
+   <li>Des éléments sont manquants</li>
+  </ul>
+  <p>La dépréciation est évaluée et vous en êtes informé <strong>avant</strong> que le remboursement ne soit traité.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- Sectie 4: Klachten en Productgarantie -->
+ <div class="section-block">
+  <h2><span class="icon">4.</span> Réclamations et garantie produit</h2>
+
+  <h3>4.1 Quand pouvez-vous déposer une réclamation ?</h3>
+  <p>Vous pouvez déposer une réclamation lorsque :</p>
+  <ul>
+   <li>Le produit est arrivé endommagé</li>
+   <li>Le produit ne correspond pas à la description</li>
+   <li>Il présente des fautes d'impression ou des défauts de fabrication</li>
+   <li>Des pages sont manquantes</li>
+   <li>Vous avez reçu un produit erroné</li>
+  </ul>
+
+  <h3>4.2 Comment déposer une réclamation ?</h3>
+  <p>Envoyez un e-mail à <a href="mailto:contact@lacheprise-livre.fr" style="color: var(--cta);">contact@lacheprise-livre.fr</a> en y joignant :</p>
+  <ul>
+   <li>Votre nom et votre numéro de commande</li>
+   <li>La description du problème</li>
+   <li>Des photos du produit endommagé ou défectueux</li>
+  </ul>
+  <p>Nous répondons à votre réclamation sous <strong>48 h</strong>.</p>
+
+  <h3>4.3 Garanties légales</h3>
+  <div class="highlight-box">
+   <p>Vous bénéficiez de la <strong>garantie légale de conformité</strong> (2 ans, articles L217-3 et suivants du Code de la consommation) ainsi que de la <strong>garantie contre les vices cachés</strong> (articles 1641 et suivants du Code civil), pour les défauts existant lors de la livraison. En cas de réclamation fondée, vous recevez un <strong>remplacement gratuit</strong> ou un <strong>remboursement intégral</strong>. Les frais de retour sont alors à notre charge.</p>
   </div>
  </div>
 
  <div class="divider"></div>
 
- <!-- Tracking -->
+ <!-- Sectie 5: Veelgestelde vragen -->
  <div class="section-block">
-  <h2><span class="icon">📍</span> Suivre ma commande</h2>
-  <p>Après l'expédition, tu reçois par e-mail une confirmation contenant un <strong>numéro de suivi</strong>. Il te permet de suivre ton colis en temps réel sur le site du transporteur.</p>
-  <p>Tu n'as pas reçu ton numéro de suivi ? Vérifie tes courriers indésirables (spam) ou contacte-nous à <a href="mailto:support@lacheprise-livre.fr" style="color: var(--cta);">support@lacheprise-livre.fr</a>.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Beschadigd -->
- <div class="section-block">
-  <h2><span class="icon">⚠️</span> Produit endommagé ou erroné ?</h2>
-  <p>Tu as reçu un produit endommagé ou qui ne correspond pas à ta commande ? Contacte-nous immédiatement. Nous te proposons gratuitement un remplacement ou un remboursement intégral.</p>
-  <p>Envoie une photo du produit endommagé à <a href="mailto:support@lacheprise-livre.fr" style="color: var(--cta);">support@lacheprise-livre.fr</a> accompagnée de ton numéro de commande.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- FAQ -->
- <div class="section-block">
-  <h2><span class="icon">❓</span> Questions fréquentes</h2>
+  <h2><span class="icon">5.</span> Questions fréquentes</h2>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Quand ma commande est-elle expédiée ?</h3>
+    <h3>Puis-je annuler ma commande ?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Les commandes sont traitées et expédiées sous 24 h après le paiement (jours ouvrés). Tu reçois un e-mail de confirmation avec le numéro de suivi dès que ton colis est en route.</p>
+    <p>Oui, si votre commande n'a pas encore été expédiée, vous pouvez l'annuler sans frais. Envoyez-nous dès que possible un e-mail à <a href="mailto:contact@lacheprise-livre.fr" style="color: var(--cta);">contact@lacheprise-livre.fr</a> avec votre numéro de commande.</p>
    </div>
   </div>
 
   <div class="faq-item">
    <div class="faq-question" onclick="toggleFaq(this)">
-    <h3>Mon colis n'est pas arrivé. Que faire ?</h3>
+    <h3>Je n'ai pas reçu les e-books numériques, que faire ?</h3>
     <span class="faq-icon">+</span>
    </div>
    <div class="faq-answer">
-    <p>Vérifie d'abord le numéro de suivi dans ton e-mail de confirmation. Si ton colis est en transit depuis plus de 14 jours ouvrés (au sein de l'UE), contacte-nous. Nous menons l'enquête et, si nécessaire, procédons à un nouvel envoi.</p>
+    <p>Vérifiez d'abord vos courriers indésirables (spam). Vous n'avez toujours pas reçu les e-books ? Envoyez alors un e-mail à <a href="mailto:contact@lacheprise-livre.fr" style="color: var(--cta);">contact@lacheprise-livre.fr</a> avec votre numéro de commande, et nous vous renverrons les liens de téléchargement.</p>
    </div>
   </div>
 
-  <p style="margin-top: 16px;">Tu as des questions sur les retours ou la garantie ? Consulte notre <a href="retourbeleid.html" style="color: var(--cta); font-weight: 600;">politique de retour et de garantie</a>.</p>
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Puis-je échanger le livre contre un autre produit ?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>L'échange n'est malheureusement pas possible. Vous pouvez toutefois retourner le livre conformément à notre politique de retour, puis passer une nouvelle commande.</p>
+   </div>
+  </div>
+
+  <div class="faq-item">
+   <div class="faq-question" onclick="toggleFaq(this)">
+    <h3>Que se passe-t-il si mon colis est perdu ?</h3>
+    <span class="faq-icon">+</span>
+   </div>
+   <div class="faq-answer">
+    <p>Contactez-nous avec votre numéro de suivi. Nous ouvrons une enquête auprès du transporteur. Selon le résultat, nous vous envoyons un nouvel exemplaire ou procédons à un remboursement intégral.</p>
+   </div>
+  </div>
  </div>
 
- <!-- Paiement -->
- <div class="section-block">
-  <h2><span class="icon">💳</span> Paiement</h2>
-  <p>Les paiements en ligne sur ce site sont sécurisés par la passerelle de paiement <strong>Comgate, a.s.</strong> (<a href="https://www.comgate.eu/cs/platebni-brana" target="_blank" rel="noopener" style="color: var(--cta);">comgate.eu/platebni-brana</a>).</p>
-  <p><strong>Paiement par carte (VISA, Mastercard) :</strong> après la validation de ta commande, tu es redirigé(e) vers la passerelle sécurisée Comgate pour saisir les informations de ta carte. Une fois le paiement effectué, tu reviens sur notre site et nous traitons ta commande immédiatement.</p>
-  <p><strong>Boutons bancaires (virement en ligne) :</strong> tu peux également payer par virement bancaire instantané — la passerelle Comgate te redirige directement vers ta banque en ligne, où tu confirmes le paiement. Ta commande est traitée dès réception du paiement. En savoir plus sur le <a href="https://help.comgate.cz/v1/docs/cs/platby-kartou" target="_blank" rel="noopener" style="color: var(--cta);">paiement par carte</a> et les <a href="https://help.comgate.cz/docs/bankovni-prevody" target="_blank" rel="noopener" style="color: var(--cta);">virements bancaires</a>.</p>
-  <p><strong>Exploitant de la passerelle de paiement</strong> (réclamations et questions relatives aux paiements) :<br>
-   Comgate, a.s., Gočárova třída 1754/48b, 500 02 Hradec Králové, République tchèque<br>
-   E-mail : <a href="mailto:podpora@comgate.cz" style="color: var(--cta);">podpora@comgate.cz</a> &nbsp;•&nbsp; Tél. : <a href="tel:+420228224267" style="color: var(--cta);">+420 228 224 267</a></p>
- </div>
-
- <!-- Cross-link note -->
- <div class="cross-link-note">
-  <p>Pour toute information sur les retours et la garantie, consulte notre <a href="retourbeleid.html">politique de retour et de garantie</a>.</p>
- </div>
-
- <!-- Firemní údaje -->
+ <!-- Bedrijfsgegevens -->
  <div class="company-info">
-  <h3>🏢 Informations sur la société</h3>
+  <h3>Informations sur la société</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
-  <p>Rybná 716/24, Staré Město, 110 00 Prague, République tchèque</p>
-  <p>N° d'enregistrement (IČO) : 06259928 | N° de TVA : CZ06259928</p>
-  <p>E-mail : <a href="mailto:support@lacheprise-livre.fr" style="color: var(--cta);">support@lacheprise-livre.fr</a></p>
+  <p>Rybn&aacute; 716/24, Star&eacute; M&#283;sto, 110 00 Prague, R&eacute;publique tch&egrave;que</p>
+  <p>N&deg; d'enregistrement (I&#268;O) : 06259928</p>
+  <p>N&deg; de TVA : CZ06259928</p>
+  <p>Service client : <a href="mailto:contact@lacheprise-livre.fr" style="color: var(--cta);">contact@lacheprise-livre.fr</a></p>
+ </div>
+
+ <!-- Laatst bijgewerkt -->
+ <div class="last-updated">
+  Dernière mise à jour : 26 février 2026
  </div>
 
 </div>
@@ -452,14 +689,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <div class="footer-brand">
   </div>
   <div class="footer-links">
-   <a href="verzending.html">Livraison</a>
-   <a href="retourbeleid.html">Retour &amp; Garantie</a>
-   <a href="voorwaarden.html">Conditions générales de vente</a>
-   <a href="privacy.html">Politique de confidentialité</a>
+   <a href="livraison.html">Livraison</a>
+   <a href="retours.html">Retour &amp; Garantie</a>
+   <a href="conditions-generales.html">Conditions générales de vente</a>
+   <a href="confidentialite.html">Politique de confidentialité</a>
    <a href="contact.html">Service client</a>
   </div>
   <div class="footer-contact">
-   <a href="mailto:support@lacheprise-livre.fr">📧 support@lacheprise-livre.fr</a>
+   <a href="mailto:contact@lacheprise-livre.fr">contact@lacheprise-livre.fr</a>
   </div>
  </div>
  <div class="footer-payments" style="max-width:960px;margin:24px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:center;">
@@ -469,7 +706,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <img src="/icons/mc-symbol.svg" alt="Mastercard" style="height:26px;width:auto;">
  </div>
  <div class="footer-bottom">
-  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Prague • IČO : 06259928 • TVA : CZ06259928</span>
+  <span>Performance Marketing Solution s.r.o. &bull; Rybn&aacute; 716/24, 110 00 Prague &bull; I&#268;O : 06259928 &bull; TVA : CZ06259928</span>
   <span>&copy; 2026 Performance Marketing Solution s.r.o. Tous droits réservés.</span>
  </div>
 </footer>

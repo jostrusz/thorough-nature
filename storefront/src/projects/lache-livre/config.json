@@ -12,7 +12,7 @@
   "salesChannelName": "lache-livre",
   "medusaUrl": "",
   "publishableApiKey": "pk_ed81b049315f89613aa2f49e2dd2929ac833743bc13a9b0b2c88d99d12084496",
-  "facebookPixelId": "",
+  "facebookPixelId": "681453691002748",
   "regions": {
     "FR": "reg_01KX052MRE4BSM059VN4SH2AY0"
   },
@@ -33,10 +33,34 @@
     "currency": "EUR"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 36, "save": 0, "badge": "POUR TOI", "variantId": "variant_01KX0538JT3Y35C4Y2P27KNRD3" },
-    { "qty": 2, "price": 61, "save": 11, "badge": "PARTAGE AVEC UN(E) AMI(E)", "variantId": "variant_01KX0538JTAVM75R7P5YN58JD8" },
-    { "qty": 3, "price": 82, "save": 26, "badge": "PARFAIT COMME CADEAU", "variantId": "variant_01KX0538JVYZ93NSXVT6SP0Z9W" },
-    { "qty": 4, "price": 102, "save": 42, "badge": "MEILLEURE VALEUR", "variantId": "variant_01KX0538JV3HM4FBDH2C4BVDQV" }
+    {
+      "qty": 1,
+      "price": 36,
+      "save": 0,
+      "badge": "POUR TOI",
+      "variantId": "variant_01KX0538JT3Y35C4Y2P27KNRD3"
+    },
+    {
+      "qty": 2,
+      "price": 61,
+      "save": 11,
+      "badge": "PARTAGE AVEC UN PROCHE",
+      "variantId": "variant_01KX0538JTAVM75R7P5YN58JD8"
+    },
+    {
+      "qty": 3,
+      "price": 82,
+      "save": 26,
+      "badge": "PARFAIT COMME CADEAU",
+      "variantId": "variant_01KX0538JVYZ93NSXVT6SP0Z9W"
+    },
+    {
+      "qty": 4,
+      "price": 102,
+      "save": 42,
+      "badge": "MEILLEURE VALEUR",
+      "variantId": "variant_01KX0538JV3HM4FBDH2C4BVDQV"
+    }
   ],
   "catalogContentIds": [],
   "mollieProfileId": "",
@@ -51,10 +75,17 @@
     "upsell": "upsell.html",
     "thank-you": "thank-you.html",
     "contact": "contact.html",
-    "privacy": "privacy.html",
-    "voorwaarden": "voorwaarden.html",
-    "verzending": "verzending.html",
-    "retourbeleid": "retourbeleid.html",
+    "confidentialite": "confidentialite.html",
+    "conditions-generales": "conditions-generales.html",
+    "livraison": "livraison.html",
+    "retours": "retours.html",
     "popup-lache-livre": "popup-lache-livre.html"
-  }
+  },
+  "redirects": {
+    "voorwaarden": "conditions-generales",
+    "verzending": "livraison",
+    "retourbeleid": "retours",
+    "privacy": "confidentialite"
+  },
+  "packetaApiKey": "cbb760f552ef87b3"
 }
