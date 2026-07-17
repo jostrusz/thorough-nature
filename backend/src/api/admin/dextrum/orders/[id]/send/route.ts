@@ -308,13 +308,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     // z objednávky — checkout ho ukládá do packeta_carrier_id (prázdný = vlastní bod).
     // Bez toho mySTOCK hledá kód cizího boxu mezi body Packety, nenajde ho a vrátí
     // "Invalid entry / partyIdentification.pickupPlaceCode" (viz HU2026-27410, -27559).
-    const orderCarrierId = String(orderMeta.packeta_carrier_id || "").trim()
+    // Set pickupPlaceCode from any available metadata source
+    const pickupCode = orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || ""
+
+    // Dopravce z objednávky jen KDYŽ objednávka míří na výdejní místo — stejně
+    // jako v hold jobu. Bez toho by zbylý packeta_carrier_id (zákazník přepnul
+    // z boxu na doručení domů) poslal dopravce bez pickupPlaceCode.
+    const orderCarrierId = pickupCode ? String(orderMeta.packeta_carrier_id || "").trim() : ""
     if (orderCarrierId) {
       externalCarrierCode = orderCarrierId
     }
 
-    // Set pickupPlaceCode from any available metadata source
-    const pickupCode = orderMeta.packeta_point_id || orderMeta.paczkomat_id || orderMeta.pickup_place_code || ""
     if (pickupCode) {
       deliveryAddress.pickupPlaceCode = pickupCode
     }
