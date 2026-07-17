@@ -84,6 +84,16 @@ export async function GET(
   // Strip .html extension if present (links in HTML use "checkout.html")
   pageName = pageName.replace(/\.html$/, "")
 
+  // Přesměruj staré slugy (např. NL zbytky po lokalizaci) na nové, dokud se drží ve vyhledávačích a odkazech
+  const redirectTarget = config.redirects?.[pageName]
+  if (redirectTarget !== undefined && config.pages[redirectTarget] !== undefined) {
+    const isCustomDomainRedirect = request.headers.get("x-project-domain") === "true"
+    const prefix = isCustomDomainRedirect ? "" : `/p/${projectSlug}`
+    const target = new URL(`${prefix}/${redirectTarget}`, request.url)
+    target.search = request.nextUrl.search
+    return NextResponse.redirect(target, 301)
+  }
+
   // Look up the HTML filename
   const htmlFile = config.pages[pageName]
   if (!htmlFile) {

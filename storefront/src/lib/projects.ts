@@ -31,6 +31,8 @@ export interface ProjectConfig {
   bundleOptions: Array<{ qty: number; price: number; label: string; save?: number; savings?: number; originalPrice?: number; sublabel?: string; badge?: string }>
   paymentProviders: Record<string, string>
   pages: Record<string, string>
+  // Staré slugy → nové. Router na ně odpoví 301, aby po lokalizaci URL nikde nevznikla 404.
+  redirects?: Record<string, string>
 }
 
 const projectsBySlug = new Map<string, ProjectConfig>()

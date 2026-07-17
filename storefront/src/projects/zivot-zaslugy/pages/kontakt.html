@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Obchodní podmínky — Život, jaký si zasloužíš</title>
-<meta name="description" content="Obchodní podmínky internetového obchodu nejdriv-ja.cz — kniha Život, jaký si zasloužíš. Ceny, platba, dodání, odstoupení od smlouvy a záruka.">
+<title>Kontakt — Život, jaký si zasloužíš | Zákaznická podpora</title>
+<meta name="description" content="Kontaktujte nás s dotazy k objednávce, ke knize Život, jaký si zasloužíš nebo k vrácení. Odpovídáme do 24 hodin v pracovní dny.">
 <meta name="robots" content="noindex, follow">
 <link rel="icon" type="image/png" sizes="32x32" href="/life-reset-favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/life-reset-favicon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="/life-reset-favicon-180.png"><link rel="shortcut icon" href="/life-reset-favicon.png">
 
@@ -118,104 +118,144 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  padding: 48px 20px 80px;
 }
 
-.info-box {
+/* Hlavní kontaktní karta */
+.contact-card {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 20px;
+ padding: 40px;
+ box-shadow: 0 4px 20px rgba(74, 26, 46, 0.06);
+ margin-bottom: 32px;
+}
+.contact-card h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ color: var(--heading);
+ margin-bottom: 24px;
+}
+.contact-item {
+ display: flex;
+ align-items: flex-start;
+ gap: 16px;
+ padding: 16px 0;
+ border-bottom: 1px solid var(--section);
+}
+.contact-item:last-child { border-bottom: none; }
+.contact-icon {
+ width: 48px;
+ height: 48px;
+ border-radius: 12px;
+ background: var(--light);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 22px;
+ flex-shrink: 0;
+}
+.contact-info h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 4px;
+}
+.contact-info p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.6;
+ margin: 0;
+}
+.contact-info a {
+ color: var(--cta);
+ text-decoration: none;
+ font-weight: 500;
+ transition: color 0.2s;
+}
+.contact-info a:hover { color: var(--cta-hover); }
+
+/* Upozornění */
+.notice-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 16px 16px 0;
+ padding: 24px 28px;
+ margin-bottom: 32px;
+}
+.notice-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 18px;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.notice-box p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.7;
+ margin: 0;
+}
+
+/* Servisní karty */
+.service-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+ gap: 20px;
+ margin-top: 32px;
+}
+.service-card {
+ background: var(--white);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px 24px;
+ text-align: center;
+ transition: all 0.3s ease;
+}
+.service-card:hover {
+ transform: translateY(-3px);
+ box-shadow: 0 8px 24px rgba(74, 26, 46, 0.08);
+ border-color: var(--highlight);
+}
+.service-card .icon {
+ font-size: 32px;
+ margin-bottom: 14px;
+ display: block;
+}
+.service-card h3 {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ color: var(--heading);
+ margin-bottom: 8px;
+}
+.service-card p {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--muted);
+ line-height: 1.6;
+ margin: 0;
+}
+
+/* Firemní údaje */
+.company-info {
  background: var(--light);
  border: 1px solid var(--section);
  border-radius: 16px;
  padding: 28px;
- margin-bottom: 40px;
+ margin-top: 40px;
 }
-.info-box h3 {
+.company-info h3 {
  font-family: 'Recoleta', serif;
  font-size: 18px;
  color: var(--heading);
  margin-bottom: 12px;
 }
-.info-box p, .info-box li {
+.company-info p {
  font-family: 'DM Sans', sans-serif;
  font-size: 15px;
  color: var(--body);
  line-height: 1.7;
-}
-.info-box ul {
- list-style: none;
- padding: 0;
-}
-.info-box ul li {
- padding: 4px 0;
-}
-.info-box ul li::before {
- content: '→ ';
- color: var(--cta);
- font-weight: 700;
-}
-
-.section-block {
- margin-bottom: 40px;
-}
-.section-block h2 {
- font-family: 'Recoleta', serif;
- font-size: 24px;
- font-weight: 600;
- color: var(--heading);
- margin-bottom: 16px;
- line-height: 1.3;
- display: flex;
- align-items: center;
- gap: 10px;
-}
-.section-block h2 .section-num {
- display: inline-flex;
- align-items: center;
- justify-content: center;
- width: 36px;
- height: 36px;
- background: var(--cta);
- color: var(--white);
- font-family: 'DM Sans', sans-serif;
- font-size: 15px;
- font-weight: 700;
- border-radius: 10px;
- flex-shrink: 0;
-}
-.section-block p {
- font-family: 'DM Sans', sans-serif;
- font-size: 16px;
- color: var(--body);
- line-height: 1.75;
- margin-bottom: 12px;
-}
-.section-block ul, .section-block ol {
- padding-left: 24px;
- margin-bottom: 12px;
-}
-.section-block li {
- font-family: 'DM Sans', sans-serif;
- font-size: 16px;
- color: var(--body);
- line-height: 1.75;
- margin-bottom: 6px;
-}
-.section-block strong {
- color: var(--heading);
-}
-
-.highlight-box {
- background: linear-gradient(135deg, var(--light), var(--section));
- border-left: 4px solid var(--cta);
- border-radius: 0 12px 12px 0;
- padding: 20px 24px;
- margin: 20px 0;
-}
-.highlight-box p {
- margin: 0;
- font-size: 15px;
-}
-
-.divider {
- height: 1px;
- background: var(--section);
- margin: 40px 0;
+ margin: 0 0 6px;
 }
 
 /* ═══ FOOTER ═══ */
@@ -233,22 +273,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  gap: 40px;
  flex-wrap: wrap;
 }
-.footer-brand {
- display: flex;
- align-items: center;
- gap: 16px;
-}
+.footer-brand { display: flex; align-items: center; gap: 16px; }
 .footer-brand-text {
  font-family: 'Recoleta', serif;
  font-size: 18px;
  color: var(--white);
  line-height: 1.3;
 }
-.footer-links {
- display: flex;
- flex-direction: column;
- gap: 10px;
-}
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
 .footer-links a {
  font-family: 'DM Sans', sans-serif;
  font-size: 14px;
@@ -285,7 +317,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 
 @media (max-width: 768px) {
  .page-header h1 { font-size: 28px; }
- .section-block h2 { font-size: 20px; }
+ .contact-card { padding: 28px 20px; }
+ .service-grid { grid-template-columns: 1fr; }
  .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
  .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
 }
@@ -307,11 +340,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <img src="/het-leven-logo.webp" alt="Život, jaký si zasloužíš" width="360" height="70" fetchpriority="high">
   </a>
   <div class="nav-links">
-   <a href="/verzending">Doprava a dodání</a>
-   <a href="/retourbeleid">Vrácení a záruka</a>
-   <a href="/voorwaarden" class="active">Obchodní podmínky</a>
-   <a href="/privacy">Ochrana osobních údajů</a>
-   <a href="/contact">Kontakt</a>
+   <a href="/doprava">Doprava a dodání</a>
+   <a href="/reklamace">Vrácení a záruka</a>
+   <a href="/obchodni-podminky">Obchodní podmínky</a>
+   <a href="/ochrana-udaju">Ochrana osobních údajů</a>
+   <a href="/kontakt" class="active">Kontakt</a>
    <a href="/checkout" class="nav-cta">Objednat →</a>
   </div>
   <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
@@ -321,171 +354,90 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 </nav>
 <div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
 <div class="nav-mobile-menu">
- <a href="/verzending">Doprava a dodání</a>
- <a href="/retourbeleid">Vrácení a záruka</a>
- <a href="/voorwaarden">Obchodní podmínky</a>
- <a href="/privacy">Ochrana osobních údajů</a>
- <a href="/contact">Kontakt</a>
+ <a href="/doprava">Doprava a dodání</a>
+ <a href="/reklamace">Vrácení a záruka</a>
+ <a href="/obchodni-podminky">Obchodní podmínky</a>
+ <a href="/ochrana-udaju">Ochrana osobních údajů</a>
+ <a href="/kontakt">Kontakt</a>
  <a href="/checkout" class="nav-cta-mobile">Objednat →</a>
 </div>
 
 <!-- ═══ HEADER ═══ -->
 <header class="page-header">
- <div class="badge">📋 Právní informace</div>
- <h1>Obchodní podmínky</h1>
- <p>Přečtěte si prosím naše obchodní podmínky pozorně před odesláním objednávky.</p>
+ <div class="badge">💬 Zákaznická podpora</div>
+ <h1>Kontakt</h1>
+ <p>Máš dotaz k objednávce, ke knize Život, jaký si zasloužíš nebo k vrácení? Rádi ti pomůžeme!</p>
 </header>
 
 <!-- ═══ CONTENT ═══ -->
 <div class="page-content">
 
- <div class="info-box">
-  <h3>📌 Shrnutí</h3>
-  <ul>
-   <li>14denní právo na odstoupení od smlouvy (zákonné)</li>
-   <li>30denní záruka vrácení peněz (nad rámec zákona)</li>
-   <li>Doprava zdarma po celé České republice</li>
-   <li>Doručení Zásilkovnou do 2 pracovních dnů</li>
-   <li>Bezpečné platby: platební karta, bankovní tlačítka, PayPal</li>
-   <li>Digitální produkty: bez práva na odstoupení po dodání</li>
-  </ul>
+ <!-- Kontaktní karta -->
+ <div class="contact-card">
+  <h2>Napiš nám</h2>
+
+  <div class="contact-item">
+   <div class="contact-icon">📧</div>
+   <div class="contact-info">
+    <h3>E-mail</h3>
+    <p><a href="mailto:anna@nejdriv-ja.cz">anna@nejdriv-ja.cz</a></p>
+    <p>Odpovídáme do 24 hodin v pracovní dny</p>
+   </div>
+  </div>
+
+  <div class="contact-item">
+   <div class="contact-icon">📞</div>
+   <div class="contact-info">
+    <h3>Telefon</h3>
+    <p><a href="tel:+420732915755">+420 732 915 755</a></p>
+    <p>Po–pá: 9:00 – 17:00</p>
+   </div>
+  </div>
+
+  <div class="contact-item">
+   <div class="contact-icon">📍</div>
+   <div class="contact-info">
+    <h3>Adresa</h3>
+    <p>Performance Marketing Solution s.r.o.<br>
+    Rybná 716/24, Staré Město<br>
+    110 00 Praha, Česká republika</p>
+   </div>
+  </div>
  </div>
 
- <!-- Článek 1 -->
- <div class="section-block">
-  <h2><span class="section-num">1</span> Úvodní ustanovení a prodávající</h2>
-  <p>Tyto všeobecné obchodní podmínky (dále jen „Podmínky") upravují vzájemná práva a povinnosti smluvních stran vzniklé v souvislosti s prodejem knihy <strong>Život, jaký si zasloužíš</strong> (autorka Anna de Vries) prostřednictvím internetového obchodu na adrese nejdriv-ja.cz.</p>
+ <!-- Upozornění -->
+ <div class="notice-box">
+  <h3>⏱ Doba odpovědi</h3>
+  <p>Snažíme se odpovědět na všechny dotazy do <strong>24 hodin</strong> v pracovní dny. O víkendech a svátcích může být odpověď o něco pomalejší. Pro rychlejší vyřízení uveď prosím číslo objednávky nebo e-mail, který jsi použil(a) při nákupu.</p>
+ </div>
+
+ <!-- Služby -->
+ <div class="service-grid">
+  <div class="service-card">
+   <span class="icon">📦</span>
+   <h3>Sledování zásilky</h3>
+   <p>Po odeslání ti přijde sledovací odkaz e-mailem. Knihu doručuje Zásilkovna do 2 pracovních dnů.</p>
+  </div>
+  <div class="service-card">
+   <span class="icon">🔄</span>
+   <h3>Vrácení a záruka</h3>
+   <p>Nabízíme 30denní garanci vrácení peněz. Stačí nám napsat e-mail s číslem objednávky.</p>
+  </div>
+  <div class="service-card">
+   <span class="icon">💳</span>
+   <h3>Platba a faktura</h3>
+   <p>Dotaz k platbě nebo potřebuješ fakturu? Napiš nám a uveď číslo objednávky.</p>
+  </div>
+ </div>
+
+ <!-- Firemní údaje -->
+ <div class="company-info">
+  <h3>🏢 Firemní údaje</h3>
   <p><strong>Performance Marketing Solution s.r.o.</strong></p>
   <p>Rybná 716/24, Staré Město, 110 00 Praha, Česká republika</p>
-  <p>IČO: 06259928<br>DIČ: CZ06259928</p>
-  <p>E-mail: <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a><br>
-  Telefon: +420 732 915 755</p>
-  <p>Je-li kupujícím spotřebitel, řídí se práva a povinnosti neupravené těmito Podmínkami zejména zákonem č. 89/2012 Sb., občanský zákoník, zákonem č. 634/1992 Sb., o ochraně spotřebitele, a směrnicí EU 2011/83/EU o právech spotřebitelů.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 2 -->
- <div class="section-block">
-  <h2><span class="section-num">2</span> Použitelnost Podmínek</h2>
-  <p>Tyto Podmínky se vztahují na každou nabídku prodávajícího a na každou kupní smlouvu uzavřenou na dálku mezi prodávajícím a zákazníkem.</p>
-  <p>Před uzavřením smlouvy je znění Podmínek zákazníkovi vždy přístupné na webových stránkách. Odesláním objednávky zákazník potvrzuje, že se s Podmínkami seznámil a souhlasí s nimi.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 3 -->
- <div class="section-block">
-  <h2><span class="section-num">3</span> Nabídka</h2>
-  <p>Pokud má nabídka omezenou platnost nebo je vázána na podmínky, je to v nabídce výslovně uvedeno.</p>
-  <p>Nabídka obsahuje úplný a přesný popis nabízených produktů. Popis je dostatečně podrobný, aby umožnil zákazníkovi nabídku řádně posoudit.</p>
-  <p>Zjevné omyly nebo chyby v nabídce prodávajícího nezavazují.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 4 -->
- <div class="section-block">
-  <h2><span class="section-num">4</span> Uzavření smlouvy</h2>
-  <p>Kupní smlouva je uzavřena okamžikem, kdy zákazník dokončí objednávku (kliknutím na potvrzovací tlačítko) a obdrží od prodávajícího potvrzovací e-mail o přijetí objednávky.</p>
-  <p>Smlouva je uzavřena v českém jazyce a je spolu s fakturou archivována prodávajícím v elektronické podobě po zákonem stanovenou dobu.</p>
-
-  <div class="highlight-box">
-   <p><strong>Poznámka:</strong> Prodávající přijímá vhodná technická a organizační opatření k zabezpečení elektronického přenosu dat a zajišťuje bezpečné webové prostředí.</p>
-  </div>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 5 -->
- <div class="section-block">
-  <h2><span class="section-num">5</span> Právo na odstoupení od smlouvy</h2>
-  <p><strong>U fyzických produktů:</strong></p>
-  <p>Spotřebitel má v souladu s § 1829 občanského zákoníku právo odstoupit od smlouvy bez udání důvodu do 14 dnů. Tato lhůta běží ode dne převzetí zboží.</p>
-  <p>Během této lhůty bude zákazník se zbožím i obalem zacházet šetrně a použije je pouze v míře nutné k posouzení, zda si zboží ponechá.</p>
-  <p><strong>U digitálních produktů (e-booky, PDF):</strong></p>
-  <p>Dodáním digitálního obsahu (stažením) právo na odstoupení od smlouvy zaniká, pokud zákazník výslovně souhlasil s tím, že se práva na odstoupení vzdává.</p>
-  <p>Podrobný postup vrácení najdete na stránce <a href="/retourbeleid" style="color: var(--cta);">Vrácení a záruka</a>.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 6 -->
- <div class="section-block">
-  <h2><span class="section-num">6</span> Cena</h2>
-  <p>Prodejní cena tištěné knihy Život, jaký si zasloužíš je <strong>749 Kč včetně DPH</strong> a včetně dopravy zdarma po celé České republice.</p>
-  <p>Cena uvedená na webových stránkách je konečná — v pokladně nebudou účtovány žádné další poplatky. Po dobu platnosti nabídky se ceny nezvyšují, s výjimkou změn sazeb DPH.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 7 -->
- <div class="section-block">
-  <h2><span class="section-num">7</span> Platba</h2>
-  <p>Zákazník může zaplatit následujícími platebními metodami:</p>
-  <ul>
-   <li>Platební karta (Visa, Mastercard)</li>
-   <li>Online bankovní převod (bankovní tlačítka)</li>
-   <li>Apple Pay / Google Pay</li>
-   <li>PayPal</li>
-  </ul>
-  <p>Platba probíhá v okamžiku objednávky a je zpracována zabezpečeně certifikovanými platebními poskytovateli. Prodávající neukládá údaje o platebních kartách. Po úspěšné platbě obdrží zákazník potvrzení objednávky a fakturu e-mailem.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 8 -->
- <div class="section-block">
-  <h2><span class="section-num">8</span> Dodání</h2>
-  <p>Prodávající věnuje přijímání a vyřizování objednávek maximální péči. Místem dodání je adresa (nebo výdejní místo), kterou zákazník uvedl v objednávce.</p>
-  <p>Objednávky odesíláme ze skladu v České republice do <strong>24 hodin</strong> po přijetí platby. Knihy doručuje <strong>Zásilkovna (Packeta)</strong> — doba doručení je zpravidla <strong>do 2 pracovních dnů</strong> od odeslání. Po odeslání obdrží zákazník e-mailem sledovací číslo.</p>
-
-  <div class="highlight-box">
-   <p><strong>Doprava je zdarma</strong> po celé České republice — je již zahrnuta v ceně.</p>
-  </div>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 9 -->
- <div class="section-block">
-  <h2><span class="section-num">9</span> Záruka</h2>
-  <p>Nad rámec zákonného 14denního práva na odstoupení od smlouvy nabízíme <strong>rozšířenou 30denní záruku vrácení peněz</strong>.</p>
-  <p>Pokud nejste s knihou spokojeni, můžete nás do 30 dnů od převzetí kontaktovat a my vám vrátíme celou kupní cenu, bez zbytečných otázek. Práva z vadného plnění se řídí občanským zákoníkem (zákon č. 89/2012 Sb.).</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 10 -->
- <div class="section-block">
-  <h2><span class="section-num">10</span> Reklamace a stížnosti</h2>
-  <p>Stížnosti a reklamace týkající se plnění smlouvy je třeba podat prodávajícímu úplně a srozumitelně popsané bez zbytečného odkladu poté, co zákazník vadu zjistil.</p>
-  <p>Na podané stížnosti odpovídáme do 14 dnů od jejich doručení; reklamace vad vyřizujeme nejpozději do 30 dnů.</p>
-  <p>Kontakt: <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a></p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 11 -->
- <div class="section-block">
-  <h2><span class="section-num">11</span> Duševní vlastnictví</h2>
-  <p>Veškerá práva duševního vlastnictví k produktům, zejména k textům, obrázkům, návrhům a grafické úpravě, náleží prodávajícímu nebo jeho poskytovatelům licencí.</p>
-  <p>Bez předchozího písemného souhlasu prodávajícího není dovoleno produkty ani jakoukoli jejich část rozmnožovat, ukládat do databází nebo zveřejňovat.</p>
- </div>
-
- <div class="divider"></div>
-
- <!-- Článek 12 -->
- <div class="section-block">
-  <h2><span class="section-num">12</span> Rozhodné právo a řešení sporů</h2>
-  <p>Veškeré spory vyplývající z této smlouvy se řídí právem České republiky.</p>
-  <p>K mimosoudnímu řešení spotřebitelských sporů je příslušná <strong>Česká obchodní inspekce (ČOI)</strong>, Štěpánská 796/44, 110 00 Praha 1, <a href="https://www.coi.cz" target="_blank" style="color: var(--cta);">www.coi.cz</a>.</p>
-  <p>Evropská komise provozuje platformu pro řešení sporů online (ODR): <a href="https://ec.europa.eu/consumers/odr/" target="_blank" style="color: var(--cta);">https://ec.europa.eu/consumers/odr/</a></p>
- </div>
-
- <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
-  <h3>📅 Poslední aktualizace</h3>
-  <p>Tyto Podmínky byly naposledy aktualizovány 13. července 2026. Vyhrazujeme si právo tyto Podmínky kdykoli změnit.</p>
+  <p>IČO: 06259928</p>
+  <p>DIČ: CZ06259928</p>
+  <p>E-mail: <a href="mailto:anna@nejdriv-ja.cz" style="color: var(--cta);">anna@nejdriv-ja.cz</a></p>
  </div>
 
 </div>
@@ -505,17 +457,17 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Zákaznická podpora</div>
  <div style="display: flex; flex-direction: column; gap: 8px;">
  <a href="mailto:anna@nejdriv-ja.cz" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">anna@nejdriv-ja.cz</a>
- <a href="/verzending" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Doprava a vrácení</a>
- <a href="/contact" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Kontakt</a>
+ <a href="/doprava" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Doprava a vrácení</a>
+ <a href="/kontakt" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Kontakt</a>
  </div>
  </div>
 
  <div>
  <div style="font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A96E; margin-bottom: 12px;">Právní informace</div>
  <div style="display: flex; flex-direction: column; gap: 8px;">
- <a href="/voorwaarden" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Obchodní podmínky</a>
- <a href="/privacy" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Ochrana osobních údajů</a>
- <a href="/retourbeleid" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Reklamační řád</a>
+ <a href="/obchodni-podminky" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Obchodní podmínky</a>
+ <a href="/ochrana-udaju" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Ochrana osobních údajů</a>
+ <a href="/reklamace" style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(245,237,227,0.6); text-decoration: none; transition: color 0.2s;">Reklamační řád</a>
  </div>
  </div>
 
