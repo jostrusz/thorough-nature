@@ -218,16 +218,16 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   // Lâche prise sur ce qui te détruit (FR) — 2 bonusové e-booky
   'lache-livre': [
     {
-      key: "e-books/La-Solution-anti-rumination.pdf",
-      title: "La Solution anti-rumination",
+      key: "e-books/LAntidote-a-loverthinking.pdf",
+      title: "L'Antidote à l'overthinking",
       description: "E-book (PDF)",
-      size: "1.5 MB",
+      size: "3.2 MB",
     },
     {
-      key: "e-books/L-Amour-sans-faux-semblants.pdf",
-      title: "L'Amour sans faux-semblants",
+      key: "e-books/Lamour-sans-foutaises.pdf",
+      title: "L'amour sans foutaises",
       description: "E-book (PDF)",
-      size: "14 MB",
+      size: "20.5 MB",
     },
   ],
   'engedd-el': [
