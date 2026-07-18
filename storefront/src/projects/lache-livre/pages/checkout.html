@@ -4102,15 +4102,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var shippingTotal = cart.shipping_total || 0;
     var isTaxInclusive = item ? item.is_tax_inclusive : false;
 
-    // Zjisti daňovou sazbu z poměru
+    // Daňová sazba: preferuj přesnou sazbu z tax_line (např. 5.5). Přepočet z poměru
+    // se zaokrouhloval na celé číslo → 5,5 % se zobrazovalo jako 6 % (Math.round(5.5)=6).
+    // Fallback zaokrouhlí na 1 desetinné místo, aby 5,5 zůstalo 5,5.
     var taxRate = 0;
-    if (subtotal > 0 && taxTotal > 0) {
-      if (isTaxInclusive) {
-        // tax_total / subtotal * 100 (subtotal je excl. BTW)
-        taxRate = Math.round(taxTotal / subtotal * 100);
-      } else {
-        taxRate = Math.round(taxTotal / (total - taxTotal) * 100);
-      }
+    var taxLine = item && item.tax_lines && item.tax_lines[0];
+    if (taxLine && taxLine.rate != null) {
+      taxRate = taxLine.rate;
+    } else if (subtotal > 0 && taxTotal > 0) {
+      var rawRate = isTaxInclusive
+        ? (taxTotal / subtotal * 100)
+        : (taxTotal / (total - taxTotal) * 100);
+      taxRate = Math.round(rawRate * 10) / 10;
     }
 
     // Cena za produkt (totaal) — desktop summary
