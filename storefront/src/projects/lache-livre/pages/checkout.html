@@ -5816,7 +5816,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Attach customer data + the right shipping method to a cart (point relais / domicile).
   // customerData.metadata already carries the Packeta point (shipping_method + packeta_*).
   function applyShippingToRevolutCart(cartId, customerData) {
-    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(customerData) })
+    // Force the correct region BEFORE attaching the FR address. A cart cached from a
+    // previous session (created before the region default was fixed) may still be on the
+    // "Europe" region, which rejects a FR address with
+    // "Country fr is not within region Europe". Setting region_id heals it in place.
+    var body = currentRegionId ? Object.assign({ region_id: currentRegionId }, customerData) : customerData;
+    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(body) })
       .then(function () { return medusaFetch('/store/shipping-options?cart_id=' + cartId, { method: 'GET' }); })
       .then(function (shipRes) {
         var options = shipRes.shipping_options || [];
@@ -8025,6 +8030,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
+  // On load, drop a background cart cached from a previous (stale) region — e.g. one
+  // created before the region default was fixed (it would be on "Europe"). Otherwise
+  // the submit flow reuses it and attaching a FR address fails with
+  // "Country fr is not within region Europe". A fresh FR cart is then created normally.
+  (function validateCachedBackgroundCartRegion() {
+    if (!backgroundCartId || !currentRegionId) return;
+    medusaFetch('/store/carts/' + backgroundCartId + '?fields=id,region_id')
+      .then(function (res) {
+        var c = (res && (res.cart || res)) || {};
+        if (c.region_id && c.region_id !== currentRegionId) {
+          console.warn('[Checkout Recovery] Cached cart region ' + c.region_id + ' ≠ ' + currentRegionId + ' → discarding stale cart');
+          backgroundCartId = null;
+          localStorage.removeItem('background_cart_id');
+        }
+      })
+      .catch(function () {
+        // Cart no longer exists / not fetchable → drop the stale reference.
+        backgroundCartId = null;
+        localStorage.removeItem('background_cart_id');
+      });
+  })();
+
   // Update background cart with latest customer data (debounced)
   var updateBackgroundCart = debounce(function() {
     if (!backgroundCartId || backgroundCartUpdating) return;
@@ -8777,10 +8804,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     })
     .then(function(cartId) {
-      // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
+      // Stap 3: Cart updaten met klantgegevens (must complete before shipping).
+      // Force the correct region alongside the address: a cart reused from a previous
+      // (stale) region would otherwise reject the FR address with
+      // "Country fr is not within region Europe".
+      var custBody = currentRegionId ? Object.assign({ region_id: currentRegionId }, customerData) : customerData;
       return medusaFetch('/store/carts/' + cartId, {
         method: 'POST',
-        body: JSON.stringify(customerData)
+        body: JSON.stringify(custBody)
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
