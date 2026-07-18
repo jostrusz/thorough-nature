@@ -639,7 +639,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Une question ou un problème ?</div>
       <div class="ty-support-desc">Tu as repéré une erreur, tu as une question sur ta commande ou tu bloques quelque part ? N'hésite pas à nous contacter &mdash; nous serons ravis de t'aider !</div>
     </div>
-    <a href="mailto:contact@lacheprise-livre.fr?subject=Question%20sur%20ma%20commande%20%23&body=Bonjour%2C%0A%0AJ%27ai%20une%20question%20sur%20ma%20commande.%0A%0ANum%C3%A9ro%20de%20commande%C2%A0%3A%20%0A%0AMa%20question%C2%A0%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envoie-nous un e-mail</a>
+    <a href="mailto:joris@lacheprise-livre.fr?subject=Question%20sur%20ma%20commande%20%23&body=Bonjour%2C%0A%0AJ%27ai%20une%20question%20sur%20ma%20commande.%0A%0ANum%C3%A9ro%20de%20commande%C2%A0%3A%20%0A%0AMa%20question%C2%A0%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envoie-nous un e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -866,7 +866,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Question sur ma commande #' + orderNum);
     var body = encodeURIComponent('Bonjour,\n\nJ\'ai une question sur ma commande.\n\nNuméro de commande : #' + orderNum + '\n\nMa question : ');
-    mailtoEl.href = 'mailto:contact@lacheprise-livre.fr?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:joris@lacheprise-livre.fr?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bere v potaz bundle, order bump a upsell
