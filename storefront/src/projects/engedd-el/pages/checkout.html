@@ -6035,13 +6035,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'hu',
           country: 'hu',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // FIGYELEM: ez a szűrő NEM zárja ki a külső futárokat — a { country: 'hu' }
-          // group nélkül minden magyar pontot felkínál, a FoxPost boxokat is. Nincs
-          // olyan group érték, ami csak a Packeta saját magyar pontjait adná vissza
-          // ('zpoint' nem létezik, 'zbox'-ból 0 van Magyarországon). A tényleges
-          // szűrést ezért a fenti callback végzi a point.carrierId alapján.
+          // Csak a Packeta SAJÁT magyar átvevőhelyei (1272 db a hivatalos branch
+          // feed szerint) — a külső futárok (FoxPost 32970, Magyar Posta 29760)
+          // így meg sem jelennek a térképen. Ugyanaz a minta, ami CZ-n és SK-n
+          // is fut. A 'zbox' egyelőre 0 találat Magyarországon, de ártalmatlan
+          // és automatikusan bekapcsol, amint a Packeta kihelyezi a boxokat.
+          // A callback carrierId-ellenőrzése így már csak biztonsági háló.
           vendors: [
-            { country: 'hu' },
+            { country: 'hu', group: 'zpoint' },
+            { country: 'hu', group: 'zbox' },
           ],
         });
       });
