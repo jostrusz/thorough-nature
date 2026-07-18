@@ -88,8 +88,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .nav-logo img {
  height: 40px;
- width: 150px;
- aspect-ratio: 600 / 160;
+ width: 131px;
+ aspect-ratio: 600 / 183;
 }
 .nav-logo-text {
  font-family: 'Recoleta', serif;
@@ -265,7 +265,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 .d5 { transition-delay: 0.5s; }
 
 /* ═══ LAYOUT ═══ */
-.section { padding: 96px 20px; }
+.section { padding: 64px 20px; }
 .section-inner { max-width: 1000px; margin: 0 auto; }
 
 /* ═══ TYPOGRAFIE ═══ */
@@ -338,7 +338,7 @@ h2 { font-size: 38px; }
 
 /* ═══ HERO SEKCE ═══ */
 .hero-section {
- padding-top: 72px; padding-bottom: 72px;
+ padding-top: 52px; padding-bottom: 52px;
  position: relative; overflow: hidden;
 }
 .hero-section::before {
@@ -370,6 +370,7 @@ h2 { font-size: 38px; }
 .hero-right { flex-shrink: 0; position: relative; }
 
 /* ═══ PLATEBNÍ IKONY ═══ */
+.hero-buttons { margin-top: 24px; }
 .payment-row {
  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 16px;
 }
@@ -406,9 +407,12 @@ h2 { font-size: 38px; }
  background: rgba(45, 27, 61, 0.2);
 }
 .trust-bar-item .icon { font-size: 18px; }
+.tb-flags { display: inline-flex; align-items: center; vertical-align: middle; margin-right: 7px; }
+.tb-flags .tb-flag { width: 19px; height: 19px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; line-height: 1; background: #fff; box-shadow: 0 0 0 1.5px #fff, 0 1px 2px rgba(45,27,61,0.18); margin-left: -8px; }
+.tb-flags .tb-flag:first-child { margin-left: 0; }
 
 /* ═══ SEKCE "DIT BOEK IS VOOR JOU" — karusel karet ═══ */
-.voor-jou { padding: 80px 20px; background: var(--white); position: relative; }
+.voor-jou { padding: 56px 20px; background: var(--white); position: relative; }
 .voor-jou-inner { max-width: 1050px; margin: 0 auto; }
 .voor-jou h2 {
  text-align: center; font-family: 'Recoleta', serif; font-size: 32px;
@@ -482,7 +486,7 @@ h2 { font-size: 38px; }
 
 /* ═══ SEKCE "9 REDENEN" — video + benefity ═══ */
 .redenen {
- padding: 88px 20px;
+ padding: 60px 20px;
  background: var(--light);
  position: relative;
  overflow: hidden;
@@ -549,7 +553,7 @@ h2 { font-size: 38px; }
 
 /* Urgency banner nahoře */
 .offer-banner {
- background: var(--white); padding: 80px 20px 0;
+ background: var(--white); padding: 56px 20px 0;
 }
 .offer-banner-inner {
  max-width: 1050px; margin: 0 auto;
@@ -570,7 +574,7 @@ h2 { font-size: 38px; }
 
 /* Dvousloupcový layout */
 .offer-section {
- background: var(--white); padding: 48px 20px 80px;
+ background: var(--white); padding: 40px 20px 56px;
 }
 .offer-grid {
  max-width: 1050px; margin: 0 auto;
@@ -730,14 +734,14 @@ h2 { font-size: 38px; }
 
 /* ═══ SEKCE "BOOK PREVIEW" — karusel stránek knihy ═══ */
 .book-preview {
- padding: 96px 20px; background: var(--bg);
+ padding: 64px 20px; background: var(--bg);
 }
 .book-preview-inner {
  max-width: 1200px; margin: 0 auto;
 }
 .book-preview h2 {
  text-align: center; font-family: 'Recoleta', serif; font-size: 32px;
- color: var(--heading); margin-bottom: 48px; line-height: 1.35;
+ color: var(--heading); margin-bottom: 32px; line-height: 1.35;
  max-width: 900px; margin-left: auto; margin-right: auto;
 }
 .book-preview .highlight-teal {
@@ -803,7 +807,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 6: STORYTELLING — emocionální příběh ═══ */
 .verhaal {
  background: var(--white);
- padding: 96px 24px;
+ padding: 64px 24px;
 }
 .verhaal-inner {
  max-width: 500px;
@@ -981,7 +985,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 9: AUTEUR — bio autora ═══ */
 .auteur {
  background: var(--white);
- padding: 96px 24px;
+ padding: 64px 24px;
 }
 .auteur-inner {
  max-width: 500px;
@@ -1081,7 +1085,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 10: FINAL CTA — závěrečný prodejní blok ═══ */
 .final-cta {
  background: var(--white);
- padding: 96px 24px;
+ padding: 64px 24px;
 }
 .final-cta-inner {
  max-width: 960px;
@@ -1093,7 +1097,7 @@ h2 { font-size: 38px; }
  line-height: 1.35;
  color: var(--heading);
  text-align: center;
- margin-bottom: 48px;
+ margin-bottom: 32px;
 }
 .final-cta-heading .hl-yellow {
  background: linear-gradient(180deg, transparent 55%, #E8D0E4 55%);
@@ -1204,7 +1208,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 11: BONUSY — bonus e-booky ═══ */
 .bonuses {
  background: var(--light);
- padding: 96px 24px;
+ padding: 64px 24px;
  position: relative;
  overflow: hidden;
 }
@@ -1227,7 +1231,7 @@ h2 { font-size: 38px; }
  line-height: 1.35;
  color: var(--heading);
  text-align: center;
- margin-bottom: 48px;
+ margin-bottom: 32px;
 }
 .bonuses-heading .hl-yellow {
  background: linear-gradient(180deg, transparent 55%, #E8D0E4 55%);
@@ -1314,7 +1318,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 12: WAAROM DIT BOEK — garantie + USP + urgency ═══ */
 .waarom {
  background: var(--white);
- padding: 80px 24px;
+ padding: 56px 24px;
 }
 .waarom-inner {
  max-width: 500px;
@@ -1347,7 +1351,7 @@ h2 { font-size: 38px; }
  line-height: 1.75;
  color: var(--body);
  text-align: center;
- margin-bottom: 48px;
+ margin-bottom: 32px;
 }
 .waarom-guarantee strong {
  color: var(--heading);
@@ -1433,7 +1437,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 8: REVIEWS — photo slider ═══ */
 .reviews-section {
  background: var(--bg);
- padding: 120px 24px 60px;
+ padding: 80px 24px 48px;
  position: relative;
  overflow: hidden;
 }
@@ -1557,7 +1561,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 13: FINÁLNÍ NABÍDKA — knihy + cena + CTA ═══ */
 .final-offer {
  background: var(--bg);
- padding: 80px 24px;
+ padding: 56px 24px;
  text-align: center;
 }
 .final-offer-inner {
@@ -1608,7 +1612,7 @@ h2 { font-size: 38px; }
 /* ═══ SEKCE 14: FAQ — akordeonové otázky ═══ */
 .faq-section {
  background: var(--white);
- padding: 96px 24px;
+ padding: 64px 24px;
 }
 .faq-section-inner {
  max-width: 780px;
@@ -1720,8 +1724,8 @@ h2 { font-size: 38px; }
 }
 .footer-logo {
  height: 56px;
- width: 210px;
- aspect-ratio: 600 / 160;
+ width: 183px;
+ aspect-ratio: 600 / 183;
 }
 .footer-brand-text {
  font-family: 'Recoleta', serif;
@@ -1788,14 +1792,14 @@ h2 { font-size: 38px; }
 /* ═══ RESPONSIVITA ═══ */
 @media (max-width: 768px) {
  .hero-section { padding-top: 40px; padding-bottom: 48px; }
- .hero { flex-direction: column; text-align: center; gap: 24px; }
+ .hero { flex-direction: column; text-align: center; gap: 18px; }
  .hero-left { display: contents; }
- .hero-left .eyebrow { order: 1; }
- .hero-left h1 { order: 2; }
+ .hero-left .eyebrow { order: 1; margin-bottom: 0; }
+ .hero-left h1 { order: 2; margin-bottom: 0; }
  .hero-right { order: 3; }
- .hero-left .body-text { order: 4; }
- .hero-left .hero-buttons { order: 5; }
- .hero-left .payment-row { order: 6; }
+ .hero-left .body-text { order: 4; margin-bottom: 0; }
+ .hero-left .hero-buttons { order: 5; margin-top: 0; }
+ .hero-left .payment-row { order: 6; margin-top: 0; }
  h1 { font-size: 26px; }
  .hero-right img { width: 300px !important; }
  .payment-row { justify-content: center; }

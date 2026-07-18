@@ -520,8 +520,8 @@ export const FrShipmentNotificationTemplate: React.FC<FrShipmentNotificationTemp
             }}>
               Une question sur ton colis&nbsp;? Écris-nous à
               <br />
-              <Link href="mailto:support@lacheprise-livre.fr" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
-                support@lacheprise-livre.fr
+              <Link href="mailto:joris@lacheprise-livre.fr" style={{ color: '#C27BA0', textDecoration: 'underline', fontWeight: 600 }}>
+                joris@lacheprise-livre.fr
               </Link>
             </Text>
           </div>
@@ -551,8 +551,8 @@ export const FrShipmentNotificationTemplate: React.FC<FrShipmentNotificationTemp
             fontSize: '12px',
             color: '#9B7AAD',
           }}>
-            <Link href="mailto:support@lacheprise-livre.fr" style={{ color: '#C27BA0', textDecoration: 'none' }}>
-              support@lacheprise-livre.fr
+            <Link href="mailto:joris@lacheprise-livre.fr" style={{ color: '#C27BA0', textDecoration: 'none' }}>
+              joris@lacheprise-livre.fr
             </Link>
           </Text>
         </div>

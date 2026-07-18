@@ -104,12 +104,12 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     smsDispatchTemplate: 'De Hondenbijbel: Bestelling verzonden. Track & trace: {url} support@dehondenbijbel.nl',
   },
   'lache-livre': {
-    replyTo: 'support@lacheprise-livre.fr',
+    replyTo: 'joris@lacheprise-livre.fr',
     fromName: 'Lâche prise sur ce qui te détruit',
-    fromEmail: 'Lâche prise sur ce qui te détruit <support@lacheprise-livre.fr>',
+    fromEmail: 'Lâche prise sur ce qui te détruit <joris@lacheprise-livre.fr>',
     project: 'lache-livre',
     locale: 'fr',
-    smsDispatchTemplate: 'Lache prise sur ce qui te detruit : Ta commande est en route. Suivi : {url} support@lacheprise-livre.fr',
+    smsDispatchTemplate: 'Lache prise sur ce qui te detruit : Ta commande est en route. Suivi : {url} joris@lacheprise-livre.fr',
   },
   loslatenboek: {
     replyTo: 'boek@loslatenboek.nl',

@@ -245,8 +245,8 @@ export const FrAbandonedCheckout3Template: React.FC<FrAbandonedCheckout3Props> &
             margin: '2px 0 0',
           }}>
             Lâche prise sur ce qui te détruit &bull;{' '}
-            <Link href="mailto:support@lacheprise-livre.fr" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              support@lacheprise-livre.fr
+            <Link href="mailto:joris@lacheprise-livre.fr" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              joris@lacheprise-livre.fr
             </Link>
           </Text>
         </div>

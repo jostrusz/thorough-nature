@@ -1203,10 +1203,10 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
             to: cart.email,
             channel: "email",
             template: nextStepConfig.templateKey,
-            from: "Joris de Vries - Lâche prise sur ce qui te détruit <support@lacheprise-livre.fr>",
+            from: "Joris de Vries - Lâche prise sur ce qui te détruit <joris@lacheprise-livre.fr>",
             data: {
               emailOptions: {
-                replyTo: "support@lacheprise-livre.fr",
+                replyTo: "joris@lacheprise-livre.fr",
                 subject: nextStepConfig.subject(firstName),
               },
               firstName,

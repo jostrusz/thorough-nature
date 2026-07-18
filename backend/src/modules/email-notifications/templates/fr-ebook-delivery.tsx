@@ -258,8 +258,8 @@ export const FrEbookDeliveryTemplate: React.FC<FrEbookDeliveryTemplateProps> & {
             }}>
               Un souci avec le téléchargement&nbsp;?
               <br />
-              <Link href="mailto:support@lacheprise-livre.fr" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                support@lacheprise-livre.fr
+              <Link href="mailto:joris@lacheprise-livre.fr" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                joris@lacheprise-livre.fr
               </Link>
             </Text>
           </div>
@@ -290,8 +290,8 @@ export const FrEbookDeliveryTemplate: React.FC<FrEbookDeliveryTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:support@lacheprise-livre.fr" style={{ color: colors.accent, textDecoration: 'none' }}>
-              support@lacheprise-livre.fr
+            <Link href="mailto:joris@lacheprise-livre.fr" style={{ color: colors.accent, textDecoration: 'none' }}>
+              joris@lacheprise-livre.fr
             </Link>
           </Text>
         </div>
