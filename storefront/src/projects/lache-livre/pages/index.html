@@ -828,13 +828,136 @@
 <!-- ═══════════════════════════════════════════
  SEKCE 8: REVIEWS — testimonial karty
  ═══════════════════════════════════════════ -->
+<style>
+/* ═══ Explication transparente sur les avis ═══ */
+.reviews-transparency-title {
+  text-align: center; max-width: 820px; margin: 8px auto 22px;
+  font-family: 'Recoleta', Georgia, serif; font-weight: 700;
+  font-size: 28px; line-height: 1.3; color: var(--heading);
+}
+.reviews-transparency-title .highlight-yellow { font-style: italic; }
+.reviews-transparency-text {
+  max-width: 680px; margin: 0 auto 40px; font-size: 16px; line-height: 1.7;
+  color: var(--muted); text-align: center;
+  background: linear-gradient(180deg, #FFFFFF 0%, rgba(194,123,160,0.05) 100%);
+  border: 1.5px solid var(--cta); border-radius: 18px; padding: 30px 34px;
+  box-shadow: 0 4px 18px rgba(194,123,160,0.12); position: relative;
+}
+.reviews-transparency-text::before {
+  content: "🔍"; position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+  background: var(--cta); width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+  box-shadow: 0 4px 10px rgba(194,123,160,0.35);
+}
+.reviews-transparency-text p { margin: 0 0 14px 0; }
+.reviews-transparency-text p:last-child { margin-bottom: 0; }
+.reviews-transparency-text strong { color: var(--heading); }
+.reviews-transparency-footnote {
+  margin-top: 18px !important; padding-top: 16px;
+  border-top: 1px dashed rgba(194,123,160,0.35); font-size: 14px; font-style: italic;
+}
+@media (max-width: 600px) {
+  .reviews-transparency-title { font-size: 21px; margin-bottom: 18px; }
+  .reviews-transparency-text { font-size: 15px; padding: 26px 20px; margin-left: 14px; margin-right: 14px; }
+}
+/* ═══ Slider d'avis (traduction FR + original NL) ═══ */
+.czr-wrap { max-width: 760px; margin: 0 auto 48px; padding: 0 16px; }
+.czr-intro { text-align: center; margin-bottom: 22px; }
+.czr-intro h3 {
+  font-family: 'Recoleta', Georgia, serif; font-weight: 700;
+  font-size: 24px; line-height: 1.3; color: var(--heading); margin: 0 0 8px;
+}
+.czr-intro-hl { color: var(--cta); }
+.czr-intro p { font-size: 15px; line-height: 1.6; color: var(--muted); max-width: 600px; margin: 0 auto; }
+.czr-slider { position: relative; display: flex; align-items: center; gap: 8px; }
+.czr-viewport { overflow: hidden; flex: 1; border-radius: 18px; transition: height .4s cubic-bezier(0.22,1,0.36,1); }
+.czr-track { display: flex; align-items: flex-start; transition: transform .4s cubic-bezier(0.22,1,0.36,1); }
+.czr-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 4px; align-self: flex-start; }
+.czr-card {
+  background: #fff; border: 1px solid rgba(45,27,61,0.10); border-radius: 16px;
+  padding: 24px 26px; box-shadow: 0 4px 18px rgba(45,27,61,0.07);
+}
+.czr-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.czr-avatar {
+  flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 15px; color: #fff; letter-spacing: .3px;
+}
+.czr-meta { flex: 1; min-width: 0; }
+.czr-name { font-size: 15px; font-weight: 700; color: var(--heading); line-height: 1.2; }
+.czr-src { font-size: 11.5px; color: var(--muted); display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; }
+.czr-src svg { width: 12px; height: 12px; }
+.czr-stars { flex-shrink: 0; color: #F5B301; font-size: 13px; letter-spacing: 1px; }
+.czr-cz { font-size: 16px; line-height: 1.65; color: var(--heading); margin: 0 0 16px; }
+.czr-orig {
+  background: #FAF6FA; border-radius: 10px; padding: 13px 15px;
+  border-left: 3px solid rgba(194,123,160,0.4);
+}
+.czr-orig-label {
+  font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--muted); display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px;
+}
+.czr-orig-text { font-size: 13.5px; line-height: 1.55; color: var(--muted); font-style: italic; margin: 0; }
+.czr-arrow {
+  flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+  background: #fff; border: 1px solid rgba(45,27,61,0.12); color: var(--cta);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(45,27,61,0.08); transition: all .2s ease;
+}
+.czr-arrow svg { width: 20px; height: 20px; }
+.czr-arrow:hover { background: var(--cta); color: #fff; border-color: var(--cta); }
+.czr-arrow:disabled { opacity: .35; cursor: default; }
+.czr-arrow:disabled:hover { background: #fff; color: var(--cta); }
+.czr-dots { display: flex; justify-content: center; gap: 7px; margin-top: 18px; }
+.czr-dot {
+  width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0;
+  background: rgba(194,123,160,0.3); cursor: pointer; transition: all .2s ease;
+}
+.czr-dot.active { background: var(--cta); width: 22px; border-radius: 4px; }
+@media (max-width: 600px) {
+  .czr-intro h3 { font-size: 20px; }
+  .czr-card { padding: 20px 18px; }
+  .czr-cz { font-size: 15px; }
+  .czr-arrow { width: 34px; height: 34px; }
+  .czr-arrow svg { width: 17px; height: 17px; }
+}
+</style>
 <div class="reviews-section anim">
 
  <h2 class="reviews-heading">
-  🇫🇷 <span class="highlight-yellow">Des lecteurs partout en France</span><br>
+  <span class="highlight-yellow">Des lecteurs aux Pays-Bas, en Belgique, en Suède, en Norvège et en Allemagne</span>
   se sont <em>reconnus</em> dans ce livre.<br>
   <span class="highlight-yellow">Comprendre, c'est le début de la guérison</span> 💡
  </h2>
+
+ <!-- Explication transparente sur les avis -->
+ <h2 class="reviews-transparency-title">
+  📌 <span class="highlight-yellow">Des avis officiels</span> des Pays-Bas — sans un seul mot inventé.
+ </h2>
+ <div class="reviews-transparency-text">
+  <p>Les avis que tu vois ci-dessous sont <strong>de vrais posts et commentaires Facebook</strong> venant des pays où le livre est paru en premier et où des milliers de lecteurs l'ont déjà lu — c'est pourquoi ils sont <strong>en néerlandais</strong>.</p>
+  <p>Nous ne voulions pas <strong>mentir</strong>. Nous ne voulions pas <strong>inventer de faux avis</strong> ni enjoliver quoi que ce soit pour paraître plus convaincants.</p>
+  <p>Nous avons donc choisi, en toute transparence, de publier les avis <em>exactement tels que les lecteurs les ont écrits</em> — dans leur langue d'origine, sans retouche, sans changer un seul mot. Tu as ainsi la certitude de lire <strong><u>de vraies paroles de vrais lecteurs</u></strong>.</p>
+  <p>Le livre lui-même est <strong>entièrement traduit en français</strong> — avec soin, précision et le sens de la langue.</p>
+  <p class="reviews-transparency-footnote">📖 Astuce : tu peux aussi lire les avis en français juste en dessous — chaque traduction est accompagnée du commentaire original.</p>
+ </div>
+
+ <!-- ═══ Slider d'avis : traduction FR + original NL ═══ -->
+ <div class="czr-wrap">
+  <div class="czr-intro">
+   <h3>Ce que les lecteurs écrivent <span class="czr-intro-hl">— traduit en français</span></h3>
+   <p>Fais défiler les avis. Sous chaque traduction, tu trouveras <strong>le commentaire original de Facebook</strong>, pour vérifier son authenticité à tout moment.</p>
+  </div>
+
+  <div class="czr-slider">
+   <button class="czr-arrow czr-prev" id="czrPrev" aria-label="Avis précédent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+   <div class="czr-viewport">
+    <div class="czr-track" id="czrTrack"></div>
+   </div>
+   <button class="czr-arrow czr-next" id="czrNext" aria-label="Avis suivant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <div class="czr-dots" id="czrDots"></div>
+ </div>
 
  <div class="fb-reactions-grid">
   <div class="fb-reaction-card fb-card-featured">
@@ -1934,6 +2057,184 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
       showPopup('time_' + Math.round(TIME_DELAY / 1000) + 's');
     }, TIME_DELAY);
   });
+})();
+</script>
+
+<!-- ═══ Slider d'avis : traduction FR + commentaire NL original ═══ -->
+<script>
+(function() {
+  var track = document.getElementById('czrTrack');
+  var prevBtn = document.getElementById('czrPrev');
+  var nextBtn = document.getElementById('czrNext');
+  var dotsBox = document.getElementById('czrDots');
+  if (!track || !prevBtn || !nextBtn || !dotsBox) return;
+
+  function ini(name){ var p=name.trim().split(/\s+/); return ((p[0][0]||'')+(p[p.length-1][0]||'')).toUpperCase(); }
+  var PALETTE = ['#C27BA0','#8E6FA8','#5A8FB8','#6FA88E','#B8895A','#A85A6F','#7B8EC2','#A0C27B'];
+
+  var RAW = [
+    { name: "Chantal D'hondt",
+      fr: "J'espère que ce livre pourra m'aider. Mon papa est décédé samedi et, à cause des disputes familiales, je vis des moments très durs. Ces 4 dernières années, nous avons vécu ensemble, paisibles et heureux, loin d'un entourage négatif — et voilà que tout revient, ses frères et sa sœur m'empoisonnent à nouveau la vie. Papa a pu atteindre 98,5 ans, j'aurai 67 ans la semaine prochaine, et je suis épuisée par leurs disputes et leurs exigences. Je n'en peux tout simplement plus. J'espère retrouver le calme, car ce furent 4 belles années, heureuses et pleines d'amour, mais aussi très lourdes. Maintenant je veux faire le deuil de mon papa adoré et guérir moi aussi.",
+      nl: "Hopelijk kan het mij helpen, mijn papa is zaterdag overleden en door familieruzies heb ik het heel zwaar en moeilijk. We hebben de laatste 4 jaar rustig en gelukkig samen gewoond ver van de negatieve omgeving, en nu komt alles weer terug en zijn broers en zus mij het leven weer aan het verzuren. Papa is 98,5 jaar mogen worden, ik word volgende week 67 jaar, ik ben kapot van hun geruzie en hun eisen. Ik kan het gewoon niet meer aan. Hopelijk kan ik weer tot rust komen want het zijn 4 gelukkige mooie liefdevolle jaren geweest maar ook heel zware. En nu wil ik mijn allerliefste papa treuren en zelf ook weer genezen." },
+    { name: "Patricia de Vries",
+      fr: "Un livre magnifique ! Vraiment à recommander. Je le conseillerais sincèrement. Il m'a ouvert les yeux et je suis aujourd'hui plus forte et plus sereine que je ne l'ai jamais été.",
+      nl: "Schitterend boek! Echt een aanrader. Zou het echt aanraden om te lezen. Het heeft mij de ogen geopend en ben nu sterker en rustiger als nooit daarvoor ooit geweest." },
+    { name: "Katrien Schollier",
+      fr: "J'ai commencé ce livre aujourd'hui. Je l'avais à la maison depuis au moins 2 mois. J'avais du mal à me concentrer pour lire. Je suis stupéfaite de voir à quel point je me reconnais dans ces textes et ces courtes histoires. Heureuse d'avoir à nouveau avancé d'un petit pas.",
+      nl: "Ik ben vandaag beginnen lezen in dit boek. Ik had het zeker al 2 maanden in huis. Ik had moeite met concentratie om te lezen. Ik sta versteld van de teksten en de korte verhalen hoeveel herkenning ik in dit boek ben tegengekomen. Blij dat ik weer een stapje vooruit ben geraakt." },
+    { name: "Kelly Daelemans",
+      fr: "Je viens de commander le livre et j'ai tellement hâte. Après 15 ans à ne pas réussir à lâcher prise (ou parfois seulement, grâce à une psychologue), ça revient sans cesse dès que quelque chose de nouveau se présente sur le chemin… J'attends ce livre avec impatience et j'espère de tout cœur pouvoir enfin ranger ou « garer » tout ça (ou au moins beaucoup de choses), comme dit ma psychologue. Ce serait un beau début d'année.",
+      nl: "Ik heb het boek net besteld en ik kijk er zo naar uit. Na 15 jaar iets niet kunnen los laten (of toch heel soms wel dank zij een psycholoog) maar toch telkens het terug komen als er weer wat op je pad komt…. kijk ik uit naar het boek en hoop ik zo hard dat ik alles (of toch hopelijk veel) dingen een plaats kan geven of kan parkeren zoals mijn psycholoog zegt. Het zou een mooie start van het nieuwe jaar zijn" },
+    { name: "Mélanie Warmenhoven",
+      fr: "Je viens moi aussi de mettre fin à une relation et j'avais vraiment peur de ce qui est décrit plus haut. Mais c'était le troisième homme incapable de me donner ce que je désire et mérite, et qui ne me voyait pas telle que je suis. Et ça, c'est plus solitaire que de ne pas être en couple. Car avec les autres, j'ai de belles connexions — et surtout, une merveilleuse connexion avec moi-même ! Je me sens bien avec moi, et ça va de mieux en mieux 🥰",
+      nl: "Heb onlangs ook weer een verbinding verbroken en idd bang voor bovenstaande. Maar t was de 3de man die mij uiteindelijk toch niet kon geven wat ik verlang, verdien en mij niet zag voor wat ik ben. En dat maakt eenzamer dan geen verbinding. Want ik heb met andere mensen wel een fijne verbinding en het belangrijkste een hele fijne verbinding met mezelf! Ik vind t heerlijk om met mezelf te zijn en dat gaat steeds beter merk ik 🥰" },
+    { name: "Katja van Hooijdonk",
+      fr: "Je trouve que c'est un très bon livre. Il se lit facilement, avec des conseils simples que tu suis pas à pas. Accessible à tout le monde — et pourtant j'ai déjà énormément lu en développement personnel. À recommander, sans hésiter.",
+      nl: "Ik vind het een heel goed boek. Leest gemakkelijk en eenvoudige tips die je stap voor stap doorloopt. Eigenlijk voor iedereen toegankelijk en heb al enorm veel gelezen op persoonlijk ontwikkelingsgebied. Zeker aan te raden." },
+    { name: "Paula Stegeman",
+      fr: "Je m'y reconnais tellement ! Parfois, on vit trop de choses qui ont fait de nous ce que nous sommes, et on refuse que ça se reproduise ! Mieux vaut garder son mur bien haut — en amitié comme en amour ! Beaucoup de serpents rampent dans l'herbe sans qu'on les voie tout de suite !",
+      nl: "Heel herkenbaar! Soms maak je teveel dingen mee in het leven wat je heeft gemaakt tot wie je nu bent en dan ga je het niet meer toelaten dat het weer kan gebeuren! Het is beter om je muur hoog te houden…. zowel in vriendschappen als in relaties! Er kruipen heel veel slangen door het gras heen die jij niet gelijk ziet!" },
+    { name: "Sander van Hagen",
+      fr: "Ce livre est beau, mais ton histoire montre que les cicatrices ne disparaissent pas simplement en « lâchant prise ». Tu les portes avec toi — et tu veux apprendre à vivre avec, sans qu'elles continuent de te tirer vers le bas.",
+      nl: "Dat boek is mooi, maar jouw verhaal laat zien dat littekens niet verdwijnen door “loslaten” alleen. Jij draagt ze mee, en je wilt leren hoe je ermee kunt léven — zonder dat ze je blijven neerhalen." },
+    { name: "Greg Kinibe",
+      fr: "J'ai déjà tout essayé, ou du moins espéré que ça finisse par marcher. Je ne suis pas un grand lecteur, mais celui-ci, je vais me le procurer et m'y investir à fond pour redevenir celui que je devrais être — ou que je n'ai jamais été. J'ai hâte, car j'ai beaucoup à rattraper, et j'y crois.",
+      nl: "Alles al geprobeerd of toch gehoopt dat het zou lukken, ik ben zelf niet zo een boekenwurm maar deze ga ik me aanschaffen en me actief inzetten en terug worden hoe het moet zijn of nog nooit geweest is. Ik kijk er naar uit want heb veel goed te maken en heb er vertrouwen in." },
+    { name: "Lynn Quintyn",
+      fr: "Étape 1 : livre commandé et reçu. Étape 2 : me motiver à m'y plonger ! Étapes 3, 4, 5… : est-ce que je pourrai retrouver la foi et la confiance en l'amour sincère ? 🤔",
+      nl: "Stap 1: Boek gekocht en aangekomen. Stap 2: mezelf aansporen om mij er in te verdiepen! Stap 3,4,5,….: Zou ik het geloof/vertrouwen in oprechte liefde kunnen terugwinnen? 🤔" },
+    { name: "Nancy De Meulenaer",
+      fr: "J'ai commencé — ce n'est pas une lecture facile pour moi. Je n'ai pas de problèmes de couple, mais un stress post-traumatique. Et pourtant ça m'aide, alors merci — je travaille sur moi ❤️",
+      nl: "Ik ben begonnen is voor mij niet gemakkelijk lezen , ik heb geen relatie problemen maar Ptts maar toch help het mij dus dank je ik werk eraan ❤️" },
+    { name: "Frans Peeters",
+      fr: "Je m'y reconnais. Le mieux, c'est d'éviter ou d'ignorer les personnes négatives — j'ai enfin l'esprit tranquille. J'ai lu le livre et il m'a énormément aidé. Je vous souhaite beaucoup de courage.",
+      nl: "Herkenbaar, beste is negatieve mensen te vermijden en of negeren, ik heb nu rust in mijn hoofd, ik heb het boek ook gelezen en heeft mij enorm geholpen, ik wens u veel sterkte, grtjs" },
+    { name: "Sylvia van Vuuren",
+      fr: "Livre reçu, lecture commencée. Il se lit facilement — c'est très agréable, car ma concentration est mauvaise à cause de mon burn-out. Jusqu'ici, je le recommande vraiment.",
+      nl: "Boek ontvangen en begonnen met lezen. Leest makkelijk. Dat is erg fijn. Want mijn concentratie is slecht door mijn burnout klachten. Boek is tot nu een echte aanrader." },
+    { name: "Frank Goossens",
+      fr: "Ça vaut vraiment le coup, et dans ce que je lis en ce moment, il y a beaucoup de moi, sincèrement… Lâcher prise, c'est terriblement difficile pour moi… pfff",
+      nl: "Wel de moeite waardt en wat ik nu lees daar zit veel van mij bij echt.. Loslaten Das verschrikkelijk moeilijk bij mij..pffff" },
+    { name: "Claudine Callant",
+      fr: "J'ai reçu le livre, j'y lis tous les jours et je laisse tout ça faire son chemin. Par contre, je n'ai pas reçu les 2 e-books. Bien cordialement",
+      nl: "Ik heb het boek gekregen en lees er alles dagen in en laat het dan binnen dringen. Ik heb wel de 2 e'boeken niet ontvangen. Met vriendelijke groeten" },
+    { name: "Leon Groeneveld",
+      fr: "Je le reposte quand même… beau livre, mais le titre me travaillait — je le lisais sans cesse comme si c'était « ma » faute, comme si c'était moi qui détruisais tout. Désolé… mais lisez ce livre s'il vous parle — je le recommande !",
+      nl: "Ga 'm toch nog een keer posten…mooi boek maar de titel gaat niet goed in mijn hoofd..'wat JOU kapot maakt' snijdt meer hout ..ik lees de titel telkens alsof het 'mijn' schuld is en zelf dingen kapot maak..srry..wel lezen dit boek als het je aanspreekt btw, aanrader!" },
+    { name: "Marie-Rose Vanopbroecke",
+      fr: "J'ai commencé ce livre. Il me semble très compréhensible et abordable. Rien de « perché » — c'est important.",
+      nl: "Ben begonnen in dit boek. Lijkt me heel begrijpelijk en aanvaardbaar. Niet zweverig, belangrijk." },
+    { name: "Dagmar Thalen",
+      fr: "J'ai commencé à lire. On y trouve des choses où l'on se reconnaît, et beaucoup de choses utiles.",
+      nl: "Ik ben begonnen met lezen. Staan herkenbare dingen en nuttige dingen in." },
+    { name: "Frans Pleumeekers",
+      fr: "Je le lis depuis un moment et je reconnais énormément de cette douleur. Content aussi de ce soutien.",
+      nl: "lees er al een tijd in en herken heel veel van die pijn. Ben blij ook met de ondersteuning." },
+    { name: "Sandra Luimes",
+      fr: "Un beau livre, très juste — il t'apporte du calme et des repères.",
+      nl: "Mooi kloppend boek , geeft je rust en handvaten" },
+    { name: "Edward De Goede",
+      fr: "Beau livre, très instructif — il touche tout le monde 💛💚🙏",
+      nl: "Mooi boek erg leerzaam en raakt iedereen 💛💚🙏" },
+    { name: "Arjan van de Wijgert",
+      fr: "Vraiment un livre fantastique que tout le monde devrait lire. Tellement de conseils utiles, très instructif — et on s'y reconnaît.",
+      nl: "Echt een fantastisch boek dat iedereen eens zou moeten lezen. Zoveel nuttige tips en heel leerzaam en herkenbaar." },
+    { name: "Danitsja Jansen",
+      fr: "Le livre le plus formidable que j'aie jamais lu. Celui-là, il sert vraiment !",
+      nl: "Meest geweldige boek wat ik ooit heb gelezen. Hier heb je wat aan!" },
+    { name: "Mauri Deman",
+      fr: "Tout simplement un livre fantastique",
+      nl: "Gewoonweg Fantastisch boek" },
+    { name: "Leo Miedema",
+      fr: "Vraiment un très bon livre",
+      nl: "Echt een heel goed boek" },
+    { name: "Greet Woussen",
+      fr: "Livre reçu hier. Contente de mon achat.",
+      nl: "Boek gisteren gekregen. Blij met mijn aankoop." },
+    { name: "Goossens Manuella",
+      fr: "Oui, je ne regrette pas de l'avoir acheté",
+      nl: "Ja ik heb geen spijt dat ik het gekocht heb" },
+    { name: "Tanja Dugandžić",
+      fr: "Un livre magnifique",
+      nl: "Prachtig Boek" },
+    { name: "Patrick Velders",
+      fr: "Super livre.",
+      nl: "Super boek." },
+    { name: "Paul Denessen",
+      fr: "Un livre magnifique et instructif.",
+      nl: "Prachtig leerzaam boek." },
+    { name: "Christophe Kervyn",
+      fr: "À recommander… 🤙",
+      nl: "Een aanrader… 🤙" },
+    { name: "Suzanne Van Woerkom",
+      fr: "Vraiment à recommander !!",
+      nl: "Echt een aanrader!!" }
+  ];
+
+  var REVIEWS = RAW.map(function(r, i){ return { name: r.name, initials: ini(r.name), color: PALETTE[i % PALETTE.length], fr: r.fr, nl: r.nl }; });
+
+  var fbIcon = '<svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8v8.44C19.61 23.08 24 18.09 24 12.07z"/></svg>';
+  var html = '';
+  REVIEWS.forEach(function(r) {
+    html +=
+      '<div class="czr-slide"><div class="czr-card">' +
+        '<div class="czr-head">' +
+          '<div class="czr-avatar" style="background:' + r.color + '">' + r.initials + '</div>' +
+          '<div class="czr-meta">' +
+            '<div class="czr-name">' + r.name + '</div>' +
+            '<div class="czr-src">' + fbIcon + ' Commentaire sur Facebook</div>' +
+          '</div>' +
+          '<div class="czr-stars">★★★★★</div>' +
+        '</div>' +
+        '<p class="czr-cz">' + r.fr + '</p>' +
+        '<div class="czr-orig">' +
+          '<div class="czr-orig-label">' + fbIcon + ' Original (en néerlandais)</div>' +
+          '<p class="czr-orig-text">' + r.nl + '</p>' +
+        '</div>' +
+      '</div></div>';
+  });
+  track.innerHTML = html;
+
+  var pos = 0;
+  var total = REVIEWS.length;
+
+  var dots = [];
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('button');
+    d.className = 'czr-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Avis ' + (i + 1));
+    (function(idx) { d.addEventListener('click', function() { pos = idx; update(); }); })(i);
+    dotsBox.appendChild(d);
+    dots.push(d);
+  }
+
+  var vp = track.parentElement;
+  function syncHeight() {
+    var active = track.children[pos];
+    if (active) vp.style.height = active.offsetHeight + 'px';
+  }
+  function update() {
+    track.style.transform = 'translateX(-' + (pos * 100) + '%)';
+    prevBtn.disabled = (pos <= 0);
+    nextBtn.disabled = (pos >= total - 1);
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === pos); });
+    syncHeight();
+  }
+
+  prevBtn.addEventListener('click', function() { if (pos > 0) { pos--; update(); } });
+  nextBtn.addEventListener('click', function() { if (pos < total - 1) { pos++; update(); } });
+  window.addEventListener('resize', syncHeight);
+
+  var startX = 0, swiping = false;
+  vp.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; swiping = true; }, { passive: true });
+  vp.addEventListener('touchend', function(e) {
+    if (!swiping) return; swiping = false;
+    var diff = startX - e.changedTouches[0].clientX;
+    if (diff > 45 && pos < total - 1) { pos++; update(); }
+    else if (diff < -45 && pos > 0) { pos--; update(); }
+  }, { passive: true });
+
+  update();
 })();
 </script>
 
