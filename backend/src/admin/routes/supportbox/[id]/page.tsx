@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../../lib/sdk"
 import { projectLabel } from "../project-labels"
+import { neighborsOf } from "../nav-queue"
 
 /* ═══════════════════════════════════════════════════════════════
    DESIGN SYSTEM — Premium SaaS look
@@ -1366,6 +1367,22 @@ const TicketDetailPage = () => {
   const { id: ticketId } = useParams()
   const navigate = useNavigate()
   const qc = useQueryClient()
+
+  // ─── Queue navigation (Shopify-style ↑/↓) ──────────────────────────────
+  // Neighbours come from the ordered snapshot the list stored on the way in.
+  // up = newer (above), down = older (below), matching the newest-first list.
+  const nav = neighborsOf(ticketId)
+  const goTo = (id: string | null) => { if (id) navigate(`/supportbox/${id}`) }
+  const goPrev = () => goTo(nav.prevId) // newer (↑)
+  const goNext = () => goTo(nav.nextId) // older (↓)
+  // After solve / spam / reply-and-close: advance to the next ticket in the
+  // queue so the operator keeps moving down the inbox; fall back to the list
+  // when there's nothing left below (or the queue is unknown).
+  const advanceAfterAction = () => {
+    if (nav.nextId) navigate(`/supportbox/${nav.nextId}`)
+    else navigate("/supportbox")
+  }
+
   const [reply, setReply] = useState("")
   const [keepOpen, setKeepOpen] = useState(false)
   const [attachments, setAttachments] = useState<{ file: File; base64: string }[]>([])
@@ -1391,6 +1408,31 @@ const TicketDetailPage = () => {
 
   const ticket = data?.ticket
   const orders = data?.allOrders || []
+
+  // Prefetch the neighbours so ↑/↓ switches feel instant (no spinner).
+  useEffect(() => {
+    for (const nid of [nav.prevId, nav.nextId]) {
+      if (!nid) continue
+      qc.prefetchQuery({
+        queryKey: ["supportbox-ticket-detail", nid],
+        queryFn: async () => await sdk.client.fetch(`/admin/supportbox/tickets/${nid}`, { method: "GET" }) as any,
+      })
+    }
+  }, [ticketId, nav.prevId, nav.nextId])
+
+  // Keyboard: ↑/↓ (or k/j) move through the queue. Skipped while typing in the
+  // reply editor or any form field so it never hijacks text entry.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); goNext() }
+      else if (e.key === "ArrowUp" || e.key === "k") { e.preventDefault(); goPrev() }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [nav.prevId, nav.nextId])
 
   // Auto-mark ticket as read when opened
   useEffect(() => {
@@ -1429,7 +1471,7 @@ const TicketDetailPage = () => {
       qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
       qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
       if (!keepOpen) {
-        navigate("/supportbox")
+        advanceAfterAction()
       }
     },
   })
@@ -1439,7 +1481,7 @@ const TicketDetailPage = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
       qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
-      navigate("/supportbox")
+      advanceAfterAction()
     },
   })
 
@@ -1453,7 +1495,7 @@ const TicketDetailPage = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["supportbox-ticket-detail", ticketId] })
       qc.invalidateQueries({ queryKey: ["supportbox-tickets"] })
-      navigate("/supportbox")
+      advanceAfterAction()
     },
   })
 
@@ -1667,6 +1709,36 @@ const TicketDetailPage = () => {
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke={D.textSec} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </div>
           </Link>
+
+          {/* Queue navigation — ↑ newer / ↓ older, through the list you came from */}
+          {nav.index >= 0 && nav.total > 1 && (
+            <div className="sb-nav-queue" style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+              <button onClick={goPrev} disabled={!nav.prevId} title="Novější ticket (↑)"
+                style={{
+                  width: "30px", height: "30px", borderRadius: "6px",
+                  backgroundColor: nav.prevId ? D.inset : "transparent",
+                  border: `1px solid ${D.border}`, display: "flex", alignItems: "center",
+                  justifyContent: "center", cursor: nav.prevId ? "pointer" : "not-allowed",
+                  opacity: nav.prevId ? 1 : 0.45, padding: 0,
+                }}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 10l4-4 4 4" stroke={nav.prevId ? D.textSec : D.textFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <button onClick={goNext} disabled={!nav.nextId} title="Starší ticket (↓)"
+                style={{
+                  width: "30px", height: "30px", borderRadius: "6px",
+                  backgroundColor: nav.nextId ? D.inset : "transparent",
+                  border: `1px solid ${D.border}`, display: "flex", alignItems: "center",
+                  justifyContent: "center", cursor: nav.nextId ? "pointer" : "not-allowed",
+                  opacity: nav.nextId ? 1 : 0.45, padding: 0,
+                }}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke={nav.nextId ? D.textSec : D.textFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: D.textMuted, marginLeft: "2px", whiteSpace: "nowrap", flexShrink: 0 }}>
+                {nav.index + 1} / {nav.total}
+              </span>
+            </div>
+          )}
+
           <h1 className="sb-header-subject" style={{ fontSize: "16px", fontWeight: 700, color: D.text, margin: 0, lineHeight: 1.3, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {ticket.subject}
           </h1>

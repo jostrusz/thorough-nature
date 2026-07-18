@@ -7,6 +7,7 @@ import { Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../lib/sdk"
 import { projectLabel } from "./project-labels"
+import { saveNavQueue } from "./nav-queue"
 
 // ═══════════════════════════════════════════
 // FULL-WIDTH OVERRIDE
@@ -858,6 +859,14 @@ const SupportBoxDashboard = () => {
       : +new Date(b.created_at)
     return bLatest - aLatest
   })
+
+  // Publish the on-screen order so the detail page can navigate ↑/↓ through the
+  // exact queue the operator is looking at (same filter + sort). Keyed on the id
+  // string so it only rewrites when the queue actually changes, not every render.
+  const ticketIdsKey = tickets.map((t: any) => t.id).join(",")
+  useEffect(() => {
+    saveNavQueue(ticketIdsKey ? ticketIdsKey.split(",") : [])
+  }, [ticketIdsKey])
 
   // Count new tickets per config — comes from /counts per_config breakdown.
   const newPerConfig = (configId: string) => perConfigCounts[configId] || 0
