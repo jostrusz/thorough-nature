@@ -109,7 +109,14 @@ export const HlOrderPlacedTemplate: React.FC<HlOrderPlacedTemplateProps> & {
     (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
     0
   )
-  const shippingTotal = order.summary?.shipping_total ?? 0
+  // order_summary.totals carries only payment-level figures — it has no
+  // shipping_total key — so fall back to the shipping method, where the real
+  // fee lives. Without this, paid delivery renders as free.
+  const shippingFromMethods = (order.shipping_methods || []).reduce(
+    (sum: number, m: any) => sum + (Number(m.amount) || 0),
+    0
+  )
+  const shippingTotal = order.summary?.shipping_total ?? shippingFromMethods
   const taxTotal = order.summary?.tax_total ?? 0
   const total = order.summary?.current_order_total ?? subtotal + shippingTotal
 

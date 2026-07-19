@@ -18,8 +18,10 @@ export default async function orderPlacedHandler({
   // ── Idempotency: prevent duplicate order confirmation emails (e.g. after server restart) ──
   if (await shouldSkipDuplicate(orderModuleService, data.id, 'order_confirmation_sent', 'OrderPlaced')) return
 
+  // shipping_methods is needed for the shipping line: order_summary.totals has
+  // no shipping_total key, so the fee only exists on the shipping method.
   const order = await orderModuleService.retrieveOrder(data.id, {
-    relations: ['items', 'summary', 'shipping_address', 'billing_address'],
+    relations: ['items', 'summary', 'shipping_address', 'billing_address', 'shipping_methods'],
   })
 
   // ── Enrich line items with the official product image from admin ──

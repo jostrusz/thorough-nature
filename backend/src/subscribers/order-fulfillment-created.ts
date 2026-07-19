@@ -26,7 +26,7 @@ export default async function orderFulfillmentCreatedHandler({
     const fulfillmentId = data.fulfillment_id
 
     const order = await orderModuleService.retrieveOrder(orderId, {
-      relations: ['items', 'shipping_address'],
+      relations: ['items', 'shipping_address', 'shipping_methods'],
     })
 
     // Retrieve full shipping address

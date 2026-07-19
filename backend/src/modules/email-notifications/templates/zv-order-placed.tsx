@@ -90,7 +90,14 @@ export const ZvOrderPlacedTemplate: React.FC<ZvOrderPlacedTemplateProps> & {
     0
   )
   // Use non-raw summary values (major units) — raw_* values can be in minor units (haléře)
-  const shippingTotal = order.summary?.shipping_total ?? 0
+  // order_summary.totals carries only payment-level figures — it has no
+  // shipping_total key — so fall back to the shipping method, where the real
+  // fee lives. Without this, paid delivery renders as free.
+  const shippingFromMethods = (order.shipping_methods || []).reduce(
+    (sum: number, m: any) => sum + (Number(m.amount) || 0),
+    0
+  )
+  const shippingTotal = order.summary?.shipping_total ?? shippingFromMethods
   const taxTotal = order.summary?.tax_total ?? 0
   const total = order.summary?.current_order_total ?? subtotal + shippingTotal
 

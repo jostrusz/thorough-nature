@@ -37,8 +37,10 @@ export default async function orderPlacedAdminNotificationHandler({
 
     const notificationModuleService: INotificationModuleService = container.resolve(Modules.NOTIFICATION)
 
+    // shipping_methods is needed for the shipping line: order_summary.totals has
+    // no shipping_total key, so the fee only exists on the shipping method.
     const order = await orderModuleService.retrieveOrder(data.id, {
-      relations: ['items', 'summary', 'shipping_address'],
+      relations: ['items', 'summary', 'shipping_address', 'shipping_methods'],
     })
 
     // Get shipping address

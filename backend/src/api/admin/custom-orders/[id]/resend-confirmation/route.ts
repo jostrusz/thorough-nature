@@ -24,7 +24,7 @@ export async function POST(
     const orderModuleService = req.scope.resolve(Modules.ORDER) as any
 
     const order = await orderModuleService.retrieveOrder(id, {
-      relations: ["items", "summary", "shipping_address", "billing_address"],
+      relations: ["items", "summary", "shipping_address", "billing_address", "shipping_methods"],
     })
 
     if (!order?.email) {

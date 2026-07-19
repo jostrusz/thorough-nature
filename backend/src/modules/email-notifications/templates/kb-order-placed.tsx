@@ -115,7 +115,14 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
     0
   )
   // Use non-raw summary values (major units like 550 Kč), NOT raw values (minor units like 55000 haléřů)
-  const shippingTotal = order.summary?.shipping_total ?? 0
+  // order_summary.totals carries only payment-level figures — it has no
+  // shipping_total key — so fall back to the shipping method, where the real
+  // fee lives. Without this, paid delivery renders as free.
+  const shippingFromMethods = (order.shipping_methods || []).reduce(
+    (sum: number, m: any) => sum + (Number(m.amount) || 0),
+    0
+  )
+  const shippingTotal = order.summary?.shipping_total ?? shippingFromMethods
   const taxTotal = order.summary?.tax_total ?? 0
   const codFee = Number(order.metadata?.cod_fee) || 0
   const shippingFee = Number(order.metadata?.shipping_fee) || 0
