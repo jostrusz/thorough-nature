@@ -20,6 +20,16 @@ function s3(): S3Client {
   })
 }
 
+/** Upload a raw image buffer to MinIO under `key`, return public URL. */
+export async function uploadBuffer(buf: Buffer, key: string, contentType = "image/jpeg"): Promise<string> {
+  await s3().send(new PutObjectCommand({
+    Bucket: BUCKET, Key: key, Body: buf, ContentType: contentType, ACL: "public-read",
+  }))
+  const pub = (process.env.MINIO_PUBLIC_ENDPOINT || "https://bucket-production-b93e.up.railway.app")
+    .replace(/:443$/, "")
+  return `${pub}/${BUCKET}/${key}`
+}
+
 export async function mirrorImage(url: string, key: string): Promise<string | null> {
   try {
     const res = await fetch(url)

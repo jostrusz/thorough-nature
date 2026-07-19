@@ -37,7 +37,20 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
   })
 
   const off = Number(offset), lim = Number(limit)
-  res.json({ creatives: rows.slice(off, off + lim), count: rows.length })
+  const page = rows.slice(off, off + lim)
+
+  // attach image variants so the UI can render variant strips in one call
+  const ids = page.map((r: any) => r.id)
+  const variants = ids.length
+    ? await svc.listAdVariants({ creative_id: ids }, { take: 1000, order: { variant_no: "ASC" } })
+    : []
+  const byCreative: Record<string, any[]> = {}
+  for (const v of variants) (byCreative[v.creative_id] = byCreative[v.creative_id] || []).push(v)
+
+  res.json({
+    creatives: page.map((r: any) => ({ ...r, variants: byCreative[r.id] || [] })),
+    count: rows.length,
+  })
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {

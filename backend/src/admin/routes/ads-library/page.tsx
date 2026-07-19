@@ -4,9 +4,11 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../lib/sdk"
 
-/* ─────────────────────────────────────────────────────────────
- * Knihovna reklam — databáze FB kreativ + živý výkon z Meta API
- * ──────────────────────────────────────────────────────────── */
+/* ═════════════════════════════════════════════════════════════
+ * Knihovna reklam v2 — rodiny s jazykovými verzemi, lokalizační
+ * wizard (modely / režimy / prompty / varianty), fronta jobů,
+ * živý výkon z Meta API a odeslání PAUSED reklamy do účtu.
+ * ════════════════════════════════════════════════════════════ */
 
 const PROJECTS: Record<string, { flag: string; lang: string }> = {
   loslatenboek: { flag: "🇳🇱", lang: "NL" }, "het-leven": { flag: "🇳🇱", lang: "NL" },
@@ -21,38 +23,69 @@ const PROJECTS: Record<string, { flag: string; lang: string }> = {
 const RANGES = [["3d", "3 dny"], ["7d", "7 dní"], ["14d", "14 dní"], ["30d", "30 dní"],
   ["90d", "3 měs."], ["180d", "6 měs."], ["365d", "1 rok"]]
 
-const S = {
-  card: { background: "var(--bg-base, #fff)", border: "1px solid var(--border-base, #e5e7eb)", borderRadius: 10 } as any,
-  chip: { fontSize: 11, padding: "1px 8px", borderRadius: 999, background: "var(--bg-subtle, #f3f4f6)", whiteSpace: "nowrap" } as any,
-  btn: { fontSize: 13, padding: "6px 12px", borderRadius: 8, border: "1px solid var(--border-base, #d1d5db)", background: "var(--bg-base, #fff)", cursor: "pointer" } as any,
-  btnPri: { fontSize: 13, padding: "6px 12px", borderRadius: 8, border: "1px solid #7c3aed", background: "#7c3aed", color: "#fff", cursor: "pointer", fontWeight: 600 } as any,
-  input: { fontSize: 13, padding: "7px 10px", borderRadius: 8, border: "1px solid var(--border-base, #d1d5db)", background: "var(--bg-base, #fff)" } as any,
-  mono: { fontFamily: "ui-monospace, Menlo, monospace", fontVariantNumeric: "tabular-nums" } as any,
+const IMG_PROMPTS = {
+  swap: "Replace the book cover in the image with the reference cover exactly (same angle, perspective and lighting). If the image contains a headline or any other text, translate it naturally into {LANG}. Preserve the composition, hands, environment and all other details.",
+  texts: "Translate all visible text in the image into {LANG}. Keep the composition, style, colors, objects and every other detail exactly the same.",
 }
+const PROMPT_916 = "Reframe to 9:16 portrait. Extend the environment upward and downward using consistent perspective and atmospheric depth. Preserve all original details and the overall aesthetic."
 
+const S = {
+  card: { background: "var(--bg-base,#fff)", border: "1.5px solid var(--border-base,#e5e7eb)", borderRadius: 12 } as any,
+  chip: { fontSize: 12, padding: "2px 9px", borderRadius: 999, background: "var(--bg-subtle,#f3f4f6)", whiteSpace: "nowrap", fontWeight: 550 } as any,
+  btn: { fontSize: 13.5, padding: "7px 13px", borderRadius: 10, border: "1.5px solid var(--border-base,#d1d5db)", background: "var(--bg-base,#fff)", cursor: "pointer", fontWeight: 550 } as any,
+  btnPri: { fontSize: 13.5, padding: "7px 13px", borderRadius: 10, border: "1.5px solid #7c3aed", background: "#7c3aed", color: "#fff", cursor: "pointer", fontWeight: 650 } as any,
+  input: { fontSize: 13.5, padding: "8px 11px", borderRadius: 9, border: "1.5px solid var(--border-base,#d1d5db)", background: "var(--bg-base,#fff)", width: "100%" } as any,
+  mono: { fontFamily: "ui-monospace,Menlo,monospace", fontVariantNumeric: "tabular-nums" } as any,
+  eyebrow: { fontFamily: "ui-monospace,Menlo,monospace", fontSize: 10.5, letterSpacing: ".1em", textTransform: "uppercase", color: "#6b7280" } as any,
+  ptext: { width: "100%", fontFamily: "ui-monospace,Menlo,monospace", fontSize: 12, lineHeight: 1.5, border: "1.5px solid var(--border-base,#d1d5db)", borderRadius: 9, background: "var(--bg-subtle,#f9fafb)", padding: "8px 10px", resize: "vertical", minHeight: 56, margin: "4px 0 10px" } as any,
+}
 const fmtEur = (n: number) => (n || 0).toLocaleString("cs-CZ", { maximumFractionDigits: 0 }) + " €"
 
-/* ── Knihovna tab ── */
-function LibraryTab() {
+/* ── hover zoom ── */
+function useZoom() {
+  const [z, setZ] = useState<any>(null)
+  const move = (e: any) => setZ((p: any) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))
+  const show = (e: any, url: string, label?: string) => setZ({ url, label, x: e.clientX, y: e.clientY })
+  const hide = () => setZ(null)
+  const el = z ? (
+    <div style={{ position: "fixed", zIndex: 90, pointerEvents: "none",
+      left: Math.min(z.x + 18, (window.innerWidth || 1200) - 360), top: Math.max(8, Math.min(z.y - 190, (window.innerHeight || 800) - 400)),
+      boxShadow: "0 18px 50px rgba(15,8,18,.4)", borderRadius: 14, overflow: "hidden", border: "1px solid #d1d5db", background: "#fff" }}>
+      <img src={z.url} alt="" style={{ width: 340, height: 340, objectFit: "contain", display: "block", background: "#111" }} />
+      {z.label && <div style={{ fontSize: 11, padding: "5px 10px", textAlign: "center", color: "#6b7280" }}>{z.label}</div>}
+    </div>
+  ) : null
+  return { show, hide, move, el }
+}
+
+/* ═══ Knihovna ═══ */
+function LibraryTab({ zoom }: any) {
   const qc = useQueryClient()
-  const [q, setQ] = useState(""); const [project, setProject] = useState("")
-  const [tag, setTag] = useState(""); const [sort, setSort] = useState("date")
+  const [q, setQ] = useState(""); const [project, setProject] = useState(""); const [tag, setTag] = useState("")
   const [checked, setChecked] = useState<Record<string, string[]>>({})
-  const [open, setOpen] = useState<Record<string, boolean>>({})
-  const [modal, setModal] = useState<any>(null) // { creative, target, preview }
+  const [openTexts, setOpenTexts] = useState<Record<string, boolean>>({})
+  const [openFam, setOpenFam] = useState<Record<string, boolean>>({})
+  const [wizard, setWizard] = useState<any>(null)
+  const [metaModal, setMetaModal] = useState<any>(null)
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ads-lib", q, project, tag, sort],
-    queryFn: () => sdk.client.fetch(
-      `/admin/ads-library/creatives?q=${encodeURIComponent(q)}&project=${project}&tag=${tag}&sort=${sort}`,
-      { method: "GET" }
-    ),
+    queryKey: ["ads-lib", q, project, tag],
+    queryFn: () => sdk.client.fetch(`/admin/ads-library/creatives?q=${encodeURIComponent(q)}&project=${project}&tag=${tag}&limit=200`, { method: "GET" }),
   })
   const creatives = data?.creatives || []
+  const byId = useMemo(() => Object.fromEntries(creatives.map((c: any) => [c.id, c])), [creatives])
+  const roots = creatives.filter((c: any) => !c.translated_from_id || !byId[c.translated_from_id])
+  const kidsOf = (id: string) => creatives.filter((c: any) => c.translated_from_id === id)
 
-  const translate = useMutation({
-    mutationFn: async ({ id, body }: any) =>
-      sdk.client.fetch(`/admin/ads-library/creatives/${id}/translate`, { method: "POST", body }),
+  const official = useMutation({
+    mutationFn: ({ id, variant_id }: any) =>
+      sdk.client.fetch(`/admin/ads-library/creatives/${id}/variants`, { method: "POST", body: { action: "official", variant_id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ads-lib"] }),
+  })
+  const genMore = useMutation({
+    mutationFn: ({ id, format }: any) =>
+      sdk.client.fetch(`/admin/ads-library/creatives/${id}/variants`, { method: "POST", body: { action: "generate", format } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ads-lib"] }),
   })
 
   const tick = (id: string, key: string) => setChecked((c) => {
@@ -61,353 +94,529 @@ function LibraryTab() {
     return { ...c, [id]: arr }
   })
 
-  const runPreview = async () => {
-    const sel = checked[modal.creative.id] || []
-    const body = {
-      target_project: modal.target,
-      primary_indexes: sel.filter((k) => k[0] === "P").map((k) => +k.slice(1)),
-      headline_indexes: sel.filter((k) => k[0] === "H").map((k) => +k.slice(1)),
+  const Card = ({ a, isChild }: any) => {
+    const sel = checked[a.id] || []
+    const tOpen = openTexts[a.id]
+    const P = a.primary_texts || [], H = a.headlines || []
+    const kids = kidsOf(a.id)
+    const famOpen = openFam[a.id]
+    const img = a.image_1x1_url || a.video_thumb_url
+    const generating = a.metadata?.generating
+    const failed = a.metadata?.failed
+    const row = (t: string, i: number, pref: string) => {
+      const key = pref + i, on = sel.includes(key)
+      return (
+        <label key={key} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "4px 8px", borderRadius: 8, cursor: "pointer", fontSize: 14 }}>
+          <input type="checkbox" checked={on} onChange={() => tick(a.id, key)} style={{ marginTop: 4, accentColor: "#7c3aed", flexShrink: 0 }} />
+          <span style={{ ...S.mono, fontSize: 10.5, color: "#9ca3af", width: 26, flexShrink: 0, paddingTop: 3, fontWeight: 700 }}>{pref}{i + 1}</span>
+          <span style={{ minWidth: 0, overflowWrap: "anywhere" }}>{t}</span>
+        </label>)
     }
-    const res = await translate.mutateAsync({ id: modal.creative.id, body })
-    setModal((m: any) => ({ ...m, preview: res.translation }))
-  }
-  const savePreview = async () => {
-    await translate.mutateAsync({
-      id: modal.creative.id,
-      body: { target_project: modal.target, save: true, edited: modal.preview },
-    })
-    setModal(null); setChecked({})
-    qc.invalidateQueries({ queryKey: ["ads-lib"] })
+    return (
+      <div style={{ ...S.card, overflow: "visible" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", padding: "12px 16px", borderBottom: "1px solid var(--border-base,#e5e7eb)" }}>
+          <b style={{ fontSize: isChild ? 14.5 : 15.5, overflowWrap: "anywhere" }}>{a.name}</b>
+          <span style={S.chip}>{PROJECTS[a.project_id]?.flag || "🌐"} {a.language}</span>
+          <span style={S.chip}>{a.project_id}</span>
+          {a.tag === "winner" && <span style={{ ...S.chip, background: "#dcfce7", color: "#15803d" }}>🏆 winner</span>}
+          {a.source === "translation" && <span style={{ ...S.chip, background: "#ede9fe", color: "#7c3aed" }}>🍌 lokalizace</span>}
+          {a.meta_ad_id && <span style={{ ...S.chip, background: "#dcfce7", color: "#15803d" }}>🚀 v Meta účtu</span>}
+          {generating && <span style={{ ...S.chip, background: "#fef3c7", color: "#b45309" }}>⏳ generuje se…</span>}
+          {failed && <span style={{ ...S.chip, background: "#fee2e2", color: "#b91c1c" }} title={failed}>⚠️ chyba</span>}
+          <span style={{ ...S.mono, fontSize: 12, color: "#6b7280", marginLeft: "auto" }}>
+            {a.perf ? <>ROAS <b style={{ color: "#111827" }}>{(a.perf.roas || 0).toFixed(1)}×</b> · {a.perf.sales || 0} prodejů</> : "zatím bez dat"}
+          </span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: isChild ? "104px minmax(0,1fr)" : "136px minmax(0,1fr)", gap: 18, padding: "14px 16px" }}>
+          <div style={{ textAlign: "center" }}>
+            {img ? (
+              <img src={img} alt={a.name}
+                onMouseEnter={(e) => zoom.show(e, img, a.name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                style={{ width: isChild ? 100 : 132, height: isChild ? 100 : 132, objectFit: "cover", borderRadius: 10, border: "1px solid #e5e7eb", cursor: "zoom-in" }} />
+            ) : (
+              <div style={{ width: isChild ? 100 : 132, height: isChild ? 100 : 132, borderRadius: 10, background: "var(--bg-subtle,#f3f4f6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto" }}>
+                {generating ? "⏳" : "🖼️"}
+              </div>)}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            {tOpen ? (<>
+              <span style={S.eyebrow}>Primary texty</span>
+              {P.map((t: string, i: number) => row(t, i, "P"))}
+              <span style={{ ...S.eyebrow, display: "block", marginTop: 6 }}>Headliny</span>
+              {H.map((t: string, i: number) => row(t, i, "H"))}
+              <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "4px" }} onClick={() => setOpenTexts((o) => ({ ...o, [a.id]: false }))}>Sbalit texty ▴</button>
+            </>) : (<>
+              <div style={{ fontSize: 14, color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><b style={{ ...S.mono, fontSize: 10.5, color: "#111827", marginRight: 6 }}>P1</b>{P[0] || "—"}</div>
+              <div style={{ fontSize: 14, color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><b style={{ ...S.mono, fontSize: 10.5, color: "#111827", marginRight: 6 }}>H1</b>{H[0] || "—"}</div>
+              <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "4px" }} onClick={() => setOpenTexts((o) => ({ ...o, [a.id]: true }))}>📖 Zobrazit všechny texty ({P.length + H.length}) ▾</button>
+            </>)}
+            {a.translated_from_id && byId[a.translated_from_id] &&
+              <div style={{ fontSize: 12.5, color: "#6b7280", marginTop: 5 }}>🍌 lokalizováno z: <b>{byId[a.translated_from_id].name}</b></div>}
+            {a.variants?.length > 0 && (
+              <div style={{ display: "flex", gap: 7, alignItems: "center", flexWrap: "wrap", marginTop: 9 }}>
+                <span style={{ fontSize: 11.5, color: "#6b7280" }}>🎛️ Varianty ({a.variants.length}):</span>
+                {a.variants.map((v: any) => (
+                  <span key={v.id} title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}`}
+                    onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}`)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                    onClick={() => official.mutate({ id: a.id, variant_id: v.id })}
+                    style={{ width: v.format === "1:1" ? 44 : 26, height: 44, borderRadius: 8, position: "relative", cursor: "pointer", overflow: "hidden",
+                      border: v.is_official ? "2px solid #15803d" : "2px solid var(--border-base,#e5e7eb)", boxShadow: v.is_official ? "0 0 0 2px #dcfce7" : "none" }}>
+                    <img src={v.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    {v.is_official && <span style={{ position: "absolute", top: -1, right: 0, fontSize: 9 }}>✅</span>}
+                  </span>))}
+                <button style={{ ...S.btn, padding: "4px 9px", fontSize: 12 }} disabled={genMore.isPending}
+                  onClick={() => genMore.mutate({ id: a.id, format: "1:1" })}>{genMore.isPending ? "…" : "＋"}</button>
+              </div>)}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", padding: "10px 16px", borderTop: "1px solid var(--border-base,#e5e7eb)", background: "var(--bg-subtle,#f9fafb)", borderRadius: "0 0 12px 12px" }}>
+          <button style={sel.length ? S.btnPri : { ...S.btnPri, opacity: .4, cursor: "not-allowed" }} disabled={!sel.length}
+            onClick={() => setWizard({ creative: a, sel })}>🌍 Lokalizovat ({sel.length})</button>
+          {img && <a href={img} target="_blank" rel="noreferrer" style={{ ...S.btn, textDecoration: "none", color: "inherit", display: "inline-flex", alignItems: "center" }}>⬇️ Obrázky</a>}
+          <button style={S.btn} onClick={() => setMetaModal({ creative: a })}>🚀 Do Meta účtu</button>
+          {kids.length > 0 && (
+            <button style={{ ...S.btn, marginLeft: "auto", borderColor: "#ede9fe", background: "#ede9fe", color: "#7c3aed" }}
+              onClick={() => setOpenFam((o) => ({ ...o, [a.id]: !famOpen }))}>
+              🌍 Jazykové verze <b>{kids.length}</b> {famOpen ? "▴" : "▾"}</button>)}
+        </div>
+      </div>)
   }
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-        <input style={{ ...S.input, flex: 1, minWidth: 200 }} placeholder="🔍 Hledat v textech…"
-          value={q} onChange={(e) => setQ(e.target.value)} />
-        <select style={S.input} value={project} onChange={(e) => setProject(e.target.value)}>
+      <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginBottom: 14 }}>
+        <input style={{ ...S.input, flex: 1, minWidth: 200 }} placeholder="🔍 Hledat v textech…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <select style={{ ...S.input, width: "auto" }} value={project} onChange={(e) => setProject(e.target.value)}>
           <option value="">Projekt: všechny</option>
           {Object.entries(PROJECTS).map(([k, v]) => <option key={k} value={k}>{v.flag} {k}</option>)}
         </select>
-        <select style={S.input} value={tag} onChange={(e) => setTag(e.target.value)}>
-          <option value="">Štítek: vše</option><option value="winner">🏆 winner</option>
-          <option value="test">🧪 testuje se</option><option value="evergreen">🌲 evergreen</option>
+        <select style={{ ...S.input, width: "auto" }} value={tag} onChange={(e) => setTag(e.target.value)}>
+          <option value="">Štítek: vše</option><option value="winner">🏆 winner</option><option value="test">🧪 test</option>
         </select>
-        <select style={S.input} value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="date">Řadit: datum</option><option value="roas">Řadit: ROAS</option>
-          <option value="sales">Řadit: prodeje</option><option value="cpa">Řadit: CPA</option>
-        </select>
-        <span style={{ fontSize: 12, color: "var(--fg-muted, #6b7280)", alignSelf: "center", marginLeft: "auto" }}>
-          {data?.count ?? "…"} reklam
-        </span>
+        <span style={{ fontSize: 12.5, color: "#6b7280", alignSelf: "center", marginLeft: "auto" }}>{data?.count ?? "…"} reklam</span>
       </div>
-
-      {isLoading && <div style={{ padding: 30, textAlign: "center", color: "#6b7280" }}>Načítám knihovnu…</div>}
-      {!isLoading && !creatives.length && (
-        <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>
-          Knihovna je prázdná — přidej vítěze ze záložky <b>🏆 Výkon</b>.
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px, 1fr))", gap: 12 }}>
-        {creatives.map((a: any) => {
-          const sel = checked[a.id] || []
-          const isOpen = open[a.id]
-          const P = a.primary_texts || [], H = a.headlines || []
-          const rows = [
-            ...P.map((t: string, i: number) => ({ key: `P${i}`, label: `P${i + 1}`, text: t })),
-            ...H.map((t: string, i: number) => ({ key: `H${i}`, label: `H${i + 1}`, text: t })),
-          ]
-          const visible = isOpen ? rows : rows.slice(0, 3)
-          return (
-            <div key={a.id} style={{ ...S.card, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", gap: 12, padding: 12, flex: 1 }}>
-                <div style={{ flexShrink: 0, width: 96, textAlign: "center" }}>
-                  {a.image_1x1_url || a.video_thumb_url ? (
-                    <img src={a.image_1x1_url || a.video_thumb_url} alt={a.name}
-                      style={{ width: 96, height: 96, objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }} />
-                  ) : (
-                    <div style={{ width: 96, height: 96, borderRadius: 8, background: "#f3f4f6",
-                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>
-                      {a.media_type === "video" ? "🎬" : "🖼️"}
-                    </div>
-                  )}
-                  <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 4 }}>{a.media_type}</div>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                    <b style={{ fontSize: 13.5 }}>{a.name}</b>
-                    <span style={S.chip}>{PROJECTS[a.project_id]?.flag || "🌐"} {a.language}</span>
-                    <span style={S.chip}>{a.project_id}</span>
-                    {a.tag === "winner" && <span style={{ ...S.chip, background: "#dcfce7", color: "#15803d", fontWeight: 600 }}>🏆 winner</span>}
-                    {a.source === "translation" && <span style={{ ...S.chip, background: "#ede9fe", color: "#7c3aed" }}>🌍 překlad</span>}
-                  </div>
-                  {a.perf && (
-                    <div style={{ ...S.mono, fontSize: 11, color: "#6b7280", margin: "4px 0 6px" }}>
-                      ROAS <b style={{ color: "#111827" }}>{(a.perf.roas || 0).toFixed(1)}×</b> · {a.perf.sales || 0} prodejů
-                      · CPA {(a.perf.cpa || 0).toFixed(1)} € · CTR {(a.perf.ctr || 0).toFixed(2)} %
-                    </div>
-                  )}
-                  <div style={{ fontSize: 12.5, marginTop: 4 }}>
-                    {visible.map((r) => (
-                      <label key={r.key} style={{ display: "flex", gap: 7, padding: "2px 0", cursor: "pointer", alignItems: "flex-start" }}>
-                        <input type="checkbox" checked={sel.includes(r.key)} onChange={() => tick(a.id, r.key)} style={{ marginTop: 3 }} />
-                        <span style={{ ...S.mono, fontSize: 10, color: "#9ca3af", width: 26, flexShrink: 0, paddingTop: 2 }}>{r.label}</span>
-                        <span style={isOpen ? {} : { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.text}</span>
-                      </label>
-                    ))}
-                    {rows.length > 3 && (
-                      <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "2px 0", fontSize: 12 }}
-                        onClick={() => setOpen((o) => ({ ...o, [a.id]: !isOpen }))}>
-                        {isOpen ? "Sbalit ▴" : `＋ ${rows.length - 3} dalších textů ▾`}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 6, padding: "8px 12px", borderTop: "1px solid #e5e7eb", background: "var(--bg-subtle, #f9fafb)" }}>
-                <button style={sel.length ? S.btnPri : { ...S.btn, opacity: 0.5, cursor: "not-allowed" }}
-                  disabled={!sel.length}
-                  onClick={() => setModal({ creative: a, target: "lache-livre", preview: null })}>
-                  🌍 Přeložit vybrané ({sel.length})
-                </button>
-                <span style={{ marginLeft: "auto", fontSize: 11, color: "#9ca3af", alignSelf: "center" }}>
-                  {new Date(a.created_at).toLocaleDateString("cs-CZ")}
-                </span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {modal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 60,
-          display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "6vh 16px" }}
-          onClick={(e) => e.target === e.currentTarget && setModal(null)}>
-          <div style={{ ...S.card, maxWidth: 620, width: "100%", maxHeight: "85vh", overflow: "auto", background: "#fff" }}>
-            <div style={{ padding: "13px 18px", borderBottom: "1px solid #e5e7eb", display: "flex" }}>
-              <b>🌍 Přeložit — {modal.creative.name}</b>
-              <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={() => setModal(null)}>✕</button>
-            </div>
-            <div style={{ padding: "14px 18px" }}>
-              <label style={{ fontSize: 11, color: "#6b7280", display: "block", marginBottom: 5 }}>CÍLOVÝ PROJEKT</label>
-              <select style={{ ...S.input, width: "100%" }} value={modal.target}
-                onChange={(e) => setModal((m: any) => ({ ...m, target: e.target.value, preview: null }))}>
-                {Object.entries(PROJECTS).filter(([k]) => k !== modal.creative.project_id)
-                  .map(([k, v]) => <option key={k} value={k}>{v.flag} {k} — {v.lang}</option>)}
-              </select>
-              <div style={{ fontSize: 11, color: "#6b7280", margin: "8px 0 14px" }}>
-                AI adaptuje texty s kontextem cílové knihy (tón, tykání, fakta) — ne doslovný překlad.
-              </div>
-              {modal.preview && (
-                <div style={{ border: "1px solid #7c3aed", borderRadius: 8, padding: 12, background: "#faf5ff" }}>
-                  {(modal.preview.primaries || []).map((p: string, i: number) => (
-                    <div key={`p${i}`} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 3 }}>PRIMARY {i + 1}</div>
-                      <textarea style={{ ...S.input, width: "100%", minHeight: 70 }} value={p}
-                        onChange={(e) => setModal((m: any) => {
-                          const pr = { ...m.preview }; pr.primaries = [...pr.primaries]; pr.primaries[i] = e.target.value
-                          return { ...m, preview: pr }
-                        })} />
-                    </div>
-                  ))}
-                  {(modal.preview.headlines || []).map((h: string, i: number) => (
-                    <div key={`h${i}`} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 10, color: "#6b7280", marginBottom: 3 }}>HEADLINE {i + 1}</div>
-                      <input style={{ ...S.input, width: "100%" }} value={h}
-                        onChange={(e) => setModal((m: any) => {
-                          const pr = { ...m.preview }; pr.headlines = [...pr.headlines]; pr.headlines[i] = e.target.value
-                          return { ...m, preview: pr }
-                        })} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end" }}>
-              <button style={S.btn} onClick={() => setModal(null)}>Zavřít</button>
-              {!modal.preview ? (
-                <button style={S.btnPri} disabled={translate.isPending} onClick={runPreview}>
-                  {translate.isPending ? "Překládám…" : "Přeložit →"}
-                </button>
-              ) : (
-                <button style={S.btnPri} disabled={translate.isPending} onClick={savePreview}>
-                  {translate.isPending ? "Ukládám…" : "💾 Uložit do knihovny"}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+      {isLoading && <div style={{ padding: 30, textAlign: "center", color: "#6b7280" }}>Načítám…</div>}
+      {!isLoading && !creatives.length &&
+        <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>Knihovna je prázdná — importuj vítěze ze záložky 🏆 Výkon.</div>}
+      {roots.map((a: any) => {
+        const kids = kidsOf(a.id)
+        return (
+          <div key={a.id} style={{ marginBottom: 16 }}>
+            <Card a={a} isChild={false} />
+            {kids.length > 0 && openFam[a.id] && (
+              <div style={{ position: "relative", marginLeft: 34, paddingLeft: 30, paddingTop: 14 }}>
+                <div style={{ position: "absolute", left: 0, top: -4, bottom: 44, width: 2.5, background: "#d8b4fe", borderRadius: 3 }} />
+                {kids.map((k: any) => (
+                  <div key={k.id} style={{ position: "relative", marginBottom: 14 }}>
+                    <div style={{ position: "absolute", left: -30, top: -16, width: 28, height: 46, borderLeft: "2.5px solid #d8b4fe", borderBottom: "2.5px solid #d8b4fe", borderBottomLeftRadius: 16 }} />
+                    <Card a={k} isChild={true} />
+                  </div>))}
+              </div>)}
+          </div>)
+      })}
+      {wizard && <LocalizeWizard wizard={wizard} onClose={() => { setWizard(null); qc.invalidateQueries({ queryKey: ["ads-lib"] }); qc.invalidateQueries({ queryKey: ["ads-jobs"] }) }} />}
+      {metaModal && <MetaModal m={metaModal} onClose={() => { setMetaModal(null); qc.invalidateQueries({ queryKey: ["ads-lib"] }) }} />}
+    </div>)
 }
 
-/* ── Výkon tab ── */
-function PerformanceTab() {
+/* ═══ Lokalizační wizard ═══ */
+function LocalizeWizard({ wizard, onClose }: any) {
+  const a = wizard.creative
+  const [targets, setTargets] = useState<string[]>([])
+  const [imgModel, setImgModel] = useState("nano-banana-pro")
+  const [imgMode, setImgMode] = useState<"swap" | "texts">("swap")
+  const [imgPrompt, setImgPrompt] = useState(IMG_PROMPTS.swap)
+  const [p916, setP916] = useState(PROMPT_916)
+  const [imgCount, setImgCount] = useState(2)
+  const [f11, setF11] = useState(true); const [f916, setF916] = useState(true)
+  const [txtModel, setTxtModel] = useState("claude-opus-4-8")
+  const [txtCount, setTxtCount] = useState(1)
+  const [sent, setSent] = useState<any>(null)
+
+  const modelsQ = useQuery({
+    queryKey: ["ads-models"],
+    queryFn: () => sdk.client.fetch("/admin/ads-library/localize", { method: "GET" }),
+  })
+  const imgModels = modelsQ.data?.image_models || []
+  const txtModels = modelsQ.data?.text_models || []
+
+  const run = useMutation({
+    mutationFn: () => sdk.client.fetch("/admin/ads-library/localize", {
+      method: "POST",
+      body: {
+        source_creative_id: a.id, target_projects: targets,
+        img_model: imgModel, img_mode: imgMode, img_prompt: imgPrompt, p916,
+        img_count: imgCount, formats: [...(f11 ? ["1:1"] : []), ...(f916 ? ["9:16"] : [])],
+        txt_model: txtModel, txt_count: txtCount,
+        primary_indexes: wizard.sel.filter((k: string) => k[0] === "P").map((k: string) => +k.slice(1)),
+        headline_indexes: wizard.sel.filter((k: string) => k[0] === "H").map((k: string) => +k.slice(1)),
+      },
+    }),
+    onSuccess: (r: any) => setSent(r),
+  })
+
+  const cnt = (cur: number, set: any, max: number) => (
+    <span style={{ display: "inline-flex", gap: 3, background: "var(--bg-subtle,#f3f4f6)", borderRadius: 999, padding: 3 }}>
+      {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
+        <button key={n} onClick={() => set(n)}
+          style={{ ...S.mono, fontSize: 12.5, padding: "4px 11px", borderRadius: 999, border: "none", cursor: "pointer",
+            background: cur === n ? "#7c3aed" : "transparent", color: cur === n ? "#fff" : "#6b7280", fontWeight: cur === n ? 700 : 400 }}>{n}</button>))}
+    </span>)
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "4vh 16px" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={{ ...S.card, maxWidth: 700, width: "100%", maxHeight: "90vh", overflow: "auto", background: "var(--bg-base,#fff)" }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid #e5e7eb", display: "flex", position: "sticky", top: 0, background: "var(--bg-base,#fff)", zIndex: 2 }}>
+          <b style={{ fontSize: 15.5 }}>🌍 Lokalizovat — {a.name}</b>
+          <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={onClose}>✕</button>
+        </div>
+        <div style={{ padding: "16px 18px" }}>
+          {sent ? (
+            <div style={{ padding: 12 }}>
+              <div style={{ fontSize: 15, fontWeight: 650, marginBottom: 8 }}>🚀 Spuštěno {sent.jobs.length} {sent.jobs.length === 1 ? "job" : "joby"}</div>
+              <div style={{ fontSize: 13.5, color: "#6b7280", lineHeight: 1.6 }}>
+                Generování běží na pozadí — průběh sleduj v záložce <b>⚙️ Fronta</b>. Po dokončení se nová jazyková verze objeví
+                pod originálem se všemi variantami. Můžeš toto okno zavřít.</div>
+            </div>
+          ) : (<>
+            <span style={S.eyebrow}>Cílové projekty</span>
+            <div style={{ display: "flex", gap: 7, flexWrap: "wrap", margin: "8px 0 16px" }}>
+              {Object.entries(PROJECTS).filter(([k]) => k !== a.project_id).map(([k, v]) => (
+                <button key={k} onClick={() => setTargets((t) => t.includes(k) ? t.filter((x) => x !== k) : [...t, k])}
+                  style={{ ...S.btn, borderRadius: 999, padding: "6px 12px", fontSize: 13,
+                    ...(targets.includes(k) ? { borderColor: "#7c3aed", background: "#ede9fe", color: "#7c3aed", fontWeight: 650 } : {}) }}>
+                  {v.flag} {k}</button>))}
+            </div>
+
+            <span style={S.eyebrow}>🖼️ Obrázky</span>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "7px 0 10px", flexWrap: "wrap" }}>
+              <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Model</label>
+              <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={imgModel} onChange={(e) => setImgModel(e.target.value)}>
+                {imgModels.map((m: any) => <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.available ? "" : " — čeká na GEMINI_API_KEY"}</option>)}
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start", margin: "0 0 10px", flexWrap: "wrap" }}>
+              <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62, paddingTop: 9 }}>Režim</label>
+              {[["swap", "🔄 Book swap", "přehodí cover + přeloží headline v obrázku"],
+                ["texts", "✍️ Akviziční", "jen předělá texty v obrázku do jazyka"]].map(([id, label, desc]) => (
+                <label key={id} style={{ display: "inline-flex", alignItems: "flex-start", gap: 8, border: "1.5px solid", borderRadius: 10, padding: "9px 13px", cursor: "pointer", fontSize: 13.5,
+                  borderColor: imgMode === id ? "#7c3aed" : "var(--border-base,#d1d5db)", background: imgMode === id ? "#ede9fe" : "transparent" }}>
+                  <input type="radio" checked={imgMode === id} onChange={() => { setImgMode(id as any); setImgPrompt(IMG_PROMPTS[id]) }} style={{ accentColor: "#7c3aed", marginTop: 3 }} />
+                  <span><b>{label}</b><small style={{ display: "block", color: "#6b7280", fontSize: 11, fontWeight: 400 }}>{desc}</small></span>
+                </label>))}
+            </div>
+            {imgMode === "swap" && (
+              <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12, color: "#6b7280", marginBottom: 9 }}>
+                📖 K promptu se automaticky přiloží <b>referenční cover cílové knihy</b> (registr assetů — per projekt).</div>)}
+            <span style={S.eyebrow}>Prompt — můžeš upravit ({"{LANG}"} = cílový jazyk)</span>
+            <textarea style={S.ptext} value={imgPrompt} onChange={(e) => setImgPrompt(e.target.value)} />
+            <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "0 0 10px" }}>
+              <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Varianty</label>
+              {cnt(imgCount, setImgCount, 4)}
+              <span style={{ fontSize: 12, color: "#6b7280" }}>na každý formát</span>
+            </div>
+            <label style={{ display: "flex", gap: 10, padding: "7px 0", fontSize: 14, cursor: "pointer" }}>
+              <input type="checkbox" checked={f11} onChange={() => setF11(!f11)} style={{ accentColor: "#7c3aed", marginTop: 3 }} />
+              <span><b>1:1 — feed</b><small style={{ display: "block", color: "#6b7280", fontSize: 12 }}>hlavní generování podle promptu výše</small></span>
+            </label>
+            <label style={{ display: "flex", gap: 10, padding: "7px 0", fontSize: 14, cursor: "pointer" }}>
+              <input type="checkbox" checked={f916} onChange={() => setF916(!f916)} style={{ accentColor: "#7c3aed", marginTop: 3 }} />
+              <span><b>9:16 — Reels / Stories</b><small style={{ display: "block", color: "#6b7280", fontSize: 12 }}>automatický reframe z hotové 1:1 (image-to-image)</small></span>
+            </label>
+            {f916 && (<div style={{ margin: "0 0 6px 26px" }}>
+              <span style={S.eyebrow}>Prompt 9:16 reframe</span>
+              <textarea style={S.ptext} value={p916} onChange={(e) => setP916(e.target.value)} />
+            </div>)}
+
+            <span style={{ ...S.eyebrow, display: "block", marginTop: 8 }}>✍️ Texty ({wizard.sel.length} vybraných)</span>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "7px 0 10px", flexWrap: "wrap" }}>
+              <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Model</label>
+              <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={txtModel} onChange={(e) => setTxtModel(e.target.value)}>
+                <optgroup label="Anthropic">
+                  {txtModels.filter((m: any) => m.provider === "anthropic").map((m: any) =>
+                    <option key={m.id} value={m.id} disabled={!m.available}>{m.label}</option>)}
+                </optgroup>
+                <optgroup label="OpenAI">
+                  {txtModels.filter((m: any) => m.provider === "openai").map((m: any) =>
+                    <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.available ? "" : " — čeká na OPENAI_API_KEY"}</option>)}
+                </optgroup>
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "0 0 12px" }}>
+              <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Varianty</label>
+              {cnt(txtCount, setTxtCount, 3)}
+              <span style={{ fontSize: 12, color: "#6b7280" }}>nezávislé překlady (uloží se všechny)</span>
+            </div>
+            <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12, color: "#6b7280" }}>
+              Všechny varianty se uloží (MinIO + DB) — oficiální pak označíš na kartě. CTA, cena a odkaz jdou ze statické mapy projektu.</div>
+          </>)}
+        </div>
+        <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
+          <button style={S.btn} onClick={onClose}>Zavřít</button>
+          {!sent && <button style={targets.length ? S.btnPri : { ...S.btnPri, opacity: .4 }} disabled={!targets.length || run.isPending}
+            onClick={() => run.mutate()}>{run.isPending ? "Spouštím…" : `🚀 Spustit (${targets.length})`}</button>}
+        </div>
+      </div>
+    </div>)
+}
+
+/* ═══ Meta modal ═══ */
+function MetaModal({ m, onClose }: any) {
+  const a = m.creative
+  const accountsQ = useQuery({ queryKey: ["ads-accounts"], queryFn: () => sdk.client.fetch("/admin/ads-library/accounts", { method: "GET" }) })
+  const [account, setAccount] = useState("")
+  const [campaign, setCampaign] = useState<any>(null)
+  const [adset, setAdset] = useState<any>(null)
+  const [newSet, setNewSet] = useState(false)
+  const [newName, setNewName] = useState(`${a.name} — Broad`)
+  const [newBudget, setNewBudget] = useState(20)
+  const [copyFrom, setCopyFrom] = useState("")
+  const [result, setResult] = useState<any>(null)
+
+  const campsQ = useQuery({
+    queryKey: ["ads-meta-camps", account],
+    enabled: !!account,
+    queryFn: () => sdk.client.fetch(`/admin/ads-library/meta/campaigns?account=${account}`, { method: "GET" }),
+  })
+  const send = useMutation({
+    mutationFn: () => sdk.client.fetch(`/admin/ads-library/creatives/${a.id}/send-to-meta`, {
+      method: "POST",
+      body: {
+        account_id: account, campaign_id: campaign?.id,
+        ...(newSet
+          ? { new_adset: { name: newName, daily_budget_eur: newBudget, copy_from_adset_id: copyFrom } }
+          : { adset_id: adset?.id }),
+      },
+    }),
+    onSuccess: (r: any) => setResult(r),
+  })
+
+  const pick = (on: boolean): any => ({ border: "1.5px solid", borderRadius: 10, padding: "10px 13px", marginBottom: 8, cursor: "pointer", display: "flex", gap: 10, alignItems: "center", fontSize: 13.5, borderColor: on ? "#7c3aed" : "var(--border-base,#e5e7eb)", background: on ? "#ede9fe" : "transparent" })
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "4vh 16px" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={{ ...S.card, maxWidth: 580, width: "100%", maxHeight: "90vh", overflow: "auto", background: "var(--bg-base,#fff)" }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid #e5e7eb", display: "flex", position: "sticky", top: 0, background: "var(--bg-base,#fff)", zIndex: 2 }}>
+          <b style={{ fontSize: 15.5 }}>🚀 Do Meta účtu — {a.name}</b>
+          <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={onClose}>✕</button>
+        </div>
+        <div style={{ padding: "16px 18px" }}>
+          {result ? (
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 650, marginBottom: 8 }}>✅ Reklama vytvořena jako PAUSED</div>
+              <div style={{ ...S.mono, fontSize: 12.5, color: "#6b7280", lineHeight: 1.8 }}>
+                ad_id: {result.ad_id}<br />creative_id: {result.creative_id}<br />adset_id: {result.adset_id}</div>
+              <div style={{ fontSize: 13.5, marginTop: 10 }}>Zkontroluj náhled v Ads Manageru a zapni ji tam.</div>
+            </div>
+          ) : (<>
+            <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
+              Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru. Pošle se: 1:1{a.image_9x16_url ? " + 9:16 (placement customization)" : ""},
+              {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.</div>
+            <span style={S.eyebrow}>1 · Reklamní účet</span>
+            <select style={{ ...S.input, margin: "6px 0 14px" }} value={account} onChange={(e) => { setAccount(e.target.value); setCampaign(null); setAdset(null) }}>
+              <option value="">— vyber účet —</option>
+              {(accountsQ.data?.accounts || []).map((ac: any) => <option key={ac.id} value={ac.id}>{ac.name}</option>)}
+            </select>
+            {account && (<>
+              <span style={S.eyebrow}>2 · Kampaň</span>
+              <div style={{ margin: "6px 0 12px" }}>
+                {campsQ.isLoading && <div style={{ fontSize: 13, color: "#6b7280" }}>Načítám kampaně…</div>}
+                {(campsQ.data?.campaigns || []).map((c: any) => (
+                  <div key={c.id} style={pick(campaign?.id === c.id)} onClick={() => { setCampaign(c); setAdset(null); setNewSet(false) }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 99, background: c.status === "ACTIVE" ? "#15803d" : "#b45309", flexShrink: 0 }} />
+                    <b>{c.name}</b>
+                    <span style={{ ...S.mono, fontSize: 11.5, color: "#6b7280", marginLeft: "auto", textAlign: "right" }}>{c.status}{c.daily_budget ? <><br />{fmtEur(c.daily_budget)} / den</> : ""}</span>
+                  </div>))}
+              </div>
+            </>)}
+            {campaign && (<>
+              <span style={S.eyebrow}>3 · Ad set</span>
+              <div style={{ margin: "6px 0 4px" }}>
+                {campaign.adsets.map((s: any) => (
+                  <div key={s.id} style={pick(adset?.id === s.id)} onClick={() => { setAdset(s); setNewSet(false) }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 99, background: s.status === "ACTIVE" ? "#15803d" : "#b45309", flexShrink: 0 }} />
+                    <b>{s.name}</b>
+                    <span style={{ ...S.mono, fontSize: 11.5, color: "#6b7280", marginLeft: "auto" }}>{s.daily_budget ? fmtEur(s.daily_budget) + " / den" : ""}</span>
+                  </div>))}
+                <div style={pick(newSet)} onClick={() => { setNewSet(true); setAdset(null) }}>＋ <b>Vytvořit nový ad set</b></div>
+              </div>
+              {newSet && (
+                <div style={{ border: "1.5px dashed #7c3aed", borderRadius: 10, padding: 13, background: "#faf5ff", marginBottom: 10 }}>
+                  <span style={S.eyebrow}>Název</span>
+                  <input style={{ ...S.input, margin: "4px 0 10px" }} value={newName} onChange={(e) => setNewName(e.target.value)} />
+                  <span style={S.eyebrow}>Denní rozpočet (€)</span>
+                  <input type="number" style={{ ...S.input, width: 120, margin: "4px 0 10px" }} value={newBudget} onChange={(e) => setNewBudget(+e.target.value)} />
+                  <span style={S.eyebrow}>Targeting zkopírovat z (vzorový ad set)</span>
+                  <select style={{ ...S.input, margin: "4px 0 4px" }} value={copyFrom} onChange={(e) => setCopyFrom(e.target.value)}>
+                    <option value="">— vyber vzor —</option>
+                    {(campsQ.data?.campaigns || []).flatMap((c: any) => c.adsets).map((s: any) =>
+                      <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>)}
+            </>)}
+            {send.error && <div style={{ color: "#b91c1c", fontSize: 13, marginTop: 8 }}>Chyba: {String((send.error as any)?.message || send.error)}</div>}
+          </>)}
+        </div>
+        <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
+          <button style={S.btn} onClick={onClose}>Zavřít</button>
+          {!result && <button style={(adset || (newSet && copyFrom)) ? S.btnPri : { ...S.btnPri, opacity: .4 }}
+            disabled={!(adset || (newSet && copyFrom)) || send.isPending}
+            onClick={() => send.mutate()}>{send.isPending ? "Vytvářím…" : "🚀 Vytvořit PAUSED reklamu"}</button>}
+        </div>
+      </div>
+    </div>)
+}
+
+/* ═══ Fronta ═══ */
+function QueueTab() {
+  const { data } = useQuery({
+    queryKey: ["ads-jobs"],
+    queryFn: () => sdk.client.fetch("/admin/ads-library/jobs", { method: "GET" }),
+    refetchInterval: 4000,
+  })
+  const jobs = data?.jobs || []
+  const stepChip = (s: any) => {
+    const bg = s.status === "done" ? "#dcfce7" : s.status === "running" ? "#fef3c7" : s.status === "failed" ? "#fee2e2" : "var(--bg-subtle,#f3f4f6)"
+    const col = s.status === "done" ? "#15803d" : s.status === "running" ? "#b45309" : s.status === "failed" ? "#b91c1c" : "#6b7280"
+    return <span key={s.key} style={{ ...S.mono, fontSize: 11, padding: "2px 9px", borderRadius: 999, background: bg, color: col }}>
+      {s.label}{s.detail ? ` ${s.detail}` : ""}</span>
+  }
+  return (
+    <div style={{ ...S.card, overflow: "hidden" }}>
+      <div style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}><b>⚙️ Fronta lokalizací</b>
+        <span style={{ fontSize: 12, color: "#6b7280", marginLeft: 10 }}>obnovuje se každé 4 s</span></div>
+      {!jobs.length && <div style={{ padding: 24, color: "#6b7280", fontSize: 13.5 }}>Zatím žádné joby — spusť lokalizaci v 📚 Knihovně.</div>}
+      {jobs.map((j: any) => (
+        <div key={j.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, padding: "12px 16px", borderTop: "1px solid #f3f4f6", alignItems: "center" }}>
+          <div>
+            <b style={{ fontSize: 13.5 }}>{j.source_name} → {PROJECTS[j.target_project]?.flag || "🌐"} {j.target_project}</b>
+            <div style={{ display: "flex", gap: 6, marginTop: 5, flexWrap: "wrap" }}>{(j.steps || []).map(stepChip)}</div>
+            {j.error && <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 4 }}>{j.error}</div>}
+          </div>
+          <span style={{ fontSize: 12.5, color: j.status === "done" ? "#15803d" : j.status === "failed" ? "#b91c1c" : "#b45309", fontWeight: 650, whiteSpace: "nowrap" }}>
+            {j.status === "done" ? "✅ hotovo" : j.status === "failed" ? "❌ selhalo" : j.status === "running" ? "⏳ běží" : "🕐 čeká"}</span>
+        </div>))}
+    </div>)
+}
+
+/* ═══ Výkon ═══ */
+function PerformanceTab({ zoom }: any) {
   const qc = useQueryClient()
   const [selected, setSelected] = useState<string[]>([])
   const [range, setRange] = useState("7d")
   const [sort, setSort] = useState("roas")
   const [importing, setImporting] = useState<string | null>(null)
-  const [importFor, setImportFor] = useState<any>(null) // row awaiting project pick
+  const [importFor, setImportFor] = useState<any>(null)
 
-  const accountsQ = useQuery({
-    queryKey: ["ads-accounts"],
-    queryFn: () => sdk.client.fetch("/admin/ads-library/accounts", { method: "GET" }),
-  })
+  const accountsQ = useQuery({ queryKey: ["ads-accounts"], queryFn: () => sdk.client.fetch("/admin/ads-library/accounts", { method: "GET" }) })
   const accounts = accountsQ.data?.accounts || []
-
   const perfQ = useQuery({
     queryKey: ["ads-perf", selected.join(","), range, sort],
     enabled: selected.length > 0,
-    queryFn: () => sdk.client.fetch(
-      `/admin/ads-library/performance?accounts=${selected.join(",")}&range=${range}&sort=${sort}&limit=40`,
-      { method: "GET" }
-    ),
+    queryFn: () => sdk.client.fetch(`/admin/ads-library/performance?accounts=${selected.join(",")}&range=${range}&sort=${sort}&limit=40`, { method: "GET" }),
   })
-
   const doImport = async (row: any, projectId: string) => {
     setImporting(row.ad_id); setImportFor(null)
     try {
       await sdk.client.fetch("/admin/ads-library/import", {
         method: "POST",
-        body: {
-          meta_ad_id: row.ad_id, account_id: row.account_id,
-          project_id: projectId, language: PROJECTS[projectId]?.lang || "NL", range,
-        },
+        body: { meta_ad_id: row.ad_id, account_id: row.account_id, project_id: projectId, language: PROJECTS[projectId]?.lang || "NL", range },
       })
-      qc.invalidateQueries({ queryKey: ["ads-perf"] })
-      qc.invalidateQueries({ queryKey: ["ads-lib"] })
+      qc.invalidateQueries({ queryKey: ["ads-perf"] }); qc.invalidateQueries({ queryKey: ["ads-lib"] })
     } finally { setImporting(null) }
   }
-
-  const toggleAcc = (id: string) => setSelected((s) =>
-    s.includes(id) ? s.filter((x) => x !== id) : [...s, id])
-
   return (
     <div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-        {accountsQ.isLoading && <span style={{ fontSize: 13, color: "#6b7280" }}>Načítám účty z Meta API…</span>}
-        {accountsQ.error && <span style={{ fontSize: 13, color: "#dc2626" }}>Meta API nedostupné: {String(accountsQ.error?.message || "")}</span>}
-        {accounts.map((a: any) => (
-          <button key={a.id} onClick={() => toggleAcc(a.id)}
-            style={selected.includes(a.id)
-              ? { ...S.btn, borderColor: "#7c3aed", background: "#ede9fe", fontWeight: 600 }
-              : S.btn}>
-            {selected.includes(a.id) ? "✓ " : ""}{a.name}
-          </button>
-        ))}
+        {accountsQ.isLoading && <span style={{ fontSize: 13, color: "#6b7280" }}>Načítám účty…</span>}
+        {accounts.map((ac: any) => (
+          <button key={ac.id} onClick={() => setSelected((s) => s.includes(ac.id) ? s.filter((x) => x !== ac.id) : [...s, ac.id])}
+            style={{ ...S.btn, ...(selected.includes(ac.id) ? { borderColor: "#7c3aed", background: "#ede9fe", fontWeight: 650 } : {}) }}>
+            {selected.includes(ac.id) ? "✓ " : ""}{ac.name}</button>))}
       </div>
-      <div style={{ display: "flex", gap: 4, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 4, marginBottom: 14, flexWrap: "wrap" }}>
         {RANGES.map(([k, label]) => (
-          <button key={k} onClick={() => setRange(k)}
-            style={range === k ? { ...S.btn, background: "#111827", color: "#fff", borderColor: "#111827" } : S.btn}>
-            {label}
-          </button>
-        ))}
+          <button key={k} onClick={() => setRange(k)} style={{ ...S.btn, ...(range === k ? { background: "#111827", color: "#fff", borderColor: "#111827" } : {}) }}>{label}</button>))}
         <span style={{ width: 14 }} />
         {[["roas", "ROAS"], ["sales", "Prodeje"], ["ctr", "CTR"], ["spend", "Spend"]].map(([k, label]) => (
-          <button key={k} onClick={() => setSort(k)}
-            style={sort === k ? { ...S.btn, borderColor: "#7c3aed", color: "#7c3aed", fontWeight: 600 } : S.btn}>
-            ↓ {label}
-          </button>
-        ))}
+          <button key={k} onClick={() => setSort(k)} style={{ ...S.btn, ...(sort === k ? { borderColor: "#7c3aed", color: "#7c3aed", fontWeight: 650 } : {}) }}>↓ {label}</button>))}
       </div>
-
-      {!selected.length && (
-        <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>
-          ☝️ Vyber nahoře jeden nebo více reklamních účtů.
-        </div>
-      )}
+      {!selected.length && <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>☝️ Vyber reklamní účty.</div>}
       {perfQ.isFetching && <div style={{ padding: 20, textAlign: "center", color: "#6b7280" }}>Tahám živá data z Meta API…</div>}
-      {perfQ.error && <div style={{ ...S.card, padding: 20, color: "#dc2626" }}>Chyba: {String(perfQ.error?.message || "")}</div>}
-
       {perfQ.data?.rows?.length > 0 && (
         <div style={{ ...S.card, overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
               <thead><tr style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: ".06em", color: "#6b7280" }}>
-                <th style={{ textAlign: "left", padding: "8px 12px" }}>Reklama</th>
-                <th style={{ textAlign: "left", padding: "8px 8px" }}>Účet</th>
-                <th style={{ textAlign: "right", padding: "8px 8px" }}>Spend</th>
-                <th style={{ textAlign: "right", padding: "8px 8px" }}>Prodeje</th>
-                <th style={{ textAlign: "right", padding: "8px 8px" }}>CPA</th>
-                <th style={{ textAlign: "right", padding: "8px 8px" }}>ROAS</th>
-                <th style={{ textAlign: "right", padding: "8px 8px" }}>CTR</th>
-                <th style={{ padding: "8px 12px" }} />
-              </tr></thead>
+                <th style={{ textAlign: "left", padding: "9px 14px" }}>Reklama</th>
+                <th style={{ textAlign: "left", padding: "9px 8px" }}>Účet</th>
+                <th style={{ textAlign: "right", padding: "9px 8px" }}>Spend</th>
+                <th style={{ textAlign: "right", padding: "9px 8px" }}>Prodeje</th>
+                <th style={{ textAlign: "right", padding: "9px 8px" }}>CPA</th>
+                <th style={{ textAlign: "right", padding: "9px 8px" }}>ROAS</th>
+                <th style={{ textAlign: "right", padding: "9px 8px" }}>CTR</th>
+                <th style={{ padding: "9px 14px" }} /></tr></thead>
               <tbody>
                 {perfQ.data.rows.map((r: any) => (
                   <tr key={r.ad_id} style={{ borderTop: "1px solid #f3f4f6" }}>
-                    <td style={{ padding: "7px 12px", maxWidth: 340 }}>
-                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <td style={{ padding: "8px 14px", maxWidth: 340 }}>
+                      <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                         {r.thumb
-                          ? <img src={r.thumb} alt="" style={{ width: 34, height: 34, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
-                          : <span style={{ width: 34, height: 34, borderRadius: 6, background: "#f3f4f6", display: "inline-flex",
-                              alignItems: "center", justifyContent: "center", flexShrink: 0 }}>🖼️</span>}
+                          ? <img src={r.thumb} alt="" onMouseEnter={(e) => zoom.show(e, r.thumb, r.ad_name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                              style={{ width: 38, height: 38, borderRadius: 7, objectFit: "cover", flexShrink: 0, cursor: "zoom-in" }} />
+                          : <span style={{ width: 38, height: 38, borderRadius: 7, background: "#f3f4f6", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>🖼️</span>}
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>{r.ad_name}</div>
-                          <div style={{ fontSize: 11, color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.campaign_name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ padding: "7px 8px", fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>{r.account_name}</td>
-                    <td style={{ ...S.mono, textAlign: "right", padding: "7px 8px" }}>{fmtEur(r.spend)}</td>
-                    <td style={{ ...S.mono, textAlign: "right", padding: "7px 8px" }}>{r.sales}</td>
-                    <td style={{ ...S.mono, textAlign: "right", padding: "7px 8px" }}>{r.cpa ? r.cpa.toFixed(1) + " €" : "—"}</td>
-                    <td style={{ ...S.mono, textAlign: "right", padding: "7px 8px", fontWeight: 700,
-                      color: r.roas >= 2 ? "#15803d" : r.roas >= 1.3 ? "#b45309" : "#b91c1c" }}>
-                      {r.roas ? r.roas.toFixed(2) + "×" : "—"}
-                    </td>
-                    <td style={{ ...S.mono, textAlign: "right", padding: "7px 8px" }}>{r.ctr ? r.ctr.toFixed(2) + " %" : "—"}</td>
-                    <td style={{ padding: "7px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
+                          <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 550 }}>{r.ad_name}</div>
+                          <div style={{ fontSize: 11.5, color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.campaign_name}</div>
+                        </div></div></td>
+                    <td style={{ padding: "8px 8px", fontSize: 12.5, color: "#6b7280", whiteSpace: "nowrap" }}>{r.account_name}</td>
+                    <td style={{ ...S.mono, textAlign: "right", padding: "8px 8px" }}>{fmtEur(r.spend)}</td>
+                    <td style={{ ...S.mono, textAlign: "right", padding: "8px 8px" }}>{r.sales}</td>
+                    <td style={{ ...S.mono, textAlign: "right", padding: "8px 8px" }}>{r.cpa ? r.cpa.toFixed(1) + " €" : "—"}</td>
+                    <td style={{ ...S.mono, textAlign: "right", padding: "8px 8px", fontWeight: 700, color: r.roas >= 2 ? "#15803d" : r.roas >= 1.3 ? "#b45309" : "#b91c1c" }}>{r.roas ? r.roas.toFixed(2) + "×" : "—"}</td>
+                    <td style={{ ...S.mono, textAlign: "right", padding: "8px 8px" }}>{r.ctr ? r.ctr.toFixed(2) + " %" : "—"}</td>
+                    <td style={{ padding: "8px 14px", textAlign: "right", whiteSpace: "nowrap" }}>
                       {r.in_library
-                        ? <span style={{ fontSize: 11, color: "#15803d", fontWeight: 600 }}>v knihovně ✓</span>
+                        ? <span style={{ fontSize: 11.5, color: "#15803d", fontWeight: 650 }}>v knihovně ✓</span>
                         : importFor?.ad_id === r.ad_id
-                          ? <select autoFocus style={{ ...S.input, fontSize: 12 }} defaultValue=""
-                              onChange={(e) => e.target.value && doImport(r, e.target.value)}
-                              onBlur={() => setImportFor(null)}>
+                          ? <select autoFocus style={{ ...S.input, fontSize: 12.5, width: "auto" }} defaultValue=""
+                              onChange={(e) => e.target.value && doImport(r, e.target.value)} onBlur={() => setImportFor(null)}>
                               <option value="" disabled>Projekt…</option>
                               {Object.entries(PROJECTS).map(([k, v]) => <option key={k} value={k}>{v.flag} {k}</option>)}
                             </select>
                           : <button style={S.btn} disabled={importing === r.ad_id} onClick={() => setImportFor(r)}>
-                              {importing === r.ad_id ? "Importuji…" : "＋ do knihovny"}
-                            </button>}
-                    </td>
-                  </tr>
-                ))}
+                              {importing === r.ad_id ? "Importuji…" : "＋ do knihovny"}</button>}</td>
+                  </tr>))}
               </tbody>
             </table>
           </div>
-        </div>
-      )}
-    </div>
-  )
+        </div>)}
+    </div>)
 }
 
-/* ── Page shell ── */
+/* ═══ Shell ═══ */
 const AdsLibraryPage = () => {
-  const [tab, setTab] = useState<"lib" | "perf">("lib")
+  const [tab, setTab] = useState<"lib" | "perf" | "queue">("lib")
+  const zoom = useZoom()
   return (
-    <div style={{ padding: "20px 24px", maxWidth: 1180 }}>
+    <div style={{ padding: "20px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 18 }}>
         <h1 style={{ fontSize: 19, fontWeight: 700, margin: 0 }}>🗂️ Knihovna reklam</h1>
-        <div style={{ display: "flex", gap: 2, background: "var(--bg-subtle, #f3f4f6)", borderRadius: 9, padding: 3 }}>
-          {[["lib", "📚 Knihovna"], ["perf", "🏆 Výkon"]].map(([k, label]) => (
+        <div style={{ display: "flex", gap: 2, background: "var(--bg-subtle,#f3f4f6)", borderRadius: 10, padding: 3 }}>
+          {[["lib", "📚 Knihovna"], ["perf", "🏆 Výkon"], ["queue", "⚙️ Fronta"]].map(([k, label]) => (
             <button key={k} onClick={() => setTab(k as any)}
-              style={{ fontSize: 13, padding: "5px 14px", borderRadius: 7, border: "none", cursor: "pointer",
-                background: tab === k ? "#fff" : "transparent",
-                fontWeight: tab === k ? 600 : 400,
-                boxShadow: tab === k ? "0 1px 3px rgba(0,0,0,.1)" : "none" }}>
-              {label}
-            </button>
-          ))}
+              style={{ fontSize: 13.5, padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer",
+                background: tab === k ? "var(--bg-base,#fff)" : "transparent", fontWeight: tab === k ? 650 : 400,
+                boxShadow: tab === k ? "0 1px 3px rgba(0,0,0,.1)" : "none" }}>{label}</button>))}
         </div>
       </div>
-      {tab === "lib" ? <LibraryTab /> : <PerformanceTab />}
-    </div>
-  )
+      {tab === "lib" && <LibraryTab zoom={zoom} />}
+      {tab === "perf" && <PerformanceTab zoom={zoom} />}
+      {tab === "queue" && <QueueTab />}
+      {zoom.el}
+    </div>)
 }
 
 export const config = defineRouteConfig({ label: "Knihovna reklam" })
