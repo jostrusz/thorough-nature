@@ -87,6 +87,7 @@ const medusaConfig = {
     { resolve: "./src/modules/dextrum" },
     { resolve: "./src/modules/huset" },
     { resolve: "./src/modules/supportbox" },
+    { resolve: "./src/modules/ads-library" },
     { resolve: "./src/modules/project-settings" },
     { resolve: "./src/modules/resend-config" },
     { resolve: "./src/modules/digital-download" },
