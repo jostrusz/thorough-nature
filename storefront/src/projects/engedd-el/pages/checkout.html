@@ -5990,26 +5990,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
         Packeta.Widget.pick(apiKey, function(point) {
           if (point) {
-            // Külső futár pontja (FoxPost 32970, Magyar Posta 29760) → elutasítjuk.
-            // A vendors szűrő erre NEM elég: a { country: 'hu' } nem szűr semmit, és
-            // nincs olyan group érték, ami csak a Packeta saját magyar pontjait adná.
-            // Ezek a rendelések a mySTOCK-ban némán elvesztek (HU2026-27559, -27404,
-            // -27392, -27360, -27281): a mySTOCK 200 OK + ID-t ad vissza, de a
-            // rendelés nem jön létre. Amíg a FoxPost nincs engedélyezve a Packeta
-            // fiókban (allowed branch settings, HU/EUR), csak saját pontot fogadunk el.
-            if (point.carrierId) {
-              alert('Ezt az átvevőhelyet sajnos jelenleg nem tudjuk kiszolgálni. '
-                + 'Kérlek, válassz Packeta csomagpontot, vagy válaszd a házhozszállítást.');
-              return;
-            }
             selectedPacketaPoint = {
               id: point.id,
               name: point.name,
               address: point.place || point.street,
               zip: point.zip,
               city: point.city,
-              // carrierId === null → saját Packeta csomagpont (érvényes a pickupPlaceCode-hoz).
-              carrierId: null,
+              // carrierId === null → saját Packeta csomagpont/Z-BOX.
+              // Kitöltött carrierId → külső futár pontja (FoxPost 32970, Magyar Posta
+              // 4539 / 29760). A backend ezt a kódot külön külddi a mySTOCK-nak
+              // externalCarrierCode-ként, ezért a valódi értéket kell átadni.
+              carrierId: (point.carrierId === undefined ? null : point.carrierId),
             };
             // Show selected point
             var display = document.getElementById('packeta-selected-point');
@@ -6035,15 +6026,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'hu',
           country: 'hu',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // Csak a Packeta SAJÁT magyar átvevőhelyei (1272 db a hivatalos branch
-          // feed szerint) — a külső futárok (FoxPost 32970, Magyar Posta 29760)
-          // így meg sem jelennek a térképen. Ugyanaz a minta, ami CZ-n és SK-n
-          // is fut. A 'zbox' egyelőre 0 találat Magyarországon, de ártalmatlan
-          // és automatikusan bekapcsol, amint a Packeta kihelyezi a boxokat.
-          // A callback carrierId-ellenőrzése így már csak biztonsági háló.
+          // Minden magyar átvevőhely — a Packeta saját pontjai ÉS a külső futárok
+          // (FoxPost 32970, Magyar Posta 4539 / 29760) is.
+          //
+          // Korábban 'zpoint' + 'zbox' szűrt, ami a külső futárokat elrejtette. A
+          // rendelési adatok szerint viszont a csomagpontot választó magyar vevők
+          // 13-ból 10-en épp külső futár pontját kérték, tehát az a szűrő a pickup
+          // forgalom nagy részét elzárta.
+          //
+          // A külső pont kódja a callbacken át a packeta_carrier_id-be kerül, a
+          // backend pedig externalCarrierCode-ként küldi a mySTOCK-nak (a
+          // pickupPlaceCode mellé) — így a Packeta "Carrier pick-up point"
+          // sémájának megfelelően dolgozza fel.
           vendors: [
-            { country: 'hu', group: 'zpoint' },
-            { country: 'hu', group: 'zbox' },
+            { country: 'hu' },
           ],
         });
       });
@@ -6063,12 +6059,6 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var savedPoint = localStorage.getItem('checkout_packeta_point');
       if (savedPoint) {
         var pt = JSON.parse(savedPoint);
-        // Korábban elmentett külső futár pontja (FoxPost) — eldobjuk, különben a
-        // widget szűrése megkerülhető lenne egy régi localStorage bejegyzéssel.
-        if (pt && pt.carrierId) {
-          localStorage.removeItem('checkout_packeta_point');
-          pt = null;
-        }
         if (pt && pt.id && pt.name) {
           selectedPacketaPoint = pt;
           var display = document.getElementById('packeta-selected-point');
