@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
+import { createHash } from "crypto"
 
 /**
  * Mirror a remote (signed, expiring) Meta CDN image into MinIO so the
@@ -20,10 +21,18 @@ function s3(): S3Client {
   })
 }
 
-/** Upload a raw image buffer to MinIO under `key`, return public URL. */
+/**
+ * Upload a raw image buffer to MinIO under `key`, return public URL.
+ * A content hash is appended to the filename so a re-generated image always
+ * gets a fresh URL — browsers can then cache it forever without ever showing
+ * a stale version.
+ */
 export async function uploadBuffer(buf: Buffer, key: string, contentType = "image/jpeg"): Promise<string> {
+  const tag = createHash("md5").update(buf).digest("hex").slice(0, 8)
+  key = key.replace(/(\.[a-z0-9]+)$/i, `-${tag}$1`)
   await s3().send(new PutObjectCommand({
     Bucket: BUCKET, Key: key, Body: buf, ContentType: contentType, ACL: "public-read",
+    CacheControl: "public, max-age=31536000, immutable",
   }))
   const pub = (process.env.MINIO_PUBLIC_ENDPOINT || "https://bucket-production-b93e.up.railway.app")
     .replace(/:443$/, "")
@@ -36,12 +45,7 @@ export async function mirrorImage(url: string, key: string): Promise<string | nu
     if (!res.ok) return null
     const buf = Buffer.from(await res.arrayBuffer())
     const type = res.headers.get("content-type") || "image/jpeg"
-    await s3().send(new PutObjectCommand({
-      Bucket: BUCKET, Key: key, Body: buf, ContentType: type, ACL: "public-read",
-    }))
-    const pub = (process.env.MINIO_PUBLIC_ENDPOINT || "https://bucket-production-b93e.up.railway.app")
-      .replace(/:443$/, "")
-    return `${pub}/${BUCKET}/${key}`
+    return await uploadBuffer(buf, key, type)
   } catch (e) {
     console.warn(`[Ads Library] mirrorImage failed: ${e.message}`)
     return null
