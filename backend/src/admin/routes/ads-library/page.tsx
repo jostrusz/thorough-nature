@@ -443,6 +443,7 @@ function MetaModal({ m, onClose }: any) {
   const [newName, setNewName] = useState(`${a.name} — Broad`)
   const [newBudget, setNewBudget] = useState(20)
   const [copyFrom, setCopyFrom] = useState("")
+  const [quickAdset, setQuickAdset] = useState("")
   const [result, setResult] = useState<any>(null)
 
   const campsQ = useQuery({
@@ -453,12 +454,14 @@ function MetaModal({ m, onClose }: any) {
   const send = useMutation({
     mutationFn: () => sdk.client.fetch(`/admin/ads-library/creatives/${a.id}/send-to-meta`, {
       method: "POST",
-      body: {
-        account_id: account, campaign_id: campaign?.id,
-        ...(newSet
-          ? { new_adset: { name: newName, daily_budget_eur: newBudget, copy_from_adset_id: copyFrom } }
-          : { adset_id: adset?.id }),
-      },
+      body: quickAdset.trim()
+        ? { adset_id: quickAdset.trim() } // account is resolved from the ad set
+        : {
+            account_id: account, campaign_id: campaign?.id,
+            ...(newSet
+              ? { new_adset: { name: newName, daily_budget_eur: newBudget, copy_from_adset_id: copyFrom } }
+              : { adset_id: adset?.id }),
+          },
     }),
     onSuccess: (r: any) => setResult(r),
   })
@@ -477,6 +480,8 @@ function MetaModal({ m, onClose }: any) {
           {result ? (
             <div>
               <div style={{ fontSize: 15, fontWeight: 650, marginBottom: 8 }}>✅ Reklama vytvořena jako PAUSED</div>
+              {result.adset_name && <div style={{ fontSize: 13.5, marginBottom: 6 }}>
+                📁 {result.campaign_name ? `${result.campaign_name} → ` : ""}<b>{result.adset_name}</b></div>}
               <div style={{ ...S.mono, fontSize: 12.5, color: "#6b7280", lineHeight: 1.8 }}>
                 ad_id: {result.ad_id}<br />creative_id: {result.creative_id}<br />adset_id: {result.adset_id}</div>
               <div style={{ fontSize: 13.5, marginTop: 10 }}>Zkontroluj náhled v Ads Manageru a zapni ji tam.</div>
@@ -485,6 +490,19 @@ function MetaModal({ m, onClose }: any) {
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
               Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru. Pošle se: 1:1{a.image_9x16_url ? " + 9:16 (placement customization)" : ""},
               {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.</div>
+            <div style={{ border: "1.5px solid #7c3aed", borderRadius: 10, padding: "11px 13px", marginBottom: 14, background: "#faf5ff" }}>
+              <div style={{ fontSize: 13, fontWeight: 650, marginBottom: 6 }}>⚡ Rychlá cesta — vlož Ad set ID</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input style={{ ...S.input, ...S.mono, flex: 1 }} placeholder="např. 120211234567890123 (z Ads Manageru)"
+                  value={quickAdset} onChange={(e) => setQuickAdset(e.target.value)} />
+                <button style={quickAdset.trim() ? S.btnPri : { ...S.btnPri, opacity: .4 }}
+                  disabled={!quickAdset.trim() || send.isPending}
+                  onClick={() => send.mutate()}>{send.isPending ? "…" : "🚀 Odeslat"}</button>
+              </div>
+              <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 5 }}>
+                Účet i kampaň se dohledají z ad setu samy. Reklama vznikne PAUSED, ad set se nijak nemění.</div>
+            </div>
+            <div style={{ fontSize: 12, color: "#6b7280", margin: "0 0 10px" }}>— nebo vyber proklikem —</div>
             <span style={S.eyebrow}>1 · Reklamní účet</span>
             <select style={{ ...S.input, margin: "6px 0 14px" }} value={account} onChange={(e) => { setAccount(e.target.value); setCampaign(null); setAdset(null) }}>
               <option value="">— vyber účet —</option>

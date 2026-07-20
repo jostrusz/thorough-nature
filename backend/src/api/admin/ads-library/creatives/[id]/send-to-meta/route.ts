@@ -31,7 +31,9 @@ async function uploadImage(account: string, url: string): Promise<string> {
 
 /**
  * POST /admin/ads-library/creatives/:id/send-to-meta
- * Body: { account_id, campaign_id, adset_id }
+ * Body: { adset_id }                                      ← quick path: the account
+ *        is resolved from the ad set itself, nothing else needed
+ *    or { account_id, campaign_id, adset_id }
  *    or { account_id, campaign_id, new_adset: { name, daily_budget_eur, copy_from_adset_id } }
  * Creates an ad in PAUSED state. page_id/IG identity is taken from the
  * account's most recent creative (data-driven, nothing hardcoded).
@@ -39,8 +41,18 @@ async function uploadImage(account: string, url: string): Promise<string> {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
   const b = (req.body || {}) as any
-  const account = b.account_id
-  if (!account?.startsWith("act_")) return res.status(400).json({ error: "account_id (act_…) je povinný" })
+  let account = b.account_id
+  let adsetInfo: any = null
+  // quick path — a bare adset id carries its account with it
+  if (!account && b.adset_id) {
+    try {
+      adsetInfo = await graphGet(String(b.adset_id).trim(), { fields: "account_id,name,status,campaign{name}" })
+      account = `act_${adsetInfo.account_id}`
+    } catch (e: any) {
+      return res.status(400).json({ error: `ad set ${b.adset_id} nejde načíst — zkontroluj ID (${e.message})` })
+    }
+  }
+  if (!account?.startsWith("act_")) return res.status(400).json({ error: "account_id (act_…) nebo platný adset_id je povinný" })
 
   const [c] = await svc.listAdCreatives({ id: req.params.id })
   if (!c) return res.status(404).json({ error: "kreativa nenalezena" })
@@ -58,7 +70,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     if (!spec?.page_id) return res.status(400).json({ error: "v účtu není žádná kreativa, ze které jde převzít FB stránku" })
 
     // ── ad set (existing or new) ──
-    let adsetId = b.adset_id
+    let adsetId = b.adset_id ? String(b.adset_id).trim() : null
     if (!adsetId && b.new_adset) {
       const na = b.new_adset
       if (!na.copy_from_adset_id) return res.status(400).json({ error: "new_adset.copy_from_adset_id (vzorový ad set) je povinný" })
@@ -123,7 +135,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       meta_ad_id: ad.id, meta_creative_id: creative.id, meta_account_id: account,
       metadata: { ...(c.metadata || {}), sent_to_meta_at: new Date().toISOString(), meta_adset_id: adsetId },
     })
-    res.json({ ad_id: ad.id, creative_id: creative.id, adset_id: adsetId, status: "PAUSED" })
+    res.json({
+      ad_id: ad.id, creative_id: creative.id, adset_id: adsetId, status: "PAUSED",
+      adset_name: adsetInfo?.name, campaign_name: adsetInfo?.campaign?.name, account_id: account,
+    })
   } catch (e: any) {
     res.status(502).json({ error: e.message })
   }
