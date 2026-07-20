@@ -87,10 +87,12 @@ export async function runLocalizationJob(container: any, jobId: string) {
     if (wants11) {
       await setStep("img11", { status: "running" })
       if (!src.image_1x1_url) throw new Error("zdrojová kreativa nemá obrázek")
-      // cover first, ad second — labelled, so the model cannot mix them up.
-      // The target-book cover is ALWAYS attached to 1:1 generation (both
-      // modes) so the book shown in the ad is the right edition; the 9:16
-      // reframe below works purely from the finished 1:1 and needs no cover.
+      // References per mode:
+      //  swap      → cover first, ad second (labelled so the model can't mix
+      //              them up); the cover is what gets painted onto the book
+      //  akviziční → ONLY the source ad. No cover — attaching it tempted the
+      //              model to paint a book into creatives that have none
+      // The 9:16 reframe below works purely from the finished 1:1.
       const cover = PROJECT_COVERS[target]
       const refs: any[] = []
       if (p.img_mode === "swap") {
@@ -98,8 +100,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
         refs.push({ url: cover, label: "IMAGE 1 — the new book cover to use:" })
         refs.push({ url: src.image_1x1_url, label: "IMAGE 2 — the advertisement to edit:" })
       } else {
-        if (cover) refs.push({ url: cover, label: "IMAGE 1 — reference: the target edition's book cover (if a book appears in the ad, it must look like this):" })
-        refs.push({ url: src.image_1x1_url, label: cover ? "IMAGE 2 — the advertisement to edit:" : "The advertisement to edit:" })
+        refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
       }
       await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
       let swapFails = 0

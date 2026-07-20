@@ -51,6 +51,12 @@ PRAVIDLA:
 3. Název knihy, URL a fakta nahraď údaji cílového projektu.
 4. Délka zhruba jako originál. Headliny max ~40 znaků.
 5. Žádné anglicismy, žádné AI fráze.
+6. JAZYKOVÁ SPRÁVNOST (${ctx.langName}): text musí být gramaticky bezchybný —
+   správné skloňování a časování, pády, shoda podmětu s přísudkem, správné
+   rody přídavných jmen a příčestí, přirozený slovosled a idiomatická
+   stylistika cílového jazyka. Rod vypravěče drž konzistentně celým textem
+   (viz Oslovení výše — např. žena mluví v ženském rodě). Před odevzdáním si
+   každou větu přečti očima rodilého korektora.
 
 ${HUMANIZER_RULES}
 
