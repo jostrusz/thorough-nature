@@ -24,8 +24,8 @@ const RANGES = [["3d", "3 dny"], ["7d", "7 dní"], ["14d", "14 dní"], ["30d", "
   ["90d", "3 měs."], ["180d", "6 měs."], ["365d", "1 rok"]]
 
 const IMG_PROMPTS = {
-  swap: "Replace the book cover in the image with the reference cover exactly (same angle, perspective and lighting). If the image contains a headline or any other text, translate it naturally into {LANG}. Preserve the composition, hands, environment and all other details.",
-  texts: "Translate all visible text in the image into {LANG}. Keep the composition, style, colors, objects and every other detail exactly the same.",
+  swap: "Replace only the book cover shown in the image with the reference cover, matching the original angle, perspective, lighting and size. Translate every piece of visible text into {LANG}, keeping each text block in the same position, font style, size and color. Do not remove any text. Do not add any new text, prices, badges, logos, books, objects or people. Keep the composition, characters, colors and background otherwise identical.",
+  texts: "Translate every piece of visible text in this image into {LANG}. Keep each text block in exactly the same position, font style, size, color and orientation as the original. Do not remove any text. Do not add any new text, prices, badges, logos, objects or people. Keep the composition, characters, colors and background identical apart from the translated words.",
 }
 const PROMPT_916 = "Reframe to 9:16 portrait. Extend the environment upward and downward using consistent perspective and atmospheric depth. Preserve all original details and the overall aesthetic."
 

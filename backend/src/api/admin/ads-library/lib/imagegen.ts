@@ -5,15 +5,15 @@
  * renames them — verified on first live run.
  */
 const MODELS: Record<string, string> = {
-  "nano-banana-pro": process.env.IMAGE_MODEL_NANO_PRO || "gemini-3-pro-image-preview",
-  "nano-banana": process.env.IMAGE_MODEL_NANO || "gemini-2.5-flash-image",
+  "nano-banana-pro": process.env.IMAGE_MODEL_NANO_PRO || "gemini-3-pro-image",
+  "nano-banana": process.env.IMAGE_MODEL_NANO || "gemini-3.1-flash-image",
 }
 
 export function imageModels() {
   const hasKey = !!(process.env.GEMINI_API_KEY || "").trim()
   return [
     { id: "nano-banana-pro", label: "🍌 Nano Banana Pro (Google) — nejlepší text v obrázku", available: hasKey },
-    { id: "nano-banana", label: "🍌 Nano Banana (Google) — rychlý/levný", available: hasKey },
+    { id: "nano-banana", label: "🍌 Nano Banana Flash (Google) — rychlý/levný", available: hasKey },
   ]
 }
 
