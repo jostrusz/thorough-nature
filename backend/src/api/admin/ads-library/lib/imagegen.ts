@@ -9,11 +9,14 @@ const MODELS: Record<string, string> = {
   "nano-banana": process.env.IMAGE_MODEL_NANO || "gemini-3.1-flash-image",
 }
 
+/** 1K | 2K | 4K — 2K is the default, see the note at the generationConfig. */
+const IMAGE_SIZE = process.env.IMAGE_SIZE || "2K"
+
 export function imageModels() {
   const hasKey = !!(process.env.GEMINI_API_KEY || "").trim()
   return [
-    { id: "nano-banana-pro", label: "🍌 Nano Banana Pro (Google) — nejlepší text v obrázku", available: hasKey },
-    { id: "nano-banana", label: "🍌 Nano Banana Flash (Google) — rychlý/levný", available: hasKey },
+    { id: "nano-banana-pro", label: `🍌 Nano Banana Pro (Google) — nejlepší text v obrázku, ${IMAGE_SIZE}`, available: hasKey },
+    { id: "nano-banana", label: `🍌 Nano Banana Flash (Google) — rychlý/levný, ${IMAGE_SIZE}`, available: hasKey },
   ]
 }
 
@@ -69,7 +72,11 @@ export async function generateImage(opts: {
           contents: [{ parts }],
           generationConfig: {
             responseModalities: ["IMAGE"],
-            imageConfig: { aspectRatio: opts.aspectRatio },
+            // 2K = 2048px. On gemini-3-pro-image it bills the SAME as the 1K
+            // default (verified live: 1199 vs 1211 output tokens) while giving
+            // 4× the pixels — and 1024px sits just under Meta's recommended
+            // 1080px feed minimum. On the Flash model 2K does cost ~1.85×.
+            imageConfig: { aspectRatio: opts.aspectRatio, imageSize: IMAGE_SIZE },
           },
         }),
         signal: AbortSignal.timeout(180000),

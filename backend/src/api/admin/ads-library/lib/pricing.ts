@@ -18,6 +18,7 @@ const RATES: Record<string, Rate> = {
   "gemini-3.1-flash-image": { input: 0.5, output: 60.0 },
   "gemini-2.5-flash-image": { input: 0.5, output: 60.0 },
   // Anthropic
+  "claude-fable-5": { input: 10.0, output: 50.0 },
   "claude-opus-4-8": { input: 5.0, output: 25.0 },
   "claude-sonnet-5": { input: 3.0, output: 15.0 },
   "claude-haiku-4-5-20251001": { input: 1.0, output: 5.0 },

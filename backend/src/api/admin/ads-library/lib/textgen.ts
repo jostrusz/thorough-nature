@@ -9,6 +9,7 @@ import type { Usage } from "./pricing"
  */
 export function textModels() {
   const list = [
+    { id: "claude-fable-5", label: "Claude Fable 5 — nejsilnější model", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
@@ -102,8 +103,9 @@ export async function translateTexts(opts: {
     model: opts.modelId,
     // 5 long primaries + 5 headlines can easily exceed 2500 output tokens —
     // a truncated response has no closing brace and used to surface as the
-    // confusing "AI nevrátila JSON"
-    max_tokens: 8000,
+    // confusing "AI nevrátila JSON". Fable 5 always thinks, and those tokens
+    // count against max_tokens too, so it gets a bigger budget.
+    max_tokens: opts.modelId === "claude-fable-5" ? 24000 : 8000,
     messages: [{ role: "user", content: prompt }],
   })
   const text = (msg.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n")
