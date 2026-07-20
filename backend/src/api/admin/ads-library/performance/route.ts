@@ -90,6 +90,7 @@ async function fetchInsights(accIds: string[], range: string) {
       const json = await graphGet("", {
         ids: chunk.map((r) => r.ad_id).join(","),
         fields: "creative{id,thumbnail_url,image_url}",
+        thumbnail_width: 512, thumbnail_height: 512,
       })
       for (const r of chunk) {
         const c = json[r.ad_id]?.creative

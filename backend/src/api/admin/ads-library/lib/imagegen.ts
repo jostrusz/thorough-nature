@@ -10,7 +10,7 @@ const MODELS: Record<string, string> = {
 }
 
 export function imageModels() {
-  const hasKey = !!process.env.GEMINI_API_KEY
+  const hasKey = !!(process.env.GEMINI_API_KEY || "").trim()
   return [
     { id: "nano-banana-pro", label: "🍌 Nano Banana Pro (Google) — nejlepší text v obrázku", available: hasKey },
     { id: "nano-banana", label: "🍌 Nano Banana (Google) — rychlý/levný", available: hasKey },
@@ -35,7 +35,7 @@ export async function generateImage(opts: {
   refs: string[]
   aspectRatio: "1:1" | "9:16"
 }): Promise<{ buffer: Buffer; mime: string }> {
-  const key = process.env.GEMINI_API_KEY
+  const key = (process.env.GEMINI_API_KEY || "").trim()
   if (!key) throw new Error("GEMINI_API_KEY není nastaven — dodej klíč z aistudio.google.com")
   const model = MODELS[opts.modelId] || MODELS["nano-banana-pro"]
 

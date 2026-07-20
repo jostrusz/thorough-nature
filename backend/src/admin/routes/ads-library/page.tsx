@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../lib/sdk"
@@ -44,6 +44,25 @@ const fmtEur = (n: number) => (n || 0).toLocaleString("cs-CZ", { maximumFraction
 /* ── hover zoom ── */
 function useZoom() {
   const [z, setZ] = useState<any>(null)
+  // global guard: the moment the cursor is NOT over a [data-zoom] element,
+  // the zoom disappears — it can never get stuck (re-renders, scroll, clicks)
+  useEffect(() => {
+    if (!z) return
+    const onMove = (e: any) => {
+      const t = e.target
+      if (!(t instanceof Element) || !t.closest("[data-zoom]")) { setZ(null); return }
+      setZ((p: any) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))
+    }
+    const onAway = () => setZ(null)
+    document.addEventListener("mousemove", onMove, true)
+    document.addEventListener("scroll", onAway, true)
+    document.addEventListener("click", onAway, true)
+    return () => {
+      document.removeEventListener("mousemove", onMove, true)
+      document.removeEventListener("scroll", onAway, true)
+      document.removeEventListener("click", onAway, true)
+    }
+  }, [!!z])
   const move = (e: any) => setZ((p: any) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))
   const show = (e: any, url: string, label?: string) => setZ({ url, label, x: e.clientX, y: e.clientY })
   const hide = () => setZ(null)
@@ -62,6 +81,7 @@ function useZoom() {
 function LibraryTab({ zoom }: any) {
   const qc = useQueryClient()
   const [q, setQ] = useState(""); const [project, setProject] = useState(""); const [tag, setTag] = useState("")
+  const [showArchived, setShowArchived] = useState(false)
   const [checked, setChecked] = useState<Record<string, string[]>>({})
   const [openTexts, setOpenTexts] = useState<Record<string, boolean>>({})
   const [openFam, setOpenFam] = useState<Record<string, boolean>>({})
@@ -69,8 +89,8 @@ function LibraryTab({ zoom }: any) {
   const [metaModal, setMetaModal] = useState<any>(null)
 
   const { data, isLoading } = useQuery({
-    queryKey: ["ads-lib", q, project, tag],
-    queryFn: () => sdk.client.fetch(`/admin/ads-library/creatives?q=${encodeURIComponent(q)}&project=${project}&tag=${tag}&limit=200`, { method: "GET" }),
+    queryKey: ["ads-lib", q, project, tag, showArchived],
+    queryFn: () => sdk.client.fetch(`/admin/ads-library/creatives?q=${encodeURIComponent(q)}&project=${project}&tag=${tag}&archived=${showArchived ? "1" : "0"}&limit=200`, { method: "GET" }),
   })
   const creatives = data?.creatives || []
   const byId = useMemo(() => Object.fromEntries(creatives.map((c: any) => [c.id, c])), [creatives])
@@ -80,6 +100,11 @@ function LibraryTab({ zoom }: any) {
   const official = useMutation({
     mutationFn: ({ id, variant_id }: any) =>
       sdk.client.fetch(`/admin/ads-library/creatives/${id}/variants`, { method: "POST", body: { action: "official", variant_id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["ads-lib"] }),
+  })
+  const archiveMut = useMutation({
+    mutationFn: ({ id, archived }: any) =>
+      sdk.client.fetch(`/admin/ads-library/creatives/${id}`, { method: "POST", body: { archived } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ads-lib"] }),
   })
   const genMore = useMutation({
@@ -130,7 +155,7 @@ function LibraryTab({ zoom }: any) {
         <div style={{ display: "grid", gridTemplateColumns: isChild ? "104px minmax(0,1fr)" : "136px minmax(0,1fr)", gap: 18, padding: "14px 16px" }}>
           <div style={{ textAlign: "center" }}>
             {img ? (
-              <img src={img} alt={a.name}
+              <img src={img} alt={a.name} data-zoom="1"
                 onMouseEnter={(e) => zoom.show(e, img, a.name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                 style={{ width: isChild ? 100 : 132, height: isChild ? 100 : 132, objectFit: "cover", borderRadius: 10, border: "1px solid #e5e7eb", cursor: "zoom-in" }} />
             ) : (
@@ -156,7 +181,7 @@ function LibraryTab({ zoom }: any) {
               <div style={{ display: "flex", gap: 7, alignItems: "center", flexWrap: "wrap", marginTop: 9 }}>
                 <span style={{ fontSize: 11.5, color: "#6b7280" }}>🎛️ Varianty ({a.variants.length}):</span>
                 {a.variants.map((v: any) => (
-                  <span key={v.id} title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}`}
+                  <span key={v.id} data-zoom="1" title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}`}
                     onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}`)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                     onClick={() => official.mutate({ id: a.id, variant_id: v.id })}
                     style={{ width: v.format === "1:1" ? 44 : 26, height: 44, borderRadius: 8, position: "relative", cursor: "pointer", overflow: "hidden",
@@ -172,8 +197,17 @@ function LibraryTab({ zoom }: any) {
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", padding: "10px 16px", borderTop: "1px solid var(--border-base,#e5e7eb)", background: "var(--bg-subtle,#f9fafb)", borderRadius: "0 0 12px 12px" }}>
           <button style={sel.length ? S.btnPri : { ...S.btnPri, opacity: .4, cursor: "not-allowed" }} disabled={!sel.length}
             onClick={() => setWizard({ creative: a, sel })}>🌍 Lokalizovat ({sel.length})</button>
+          <button style={S.btn} onClick={() => {
+            const all = [...P.map((_: any, i: number) => "P" + i), ...H.map((_: any, i: number) => "H" + i)]
+            setChecked((c) => ({ ...c, [a.id]: sel.length === all.length ? [] : all }))
+          }}>{sel.length === P.length + H.length && sel.length > 0 ? "✖️ Zrušit výběr" : "☑️ Označit vše"}</button>
           {img && <a href={img} target="_blank" rel="noreferrer" style={{ ...S.btn, textDecoration: "none", color: "inherit", display: "inline-flex", alignItems: "center" }}>⬇️ Obrázky</a>}
           <button style={S.btn} onClick={() => setMetaModal({ creative: a })}>🚀 Do Meta účtu</button>
+          {a.archived
+            ? <button style={{ ...S.btn, borderColor: "#15803d", color: "#15803d" }} disabled={archiveMut.isPending}
+                onClick={() => archiveMut.mutate({ id: a.id, archived: false })}>↩️ Obnovit z archivu</button>
+            : <button style={S.btn} disabled={archiveMut.isPending} title="Nic se nemaže — karta se jen přesune do Archivu"
+                onClick={() => archiveMut.mutate({ id: a.id, archived: true })}>🗄️ Archivovat</button>}
           {kids.length > 0 && (
             <button style={{ ...S.btn, marginLeft: "auto", borderColor: "#ede9fe", background: "#ede9fe", color: "#7c3aed" }}
               onClick={() => setOpenFam((o) => ({ ...o, [a.id]: !famOpen }))}>
@@ -193,11 +227,15 @@ function LibraryTab({ zoom }: any) {
         <select style={{ ...S.input, width: "auto" }} value={tag} onChange={(e) => setTag(e.target.value)}>
           <option value="">Štítek: vše</option><option value="winner">🏆 winner</option><option value="test">🧪 test</option>
         </select>
+        <button style={{ ...S.btn, ...(showArchived ? { background: "#111827", color: "#fff", borderColor: "#111827" } : {}) }}
+          onClick={() => setShowArchived(!showArchived)}>🗄️ Archiv{showArchived ? " ✓" : ""}</button>
         <span style={{ fontSize: 12.5, color: "#6b7280", alignSelf: "center", marginLeft: "auto" }}>{data?.count ?? "…"} reklam</span>
       </div>
       {isLoading && <div style={{ padding: 30, textAlign: "center", color: "#6b7280" }}>Načítám…</div>}
+      {showArchived && <div style={{ ...S.card, padding: "10px 16px", marginBottom: 14, fontSize: 13, color: "#6b7280", background: "var(--bg-subtle,#f9fafb)" }}>
+        🗄️ <b>Archiv</b> — karty jsou jen odložené z dohledu, nic není smazané. „↩️ Obnovit" je vrátí do knihovny.</div>}
       {!isLoading && !creatives.length &&
-        <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>Knihovna je prázdná — importuj vítěze ze záložky 🏆 Výkon.</div>}
+        <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>{showArchived ? "Archiv je prázdný." : "Knihovna je prázdná — importuj vítěze ze záložky 🏆 Výkon."}</div>}
       {roots.map((a: any) => {
         const kids = kidsOf(a.id)
         return (
@@ -564,7 +602,7 @@ function PerformanceTab({ zoom }: any) {
                     <td style={{ padding: "8px 14px", maxWidth: 340 }}>
                       <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                         {r.thumb
-                          ? <img src={r.thumb} alt="" onMouseEnter={(e) => zoom.show(e, r.thumb, r.ad_name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                          ? <img src={r.thumb} alt="" data-zoom="1" onMouseEnter={(e) => zoom.show(e, r.thumb, r.ad_name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                               style={{ width: 38, height: 38, borderRadius: 7, objectFit: "cover", flexShrink: 0, cursor: "zoom-in" }} />
                           : <span style={{ width: 38, height: 38, borderRadius: 7, background: "#f3f4f6", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>🖼️</span>}
                         <div style={{ minWidth: 0 }}>

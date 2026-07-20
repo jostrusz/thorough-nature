@@ -7,11 +7,11 @@ import { PROJECT_CONTEXT } from "./project-context"
  */
 export function textModels() {
   const list = [
-    { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!process.env.ANTHROPIC_API_KEY },
-    { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!process.env.ANTHROPIC_API_KEY },
-    { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!process.env.ANTHROPIC_API_KEY },
-    { id: "gpt-4o", label: "GPT-4o (OpenAI)", provider: "openai", available: !!process.env.OPENAI_API_KEY },
-    { id: "gpt-4o-mini", label: "GPT-4o mini (OpenAI)", provider: "openai", available: !!process.env.OPENAI_API_KEY },
+    { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
+    { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
+    { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
+    { id: "gpt-4o", label: "GPT-4o (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
+    { id: "gpt-4o-mini", label: "GPT-4o mini (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
   ]
   return list
 }
@@ -60,7 +60,7 @@ export async function translateTexts(opts: {
   const provider = model?.provider || "anthropic"
 
   if (provider === "openai") {
-    const key = process.env.OPENAI_API_KEY
+    const key = (process.env.OPENAI_API_KEY || "").trim()
     if (!key) throw new Error("OPENAI_API_KEY není nastaven")
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

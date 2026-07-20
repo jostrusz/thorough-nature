@@ -35,6 +35,10 @@ const AdCreative = model.define("ad_creative", {
   // last synced performance snapshot { spend, sales, cpa, roas, ctr, range, synced_at }
   perf: model.json().nullable(),
 
+  // archive — nothing is ever deleted, archived cards just move out of sight
+  archived: model.boolean().default(false),
+  archived_at: model.dateTime().nullable(),
+
   metadata: model.json().nullable(),
 })
 

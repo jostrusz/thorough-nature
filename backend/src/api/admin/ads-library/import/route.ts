@@ -22,9 +22,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (existing) return res.json({ creative: existing, already_existed: true })
 
   try {
-    // 1) creative + texts
+    // 1) creative + texts (thumbnail requested in high res — default is 64px)
     const ad = await graphGet(meta_ad_id, {
-      fields: "name,creative{id,title,body,image_url,thumbnail_url,video_id,object_story_spec,asset_feed_spec,call_to_action_type}",
+      fields: "name,creative{id,title,body,image_url,image_hash,thumbnail_url,video_id,object_story_spec,asset_feed_spec,call_to_action_type}",
+      thumbnail_width: 1080, thumbnail_height: 1080,
     })
     const c = ad.creative || {}
     const feed = c.asset_feed_spec || {}
@@ -42,8 +43,27 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     ].filter(Boolean)
     const dedup = (arr: string[]) => [...new Set(arr)].slice(0, 5)
 
-    // 2) mirror image to MinIO (Meta URLs expire)
-    const src = c.image_url || c.thumbnail_url
+    // 2) mirror image to MinIO in FULL resolution (Meta URLs expire)
+    //    priority: creative.image_url → adimages lookup by hash → hi-res thumbnail
+    let src = c.image_url || null
+    if (!src && account_id) {
+      const hashes = [
+        c.image_hash,
+        link.image_hash,
+        ...(feed.images || []).map((i: any) => i.hash),
+      ].filter(Boolean)
+      if (hashes.length) {
+        try {
+          const imgs = await graphGet(`${account_id}/adimages`, {
+            hashes: JSON.stringify(hashes.slice(0, 3)), fields: "url,hash",
+          })
+          src = imgs.data?.[0]?.url || null
+        } catch (e) {
+          console.warn(`[Ads Library] adimages lookup failed: ${e.message}`)
+        }
+      }
+    }
+    if (!src) src = c.thumbnail_url || null
     let imageUrl: string | null = null
     if (src) {
       imageUrl = await mirrorImage(src, `ads-library/${meta_ad_id}.jpg`)

@@ -9,9 +9,9 @@ import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
-  const { project, language, tag, source, q, sort = "date", limit = "100", offset = "0" } = req.query as any
+  const { project, language, tag, source, q, sort = "date", limit = "100", offset = "0", archived } = req.query as any
 
-  const filters: any = {}
+  const filters: any = { archived: archived === "1" }
   if (project) filters.project_id = project
   if (language) filters.language = language
   if (tag) filters.tag = tag

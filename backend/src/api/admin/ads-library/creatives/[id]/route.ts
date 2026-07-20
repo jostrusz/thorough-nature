@@ -21,6 +21,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     "headlines", "description_text", "cta_type", "link_url", "image_1x1_url", "image_9x16_url"]) {
     if (b[k] !== undefined) patch[k] = b[k]
   }
+  // archive/unarchive — moves the card out of sight, nothing is deleted
+  if (b.archived !== undefined) {
+    patch.archived = !!b.archived
+    patch.archived_at = b.archived ? new Date() : null
+  }
   const updated = await svc.updateAdCreatives({ id: req.params.id, ...patch })
   res.json({ creative: updated })
 }
