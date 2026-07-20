@@ -293,7 +293,9 @@ function LocalizeWizard({ wizard, onClose }: any) {
   const [imgMode, setImgMode] = useState<"swap" | "texts">("swap")
   const [imgPrompt, setImgPrompt] = useState(IMG_PROMPTS.swap)
   const [p916, setP916] = useState(PROMPT_916)
-  const [imgCount, setImgCount] = useState(2)
+  // 1 variant per format by default — every extra 1:1 also spawns an extra
+  // 9:16 reframe, so "2" quietly meant 4 images (~$0.56) per job
+  const [imgCount, setImgCount] = useState(1)
   const [f11, setF11] = useState(true); const [f916, setF916] = useState(true)
   const [txtModel, setTxtModel] = useState("claude-opus-4-8")
   const [txtCount, setTxtCount] = useState(1)
@@ -548,7 +550,7 @@ function RateHint({ models, id }: any) {
 }
 
 /* ═══ Fronta ═══ */
-function QueueTab() {
+function QueueTab({ zoom }: any) {
   const [openJob, setOpenJob] = useState<string | null>(null)
   const { data } = useQuery({
     queryKey: ["ads-jobs"],
@@ -568,7 +570,14 @@ function QueueTab() {
         <span style={{ fontSize: 12, color: "#6b7280", marginLeft: 10 }}>obnovuje se každé 4 s</span></div>
       {!jobs.length && <div style={{ padding: 24, color: "#6b7280", fontSize: 13.5 }}>Zatím žádné joby — spusť lokalizaci v 📚 Knihovně.</div>}
       {jobs.map((j: any) => (
-        <div key={j.id} style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, padding: "12px 16px", borderTop: "1px solid #f3f4f6", alignItems: "center" }}>
+        <div key={j.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 14, padding: "12px 16px", borderTop: "1px solid #f3f4f6", alignItems: "start" }}>
+          {j.thumb ? (
+            <img src={j.thumb} alt="" data-zoom="1"
+              onMouseEnter={(e) => zoom?.show(e, j.thumb, j.source_name)} onMouseMove={zoom?.move} onMouseLeave={zoom?.hide}
+              style={{ width: 64, height: 64, objectFit: "cover", borderRadius: 9, border: "1px solid var(--border-base,#e5e7eb)", cursor: "zoom-in" }} />
+          ) : (
+            <div style={{ width: 64, height: 64, borderRadius: 9, background: "var(--bg-subtle,#f3f4f6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🖼️</div>
+          )}
           <div>
             <b style={{ fontSize: 13.5 }}>{j.source_name} → {PROJECTS[j.target_project]?.flag || "🌐"} {j.target_project}</b>
             <div style={{ display: "flex", gap: 6, marginTop: 5, flexWrap: "wrap" }}>{(j.steps || []).map(stepChip)}</div>
@@ -724,7 +733,7 @@ const AdsLibraryPage = () => {
       </div>
       {tab === "lib" && <LibraryTab zoom={zoom} />}
       {tab === "perf" && <PerformanceTab zoom={zoom} />}
-      {tab === "queue" && <QueueTab />}
+      {tab === "queue" && <QueueTab zoom={zoom} />}
       {zoom.el}
     </div>)
 }

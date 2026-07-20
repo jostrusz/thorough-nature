@@ -74,7 +74,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
     })
     await svc.updateAdLocalizationJobs({ id: jobId, result_creative_id: created.id })
 
-    const imgCount = Math.min(Number(p.img_count) || 2, 4)
+    const imgCount = Math.min(Number(p.img_count) || 1, 4)
     const wants11 = p.formats?.includes("1:1")
     const wants916 = p.formats?.includes("9:16")
     const langPrompt = (tpl: string) => String(tpl || "")
