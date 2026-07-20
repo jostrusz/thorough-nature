@@ -94,12 +94,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   try {
-    // ── identity from the account's latest creative ──
+    // ── identity from the account's latest creatives — page and IG may live
+    // on different rows, and ads targeting IG positions hard-require the IG id ──
     const last = await graphGet(`${account}/adcreatives`, {
-      fields: "object_story_spec{page_id,instagram_user_id}", limit: 5,
+      fields: "object_story_spec{page_id,instagram_user_id}", limit: 10,
     })
-    const spec = (last.data || []).map((x: any) => x.object_story_spec).find((s: any) => s?.page_id)
-    if (!spec?.page_id) return fail(400, "v účtu není žádná kreativa, ze které jde převzít FB stránku")
+    const specs = (last.data || []).map((x: any) => x.object_story_spec).filter(Boolean)
+    const pageId = specs.find((s: any) => s.page_id)?.page_id
+    const igId = specs.find((s: any) => s.instagram_user_id)?.instagram_user_id
+    if (!pageId) return fail(400, "v účtu není žádná kreativa, ze které jde převzít FB stránku")
+    const spec: any = { page_id: pageId }
+    if (igId) spec.instagram_user_id = igId
 
     // ── ad set (existing or new) ──
     let adsetId = b.adset_id ? String(b.adset_id).trim() : null
@@ -128,12 +133,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const hash11 = await uploadImage(account, c.image_1x1_url)
     const hash916 = c.image_9x16_url ? await uploadImage(account, c.image_9x16_url) : null
 
-    // ── creative: all primaries + headlines via asset_feed_spec ──
+    // ── creative via asset_feed_spec. Meta won't combine placement
+    // customization (the 1:1/9:16 rules) with multiple text variants on a
+    // regular ad set — so a card WITH 9:16 ships both images + the official
+    // text only, and a card without 9:16 ships all texts on the 1:1. ──
     const link = c.link_url || "https://www.marketing-hq.eu/"
+    const textsSent = hash916 ? 1 : Math.min((c.primary_texts || []).length, 5)
     const assetFeed: any = {
       images: [{ hash: hash11, adlabels: [{ name: "sq" }] }],
-      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) => ({ text: t })),
-      titles: (c.headlines || []).slice(0, 5).map((t: string) => ({ text: t })),
+      bodies: (c.primary_texts || []).slice(0, textsSent).map((t: string) => ({ text: t })),
+      titles: (c.headlines || []).slice(0, hash916 ? 1 : 5).map((t: string) => ({ text: t })),
       descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
       ad_formats: ["SINGLE_IMAGE"],
       call_to_action_types: [c.cta_type || "LEARN_MORE"],
@@ -170,6 +179,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     res.json({
       ad_id: ad.id, creative_id: creative.id, adset_id: adsetId, status: "PAUSED",
       adset_name: adsetInfo?.name, campaign_name: adsetInfo?.campaign?.name, account_id: account,
+      images_sent: hash916 ? 2 : 1, texts_sent: textsSent,
     })
   } catch (e: any) {
     fail(502, e.message)

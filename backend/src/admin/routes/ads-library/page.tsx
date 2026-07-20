@@ -486,6 +486,8 @@ function MetaModal({ m, onClose }: any) {
               <div style={{ fontSize: 15, fontWeight: 650, marginBottom: 8 }}>✅ Reklama vytvořena jako PAUSED</div>
               {result.adset_name && <div style={{ fontSize: 13.5, marginBottom: 6 }}>
                 📁 {result.campaign_name ? `${result.campaign_name} → ` : ""}<b>{result.adset_name}</b></div>}
+              {result.images_sent != null && <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 6 }}>
+                🖼️ {result.images_sent === 2 ? "1:1 + 9:16" : "jen 1:1"} · ✍️ {result.texts_sent}× text</div>}
               <div style={{ ...S.mono, fontSize: 12.5, color: "#6b7280", lineHeight: 1.8 }}>
                 ad_id: {result.ad_id}<br />creative_id: {result.creative_id}<br />adset_id: {result.adset_id}</div>
               <div style={{ fontSize: 13.5, marginTop: 10 }}>Zkontroluj náhled v Ads Manageru a zapni ji tam.</div>
@@ -502,9 +504,10 @@ function MetaModal({ m, onClose }: any) {
                 </div>
               </div>)}
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
-              Posílá se: <b>{a.name}</b> — 1:1{a.image_9x16_url ? " + 9:16 (placement customization)" : " (9:16 tato verze nemá)"},
-              {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.
-              Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
+              Posílá se: <b>{a.name}</b> — {a.image_9x16_url
+                ? <>1:1 + 9:16 (feed/Stories) s <b>oficiálním textem P1+H1</b> — Meta neumí kombinovat párování formátů s více texty</>
+                : <>1:1 (9:16 tato verze nemá), {(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline</>},
+              {" "}CTA, odkaz s UTM. Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
             {(() => {
               const accName = (accountsQ.data?.accounts || []).find((x: any) => x.id === account)?.name || ""
               const accLang = accName.match(/\(([A-Z]{2})\)/)?.[1]
