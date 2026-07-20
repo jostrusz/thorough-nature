@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
-import { generateImage } from "./imagegen"
+import { generateImage, askImageYesNo } from "./imagegen"
 import { translateTexts } from "./textgen"
 import { uploadBuffer } from "./media"
 import { PROJECT_CONTEXT } from "./project-context"
@@ -85,29 +85,54 @@ export async function runLocalizationJob(container: any, jobId: string) {
         refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
       }
       await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
+      let swapFails = 0
       for (let i = 0; i < imgCount; i++) {
-        const { buffer, mime } = await generateImage({
-          modelId: p.img_model, prompt: langPrompt(p.img_prompt), refs, aspectRatio: "1:1",
-        })
+        let buffer: any, mime = "image/jpeg", swapOk: boolean | null = null
+        // book swap gets one automatic retry when the verifier says the cover
+        // did not actually change (the model loves to keep the original title)
+        const maxTries = p.img_mode === "swap" ? 2 : 1
+        for (let attempt = 1; attempt <= maxTries; attempt++) {
+          const addendum = attempt > 1
+            ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
+            : ""
+          const gen = await generateImage({
+            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1",
+          })
+          buffer = gen.buffer; mime = gen.mime
+          if (p.img_mode !== "swap") break
+          swapOk = await askImageYesNo(
+            buffer.toString("base64"), mime,
+            `Does the book cover in this image show the title "${ctx.book}"?`
+          )
+          if (swapOk !== false) break
+          log(`1:1 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
+        }
+        if (swapOk === false) swapFails++
         const ext = mime.includes("png") ? "png" : "jpg"
         const url = await uploadBuffer(buffer, `ads-library/${created.id}/1x1/v${i + 1}.${ext}`, mime)
         const row = await svc.createAdVariants({
           creative_id: created.id, format: "1:1", variant_no: i + 1, url,
           model_id: p.img_model, mode: p.img_mode, prompt: langPrompt(p.img_prompt),
-          is_official: i === 0,
+          is_official: false, metadata: { swap_ok: swapOk },
         })
         v11.push(row)
         await setStep("img11", { status: "running", detail: `${i + 1}/${imgCount}` })
       }
-      await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[0].url })
-      await setStep("img11", { status: "done", detail: `${v11.length} variant` })
-      log(`1:1 done (${v11.length})`)
+      // official = first variant that passed the swap check, else the first one
+      const bestIdx = Math.max(0, v11.findIndex((v: any) => v.metadata?.swap_ok !== false))
+      await svc.updateAdVariants({ id: v11[bestIdx].id, is_official: true })
+      await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[bestIdx].url })
+      const failNote = swapFails ? ` (${swapFails}⚠️ obálka nezměněna)` : ""
+      await setStep("img11", { status: "done", detail: `${v11.length} variant${failNote}` })
+      log(`1:1 done (${v11.length}, swap fails: ${swapFails})`)
     }
 
     // ── 2) 9:16 reframe from each 1:1 ──
     if (wants916) {
       await setStep("img916", { status: "running" })
-      const sources = v11.length ? v11.map((v) => v.url) : [src.image_1x1_url].filter(Boolean)
+      const good = v11.filter((v: any) => v.metadata?.swap_ok !== false)
+      const sources = (good.length ? good : v11).map((v) => v.url)
+      if (!sources.length && src.image_1x1_url) sources.push(src.image_1x1_url)
       if (!sources.length) throw new Error("9:16 reframe nemá zdrojový obrázek")
       await setStep("img916", { status: "running", prompt: p.p916, refs: sources.slice(0, imgCount) })
       let n = 0

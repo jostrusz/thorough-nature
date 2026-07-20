@@ -186,13 +186,17 @@ function LibraryTab({ zoom }: any) {
               <div style={{ display: "flex", gap: 7, alignItems: "center", flexWrap: "wrap", marginTop: 9 }}>
                 <span style={{ fontSize: 11.5, color: "#6b7280" }}>🎛️ Varianty ({a.variants.length}):</span>
                 {a.variants.map((v: any) => (
-                  <span key={v.id} data-zoom="1" title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}`}
-                    onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}`)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                  <span key={v.id} data-zoom="1"
+                    title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`}
+                    onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`)}
+                    onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                     onClick={() => official.mutate({ id: a.id, variant_id: v.id })}
                     style={{ width: v.format === "1:1" ? 44 : 26, height: 44, borderRadius: 8, position: "relative", cursor: "pointer", overflow: "hidden",
-                      border: v.is_official ? "2px solid #15803d" : "2px solid var(--border-base,#e5e7eb)", boxShadow: v.is_official ? "0 0 0 2px #dcfce7" : "none" }}>
+                      border: v.is_official ? "2px solid #15803d" : v.metadata?.swap_ok === false ? "2px solid #f59e0b" : "2px solid var(--border-base,#e5e7eb)",
+                      boxShadow: v.is_official ? "0 0 0 2px #dcfce7" : "none" }}>
                     <img src={v.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     {v.is_official && <span style={{ position: "absolute", top: -1, right: 0, fontSize: 9 }}>✅</span>}
+                    {!v.is_official && v.metadata?.swap_ok === false && <span style={{ position: "absolute", top: -1, right: 0, fontSize: 9 }}>⚠️</span>}
                   </span>))}
                 <button style={{ ...S.btn, padding: "4px 9px", fontSize: 12 }} disabled={genMore.isPending}
                   onClick={() => genMore.mutate({ id: a.id, format: "1:1" })}>{genMore.isPending ? "…" : "＋"}</button>

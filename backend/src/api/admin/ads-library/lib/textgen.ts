@@ -40,9 +40,14 @@ Odpověz POUZE validním JSON:
 {"primaries": ["..."], "headlines": ["..."]}`
 }
 
-function parseJson(text: string) {
+function parseJson(text: string, truncated: boolean) {
+  if (truncated) {
+    throw new Error("odpověď AI byla oříznuta limitem tokenů — vyber méně textů, nebo to zkus znovu")
+  }
   const s = text.indexOf("{"), e = text.lastIndexOf("}")
-  if (s < 0 || e < 0) throw new Error("AI nevrátila JSON")
+  if (s < 0 || e < 0) {
+    throw new Error(`AI nevrátila JSON — začátek odpovědi: "${text.slice(0, 160)}"`)
+  }
   return JSON.parse(text.slice(s, e + 1))
 }
 
@@ -73,16 +78,21 @@ export async function translateTexts(opts: {
     })
     const json = await res.json()
     if (!res.ok) throw new Error(`[OpenAI] ${json?.error?.message || res.status}`)
-    const out = parseJson(json.choices?.[0]?.message?.content || "")
+    const choice = json.choices?.[0]
+    const out = parseJson(choice?.message?.content || "", choice?.finish_reason === "length")
     return { primaries: out.primaries || [], headlines: out.headlines || [] }
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const msg = await client.messages.create({
     model: opts.modelId,
-    max_tokens: 2500,
+    // 5 long primaries + 5 headlines can easily exceed 2500 output tokens —
+    // a truncated response has no closing brace and used to surface as the
+    // confusing "AI nevrátila JSON"
+    max_tokens: 8000,
     messages: [{ role: "user", content: prompt }],
   })
-  const out = parseJson(msg.content?.[0]?.text || "")
+  const text = (msg.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n")
+  const out = parseJson(text, msg.stop_reason === "max_tokens")
   return { primaries: out.primaries || [], headlines: out.headlines || [] }
 }

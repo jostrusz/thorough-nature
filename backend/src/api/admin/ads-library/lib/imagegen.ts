@@ -90,3 +90,37 @@ export async function generateImage(opts: {
   }
   return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png" }
 }
+
+/**
+ * Ask a cheap vision model a yes/no question about a generated image —
+ * used as a quality gate after a book-swap (did the cover actually change?).
+ */
+export async function askImageYesNo(imageB64: string, mime: string, question: string): Promise<boolean | null> {
+  const key = (process.env.GEMINI_API_KEY || "").trim()
+  if (!key) return null
+  try {
+    const model = process.env.IMAGE_VERIFY_MODEL || "gemini-3.1-flash-image"
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: mime, data: imageB64 } },
+            { text: `${question}\nAnswer with a single word: YES or NO.` },
+          ]}],
+          generationConfig: { responseModalities: ["TEXT"] },
+        }),
+        signal: AbortSignal.timeout(60000),
+      }
+    )
+    const json = await res.json()
+    const txt = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join(" ") || ""
+    if (/\bYES\b/i.test(txt)) return true
+    if (/\bNO\b/i.test(txt)) return false
+    return null
+  } catch {
+    return null // verification is best-effort, never fails the job
+  }
+}
