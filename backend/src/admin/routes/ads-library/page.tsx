@@ -24,7 +24,7 @@ const RANGES = [["3d", "3 dny"], ["7d", "7 dní"], ["14d", "14 dní"], ["30d", "
   ["90d", "3 měs."], ["180d", "6 měs."], ["365d", "1 rok"]]
 
 const IMG_PROMPTS = {
-  swap: "Replace only the book cover shown in the image with the reference cover, matching the original angle, perspective, lighting and size. Translate every piece of visible text into {LANG}, keeping each text block in the same position, font style, size and color. Do not remove any text. Do not add any new text, prices, badges, logos, books, objects or people. Keep the composition, characters, colors and background otherwise identical.",
+  swap: "Edit IMAGE 2: the book shown in it must be replaced by the book from IMAGE 1.\n\nThe book in the result must read exactly:\n  Title: \"{BOOK}\"\n  Author: {AUTHOR}\nThe original title must be gone completely. Use the layout, colors and artwork of IMAGE 1, and write all text on the cover in {LANG}.\n\nKeep the person, hands, background, table and whole scene of IMAGE 2 identical. Keep the book's position, angle, size, lighting and shadows. Translate any other text in the image (headlines, captions, badges) into {LANG}, keeping its position, font style, size and color. Do not add prices, badges, stickers, logos or anything not present in IMAGE 2.",
   texts: "Translate every piece of visible text in this image into {LANG}. Keep each text block in exactly the same position, font style, size, color and orientation as the original. Do not remove any text. Do not add any new text, prices, badges, logos, objects or people. Keep the composition, characters, colors and background identical apart from the translated words.",
 }
 const PROMPT_916 = "Reframe to 9:16 portrait. Extend the environment upward and downward using consistent perspective and atmospheric depth. Preserve all original details and the overall aesthetic."
@@ -514,6 +514,7 @@ function MetaModal({ m, onClose }: any) {
 
 /* ═══ Fronta ═══ */
 function QueueTab() {
+  const [openJob, setOpenJob] = useState<string | null>(null)
   const { data } = useQuery({
     queryKey: ["ads-jobs"],
     queryFn: () => sdk.client.fetch("/admin/ads-library/jobs", { method: "GET" }),
@@ -537,6 +538,30 @@ function QueueTab() {
             <b style={{ fontSize: 13.5 }}>{j.source_name} → {PROJECTS[j.target_project]?.flag || "🌐"} {j.target_project}</b>
             <div style={{ display: "flex", gap: 6, marginTop: 5, flexWrap: "wrap" }}>{(j.steps || []).map(stepChip)}</div>
             {j.error && <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 4 }}>{j.error}</div>}
+            <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "3px 0", fontSize: 12.5 }}
+              onClick={() => setOpenJob(openJob === j.id ? null : j.id)}>
+              {openJob === j.id ? "Skrýt zadání ▴" : "📋 Zobrazit zadání (prompty, modely) ▾"}</button>
+            {openJob === j.id && (
+              <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--bg-subtle,#f9fafb)", borderRadius: 9, border: "1px solid var(--border-base,#e5e7eb)" }}>
+                <div style={{ ...S.mono, fontSize: 11.5, color: "#6b7280", marginBottom: 8 }}>
+                  🖼️ {j.params?.img_model} · režim {j.params?.img_mode === "swap" ? "book swap" : "akviziční"} ·
+                  {" "}{j.params?.img_count}× {(j.params?.formats || []).join(" + ")}
+                  {"  |  "}✍️ {j.params?.txt_model} · {j.params?.txt_count}× překlad
+                </div>
+                {(j.steps || []).filter((s: any) => s.prompt).map((s: any) => (
+                  <div key={s.key} style={{ marginBottom: 8 }}>
+                    <div style={S.eyebrow}>{s.label}</div>
+                    <div style={{ ...S.mono, fontSize: 11.5, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginTop: 2 }}>{s.prompt}</div>
+                    {s.refs?.length > 0 && (
+                      <div style={{ fontSize: 11, color: "#6b7280", marginTop: 3 }}>
+                        reference: {s.refs.map((r: string, i: number) =>
+                          <a key={i} href={r} target="_blank" rel="noreferrer" style={{ color: "#7c3aed", marginRight: 8 }}>
+                            {i === s.refs.length - 1 && s.refs.length > 1 ? "cover knihy" : `obrázek ${i + 1}`}</a>)}
+                      </div>)}
+                  </div>))}
+                {!(j.steps || []).some((s: any) => s.prompt) &&
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>Job selhal dřív, než se zadání stihlo zapsat — parametry výše.</div>}
+              </div>)}
           </div>
           <span style={{ fontSize: 12.5, color: j.status === "done" ? "#15803d" : j.status === "failed" ? "#b91c1c" : "#b45309", fontWeight: 650, whiteSpace: "nowrap" }}>
             {j.status === "done" ? "✅ hotovo" : j.status === "failed" ? "❌ selhalo" : j.status === "running" ? "⏳ běží" : "🕐 čeká"}</span>

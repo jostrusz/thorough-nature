@@ -17,10 +17,18 @@ export function imageModels() {
   ]
 }
 
-async function fetchAsInline(url: string): Promise<any> {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`reference image fetch failed (${res.status}): ${url}`)
+async function fetchAsInline(url: string, label: string): Promise<any> {
+  // node's fetch throws a bare "fetch failed" on DNS/TLS problems — wrap it so
+  // the job log says which reference could not be downloaded
+  let res: Response
+  try {
+    res = await fetch(url, { signal: AbortSignal.timeout(30000) })
+  } catch (e: any) {
+    throw new Error(`nelze stáhnout ${label} (${e?.cause?.code || e.message}): ${url}`)
+  }
+  if (!res.ok) throw new Error(`nelze stáhnout ${label} — HTTP ${res.status}: ${url}`)
   const buf = Buffer.from(await res.arrayBuffer())
+  if (!buf.length) throw new Error(`${label} je prázdný soubor: ${url}`)
   const mime = res.headers.get("content-type")?.split(";")[0] || "image/jpeg"
   return { inline_data: { mime_type: mime, data: buf.toString("base64") } }
 }
@@ -32,30 +40,44 @@ async function fetchAsInline(url: string): Promise<any> {
 export async function generateImage(opts: {
   modelId: string
   prompt: string
-  refs: string[]
+  /** URL, or {url,label} — the label is sent as a text part right before the
+   *  image so the model can tell the source ad from the target book cover. */
+  refs: Array<string | { url: string; label: string }>
   aspectRatio: "1:1" | "9:16"
 }): Promise<{ buffer: Buffer; mime: string }> {
   const key = (process.env.GEMINI_API_KEY || "").trim()
   if (!key) throw new Error("GEMINI_API_KEY není nastaven — dodej klíč z aistudio.google.com")
   const model = MODELS[opts.modelId] || MODELS["nano-banana-pro"]
 
-  const parts: any[] = [{ text: opts.prompt }]
-  for (const url of opts.refs) parts.push(await fetchAsInline(url))
+  const parts: any[] = []
+  for (const ref of opts.refs) {
+    const url = typeof ref === "string" ? ref : ref.url
+    const label = typeof ref === "string" ? "" : ref.label
+    if (label) parts.push({ text: label })
+    parts.push(await fetchAsInline(url, label || "referenční obrázek"))
+  }
+  parts.push({ text: opts.prompt })
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts }],
-        generationConfig: {
-          responseModalities: ["IMAGE"],
-          imageConfig: { aspectRatio: opts.aspectRatio },
-        },
-      }),
-    }
-  )
+  let res: Response
+  try {
+    res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseModalities: ["IMAGE"],
+            imageConfig: { aspectRatio: opts.aspectRatio },
+          },
+        }),
+        signal: AbortSignal.timeout(180000),
+      }
+    )
+  } catch (e: any) {
+    throw new Error(`Gemini API nedostupné (${e?.cause?.code || e.message})`)
+  }
   const json = await res.json()
   if (!res.ok) {
     throw new Error(`[Gemini ${model}] ${json?.error?.message || res.status}`)

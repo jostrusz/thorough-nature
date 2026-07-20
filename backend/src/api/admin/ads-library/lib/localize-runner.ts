@@ -64,19 +64,27 @@ export async function runLocalizationJob(container: any, jobId: string) {
     const imgCount = Math.min(Number(p.img_count) || 2, 4)
     const wants11 = p.formats?.includes("1:1")
     const wants916 = p.formats?.includes("9:16")
-    const langPrompt = (tpl: string) => String(tpl || "").replaceAll("{LANG}", ctx.langName)
+    const langPrompt = (tpl: string) => String(tpl || "")
+      .replaceAll("{LANG}", ctx.langName)
+      .replaceAll("{BOOK}", ctx.book)
+      .replaceAll("{AUTHOR}", ctx.author)
 
     // ── 1) 1:1 variants ──
     const v11: any[] = []
     if (wants11) {
       await setStep("img11", { status: "running" })
-      const refs = [src.image_1x1_url].filter(Boolean)
+      if (!src.image_1x1_url) throw new Error("zdrojová kreativa nemá obrázek")
+      // cover first, ad second — labelled, so the model cannot mix them up
+      const refs: any[] = []
       if (p.img_mode === "swap") {
         const cover = PROJECT_COVERS[target]
         if (!cover) throw new Error(`chybí referenční cover pro projekt ${target}`)
-        refs.push(cover)
+        refs.push({ url: cover, label: "IMAGE 1 — the new book cover to use:" })
+        refs.push({ url: src.image_1x1_url, label: "IMAGE 2 — the advertisement to edit:" })
+      } else {
+        refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
       }
-      if (!refs.length) throw new Error("zdrojová kreativa nemá obrázek")
+      await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
       for (let i = 0; i < imgCount; i++) {
         const { buffer, mime } = await generateImage({
           modelId: p.img_model, prompt: langPrompt(p.img_prompt), refs, aspectRatio: "1:1",
@@ -101,6 +109,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
       await setStep("img916", { status: "running" })
       const sources = v11.length ? v11.map((v) => v.url) : [src.image_1x1_url].filter(Boolean)
       if (!sources.length) throw new Error("9:16 reframe nemá zdrojový obrázek")
+      await setStep("img916", { status: "running", prompt: p.p916, refs: sources.slice(0, imgCount) })
       let n = 0
       for (const srcUrl of sources.slice(0, imgCount)) {
         const { buffer, mime } = await generateImage({
@@ -123,7 +132,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
     }
 
     // ── 3) texts ──
-    await setStep("texts", { status: "running" })
+    await setStep("texts", { status: "running", prompt: `model ${p.txt_model} · kontext projektu ${target}` })
     const pick = (arr: string[], idx?: number[]) =>
       (idx?.length ? idx.map((i) => arr?.[i]).filter(Boolean) : (arr || []))
     const primaries = pick(src.primary_texts, p.primary_indexes)
