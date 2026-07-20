@@ -74,5 +74,6 @@ ${headlines.map((h, i) => `HEADLINE_${i + 1}: ${h}`).join("\n")}
 
 Odpověz POUZE validním JSON (tells česky, stručně; texty v jazyce ${langName}):
 {"tells": ["nalezený problém 1", "..."], "primaries": ["..."], "headlines": ["..."]}
-Pokud je text čistý, vrať "tells": [] a texty beze změny.`
+Pokud je text čistý, vrať "tells": [] a texty beze změny.
+POZOR: uvnitř JSON stringů nikdy nepoužívej neescapované dvojité uvozovky — když v tells cituješ text, cituj «takto» nebo ‚takto'.`
 }

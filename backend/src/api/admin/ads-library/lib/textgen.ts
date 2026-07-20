@@ -70,7 +70,24 @@ function parseJson(text: string, truncated: boolean) {
   if (s < 0 || e < 0) {
     throw new Error(`AI nevrátila JSON — začátek odpovědi: "${text.slice(0, 160)}"`)
   }
-  return JSON.parse(text.slice(s, e + 1))
+  const raw = text.slice(s, e + 1)
+  try {
+    return JSON.parse(raw)
+  } catch {
+    // models occasionally emit literal newlines inside JSON strings — escape
+    // control chars that sit inside a string literal and retry once
+    let out = "", inStr = false, escaped = false
+    for (const ch of raw) {
+      if (escaped) { out += ch; escaped = false; continue }
+      if (ch === "\\") { out += ch; escaped = inStr; continue }
+      if (ch === '"') { inStr = !inStr; out += ch; continue }
+      if (inStr && ch === "\n") { out += "\\n"; continue }
+      if (inStr && ch === "\r") { continue }
+      if (inStr && ch === "\t") { out += "\\t"; continue }
+      out += ch
+    }
+    return JSON.parse(out)
+  }
 }
 
 /** One LLM call, provider-agnostic. Returns raw text + billed usage. */
@@ -106,7 +123,9 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  const msg = await client.messages.create({
+  // streaming, because the SDK refuses non-streaming requests whose max_tokens
+  // implies a >10min worst case (Fable's 24k budget trips that check)
+  const stream = client.messages.stream({
     model: modelId,
     // 5 long primaries + 5 headlines can easily exceed 2500 output tokens —
     // a truncated response has no closing brace and used to surface as the
@@ -115,6 +134,7 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
     max_tokens: modelId === "claude-fable-5" ? 24000 : 8000,
     messages: [{ role: "user", content: prompt }],
   })
+  const msg = await stream.finalMessage()
   return {
     text: (msg.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n"),
     truncated: msg.stop_reason === "max_tokens",
