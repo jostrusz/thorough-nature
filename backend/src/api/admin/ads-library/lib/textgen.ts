@@ -1,6 +1,8 @@
 // @ts-nocheck
 import Anthropic from "@anthropic-ai/sdk"
 import { PROJECT_CONTEXT } from "./project-context"
+import { PAGE_CONTEXT } from "./page-context"
+import type { Usage } from "./pricing"
 
 /**
  * Text adaptation via Anthropic (default) or OpenAI (when OPENAI_API_KEY set).
@@ -10,13 +12,21 @@ export function textModels() {
     { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
-    { id: "gpt-4o", label: "GPT-4o (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
-    { id: "gpt-4o-mini", label: "GPT-4o mini (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
+    { id: "gpt-5.4", label: "GPT-5.4 (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
+    { id: "gpt-5.4-mini", label: "GPT-5.4 mini (OpenAI) — levný", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
   ]
   return list
 }
 
-function buildPrompt(src: any, ctx: any, primaries: string[], headlines: string[]) {
+function buildPrompt(src: any, ctx: any, page: any, primaries: string[], headlines: string[]) {
+  const pageBlock = page ? `
+KONTEXT CÍLOVÉ PRODEJNÍ STRÁNKY (${page.url}):
+- Hlavní claim: ${page.claim}
+- Slib stránky: ${page.promise}
+- Cena knihy: ${page.price}
+- Klíčová témata: ${(page.sections || []).join(" · ")}
+Texty musí ladit s tímto claimem a slibem. Pokud reklama zmiňuje cenu, použij ${page.price}.
+` : ""
   return `Jsi senior copywriter pro přímý prodej knih na Facebooku. Adaptuj následující reklamní texty do jazyka: ${ctx.langName} (${ctx.language}).
 
 CÍLOVÝ PROJEKT:
@@ -24,6 +34,7 @@ CÍLOVÝ PROJEKT:
 - Oslovení: ${ctx.address}
 - Web: ${ctx.domain}
 - Poznámky: ${ctx.notes || "—"}
+${pageBlock}
 
 PRAVIDLA:
 1. NE doslovný překlad — nativní adaptace, jak mluví rodilý mluvčí na Facebooku.
@@ -57,10 +68,10 @@ export async function translateTexts(opts: {
   targetProject: string
   primaries: string[]
   headlines: string[]
-}): Promise<{ primaries: string[]; headlines: string[] }> {
+}): Promise<{ primaries: string[]; headlines: string[]; usage: Usage }> {
   const ctx = PROJECT_CONTEXT[opts.targetProject]
   if (!ctx) throw new Error(`neznámý projekt: ${opts.targetProject}`)
-  const prompt = buildPrompt(opts.src, ctx, opts.primaries, opts.headlines)
+  const prompt = buildPrompt(opts.src, ctx, PAGE_CONTEXT[opts.targetProject], opts.primaries, opts.headlines)
   const model = textModels().find((m) => m.id === opts.modelId)
   const provider = model?.provider || "anthropic"
 
@@ -80,7 +91,10 @@ export async function translateTexts(opts: {
     if (!res.ok) throw new Error(`[OpenAI] ${json?.error?.message || res.status}`)
     const choice = json.choices?.[0]
     const out = parseJson(choice?.message?.content || "", choice?.finish_reason === "length")
-    return { primaries: out.primaries || [], headlines: out.headlines || [] }
+    return {
+      primaries: out.primaries || [], headlines: out.headlines || [],
+      usage: { model: opts.modelId, input: json.usage?.prompt_tokens || 0, output: json.usage?.completion_tokens || 0 },
+    }
   }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
@@ -94,5 +108,8 @@ export async function translateTexts(opts: {
   })
   const text = (msg.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n")
   const out = parseJson(text, msg.stop_reason === "max_tokens")
-  return { primaries: out.primaries || [], headlines: out.headlines || [] }
+  return {
+    primaries: out.primaries || [], headlines: out.headlines || [],
+    usage: { model: opts.modelId, input: msg.usage?.input_tokens || 0, output: msg.usage?.output_tokens || 0 },
+  }
 }

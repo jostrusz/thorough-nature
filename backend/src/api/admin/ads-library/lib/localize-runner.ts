@@ -5,6 +5,7 @@ import { translateTexts } from "./textgen"
 import { uploadBuffer } from "./media"
 import { PROJECT_CONTEXT } from "./project-context"
 import { PROJECT_COVERS } from "./project-assets"
+import { costUSD, round4 } from "./pricing"
 
 /**
  * Async localization job runner. Fire-and-forget from the route; progress is
@@ -24,6 +25,18 @@ export async function runLocalizationJob(container: any, jobId: string) {
     const [job] = await svc.listAdLocalizationJobs({ id: jobId })
     const steps = (job.steps || []).map((s: any) => (s.key === key ? { ...s, ...patch } : s))
     await svc.updateAdLocalizationJobs({ id: jobId, steps })
+  }
+
+  // running USD total across every AI call in this job (images, verify, texts)
+  let totalCost = 0
+  const stepCost: Record<string, number> = {}
+  const addCost = (usage: any, stepKey: string): number | null => {
+    const c = costUSD(usage)
+    if (c != null) {
+      totalCost += c
+      stepCost[stepKey] = (stepCost[stepKey] || 0) + c
+    }
+    return c
   }
 
   try {
@@ -74,20 +87,25 @@ export async function runLocalizationJob(container: any, jobId: string) {
     if (wants11) {
       await setStep("img11", { status: "running" })
       if (!src.image_1x1_url) throw new Error("zdrojová kreativa nemá obrázek")
-      // cover first, ad second — labelled, so the model cannot mix them up
+      // cover first, ad second — labelled, so the model cannot mix them up.
+      // The target-book cover is ALWAYS attached to 1:1 generation (both
+      // modes) so the book shown in the ad is the right edition; the 9:16
+      // reframe below works purely from the finished 1:1 and needs no cover.
+      const cover = PROJECT_COVERS[target]
       const refs: any[] = []
       if (p.img_mode === "swap") {
-        const cover = PROJECT_COVERS[target]
         if (!cover) throw new Error(`chybí referenční cover pro projekt ${target}`)
         refs.push({ url: cover, label: "IMAGE 1 — the new book cover to use:" })
         refs.push({ url: src.image_1x1_url, label: "IMAGE 2 — the advertisement to edit:" })
       } else {
-        refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
+        if (cover) refs.push({ url: cover, label: "IMAGE 1 — reference: the target edition's book cover (if a book appears in the ad, it must look like this):" })
+        refs.push({ url: src.image_1x1_url, label: cover ? "IMAGE 2 — the advertisement to edit:" : "The advertisement to edit:" })
       }
       await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
       let swapFails = 0
       for (let i = 0; i < imgCount; i++) {
         let buffer: any, mime = "image/jpeg", swapOk: boolean | null = null
+        let vCost = 0, vIn = 0, vOut = 0
         // book swap gets one automatic retry when the verifier says the cover
         // did not actually change (the model loves to keep the original title)
         const maxTries = p.img_mode === "swap" ? 2 : 1
@@ -99,11 +117,15 @@ export async function runLocalizationJob(container: any, jobId: string) {
             modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1",
           })
           buffer = gen.buffer; mime = gen.mime
+          vCost += addCost(gen.usage, "img11") || 0
+          vIn += gen.usage?.input || 0; vOut += gen.usage?.output || 0
           if (p.img_mode !== "swap") break
-          swapOk = await askImageYesNo(
+          const verify = await askImageYesNo(
             buffer.toString("base64"), mime,
             `Does the book cover in this image show the title "${ctx.book}"?`
           )
+          swapOk = verify.answer
+          vCost += addCost(verify.usage, "img11") || 0
           if (swapOk !== false) break
           log(`1:1 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
         }
@@ -113,7 +135,8 @@ export async function runLocalizationJob(container: any, jobId: string) {
         const row = await svc.createAdVariants({
           creative_id: created.id, format: "1:1", variant_no: i + 1, url,
           model_id: p.img_model, mode: p.img_mode, prompt: langPrompt(p.img_prompt),
-          is_official: false, metadata: { swap_ok: swapOk },
+          is_official: false,
+          metadata: { swap_ok: swapOk, cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut },
         })
         v11.push(row)
         await setStep("img11", { status: "running", detail: `${i + 1}/${imgCount}` })
@@ -123,8 +146,8 @@ export async function runLocalizationJob(container: any, jobId: string) {
       await svc.updateAdVariants({ id: v11[bestIdx].id, is_official: true })
       await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[bestIdx].url })
       const failNote = swapFails ? ` (${swapFails}⚠️ obálka nezměněna)` : ""
-      await setStep("img11", { status: "done", detail: `${v11.length} variant${failNote}` })
-      log(`1:1 done (${v11.length}, swap fails: ${swapFails})`)
+      await setStep("img11", { status: "done", detail: `${v11.length} variant${failNote}`, cost_usd: round4(stepCost.img11 || 0) })
+      log(`1:1 done (${v11.length}, swap fails: ${swapFails}, ~$${round4(stepCost.img11 || 0)})`)
     }
 
     // ── 2) 9:16 reframe from each 1:1 ──
@@ -137,9 +160,10 @@ export async function runLocalizationJob(container: any, jobId: string) {
       await setStep("img916", { status: "running", prompt: p.p916, refs: sources.slice(0, imgCount) })
       let n = 0
       for (const srcUrl of sources.slice(0, imgCount)) {
-        const { buffer, mime } = await generateImage({
+        const { buffer, mime, usage } = await generateImage({
           modelId: p.img_model, prompt: p.p916, refs: [srcUrl], aspectRatio: "9:16",
         })
+        const c916 = addCost(usage, "img916")
         const ext = mime.includes("png") ? "png" : "jpg"
         n++
         const url = await uploadBuffer(buffer, `ads-library/${created.id}/9x16/v${n}.${ext}`, mime)
@@ -147,13 +171,14 @@ export async function runLocalizationJob(container: any, jobId: string) {
           creative_id: created.id, format: "9:16", variant_no: n, url,
           model_id: p.img_model, mode: "reframe", prompt: p.p916,
           is_official: n === 1,
+          metadata: { cost_usd: c916 != null ? round4(c916) : null, tokens_in: usage?.input || 0, tokens_out: usage?.output || 0 },
         })
         await setStep("img916", { status: "running", detail: `${n}/${Math.min(sources.length, imgCount)}` })
       }
       const [firstOff] = await svc.listAdVariants({ creative_id: created.id, format: "9:16", is_official: true })
       if (firstOff) await svc.updateAdCreatives({ id: created.id, image_9x16_url: firstOff.url })
-      await setStep("img916", { status: "done", detail: `${n} variant` })
-      log(`9:16 done (${n})`)
+      await setStep("img916", { status: "done", detail: `${n} variant`, cost_usd: round4(stepCost.img916 || 0) })
+      log(`9:16 done (${n}, ~$${round4(stepCost.img916 || 0)})`)
     }
 
     // ── 3) texts ──
@@ -168,7 +193,8 @@ export async function runLocalizationJob(container: any, jobId: string) {
       const out = await translateTexts({
         modelId: p.txt_model, src, targetProject: target, primaries, headlines,
       })
-      txtVariants.push(out)
+      addCost(out.usage, "texts")
+      txtVariants.push({ primaries: out.primaries, headlines: out.headlines })
       await setStep("texts", { status: "running", detail: `${v + 1}/${txtCount}` })
     }
     await svc.updateAdCreatives({
@@ -177,18 +203,25 @@ export async function runLocalizationJob(container: any, jobId: string) {
       headlines: (txtVariants[0]?.headlines || []).slice(0, 5),
       metadata: { localization_job_id: jobId, text_variants: txtVariants, official_text_variant: 0 },
     })
-    await setStep("texts", { status: "done", detail: `${txtCount} variant` })
+    await setStep("texts", { status: "done", detail: `${txtCount} variant`, cost_usd: round4(stepCost.texts || 0) })
 
     // ── 4) finalize ──
-    await svc.updateAdLocalizationJobs({ id: jobId, status: "done" })
-    log(`done → creative ${created.id}`)
+    await svc.updateAdLocalizationJobs({
+      id: jobId, status: "done",
+      params: { ...p, cost_usd: round4(totalCost) },
+    })
+    log(`done → creative ${created.id} (~$${round4(totalCost)})`)
   } catch (e: any) {
     console.error(`[Ads Library] job ${jobId} FAILED: ${e.message}`)
     try {
       const [job] = await svc.listAdLocalizationJobs({ id: jobId })
       const steps = (job.steps || []).map((s: any) =>
         s.status === "running" ? { ...s, status: "failed", detail: e.message.slice(0, 200) } : s)
-      await svc.updateAdLocalizationJobs({ id: jobId, status: "failed", error: e.message.slice(0, 500), steps })
+      await svc.updateAdLocalizationJobs({
+        id: jobId, status: "failed", error: e.message.slice(0, 500), steps,
+        // partial spend up to the failure still gets recorded
+        params: { ...(job.params || {}), cost_usd: round4(totalCost) },
+      })
       if (job.result_creative_id) {
         await svc.updateAdCreatives({ id: job.result_creative_id, metadata: { localization_job_id: jobId, generating: false, failed: e.message.slice(0, 200) } })
       }

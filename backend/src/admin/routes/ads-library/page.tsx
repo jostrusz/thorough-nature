@@ -187,8 +187,8 @@ function LibraryTab({ zoom }: any) {
                 <span style={{ fontSize: 11.5, color: "#6b7280" }}>🎛️ Varianty ({a.variants.length}):</span>
                 {a.variants.map((v: any) => (
                   <span key={v.id} data-zoom="1"
-                    title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`}
-                    onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`)}
+                    title={`${v.format} · V${v.variant_no} · ${v.model_id || ""}${v.metadata?.cost_usd != null ? ` · ~$${v.metadata.cost_usd}` : ""}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`}
+                    onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}${v.metadata?.cost_usd != null ? ` · ~$${v.metadata.cost_usd}` : ""}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`)}
                     onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                     onClick={() => official.mutate({ id: a.id, variant_id: v.id })}
                     style={{ width: v.format === "1:1" ? 44 : 26, height: 44, borderRadius: 8, position: "relative", cursor: "pointer", overflow: "hidden",
@@ -529,7 +529,7 @@ function QueueTab() {
     const bg = s.status === "done" ? "#dcfce7" : s.status === "running" ? "#fef3c7" : s.status === "failed" ? "#fee2e2" : "var(--bg-subtle,#f3f4f6)"
     const col = s.status === "done" ? "#15803d" : s.status === "running" ? "#b45309" : s.status === "failed" ? "#b91c1c" : "#6b7280"
     return <span key={s.key} style={{ ...S.mono, fontSize: 11, padding: "2px 9px", borderRadius: 999, background: bg, color: col }}>
-      {s.label}{s.detail ? ` ${s.detail}` : ""}</span>
+      {s.label}{s.detail ? ` ${s.detail}` : ""}{s.cost_usd ? ` · $${s.cost_usd}` : ""}</span>
   }
   return (
     <div style={{ ...S.card, overflow: "hidden" }}>
@@ -551,6 +551,7 @@ function QueueTab() {
                   🖼️ {j.params?.img_model} · režim {j.params?.img_mode === "swap" ? "book swap" : "akviziční"} ·
                   {" "}{j.params?.img_count}× {(j.params?.formats || []).join(" + ")}
                   {"  |  "}✍️ {j.params?.txt_model} · {j.params?.txt_count}× překlad
+                  {j.params?.cost_usd != null && <>{"  |  "}💰 celkem ≈ ${Number(j.params.cost_usd).toFixed(4)} (orientačně, in+out tokeny)</>}
                 </div>
                 {(j.steps || []).filter((s: any) => s.prompt).map((s: any) => (
                   <div key={s.key} style={{ marginBottom: 8 }}>
@@ -567,8 +568,14 @@ function QueueTab() {
                   <div style={{ fontSize: 12, color: "#6b7280" }}>Job selhal dřív, než se zadání stihlo zapsat — parametry výše.</div>}
               </div>)}
           </div>
-          <span style={{ fontSize: 12.5, color: j.status === "done" ? "#15803d" : j.status === "failed" ? "#b91c1c" : "#b45309", fontWeight: 650, whiteSpace: "nowrap" }}>
-            {j.status === "done" ? "✅ hotovo" : j.status === "failed" ? "❌ selhalo" : j.status === "running" ? "⏳ běží" : "🕐 čeká"}</span>
+          <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 12.5, color: j.status === "done" ? "#15803d" : j.status === "failed" ? "#b91c1c" : "#b45309", fontWeight: 650 }}>
+              {j.status === "done" ? "✅ hotovo" : j.status === "failed" ? "❌ selhalo" : j.status === "running" ? "⏳ běží" : "🕐 čeká"}</span>
+            {j.params?.cost_usd != null && (
+              <span style={{ ...S.mono, display: "block", fontSize: 11.5, color: "#6b7280", marginTop: 3 }}
+                title="Orientační cena AI generování (vstupní + výstupní tokeny, oficiální ceníky)">
+                💰 ≈ ${Number(j.params.cost_usd).toFixed(3)}</span>)}
+          </span>
         </div>))}
     </div>)
 }

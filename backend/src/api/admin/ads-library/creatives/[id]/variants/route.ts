@@ -3,6 +3,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ADS_LIBRARY_MODULE } from "../../../../../../modules/ads-library"
 import { generateImage } from "../../../lib/imagegen"
 import { uploadBuffer } from "../../../lib/media"
+import { costUSD, round4 } from "../../../lib/pricing"
 
 /**
  * GET  — list variants of a creative
@@ -48,15 +49,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       ? [creative.image_1x1_url].filter(Boolean)
       : (template.metadata?.refs || [creative.image_1x1_url]).filter(Boolean)
     try {
-      const { buffer, mime } = await generateImage({
+      const { buffer, mime, usage } = await generateImage({
         modelId: template.model_id, prompt: template.prompt, refs, aspectRatio: format,
       })
+      const cost = costUSD(usage)
       const no = Math.max(...siblings.map((s: any) => s.variant_no)) + 1
       const ext = mime.includes("png") ? "png" : "jpg"
       const url = await uploadBuffer(buffer, `ads-library/${creativeId}/${format.replace(":", "x")}/v${no}.${ext}`, mime)
       const row = await svc.createAdVariants({
         creative_id: creativeId, format, variant_no: no, url,
         model_id: template.model_id, mode: template.mode, prompt: template.prompt, is_official: false,
+        metadata: { cost_usd: cost != null ? round4(cost) : null, tokens_in: usage?.input || 0, tokens_out: usage?.output || 0 },
       })
       return res.json({ variant: row })
     } catch (e: any) {

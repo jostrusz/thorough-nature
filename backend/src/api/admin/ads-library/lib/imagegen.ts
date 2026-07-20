@@ -44,7 +44,7 @@ export async function generateImage(opts: {
    *  image so the model can tell the source ad from the target book cover. */
   refs: Array<string | { url: string; label: string }>
   aspectRatio: "1:1" | "9:16"
-}): Promise<{ buffer: Buffer; mime: string }> {
+}): Promise<{ buffer: Buffer; mime: string; usage: { model: string; input: number; output: number } }> {
   const key = (process.env.GEMINI_API_KEY || "").trim()
   if (!key) throw new Error("GEMINI_API_KEY není nastaven — dodej klíč z aistudio.google.com")
   const model = MODELS[opts.modelId] || MODELS["nano-banana-pro"]
@@ -88,16 +88,25 @@ export async function generateImage(opts: {
     const block = json?.candidates?.[0]?.finishReason || json?.promptFeedback?.blockReason
     throw new Error(`[Gemini ${model}] nevrátil obrázek${block ? ` (${block})` : ""}`)
   }
-  return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png" }
+  // thoughts are billed as output tokens; usage feeds the per-job cost counter
+  const um = json?.usageMetadata || {}
+  const usage = {
+    model,
+    input: um.promptTokenCount || 0,
+    output: (um.candidatesTokenCount || 0) + (um.thoughtsTokenCount || 0),
+  }
+  return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png", usage }
 }
 
 /**
  * Ask a cheap vision model a yes/no question about a generated image —
  * used as a quality gate after a book-swap (did the cover actually change?).
  */
-export async function askImageYesNo(imageB64: string, mime: string, question: string): Promise<boolean | null> {
+export async function askImageYesNo(imageB64: string, mime: string, question: string): Promise<{
+  answer: boolean | null; usage: { model: string; input: number; output: number } | null
+}> {
   const key = (process.env.GEMINI_API_KEY || "").trim()
-  if (!key) return null
+  if (!key) return { answer: null, usage: null }
   try {
     const model = process.env.IMAGE_VERIFY_MODEL || "gemini-3.1-flash-image"
     const res = await fetch(
@@ -117,10 +126,16 @@ export async function askImageYesNo(imageB64: string, mime: string, question: st
     )
     const json = await res.json()
     const txt = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join(" ") || ""
-    if (/\bYES\b/i.test(txt)) return true
-    if (/\bNO\b/i.test(txt)) return false
-    return null
+    const um = json?.usageMetadata || {}
+    const usage = {
+      model,
+      input: um.promptTokenCount || 0,
+      output: (um.candidatesTokenCount || 0) + (um.thoughtsTokenCount || 0),
+    }
+    if (/\bYES\b/i.test(txt)) return { answer: true, usage }
+    if (/\bNO\b/i.test(txt)) return { answer: false, usage }
+    return { answer: null, usage }
   } catch {
-    return null // verification is best-effort, never fails the job
+    return { answer: null, usage: null } // verification is best-effort, never fails the job
   }
 }
