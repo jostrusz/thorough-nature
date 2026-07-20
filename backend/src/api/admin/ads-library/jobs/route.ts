@@ -5,7 +5,9 @@ import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
 /** GET /admin/ads-library/jobs — recent localization jobs for the Fronta tab. */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
-  const jobs = await svc.listAdLocalizationJobs({}, { take: 40, order: { created_at: "DESC" } })
+  const all = await svc.listAdLocalizationJobs({}, { take: 60, order: { created_at: "DESC" } })
+  // "uploaded" studio items haven't generated anything yet — Fronta shows work
+  const jobs = all.filter((j: any) => j.status !== "uploaded").slice(0, 40)
   const srcIds = [...new Set(jobs.map((j: any) => j.source_creative_id))]
   const srcs = srcIds.length ? await svc.listAdCreatives({ id: srcIds }) : []
   const srcMap = Object.fromEntries(srcs.map((s: any) => [s.id, s]))

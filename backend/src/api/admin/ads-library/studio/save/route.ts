@@ -34,7 +34,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     metadata: { studio_job_id: b.job_id || null, generating: false },
   })
   if (b.job_id) {
-    try { await svc.updateAdLocalizationJobs({ id: b.job_id, result_creative_id: created.id }) } catch {}
+    try {
+      const [item] = await svc.listAdLocalizationJobs({ id: b.job_id })
+      await svc.updateAdLocalizationJobs({
+        id: b.job_id, result_creative_id: created.id,
+        params: { ...(item?.params || {}), saved_name: created.name },
+      })
+    } catch {}
   }
   res.json({ creative: created })
 }
