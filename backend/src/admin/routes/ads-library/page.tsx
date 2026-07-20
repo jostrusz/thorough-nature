@@ -223,7 +223,7 @@ function LibraryTab({ zoom }: any) {
             setChecked((c) => ({ ...c, [a.id]: sel.length === all.length ? [] : all }))
           }}>{sel.length === P.length + H.length && sel.length > 0 ? "✖️ Zrušit výběr" : "☑️ Označit vše"}</button>
           {img && <a href={img} target="_blank" rel="noreferrer" style={{ ...S.btn, textDecoration: "none", color: "inherit", display: "inline-flex", alignItems: "center" }}>⬇️ Obrázky</a>}
-          <button style={S.btn} onClick={() => setMetaModal({ creative: a })}>🚀 Do Meta účtu</button>
+          <button style={S.btn} onClick={() => setMetaModal({ creative: a, kids: kidsOf(a.id) })}>🚀 Do Meta účtu</button>
           {a.archived
             ? <button style={{ ...S.btn, borderColor: "#15803d", color: "#15803d" }} disabled={archiveMut.isPending}
                 onClick={() => archiveMut.mutate({ id: a.id, archived: false })}>↩️ Obnovit z archivu</button>
@@ -434,7 +434,11 @@ function LocalizeWizard({ wizard, onClose }: any) {
 
 /* ═══ Meta modal ═══ */
 function MetaModal({ m, onClose }: any) {
-  const a = m.creative
+  // a source card with language versions opens a version picker — sending the
+  // NL parent into a SK account (wrong texts, no swapped cover) was too easy
+  const versions = [m.creative, ...(m.kids || [])]
+  const [selId, setSelId] = useState(m.creative.id)
+  const a = versions.find((v: any) => v.id === selId) || m.creative
   const accountsQ = useQuery({ queryKey: ["ads-accounts"], queryFn: () => sdk.client.fetch("/admin/ads-library/accounts", { method: "GET" }) })
   const [account, setAccount] = useState("")
   const [campaign, setCampaign] = useState<any>(null)
@@ -487,9 +491,28 @@ function MetaModal({ m, onClose }: any) {
               <div style={{ fontSize: 13.5, marginTop: 10 }}>Zkontroluj náhled v Ads Manageru a zapni ji tam.</div>
             </div>
           ) : (<>
+            {versions.length > 1 && (
+              <div style={{ marginBottom: 12 }}>
+                <span style={S.eyebrow}>Kterou jazykovou verzi poslat?</span>
+                <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 6 }}>
+                  {versions.map((v: any) => (
+                    <button key={v.id} onClick={() => setSelId(v.id)}
+                      style={{ ...S.btn, ...(selId === v.id ? { borderColor: "#7c3aed", background: "#ede9fe", fontWeight: 650 } : {}) }}>
+                      {PROJECTS[v.project_id]?.flag || "🌐"} {v.language}{v.id === m.creative.id && !v.translated_from_id ? " (zdroj)" : ""}</button>))}
+                </div>
+              </div>)}
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
-              Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru. Pošle se: 1:1{a.image_9x16_url ? " + 9:16 (placement customization)" : ""},
-              {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.</div>
+              Posílá se: <b>{a.name}</b> — 1:1{a.image_9x16_url ? " + 9:16 (placement customization)" : " (9:16 tato verze nemá)"},
+              {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.
+              Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
+            {(() => {
+              const accName = (accountsQ.data?.accounts || []).find((x: any) => x.id === account)?.name || ""
+              const accLang = accName.match(/\(([A-Z]{2})\)/)?.[1]
+              return accLang && a.language && accLang !== a.language ? (
+                <div style={{ background: "#fefce8", border: "1px solid #fde68a", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#a16207", marginBottom: 12 }}>
+                  ⚠️ Posíláš <b>{a.language}</b> verzi do účtu <b>{accName}</b> ({accLang}). Nechtěl jsi vybrat jinou jazykovou verzi nahoře?</div>
+              ) : null
+            })()}
             <div style={{ border: "1.5px solid #7c3aed", borderRadius: 10, padding: "11px 13px", marginBottom: 14, background: "#faf5ff" }}>
               <div style={{ fontSize: 13, fontWeight: 650, marginBottom: 6 }}>⚡ Rychlá cesta — vlož Ad set ID nebo URL</div>
               <div style={{ display: "flex", gap: 8 }}>
