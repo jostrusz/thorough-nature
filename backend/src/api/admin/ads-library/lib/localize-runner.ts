@@ -197,11 +197,13 @@ export async function runLocalizationJob(container: any, jobId: string) {
       txtVariants.push({ primaries: out.primaries, headlines: out.headlines })
       await setStep("texts", { status: "running", detail: `${v + 1}/${txtCount}` })
     }
+    // metadata updates MERGE in Medusa — generating:false must be explicit,
+    // otherwise the initial `generating: true` sticks forever
     await svc.updateAdCreatives({
       id: created.id,
       primary_texts: (txtVariants[0]?.primaries || []).slice(0, 5),
       headlines: (txtVariants[0]?.headlines || []).slice(0, 5),
-      metadata: { localization_job_id: jobId, text_variants: txtVariants, official_text_variant: 0 },
+      metadata: { localization_job_id: jobId, text_variants: txtVariants, official_text_variant: 0, generating: false },
     })
     await setStep("texts", { status: "done", detail: `${txtCount} variant`, cost_usd: round4(stepCost.texts || 0) })
 

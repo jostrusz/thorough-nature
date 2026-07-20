@@ -96,6 +96,12 @@ function LibraryTab({ zoom }: any) {
   const { data, isLoading } = useQuery({
     queryKey: ["ads-lib", q, project, tag, showArchived],
     queryFn: () => sdk.client.fetch(`/admin/ads-library/creatives?q=${encodeURIComponent(q)}&project=${project}&tag=${tag}&archived=${showArchived ? "1" : "0"}&limit=200`, { method: "GET" }),
+    // while any card is still generating, poll so finished texts/images appear
+    // without a manual page refresh
+    refetchInterval: (query: any) => {
+      const list = query?.state?.data?.creatives || []
+      return list.some((c: any) => c.metadata?.generating) ? 5000 : false
+    },
   })
   const creatives = data?.creatives || []
   const byId = useMemo(() => Object.fromEntries(creatives.map((c: any) => [c.id, c])), [creatives])
