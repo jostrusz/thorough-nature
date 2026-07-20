@@ -123,6 +123,12 @@ function LibraryTab({ zoom }: any) {
       sdk.client.fetch(`/admin/ads-library/creatives/${id}/variants`, { method: "POST", body: { action: "generate", format } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["ads-lib"] }),
   })
+  const deleteMut = useMutation({
+    mutationFn: ({ id }: any) =>
+      sdk.client.fetch(`/admin/ads-library/creatives/${id}`, { method: "DELETE" }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ads-lib"] }); qc.invalidateQueries({ queryKey: ["ads-jobs"] }) },
+    onError: (e: any) => window.alert(`Smazat nejde: ${e?.message || e}`),
+  })
 
   const tick = (id: string, key: string) => setChecked((c) => {
     const arr = c[id] ? [...c[id]] : []
@@ -223,6 +229,13 @@ function LibraryTab({ zoom }: any) {
                 onClick={() => archiveMut.mutate({ id: a.id, archived: false })}>↩️ Obnovit z archivu</button>
             : <button style={S.btn} disabled={archiveMut.isPending} title="Nic se nemaže — karta se jen přesune do Archivu"
                 onClick={() => archiveMut.mutate({ id: a.id, archived: true })}>🗄️ Archivovat</button>}
+          <button style={{ ...S.btn, borderColor: "#fecaca", color: "#b91c1c" }} disabled={deleteMut.isPending}
+            title="Smaže kartu včetně všech variant a záznamu ve frontě"
+            onClick={() => {
+              if (window.confirm(`Opravdu smazat kartu „${a.name}" včetně ${a.variants?.length || 0} variant? Tohle je nevratné.`)) {
+                deleteMut.mutate({ id: a.id })
+              }
+            }}>🗑️ Smazat</button>
           {kids.length > 0 && (
             <button style={{ ...S.btn, marginLeft: "auto", borderColor: "#ede9fe", background: "#ede9fe", color: "#7c3aed" }}
               onClick={() => setOpenFam((o) => ({ ...o, [a.id]: !famOpen }))}>

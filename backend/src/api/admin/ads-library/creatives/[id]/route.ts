@@ -32,6 +32,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
 export async function DELETE(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
-  await svc.deleteAdCreatives(req.params.id)
-  res.json({ deleted: true })
+  const id = req.params.id
+  const [row] = await svc.listAdCreatives({ id })
+  if (!row) return res.status(404).json({ error: "not_found" })
+  // a parent with language versions can't go — the children would lose lineage
+  const kids = await svc.listAdCreatives({ translated_from_id: id })
+  if (kids.length) {
+    return res.status(400).json({ error: `karta má ${kids.length} jazykové verze — smaž je nejdřív` })
+  }
+  const variants = await svc.listAdVariants({ creative_id: id }, { take: 200 })
+  if (variants.length) await svc.deleteAdVariants(variants.map((v: any) => v.id))
+  const jobs = await svc.listAdLocalizationJobs({ result_creative_id: id }, { take: 50 })
+  if (jobs.length) await svc.deleteAdLocalizationJobs(jobs.map((j: any) => j.id))
+  await svc.deleteAdCreatives(id)
+  res.json({ deleted: true, variants: variants.length, jobs: jobs.length })
 }
