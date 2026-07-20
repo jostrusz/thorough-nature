@@ -193,6 +193,26 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'cs',
     smsDispatchTemplate: 'Kocici bible: Zasilka odeslana. Sledovaci odkaz: {url} peterka@kocicibible.cz',
   },
+  // Polish edition of Kočičí bible. Without this entry the project fell through
+  // to DEFAULT_CONFIG (= loslatenboek), so Polish buyers would have received
+  // order confirmations from the Dutch boek@loslatenboek.nl.
+  'biblia-kotow': {
+    replyTo: 'ksiazka@biblia-kotow.pl',
+    fromName: 'Michał Peterka - Biblia kotów',
+    fromEmail: 'Michał Peterka - Biblia kotów <ksiazka@biblia-kotow.pl>',
+    project: 'biblia-kotow',
+    locale: 'pl',
+    smsDispatchTemplate: 'Biblia kotow: Zamowienie wyslane. Sledzenie: {url} ksiazka@biblia-kotow.pl',
+  },
+  // Also match without hyphen
+  bibliakotow: {
+    replyTo: 'ksiazka@biblia-kotow.pl',
+    fromName: 'Michał Peterka - Biblia kotów',
+    fromEmail: 'Michał Peterka - Biblia kotów <ksiazka@biblia-kotow.pl>',
+    project: 'biblia-kotow',
+    locale: 'pl',
+    smsDispatchTemplate: 'Biblia kotow: Zamowienie wyslane. Sledzenie: {url} ksiazka@biblia-kotow.pl',
+  },
   // Also match without hyphen
   kocicibible: {
     replyTo: 'peterka@kocicibible.cz',

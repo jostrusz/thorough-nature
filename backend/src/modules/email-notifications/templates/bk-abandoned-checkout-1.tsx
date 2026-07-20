@@ -223,8 +223,8 @@ export const BkAbandonedCheckout1Template: React.FC<BkAbandonedCheckout1Props> &
             margin: '2px 0 0',
           }}>
             Biblia kotów &bull;{' '}
-            <Link href="mailto:peterka@biblia-kotow.pl" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@biblia-kotow.pl
+            <Link href="mailto:ksiazka@biblia-kotow.pl" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              ksiazka@biblia-kotow.pl
             </Link>
           </Text>
         </div>

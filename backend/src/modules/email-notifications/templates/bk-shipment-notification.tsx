@@ -546,8 +546,8 @@ export const BkShipmentNotificationTemplate: React.FC<BkShipmentNotificationTemp
             }}>
               Masz pytanie do przesyłki? Śmiało napisz!
               <br />
-              <Link href="mailto:peterka@biblia-kotow.pl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@biblia-kotow.pl
+              <Link href="mailto:ksiazka@biblia-kotow.pl" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                ksiazka@biblia-kotow.pl
               </Link>
             </Text>
           </div>
@@ -578,8 +578,8 @@ export const BkShipmentNotificationTemplate: React.FC<BkShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@biblia-kotow.pl" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@biblia-kotow.pl
+            <Link href="mailto:ksiazka@biblia-kotow.pl" style={{ color: colors.accent, textDecoration: 'none' }}>
+              ksiazka@biblia-kotow.pl
             </Link>
           </Text>
         </div>

@@ -984,10 +984,10 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
             to: cart.email,
             channel: "email",
             template: nextStepConfig.templateKey,
-            from: "Michał Peterka - Biblia kotów <peterka@biblia-kotow.pl>",
+            from: "Michał Peterka - Biblia kotów <ksiazka@biblia-kotow.pl>",
             data: {
               emailOptions: {
-                replyTo: "peterka@biblia-kotow.pl",
+                replyTo: "ksiazka@biblia-kotow.pl",
                 subject: nextStepConfig.subject(firstName),
               },
               firstName,
