@@ -11,7 +11,7 @@
  * usageMetadata.candidatesTokensDetails, so the cost is exact rather than
  * assumed.
  */
-type Rate = { input: number; output: number; imageOutput?: number }
+type Rate = { input: number; output: number; imageOutput?: number; cachedInput?: number }
 
 const RATES: Record<string, Rate> = {
   // Google — Nano Banana image models (text out / image out differ 10×)
@@ -25,12 +25,13 @@ const RATES: Record<string, Rate> = {
   "claude-opus-4-8": { input: 5.0, output: 25.0 },
   "claude-sonnet-5": { input: 3.0, output: 15.0 },
   "claude-haiku-4-5-20251001": { input: 1.0, output: 5.0 },
-  // OpenAI
-  "gpt-5.6-sol": { input: 5.0, output: 30.0 },
-  "gpt-5.6-terra": { input: 2.5, output: 15.0 },
-  "gpt-5.6-luna": { input: 1.0, output: 6.0 },
-  "gpt-5.4": { input: 2.5, output: 15.0 },
-  "gpt-5.4-mini": { input: 0.75, output: 4.5 },
+  // OpenAI — cachedInput applies to usage.prompt_tokens_details.cached_tokens
+  // (kicks in when the same 1024+-token prompt repeats, e.g. txt_count > 1)
+  "gpt-5.6-sol": { input: 5.0, output: 30.0, cachedInput: 0.5 },
+  "gpt-5.6-terra": { input: 2.5, output: 15.0, cachedInput: 0.25 },
+  "gpt-5.6-luna": { input: 1.0, output: 6.0, cachedInput: 0.1 },
+  "gpt-5.4": { input: 2.5, output: 15.0, cachedInput: 0.25 },
+  "gpt-5.4-mini": { input: 0.75, output: 4.5, cachedInput: 0.075 },
 }
 
 export type Usage = {
@@ -40,6 +41,8 @@ export type Usage = {
   output: number
   /** the image-modality slice of `output`, billed at the imageOutput rate */
   imageOutput?: number
+  /** the cached slice of `input`, billed at the cachedInput rate (OpenAI) */
+  cachedInput?: number
 }
 
 /** USD cost of one call, or null when the model has no verified rate. */
@@ -52,8 +55,11 @@ export function costUSD(u: Usage | null | undefined): number | null {
   }
   const imgTok = Math.min(u.imageOutput || 0, u.output || 0)
   const txtTok = Math.max(0, (u.output || 0) - imgTok)
+  const cachedTok = Math.min(u.cachedInput || 0, u.input || 0)
+  const freshTok = Math.max(0, (u.input || 0) - cachedTok)
   return (
-    (u.input || 0) * r.input +
+    freshTok * r.input +
+    cachedTok * (r.cachedInput ?? r.input) +
     txtTok * r.output +
     imgTok * (r.imageOutput ?? r.output)
   ) / 1e6

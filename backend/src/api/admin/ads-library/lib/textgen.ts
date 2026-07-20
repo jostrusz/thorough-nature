@@ -98,7 +98,12 @@ export async function translateTexts(opts: {
     const out = parseJson(choice?.message?.content || "", choice?.finish_reason === "length")
     return {
       primaries: out.primaries || [], headlines: out.headlines || [],
-      usage: { model: opts.modelId, input: json.usage?.prompt_tokens || 0, output: json.usage?.completion_tokens || 0 },
+      usage: {
+        model: opts.modelId,
+        input: json.usage?.prompt_tokens || 0,
+        output: json.usage?.completion_tokens || 0,
+        cachedInput: json.usage?.prompt_tokens_details?.cached_tokens || 0,
+      },
     }
   }
 
