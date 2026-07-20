@@ -504,10 +504,9 @@ function MetaModal({ m, onClose }: any) {
                 </div>
               </div>)}
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
-              Posílá se: <b>{a.name}</b> — {a.image_9x16_url
-                ? <>1:1 + 9:16 (feed/Stories) s <b>oficiálním textem P1+H1</b> — Meta neumí kombinovat párování formátů s více texty</>
-                : <>1:1 (9:16 tato verze nemá), {(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline</>},
-              {" "}CTA, odkaz s UTM. Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
+              Posílá se: <b>{a.name}</b> — {a.image_9x16_url ? "1:1 + 9:16 (Meta dá vertikálu do Stories/Reels)" : "1:1 (9:16 tato verze nemá)"},
+              {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.
+              Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
             {(() => {
               const accName = (accountsQ.data?.accounts || []).find((x: any) => x.id === account)?.name || ""
               const accLang = accName.match(/\(([A-Z]{2})\)/)?.[1]

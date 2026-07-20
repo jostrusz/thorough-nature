@@ -133,28 +133,22 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const hash11 = await uploadImage(account, c.image_1x1_url)
     const hash916 = c.image_9x16_url ? await uploadImage(account, c.image_9x16_url) : null
 
-    // ── creative via asset_feed_spec. Meta won't combine placement
-    // customization (the 1:1/9:16 rules) with multiple text variants on a
-    // regular ad set — so a card WITH 9:16 ships both images + the official
-    // text only, and a card without 9:16 ships all texts on the 1:1. ──
+    // ── creative via asset_feed_spec, "flexible" shape: both images WITHOUT
+    // asset_customization_rules + all texts. Explicit rules can't be combined
+    // with multiple bodies/titles on a regular ad set, but ruleless multi-image
+    // passes and Meta picks the vertical for Stories/Reels by aspect ratio
+    // (verified live: ad 120258055174240112, 2 images + 5/5 texts). ──
     const link = c.link_url || "https://www.marketing-hq.eu/"
-    const textsSent = hash916 ? 1 : Math.min((c.primary_texts || []).length, 5)
+    const textsSent = Math.min((c.primary_texts || []).length, 5)
     const assetFeed: any = {
-      images: [{ hash: hash11, adlabels: [{ name: "sq" }] }],
-      bodies: (c.primary_texts || []).slice(0, textsSent).map((t: string) => ({ text: t })),
-      titles: (c.headlines || []).slice(0, hash916 ? 1 : 5).map((t: string) => ({ text: t })),
+      images: hash916 ? [{ hash: hash11 }, { hash: hash916 }] : [{ hash: hash11 }],
+      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) => ({ text: t })),
+      titles: (c.headlines || []).slice(0, 5).map((t: string) => ({ text: t })),
       descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
       ad_formats: ["SINGLE_IMAGE"],
       call_to_action_types: [c.cta_type || "LEARN_MORE"],
       link_urls: [{ website_url: link }],
       optimization_type: "PLACEMENT",
-    }
-    if (hash916) {
-      assetFeed.images.push({ hash: hash916, adlabels: [{ name: "vert" }] })
-      assetFeed.asset_customization_rules = [
-        { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] }, image_label: { name: "vert" }, priority: 1 },
-        { customization_spec: {}, image_label: { name: "sq" }, priority: 2 },
-      ]
     }
     const creative = await graphPost(`${account}/adcreatives`, {
       name: `[LIB-${c.id.slice(-8)}] ${c.name}`,
