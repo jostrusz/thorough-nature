@@ -169,6 +169,12 @@ export default defineMiddlewares({
       matcher: "/admin/marketing/contacts/import",
       bodyParser: { sizeLimit: "25mb" },
     },
+    // Studio upload sends the 1:1 image as base64 JSON (up to ~15MB binary)
+    {
+      method: ["POST"],
+      matcher: "/admin/ads-library/studio/upload",
+      bodyParser: { sizeLimit: "25mb" },
+    },
     {
       method: ["POST"],
       matcher: "/admin/marketing/contacts/bulk",

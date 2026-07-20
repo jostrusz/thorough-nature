@@ -124,6 +124,38 @@ export async function generateImage(opts: {
 }
 
 /**
+ * Describe an image for the Studio text generation — scene, mood, people,
+ * objects, any visible text. The description anchors the generated ad copy to
+ * what the creative actually shows.
+ */
+export async function describeImage(url: string): Promise<{ description: string; usage: any }> {
+  const key = (process.env.GEMINI_API_KEY || "").trim()
+  if (!key) throw new Error("GEMINI_API_KEY není nastaven")
+  const model = process.env.IMAGE_VERIFY_MODEL || "gemini-3.1-flash-image"
+  const inline = await fetchAsInline(url, "obrázek pro popis")
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [
+          inline,
+          { text: "Describe this advertising image in 4-6 sentences: the scene and setting, the person (age, gender, what they are doing), the mood, notable objects, and any visible text. Be concrete and factual." },
+        ]}],
+        generationConfig: { responseModalities: ["TEXT"] },
+      }),
+      signal: AbortSignal.timeout(60000),
+    }
+  )
+  const json = await res.json()
+  if (!res.ok) throw new Error(`[Gemini ${model}] ${json?.error?.message || res.status}`)
+  const description = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join(" ").trim()
+  if (!description) throw new Error("vision model nevrátil popis obrázku")
+  return { description, usage: readUsage(json, model) }
+}
+
+/**
  * Ask a cheap vision model a yes/no question about a generated image —
  * used as a quality gate after a book-swap (did the cover actually change?).
  */

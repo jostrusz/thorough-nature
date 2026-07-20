@@ -17,10 +17,11 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
     jobs: jobs.map((j: any) => {
       const src = srcMap[j.source_creative_id]
       const out = j.result_creative_id ? resMap[j.result_creative_id] : null
+      const studio = j.params?.studio
       return {
         ...j,
-        source_name: src?.name || j.source_creative_id,
-        thumb: out?.image_1x1_url || src?.image_1x1_url || src?.video_thumb_url || null,
+        source_name: studio ? `🎨 ${j.params?.file_name || "Studio"}` : (src?.name || j.source_creative_id),
+        thumb: out?.image_1x1_url || (studio ? j.params?.image_url : null) || src?.image_1x1_url || src?.video_thumb_url || null,
       }
     }),
   })

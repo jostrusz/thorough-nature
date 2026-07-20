@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "../../lib/sdk"
@@ -670,6 +670,177 @@ function QueueTab({ zoom }: any) {
     </div>)
 }
 
+/* ═══ Studio ═══ */
+function StudioTab({ zoom }: any) {
+  const qc = useQueryClient()
+  const fileRef = useRef<any>(null)
+  const [items, setItems] = useState<any[]>([])
+  const [txtModel, setTxtModel] = useState("claude-opus-4-8")
+  const modelsQ = useQuery({ queryKey: ["ads-models"], queryFn: () => sdk.client.fetch("/admin/ads-library/localize", { method: "GET" }) })
+  const txtModels = modelsQ.data?.text_models || []
+
+  const anyRunning = items.some((it) => it.jobId && !it.jobDone)
+  const jobsQ = useQuery({
+    queryKey: ["ads-jobs"],
+    queryFn: () => sdk.client.fetch("/admin/ads-library/jobs", { method: "GET" }),
+    refetchInterval: anyRunning ? 3000 : false,
+    enabled: anyRunning,
+  })
+  useEffect(() => {
+    const jobs = jobsQ.data?.jobs || []
+    if (!jobs.length) return
+    setItems((prev) => prev.map((it) => {
+      if (!it.jobId || it.jobDone) return it
+      const j = jobs.find((x: any) => x.id === it.jobId)
+      if (!j) return it
+      if (j.status === "done") return { ...it, jobDone: true, result: j.params?.result, cost: j.params?.cost_usd }
+      if (j.status === "failed") return { ...it, jobDone: true, jobError: j.error }
+      return it
+    }))
+  }, [jobsQ.data])
+
+  const addFiles = async (files: FileList | File[]) => {
+    const list = Array.from(files).filter((f) => f.type.startsWith("image/")).slice(0, 5 - items.length)
+    for (const f of list) {
+      const localId = `${Date.now()}-${f.name}`
+      setItems((p) => [...p, { localId, name: f.name, uploading: true, project: "" }])
+      try {
+        const b64: string = await new Promise((ok, err) => {
+          const r = new FileReader()
+          r.onload = () => ok(String(r.result).split(",")[1])
+          r.onerror = err; r.readAsDataURL(f)
+        })
+        const resp: any = await sdk.client.fetch("/admin/ads-library/studio/upload", {
+          method: "POST", body: { file_name: f.name, content_type: f.type, data_b64: b64 },
+        })
+        setItems((p) => p.map((it) => it.localId === localId ? { ...it, uploading: false, url: resp.url } : it))
+      } catch (e: any) {
+        setItems((p) => p.map((it) => it.localId === localId ? { ...it, uploading: false, error: e?.message || "upload selhal" } : it))
+      }
+    }
+  }
+  const patch = (localId: string, ch: any) => setItems((p) => p.map((it) => it.localId === localId ? { ...it, ...ch } : it))
+
+  const generate = async (it: any) => {
+    if (!it.project) return window.alert("Nejdřív vyber projekt")
+    patch(it.localId, { jobId: null, jobDone: false, jobError: null, result: null })
+    const r: any = await sdk.client.fetch("/admin/ads-library/studio/generate", {
+      method: "POST", body: { image_url: it.url, project_id: it.project, txt_model: txtModel, file_name: it.name },
+    })
+    patch(it.localId, { jobId: r.job_id, jobDone: false })
+  }
+  const reframe = async (it: any) => {
+    patch(it.localId, { reframing: true })
+    try {
+      const r: any = await sdk.client.fetch("/admin/ads-library/studio/reframe", { method: "POST", body: { image_url: it.url } })
+      patch(it.localId, { reframing: false, url916: r.url, cost916: r.cost_usd })
+    } catch (e: any) { patch(it.localId, { reframing: false, error916: e?.message || "reframe selhal" }) }
+  }
+  const save = async (it: any) => {
+    patch(it.localId, { saving: true })
+    try {
+      const base = it.name.replace(/\.[a-z0-9]+$/i, "")
+      const r: any = await sdk.client.fetch("/admin/ads-library/studio/save", {
+        method: "POST",
+        body: {
+          name: `${base}-${(PROJECTS[it.project]?.lang || it.project).toUpperCase()}`,
+          project_id: it.project, image_1x1_url: it.url, image_9x16_url: it.url916 || null,
+          primaries: it.result.primaries, headlines: it.result.headlines, job_id: it.jobId,
+        },
+      })
+      patch(it.localId, { saving: false, savedName: r.creative?.name })
+      qc.invalidateQueries({ queryKey: ["ads-lib"] })
+    } catch (e: any) { patch(it.localId, { saving: false, error: e?.message || "uložení selhalo" }) }
+  }
+
+  const TPL_NAMES = ["letní hlavní", "varianta B", "testimonial", "advertorial", "redakce"]
+  return (
+    <div style={{ ...S.card, overflow: "visible" }}>
+      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border-base,#e5e7eb)", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <b>🎨 Studio</b>
+        <span style={{ fontSize: 12, color: "#6b7280" }}>nahraj až 5× 1:1 → texty ze vzorů „Laat los" + 9:16 → karta do Knihovny</span>
+        <span style={{ marginLeft: "auto", fontSize: 12.5, color: "#6b7280" }}>✍️ Model textů</span>
+        <select style={{ ...S.input, width: "auto" }} value={txtModel} onChange={(e) => setTxtModel(e.target.value)}>
+          {txtModels.map((m: any) => <option key={m.id} value={m.id} disabled={!m.available}>{m.label}</option>)}
+        </select>
+      </div>
+      <div style={{ padding: "14px 16px" }}>
+        <div
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files) }}
+          onClick={() => fileRef.current?.click()}
+          style={{ border: "2px dashed #7c3aed", borderRadius: 12, background: "#faf5ff", padding: 24, textAlign: "center", color: "#7c3aed", fontWeight: 650, cursor: "pointer" }}>
+          ⬆️ Přetáhni sem 1:1 obrázky nebo klikni pro výběr
+          <div style={{ fontWeight: 400, color: "#6b7280", fontSize: 12, marginTop: 4 }}>max 5 · JPG/PNG · {items.length}/5 nahráno</div>
+          <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }}
+            onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = "" }} />
+        </div>
+      </div>
+      {items.map((it) => (
+        <div key={it.localId} style={{ borderTop: "1px solid var(--border-base,#e5e7eb)", padding: "15px 16px", display: "grid", gridTemplateColumns: "auto minmax(0,1fr)", gap: 16 }}>
+          <div>
+            {it.url ? (
+              <img src={it.url} alt="" data-zoom="1"
+                onMouseEnter={(e) => zoom.show(e, it.url, it.name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                style={{ width: 120, height: 120, objectFit: "cover", borderRadius: 11, border: "1px solid #e5e7eb", cursor: "zoom-in" }} />
+            ) : (
+              <div style={{ width: 120, height: 120, borderRadius: 11, background: "var(--bg-subtle,#f3f4f6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26 }}>
+                {it.uploading ? "⏳" : "🖼️"}</div>)}
+            {it.url916 && (
+              <img src={it.url916} alt="" data-zoom="1"
+                onMouseEnter={(e) => zoom.show(e, it.url916, `${it.name} 9:16`)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                style={{ width: 68, height: 120, objectFit: "cover", borderRadius: 10, border: "2px solid #15803d", cursor: "zoom-in", marginTop: 8, display: "block" }} />)}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <b style={{ fontSize: 13.5, marginRight: "auto", overflowWrap: "anywhere" }}>{it.name}</b>
+              <select style={{ ...S.input, width: "auto" }} value={it.project} onChange={(e) => patch(it.localId, { project: e.target.value })}>
+                <option value="">— vyber projekt —</option>
+                {Object.keys(PROJECTS).map((p) => <option key={p} value={p}>{PROJECTS[p].flag} {p}</option>)}
+              </select>
+              <button style={it.url && it.project && !(it.jobId && !it.jobDone) ? S.btnPri : { ...S.btnPri, opacity: .4 }}
+                disabled={!it.url || !it.project || (it.jobId && !it.jobDone)}
+                onClick={() => generate(it)}>{it.jobId && !it.jobDone ? "⏳ generuji…" : "✍️ Vytvořit reklamy"}</button>
+              <button style={it.url && !it.reframing ? S.btn : { ...S.btn, opacity: .4 }} disabled={!it.url || it.reframing}
+                onClick={() => reframe(it)}>{it.reframing ? "⏳ 9:16…" : it.url916 ? "↻ 9:16 znovu" : "📐 Vytvořit 9:16"}</button>
+            </div>
+            {it.error && <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>{it.error}</div>}
+            {it.error916 && <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>9:16: {it.error916}</div>}
+            {it.jobError && <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>Texty selhaly: {it.jobError}</div>}
+            {it.jobId && !it.jobDone && <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 8 }}>⏳ Agent popisuje obrázek a píše 5 primary + 5 headlinů ze vzorů… (1–3 min, sleduj i ⚙️ Frontu)</div>}
+            {it.result && (
+              <div style={{ marginTop: 10, background: "var(--bg-subtle,#f9fafb)", border: "1px solid var(--border-base,#e5e7eb)", borderRadius: 11, padding: "10px 13px" }}>
+                <div style={S.eyebrow}>5× primary — každý z jiného vzoru</div>
+                {it.result.primaries.map((p: string, i: number) => (
+                  <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline", padding: "2px 0", fontSize: 12.5 }}>
+                    <b style={{ ...S.mono, fontSize: 10.5, color: "#6b7280", flexShrink: 0 }}>P{i + 1}</b>
+                    <span style={{ fontSize: 10.5, color: "#7c3aed", background: "#ede9fe", borderRadius: 999, padding: "1px 8px", flexShrink: 0 }}>{TPL_NAMES[i] || "vzor"}</span>
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p}</span>
+                  </div>))}
+                <div style={{ ...S.eyebrow, marginTop: 8 }}>5× headline</div>
+                {it.result.headlines.map((h: string, i: number) => (
+                  <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline", padding: "2px 0", fontSize: 12.5 }}>
+                    <b style={{ ...S.mono, fontSize: 10.5, color: "#6b7280", flexShrink: 0 }}>H{i + 1}</b>
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{h}</span>
+                  </div>))}
+                <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 7 }}>
+                  🧬 {it.result.tells?.length ? `${it.result.tells.length} oprav humanizeru` : "čisté"}{it.cost != null ? ` · 💰 ≈ $${it.cost}` : ""}{it.cost916 != null ? ` + 9:16 $${it.cost916}` : ""}</div>
+                <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                  {it.savedName
+                    ? <span style={{ fontSize: 13, color: "#15803d", fontWeight: 650 }}>📚 v Knihovně jako „{it.savedName}" — otevři 📚 Knihovnu pro odeslání do Meta</span>
+                    : <>
+                        <button style={{ ...S.btn, borderColor: "#15803d", color: "#15803d", fontWeight: 650 }} disabled={it.saving}
+                          onClick={() => save(it)}>{it.saving ? "…" : "➕ Přidat do Knihovny"}</button>
+                        <button style={S.btn} onClick={() => generate(it)}>↻ Přegenerovat texty</button>
+                      </>}
+                </div>
+              </div>)}
+          </div>
+        </div>))}
+      {!items.length && <div style={{ padding: "0 16px 18px", color: "#6b7280", fontSize: 13 }}>Zatím žádné obrázky — začni přetažením nahoru.</div>}
+    </div>)
+}
+
 /* ═══ Výkon ═══ */
 function PerformanceTab({ zoom }: any) {
   const qc = useQueryClient()
@@ -767,14 +938,14 @@ function PerformanceTab({ zoom }: any) {
 
 /* ═══ Shell ═══ */
 const AdsLibraryPage = () => {
-  const [tab, setTab] = useState<"lib" | "perf" | "queue">("lib")
+  const [tab, setTab] = useState<"lib" | "perf" | "queue" | "studio">("lib")
   const zoom = useZoom()
   return (
     <div style={{ padding: "20px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 18 }}>
         <h1 style={{ fontSize: 19, fontWeight: 700, margin: 0 }}>🗂️ Knihovna reklam</h1>
         <div style={{ display: "flex", gap: 2, background: "var(--bg-subtle,#f3f4f6)", borderRadius: 10, padding: 3 }}>
-          {[["lib", "📚 Knihovna"], ["perf", "🏆 Výkon"], ["queue", "⚙️ Fronta"]].map(([k, label]) => (
+          {[["lib", "📚 Knihovna"], ["perf", "🏆 Výkon"], ["queue", "⚙️ Fronta"], ["studio", "🎨 Studio"]].map(([k, label]) => (
             <button key={k} onClick={() => setTab(k as any)}
               style={{ fontSize: 13.5, padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer",
                 background: tab === k ? "var(--bg-base,#fff)" : "transparent", fontWeight: tab === k ? 650 : 400,
@@ -784,6 +955,7 @@ const AdsLibraryPage = () => {
       {tab === "lib" && <LibraryTab zoom={zoom} />}
       {tab === "perf" && <PerformanceTab zoom={zoom} />}
       {tab === "queue" && <QueueTab zoom={zoom} />}
+      {tab === "studio" && <StudioTab zoom={zoom} />}
       {zoom.el}
     </div>)
 }
