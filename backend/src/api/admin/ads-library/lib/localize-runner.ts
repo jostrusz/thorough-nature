@@ -181,7 +181,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
       log(`9:16 done (${n}, ~$${round4(stepCost.img916 || 0)})`)
     }
 
-    // ── 3) texts ──
+    // ── 3) texts — translate + automatic humanizer pass (2 calls per variant) ──
     await setStep("texts", { status: "running", prompt: `model ${p.txt_model} · kontext projektu ${target}` })
     const pick = (arr: string[], idx?: number[]) =>
       (idx?.length ? idx.map((i) => arr?.[i]).filter(Boolean) : (arr || []))
@@ -189,13 +189,20 @@ export async function runLocalizationJob(container: any, jobId: string) {
     const headlines = pick(src.headlines, p.headline_indexes)
     const txtCount = Math.min(Number(p.txt_count) || 1, 3)
     const txtVariants: any[] = []
+    const allTells: string[] = []
     for (let v = 0; v < txtCount; v++) {
       const out = await translateTexts({
         modelId: p.txt_model, src, targetProject: target, primaries, headlines,
       })
       addCost(out.usage, "texts")
       txtVariants.push({ primaries: out.primaries, headlines: out.headlines })
-      await setStep("texts", { status: "running", detail: `${v + 1}/${txtCount}` })
+      allTells.push(...(out.tells || []).map((t: string) => txtCount > 1 ? `v${v + 1}: ${t}` : t))
+      if (v === 0) {
+        // the full rendered prompt, visible in "Zobrazit zadání"
+        await setStep("texts", { status: "running", detail: `${v + 1}/${txtCount}`, prompt: out.prompt })
+      } else {
+        await setStep("texts", { status: "running", detail: `${v + 1}/${txtCount}` })
+      }
     }
     // metadata updates MERGE in Medusa — generating:false must be explicit,
     // otherwise the initial `generating: true` sticks forever
@@ -205,7 +212,11 @@ export async function runLocalizationJob(container: any, jobId: string) {
       headlines: (txtVariants[0]?.headlines || []).slice(0, 5),
       metadata: { localization_job_id: jobId, text_variants: txtVariants, official_text_variant: 0, generating: false },
     })
-    await setStep("texts", { status: "done", detail: `${txtCount} variant`, cost_usd: round4(stepCost.texts || 0) })
+    const tellNote = allTells.length ? ` · 🧬 ${allTells.length} oprav` : " · 🧬 čisté"
+    await setStep("texts", {
+      status: "done", detail: `${txtCount} variant${tellNote}`,
+      cost_usd: round4(stepCost.texts || 0), tells: allTells.slice(0, 20),
+    })
 
     // ── 4) finalize ──
     await svc.updateAdLocalizationJobs({

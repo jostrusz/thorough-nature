@@ -419,7 +419,8 @@ function LocalizeWizard({ wizard, onClose }: any) {
               <span style={{ fontSize: 12, color: "#6b7280" }}>nezávislé překlady (uloží se všechny)</span>
             </div>
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12, color: "#6b7280" }}>
-              Všechny varianty se uloží (MinIO + DB) — oficiální pak označíš na kartě. CTA, cena a odkaz jdou ze statické mapy projektu.</div>
+              Všechny varianty se uloží (MinIO + DB) — oficiální pak označíš na kartě. CTA, cena a odkaz jdou ze statické mapy projektu.
+              Každý překlad automaticky projde 🧬 humanizer kontrolou (2. průchod odstraní AI fráze) — nález uvidíš ve frontě.</div>
           </>)}
         </div>
         <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
@@ -596,6 +597,12 @@ function QueueTab({ zoom }: any) {
                 {(j.steps || []).filter((s: any) => s.prompt).map((s: any) => (
                   <div key={s.key} style={{ marginBottom: 8 }}>
                     <div style={S.eyebrow}>{s.label}</div>
+                    {s.tells?.length > 0 && (
+                      <div style={{ margin: "4px 0 6px", padding: "7px 10px", background: "#fefce8", border: "1px solid #fde68a", borderRadius: 8 }}>
+                        <div style={{ fontSize: 11.5, fontWeight: 650, color: "#a16207", marginBottom: 3 }}>🧬 Humanizer — nalezeno a opraveno:</div>
+                        {s.tells.map((t: string, i: number) =>
+                          <div key={i} style={{ fontSize: 11.5, color: "#854d0e", lineHeight: 1.45 }}>• {t}</div>)}
+                      </div>)}
                     <div style={{ ...S.mono, fontSize: 11.5, lineHeight: 1.5, whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginTop: 2 }}>{s.prompt}</div>
                     {s.refs?.length > 0 && (
                       <div style={{ fontSize: 11, color: "#6b7280", marginTop: 3 }}>
