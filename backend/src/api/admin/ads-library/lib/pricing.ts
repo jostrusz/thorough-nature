@@ -1,22 +1,25 @@
 // @ts-nocheck
 /**
  * Official per-1M-token USD rates, verified 2026-07-20 against:
- * - ai.google.dev/gemini-api/docs/pricing (image output tokens; one 1K/2K
- *   image ≈ 1120 output tokens → ~$0.134 on Pro, ~$0.067 on Flash)
+ * - ai.google.dev/gemini-api/docs/pricing
  * - claude.com/pricing#api (Sonnet 5 intro $2/$10 until 2026-08-31)
  * - openai.com/api/pricing
  *
- * Costs are indicative ("orientační") — Gemini thought/text output tokens are
- * billed here at the image-output rate, which slightly overestimates.
+ * Image models bill their output in TWO tiers: generated image tokens at the
+ * expensive `imageOutput` rate, and the model's own text + thinking tokens at
+ * the ordinary `output` rate (10× cheaper on Pro). Gemini reports the split in
+ * usageMetadata.candidatesTokensDetails, so the cost is exact rather than
+ * assumed.
  */
-type Rate = { input: number; output: number }
+type Rate = { input: number; output: number; imageOutput?: number }
 
 const RATES: Record<string, Rate> = {
-  // Google — Nano Banana image models
-  "gemini-3-pro-image": { input: 2.0, output: 120.0 },
-  "gemini-3-pro-image-preview": { input: 2.0, output: 120.0 },
-  "gemini-3.1-flash-image": { input: 0.5, output: 60.0 },
-  "gemini-2.5-flash-image": { input: 0.5, output: 60.0 },
+  // Google — Nano Banana image models (text out / image out differ 10×)
+  "gemini-3-pro-image": { input: 2.0, output: 12.0, imageOutput: 120.0 },
+  "gemini-3-pro-image-preview": { input: 2.0, output: 12.0, imageOutput: 120.0 },
+  "gemini-3.1-flash-image": { input: 0.5, output: 3.0, imageOutput: 60.0 },
+  // 2.5 Flash Image is documented per-image ($0.039 / 1290 tok ≈ $30.23 per 1M)
+  "gemini-2.5-flash-image": { input: 0.3, output: 3.0, imageOutput: 30.23 },
   // Anthropic
   "claude-fable-5": { input: 10.0, output: 50.0 },
   "claude-opus-4-8": { input: 5.0, output: 25.0 },
@@ -27,7 +30,14 @@ const RATES: Record<string, Rate> = {
   "gpt-5.4-mini": { input: 0.75, output: 4.5 },
 }
 
-export type Usage = { model: string; input: number; output: number }
+export type Usage = {
+  model: string
+  input: number
+  /** total output tokens, image + text + thinking */
+  output: number
+  /** the image-modality slice of `output`, billed at the imageOutput rate */
+  imageOutput?: number
+}
 
 /** USD cost of one call, or null when the model has no verified rate. */
 export function costUSD(u: Usage | null | undefined): number | null {
@@ -35,9 +45,15 @@ export function costUSD(u: Usage | null | undefined): number | null {
   let r = RATES[u.model]
   if (!r) return null
   if (u.model === "claude-sonnet-5" && Date.now() < Date.parse("2026-09-01T00:00:00Z")) {
-    r = { input: 2.0, output: 10.0 } // intro pricing until 2026-08-31
+    r = { ...r, input: 2.0, output: 10.0 } // intro pricing until 2026-08-31
   }
-  return ((u.input || 0) * r.input + (u.output || 0) * r.output) / 1e6
+  const imgTok = Math.min(u.imageOutput || 0, u.output || 0)
+  const txtTok = Math.max(0, (u.output || 0) - imgTok)
+  return (
+    (u.input || 0) * r.input +
+    txtTok * r.output +
+    imgTok * (r.imageOutput ?? r.output)
+  ) / 1e6
 }
 
 export function round4(n: number): number {

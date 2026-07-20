@@ -20,6 +20,25 @@ export function imageModels() {
   ]
 }
 
+/**
+ * Token usage split by modality. Image tokens bill ~10× the rate of the
+ * model's own text and thinking tokens, so they must be counted separately —
+ * candidatesTokensDetails carries the exact IMAGE slice.
+ */
+function readUsage(json: any, model: string) {
+  const um = json?.usageMetadata || {}
+  const details = um.candidatesTokensDetails || um.candidatesTokenDetails || []
+  const imageOutput = details
+    .filter((d: any) => String(d.modality).toUpperCase() === "IMAGE")
+    .reduce((n: number, d: any) => n + (d.tokenCount || 0), 0)
+  return {
+    model,
+    input: um.promptTokenCount || 0,
+    output: (um.candidatesTokenCount || 0) + (um.thoughtsTokenCount || 0),
+    imageOutput,
+  }
+}
+
 async function fetchAsInline(url: string, label: string): Promise<any> {
   // node's fetch throws a bare "fetch failed" on DNS/TLS problems — wrap it so
   // the job log says which reference could not be downloaded
@@ -95,13 +114,7 @@ export async function generateImage(opts: {
     const block = json?.candidates?.[0]?.finishReason || json?.promptFeedback?.blockReason
     throw new Error(`[Gemini ${model}] nevrátil obrázek${block ? ` (${block})` : ""}`)
   }
-  // thoughts are billed as output tokens; usage feeds the per-job cost counter
-  const um = json?.usageMetadata || {}
-  const usage = {
-    model,
-    input: um.promptTokenCount || 0,
-    output: (um.candidatesTokenCount || 0) + (um.thoughtsTokenCount || 0),
-  }
+  const usage = readUsage(json, model)
   return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png", usage }
 }
 
@@ -133,12 +146,7 @@ export async function askImageYesNo(imageB64: string, mime: string, question: st
     )
     const json = await res.json()
     const txt = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join(" ") || ""
-    const um = json?.usageMetadata || {}
-    const usage = {
-      model,
-      input: um.promptTokenCount || 0,
-      output: (um.candidatesTokenCount || 0) + (um.thoughtsTokenCount || 0),
-    }
+    const usage = readUsage(json, model)
     if (/\bYES\b/i.test(txt)) return { answer: true, usage }
     if (/\bNO\b/i.test(txt)) return { answer: false, usage }
     return { answer: null, usage }
