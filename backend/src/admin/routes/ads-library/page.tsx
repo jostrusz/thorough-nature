@@ -66,12 +66,17 @@ function useZoom() {
   const move = (e: any) => setZ((p: any) => (p ? { ...p, x: e.clientX, y: e.clientY } : p))
   const show = (e: any, url: string, label?: string) => setZ({ url, label, x: e.clientX, y: e.clientY })
   const hide = () => setZ(null)
+  // box grows with the image (portrait creatives stay tall instead of being
+  // letterboxed into a square) and is clamped to the viewport
+  const BOX = 460
   const el = z ? (
     <div style={{ position: "fixed", zIndex: 90, pointerEvents: "none",
-      left: Math.min(z.x + 18, (window.innerWidth || 1200) - 360), top: Math.max(8, Math.min(z.y - 190, (window.innerHeight || 800) - 400)),
-      boxShadow: "0 18px 50px rgba(15,8,18,.4)", borderRadius: 14, overflow: "hidden", border: "1px solid #d1d5db", background: "#fff" }}>
-      <img src={z.url} alt="" style={{ width: 340, height: 340, objectFit: "contain", display: "block", background: "#111" }} />
-      {z.label && <div style={{ fontSize: 11, padding: "5px 10px", textAlign: "center", color: "#6b7280" }}>{z.label}</div>}
+      left: Math.max(8, Math.min(z.x + 20, (window.innerWidth || 1200) - BOX - 16)),
+      top: Math.max(8, Math.min(z.y - BOX / 2, (window.innerHeight || 800) - BOX - 40)),
+      boxShadow: "0 20px 56px rgba(15,8,18,.45)", borderRadius: 14, overflow: "hidden",
+      border: "1px solid #d1d5db", background: "#fff" }}>
+      <img src={z.url} alt="" style={{ maxWidth: BOX, maxHeight: BOX, display: "block", background: "#111" }} />
+      {z.label && <div style={{ fontSize: 11.5, padding: "6px 10px", textAlign: "center", color: "#6b7280" }}>{z.label}</div>}
     </div>
   ) : null
   return { show, hide, move, el }
@@ -602,7 +607,7 @@ function PerformanceTab({ zoom }: any) {
                     <td style={{ padding: "8px 14px", maxWidth: 340 }}>
                       <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                         {r.thumb
-                          ? <img src={r.thumb} alt="" data-zoom="1" onMouseEnter={(e) => zoom.show(e, r.thumb, r.ad_name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
+                          ? <img src={r.thumb} alt="" data-zoom="1" onMouseEnter={(e) => zoom.show(e, r.full || r.thumb, r.ad_name)} onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                               style={{ width: 38, height: 38, borderRadius: 7, objectFit: "cover", flexShrink: 0, cursor: "zoom-in" }} />
                           : <span style={{ width: 38, height: 38, borderRadius: 7, background: "#f3f4f6", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>🖼️</span>}
                         <div style={{ minWidth: 0 }}>

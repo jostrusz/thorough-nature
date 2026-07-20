@@ -82,23 +82,36 @@ async function fetchInsights(accIds: string[], range: string) {
     }
   }
 
-  // batch thumbnails: /?ids=... (max 50 per call)
+  // Previews in two passes. `thumbnail_width` is ignored on a nested
+  // creative{} field (always returns 64px), but honoured when the creative is
+  // queried directly — so pass 1 collects creative ids, pass 2 asks those ids
+  // for a 1080px render. `image_url` (the untouched original) wins when present.
   const withSales = all.filter((r) => r.spend > 0)
   for (let i = 0; i < withSales.length; i += 50) {
     const chunk = withSales.slice(i, i + 50)
     try {
       const json = await graphGet("", {
         ids: chunk.map((r) => r.ad_id).join(","),
-        fields: "creative{id,thumbnail_url,image_url}",
-        thumbnail_width: 512, thumbnail_height: 512,
+        fields: "creative{id}",
       })
-      for (const r of chunk) {
-        const c = json[r.ad_id]?.creative
-        r.creative_id = c?.id || null
-        r.thumb = c?.thumbnail_url || c?.image_url || null
+      for (const r of chunk) r.creative_id = json[r.ad_id]?.creative?.id || null
+
+      const cids = chunk.map((r) => r.creative_id).filter(Boolean)
+      if (cids.length) {
+        const cJson = await graphGet("", {
+          ids: cids.join(","),
+          fields: "thumbnail_url,image_url",
+          thumbnail_width: 1080, thumbnail_height: 1080,
+        })
+        for (const r of chunk) {
+          const c = r.creative_id ? cJson[r.creative_id] : null
+          // full-size for the hover zoom, same source for the 38px table cell
+          r.thumb = c?.image_url || c?.thumbnail_url || null
+          r.full = r.thumb
+        }
       }
     } catch (e) {
-      console.warn(`[Ads Library] thumbnail batch failed: ${e.message}`)
+      console.warn(`[Ads Library] preview batch failed: ${e.message}`)
     }
   }
   return withSales
