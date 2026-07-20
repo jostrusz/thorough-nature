@@ -26,6 +26,9 @@ const RATES: Record<string, Rate> = {
   "claude-sonnet-5": { input: 3.0, output: 15.0 },
   "claude-haiku-4-5-20251001": { input: 1.0, output: 5.0 },
   // OpenAI
+  "gpt-5.6-sol": { input: 5.0, output: 30.0 },
+  "gpt-5.6-terra": { input: 2.5, output: 15.0 },
+  "gpt-5.6-luna": { input: 1.0, output: 6.0 },
   "gpt-5.4": { input: 2.5, output: 15.0 },
   "gpt-5.4-mini": { input: 0.75, output: 4.5 },
 }

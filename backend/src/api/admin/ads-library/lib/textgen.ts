@@ -8,13 +8,17 @@ import { hasRate, rateLabel, type Usage } from "./pricing"
  * Text adaptation via Anthropic (default) or OpenAI (when OPENAI_API_KEY set).
  */
 export function textModels() {
+  const hasOpenAI = !!(process.env.OPENAI_API_KEY || "").trim()
   const list = [
     { id: "claude-fable-5", label: "Claude Fable 5 — nejsilnější model", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
-    { id: "gpt-5.4", label: "GPT-5.4 (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
-    { id: "gpt-5.4-mini", label: "GPT-5.4 mini (OpenAI) — levný", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
+    { id: "gpt-5.6-sol", label: "GPT-5.6 sol — nejsilnější", provider: "openai", available: hasOpenAI },
+    { id: "gpt-5.6-terra", label: "GPT-5.6 terra — vyvážený", provider: "openai", available: hasOpenAI },
+    { id: "gpt-5.6-luna", label: "GPT-5.6 luna — levný", provider: "openai", available: hasOpenAI },
+    { id: "gpt-5.4", label: "GPT-5.4", provider: "openai", available: hasOpenAI },
+    { id: "gpt-5.4-mini", label: "GPT-5.4 mini — nejlevnější", provider: "openai", available: hasOpenAI },
   ]
   return list.map((m) => ({ ...m, priced: hasRate(m.id), rate: rateLabel(m.id) }))
 }
