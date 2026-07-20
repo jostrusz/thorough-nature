@@ -57,30 +57,40 @@ function normalizeAdsetId(input: string): string | null {
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
   const b = (req.body || {}) as any
+  const fail = (code: number, msg: string) => res.status(code).json({ error: msg, message: msg })
+
   let account = b.account_id
   let adsetInfo: any = null
   // quick path — a bare adset id (or a pasted Ads Manager URL) carries its account
   if (!account && b.adset_id) {
     const normalized = normalizeAdsetId(b.adset_id)
     if (!normalized) {
-      return res.status(400).json({ error: `v "${String(b.adset_id).slice(0, 80)}" nevidím žádné ad set ID (dlouhé číslo) — zkopíruj ID nebo URL ad setu z Ads Manageru` })
+      return fail(400, `v "${String(b.adset_id).slice(0, 80)}" nevidím žádné ad set ID (dlouhé číslo) — zkopíruj ID nebo URL ad setu z Ads Manageru`)
     }
-    b.adset_id = normalized
     try {
       adsetInfo = await graphGet(normalized, { fields: "account_id,name,status,campaign{name}" })
-      if (!adsetInfo.campaign) throw new Error("ID nepatří ad setu (je to kampaň nebo reklama?)")
-      account = `act_${adsetInfo.account_id}`
-    } catch (e: any) {
-      return res.status(400).json({ error: `ad set ${normalized} nejde načíst — ${e.message}` })
+      if (!adsetInfo.campaign) throw new Error("není to ad set")
+      b.adset_id = normalized
+    } catch {
+      // maybe the pasted id is an AD id — resolve its parent ad set
+      try {
+        const ad = await graphGet(normalized, { fields: "adset{id,name,status,account_id,campaign{name}}" })
+        if (!ad.adset?.id) throw new Error("nemá ad set")
+        adsetInfo = ad.adset
+        b.adset_id = ad.adset.id
+      } catch {
+        return fail(400, `ID ${normalized} není ad set ani reklama dostupná tímto tokenem — zkopíruj ID/URL ad setu z Ads Manageru (sloupec ID, nebo selected_adset_ids v adrese)`)
+      }
     }
+    account = `act_${adsetInfo.account_id}`
   }
-  if (!account?.startsWith("act_")) return res.status(400).json({ error: "account_id (act_…) nebo platný adset_id je povinný" })
+  if (!account?.startsWith("act_")) return fail(400, "account_id (act_…) nebo platný adset_id je povinný")
 
   const [c] = await svc.listAdCreatives({ id: req.params.id })
-  if (!c) return res.status(404).json({ error: "kreativa nenalezena" })
-  if (!c.image_1x1_url) return res.status(400).json({ error: "kreativa nemá 1:1 obrázek" })
+  if (!c) return fail(404, "kreativa nenalezena")
+  if (!c.image_1x1_url) return fail(400, "kreativa nemá 1:1 obrázek")
   if (!c.primary_texts?.length || !c.headlines?.length) {
-    return res.status(400).json({ error: "kreativa potřebuje aspoň 1 primary text a 1 headline" })
+    return fail(400, "kreativa potřebuje aspoň 1 primary text a 1 headline")
   }
 
   try {
@@ -89,13 +99,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       fields: "object_story_spec{page_id,instagram_user_id}", limit: 5,
     })
     const spec = (last.data || []).map((x: any) => x.object_story_spec).find((s: any) => s?.page_id)
-    if (!spec?.page_id) return res.status(400).json({ error: "v účtu není žádná kreativa, ze které jde převzít FB stránku" })
+    if (!spec?.page_id) return fail(400, "v účtu není žádná kreativa, ze které jde převzít FB stránku")
 
     // ── ad set (existing or new) ──
     let adsetId = b.adset_id ? String(b.adset_id).trim() : null
     if (!adsetId && b.new_adset) {
       const na = b.new_adset
-      if (!na.copy_from_adset_id) return res.status(400).json({ error: "new_adset.copy_from_adset_id (vzorový ad set) je povinný" })
+      if (!na.copy_from_adset_id) return fail(400, "new_adset.copy_from_adset_id (vzorový ad set) je povinný")
       const tmpl = await graphGet(na.copy_from_adset_id, {
         fields: "targeting,optimization_goal,billing_event,promoted_object,campaign_id",
       })
@@ -112,7 +122,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
       adsetId = created.id
     }
-    if (!adsetId) return res.status(400).json({ error: "adset_id nebo new_adset je povinný" })
+    if (!adsetId) return fail(400, "adset_id nebo new_adset je povinný")
 
     // ── images ──
     const hash11 = await uploadImage(account, c.image_1x1_url)
@@ -162,6 +172,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       adset_name: adsetInfo?.name, campaign_name: adsetInfo?.campaign?.name, account_id: account,
     })
   } catch (e: any) {
-    res.status(502).json({ error: e.message })
+    fail(502, e.message)
   }
 }
