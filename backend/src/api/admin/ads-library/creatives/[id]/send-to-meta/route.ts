@@ -30,6 +30,22 @@ async function uploadImage(account: string, url: string): Promise<string> {
 }
 
 /**
+ * Accepts a bare ad set id OR a full Ads Manager URL and returns the id.
+ * URL shapes seen in the wild: ...&selected_adset_ids=120210000000000000...,
+ * ...&adset_ids=[%22120210...%22]..., or the id embedded in the path.
+ */
+function normalizeAdsetId(input: string): string | null {
+  const s = decodeURIComponent(String(input || "").trim())
+  if (/^\d{10,}$/.test(s)) return s
+  const named = s.match(/(?:selected_adset_ids|adset_ids?)[=%[\]"':\s]*(\d{10,})/)
+  if (named) return named[1]
+  // fall back to the longest digit run — adset ids are 15+ digits
+  const runs = s.match(/\d{10,}/g) || []
+  runs.sort((a, b) => b.length - a.length)
+  return runs[0] || null
+}
+
+/**
  * POST /admin/ads-library/creatives/:id/send-to-meta
  * Body: { adset_id }                                      ← quick path: the account
  *        is resolved from the ad set itself, nothing else needed
@@ -43,13 +59,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const b = (req.body || {}) as any
   let account = b.account_id
   let adsetInfo: any = null
-  // quick path — a bare adset id carries its account with it
+  // quick path — a bare adset id (or a pasted Ads Manager URL) carries its account
   if (!account && b.adset_id) {
+    const normalized = normalizeAdsetId(b.adset_id)
+    if (!normalized) {
+      return res.status(400).json({ error: `v "${String(b.adset_id).slice(0, 80)}" nevidím žádné ad set ID (dlouhé číslo) — zkopíruj ID nebo URL ad setu z Ads Manageru` })
+    }
+    b.adset_id = normalized
     try {
-      adsetInfo = await graphGet(String(b.adset_id).trim(), { fields: "account_id,name,status,campaign{name}" })
+      adsetInfo = await graphGet(normalized, { fields: "account_id,name,status,campaign{name}" })
+      if (!adsetInfo.campaign) throw new Error("ID nepatří ad setu (je to kampaň nebo reklama?)")
       account = `act_${adsetInfo.account_id}`
     } catch (e: any) {
-      return res.status(400).json({ error: `ad set ${b.adset_id} nejde načíst — zkontroluj ID (${e.message})` })
+      return res.status(400).json({ error: `ad set ${normalized} nejde načíst — ${e.message}` })
     }
   }
   if (!account?.startsWith("act_")) return res.status(400).json({ error: "account_id (act_…) nebo platný adset_id je povinný" })

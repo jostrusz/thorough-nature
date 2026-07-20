@@ -491,9 +491,9 @@ function MetaModal({ m, onClose }: any) {
               Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru. Pošle se: 1:1{a.image_9x16_url ? " + 9:16 (placement customization)" : ""},
               {" "}{(a.primary_texts || []).length}× primary, {(a.headlines || []).length}× headline, CTA, odkaz s UTM.</div>
             <div style={{ border: "1.5px solid #7c3aed", borderRadius: 10, padding: "11px 13px", marginBottom: 14, background: "#faf5ff" }}>
-              <div style={{ fontSize: 13, fontWeight: 650, marginBottom: 6 }}>⚡ Rychlá cesta — vlož Ad set ID</div>
+              <div style={{ fontSize: 13, fontWeight: 650, marginBottom: 6 }}>⚡ Rychlá cesta — vlož Ad set ID nebo URL</div>
               <div style={{ display: "flex", gap: 8 }}>
-                <input style={{ ...S.input, ...S.mono, flex: 1 }} placeholder="např. 120211234567890123 (z Ads Manageru)"
+                <input style={{ ...S.input, ...S.mono, flex: 1 }} placeholder="ID (120211234…) nebo celá URL z Ads Manageru"
                   value={quickAdset} onChange={(e) => setQuickAdset(e.target.value)} />
                 <button style={quickAdset.trim() ? S.btnPri : { ...S.btnPri, opacity: .4 }}
                   disabled={!quickAdset.trim() || send.isPending}
