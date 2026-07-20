@@ -2,7 +2,7 @@
 import Anthropic from "@anthropic-ai/sdk"
 import { PROJECT_CONTEXT } from "./project-context"
 import { PAGE_CONTEXT } from "./page-context"
-import type { Usage } from "./pricing"
+import { hasRate, rateLabel, type Usage } from "./pricing"
 
 /**
  * Text adaptation via Anthropic (default) or OpenAI (when OPENAI_API_KEY set).
@@ -16,7 +16,7 @@ export function textModels() {
     { id: "gpt-5.4", label: "GPT-5.4 (OpenAI)", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
     { id: "gpt-5.4-mini", label: "GPT-5.4 mini (OpenAI) — levný", provider: "openai", available: !!(process.env.OPENAI_API_KEY || "").trim() },
   ]
-  return list
+  return list.map((m) => ({ ...m, priced: hasRate(m.id), rate: rateLabel(m.id) }))
 }
 
 function buildPrompt(src: any, ctx: any, page: any, primaries: string[], headlines: string[]) {

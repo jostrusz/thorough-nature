@@ -359,8 +359,9 @@ function LocalizeWizard({ wizard, onClose }: any) {
             <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "7px 0 10px", flexWrap: "wrap" }}>
               <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Model</label>
               <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={imgModel} onChange={(e) => setImgModel(e.target.value)}>
-                {imgModels.map((m: any) => <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.available ? "" : " — čeká na GEMINI_API_KEY"}</option>)}
+                {imgModels.map((m: any) => <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.priced === false ? " ⚠️ bez ceníku" : ""}{m.available ? "" : " — čeká na GEMINI_API_KEY"}</option>)}
               </select>
+              <RateHint models={imgModels} id={imgModel} />
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "flex-start", margin: "0 0 10px", flexWrap: "wrap" }}>
               <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62, paddingTop: 9 }}>Režim</label>
@@ -401,13 +402,14 @@ function LocalizeWizard({ wizard, onClose }: any) {
               <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={txtModel} onChange={(e) => setTxtModel(e.target.value)}>
                 <optgroup label="Anthropic">
                   {txtModels.filter((m: any) => m.provider === "anthropic").map((m: any) =>
-                    <option key={m.id} value={m.id} disabled={!m.available}>{m.label}</option>)}
+                    <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.priced === false ? " ⚠️ bez ceníku" : ""}</option>)}
                 </optgroup>
                 <optgroup label="OpenAI">
                   {txtModels.filter((m: any) => m.provider === "openai").map((m: any) =>
-                    <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.available ? "" : " — čeká na OPENAI_API_KEY"}</option>)}
+                    <option key={m.id} value={m.id} disabled={!m.available}>{m.label}{m.priced === false ? " ⚠️ bez ceníku" : ""}{m.available ? "" : " — čeká na OPENAI_API_KEY"}</option>)}
                 </optgroup>
               </select>
+              <RateHint models={txtModels} id={txtModel} />
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "0 0 12px" }}>
               <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Varianty</label>
@@ -533,6 +535,16 @@ function MetaModal({ m, onClose }: any) {
         </div>
       </div>
     </div>)
+}
+
+/** Official rate of the picked model, so the cost is visible before you spend it. */
+function RateHint({ models, id }: any) {
+  const m = (models || []).find((x: any) => x.id === id)
+  if (!m) return null
+  if (m.priced === false) {
+    return <span style={{ ...S.mono, fontSize: 11.5, color: "#b45309" }} title="Model není v ceníku — cena generování se nespočítá">⚠️ bez ceníku</span>
+  }
+  return <span style={{ ...S.mono, fontSize: 11.5, color: "#6b7280" }} title="Oficiální sazba podle ceníku poskytovatele">💰 {m.rate}</span>
 }
 
 /* ═══ Fronta ═══ */

@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { hasRate, rateLabel } from "./pricing"
 /**
  * Image generation via Google Gemini API (Nano Banana models).
  * Requires env GEMINI_API_KEY. Model ids overridable via env in case Google
@@ -17,7 +18,11 @@ export function imageModels() {
   return [
     { id: "nano-banana-pro", label: `🍌 Nano Banana Pro (Google) — nejlepší text v obrázku, ${IMAGE_SIZE}`, available: hasKey },
     { id: "nano-banana", label: `🍌 Nano Banana Flash (Google) — rychlý/levný, ${IMAGE_SIZE}`, available: hasKey },
-  ]
+  ].map((m) => {
+    // rates are keyed by the resolved Gemini name, not the UI id
+    const resolved = MODELS[m.id]
+    return { ...m, resolved, priced: hasRate(resolved), rate: rateLabel(resolved) }
+  })
 }
 
 /**

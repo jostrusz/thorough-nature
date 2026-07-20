@@ -59,3 +59,19 @@ export function costUSD(u: Usage | null | undefined): number | null {
 export function round4(n: number): number {
   return Math.round(n * 10000) / 10000
 }
+
+/**
+ * Does this model have a verified rate? The wizard flags models without one so
+ * a newly added model can't silently generate at an uncounted cost.
+ */
+export function hasRate(modelId: string): boolean {
+  return !!RATES[modelId]
+}
+
+/** Human-readable rate for the wizard tooltip, e.g. "$10 / $50 za 1M". */
+export function rateLabel(modelId: string): string | null {
+  const r = RATES[modelId]
+  if (!r) return null
+  const img = r.imageOutput ? ` · obrázky $${r.imageOutput}` : ""
+  return `$${r.input} in / $${r.output} out za 1M${img}`
+}
