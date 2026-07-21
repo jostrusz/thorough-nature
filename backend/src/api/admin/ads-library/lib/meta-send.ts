@@ -114,15 +114,32 @@ export async function createPausedAd(opts: {
   const hash11 = await uploadImage(opts.account, img11)
   const hash916 = img916 ? await uploadImage(opts.account, img916) : null
   const link = c.link_url || "https://www.marketing-hq.eu/"
+  // Two images REQUIRE asset_customization_rules with full placement coverage
+  // (a catch-all rule) — without them the ad is created but delivery fails
+  // with "0 target rules for format X". Rules must reference exactly one
+  // body/title/link via labels; the remaining texts stay in the feed as the
+  // optimization pool (this mirrors what Ads Manager builds manually).
   const assetFeed: any = {
-    images: hash916 ? [{ hash: hash11 }, { hash: hash916 }] : [{ hash: hash11 }],
-    bodies: (c.primary_texts || []).slice(0, 5).map((t: string) => ({ text: t })),
-    titles: (c.headlines || []).slice(0, 5).map((t: string) => ({ text: t })),
+    images: hash916
+      ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
+      : [{ hash: hash11 }],
+    bodies: (c.primary_texts || []).slice(0, 5).map((t: string, i: number) =>
+      hash916 && i === 0 ? { text: t, adlabels: [{ name: "b1" }] } : { text: t }),
+    titles: (c.headlines || []).slice(0, 5).map((t: string, i: number) =>
+      hash916 && i === 0 ? { text: t, adlabels: [{ name: "t1" }] } : { text: t }),
     descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
     ad_formats: ["SINGLE_IMAGE"],
     call_to_action_types: [c.cta_type || "LEARN_MORE"],
-    link_urls: [{ website_url: link }],
+    link_urls: hash916 ? [{ website_url: link, adlabels: [{ name: "l1" }] }] : [{ website_url: link }],
     optimization_type: "PLACEMENT",
+  }
+  if (hash916) {
+    assetFeed.asset_customization_rules = [
+      { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] },
+        image_label: { name: "vert" }, body_label: { name: "b1" }, title_label: { name: "t1" }, link_url_label: { name: "l1" }, priority: 1 },
+      { customization_spec: {},
+        image_label: { name: "sq" }, body_label: { name: "b1" }, title_label: { name: "t1" }, link_url_label: { name: "l1" }, priority: 2 },
+    ]
   }
   const name = `[LIB-${c.id.slice(-8)}] ${c.name}${opts.nameSuffix || ""}`
   const creative = await graphPost(`${opts.account}/adcreatives`, {
