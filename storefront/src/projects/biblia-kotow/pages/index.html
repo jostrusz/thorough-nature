@@ -66,11 +66,10 @@
 <body>
 
 <!-- ═══ PRELOADER ═══ -->
-<!-- Stejná varianta jako na checkoutu: logo v .preloader-logo-wrap se
-     shine efektem přejíždějícím přes něj (viz .preloader-shine ve style.css). -->
+<!-- Identický s checkout.html (markup, rozměry loga i skrývací skript níže). -->
 <div class="preloader" id="preloader">
  <div class="preloader-logo-wrap">
-  <img src="images/biblia-kotow-logo.png" alt="Ładowanie..." class="preloader-logo" width="320" height="76">
+  <img src="images/biblia-kotow-logo.png" alt="Biblia kotów" class="preloader-logo" width="220" height="52">
   <div class="preloader-shine"></div>
  </div>
 </div>
@@ -1573,14 +1572,15 @@ function toggleFaq(element) {
 }
 </script>
 
-<!-- ═══ Preloader — skrytí po načtení ═══ -->
+<!-- ═══ Preloader — skrytí po načtení (shodné s checkout.html) ═══ -->
 <script>
 window.addEventListener('load', function() {
  var preloader = document.getElementById('preloader');
  if (preloader) {
   setTimeout(function() {
-   preloader.classList.add('loaded');
-  }, 400);
+   preloader.style.opacity = '0';
+   setTimeout(function() { preloader.style.display = 'none'; }, 500);
+  }, 300);
  }
 });
 </script>
