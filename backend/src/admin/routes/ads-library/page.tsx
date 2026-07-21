@@ -229,7 +229,16 @@ function LibraryTab({ zoom }: any) {
             setChecked((c) => ({ ...c, [a.id]: sel.length === all.length ? [] : all }))
           }}>{sel.length === P.length + H.length && sel.length > 0 ? "✖️ Zrušit výběr" : "☑️ Označit vše"}</button>
           {img && <a href={img} target="_blank" rel="noreferrer" style={{ ...S.btn, textDecoration: "none", color: "inherit", display: "inline-flex", alignItems: "center" }}>⬇️ Obrázky</a>}
-          <button style={S.btn} onClick={() => setMetaModal({ creative: a, kids: kidsOf(a.id) })}>🚀 Do Meta účtu</button>
+          <button style={S.btn} onClick={() => {
+            // with an active bulk selection this button joins the batch flow —
+            // clicking it on one card used to silently send just that card
+            if (bulkSel.length > 0) {
+              if (!bulkSel.includes(a.id)) toggleBulk(a.id)
+              setBulkOpen(true)
+            } else {
+              setMetaModal({ creative: a, kids: kidsOf(a.id) })
+            }
+          }}>🚀 Do Meta účtu{bulkSel.length > 0 ? ` (${bulkSel.includes(a.id) ? bulkSel.length : bulkSel.length + 1})` : ""}</button>
           {a.archived
             ? <button style={{ ...S.btn, borderColor: "#15803d", color: "#15803d" }} disabled={archiveMut.isPending}
                 onClick={() => archiveMut.mutate({ id: a.id, archived: false })}>↩️ Obnovit z archivu</button>

@@ -1,10 +1,12 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
+import { sweepStaleJobs } from "../lib/stale-jobs"
 
 /** GET /admin/ads-library/jobs — recent localization jobs for the Fronta tab. */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
+  await sweepStaleJobs(svc)
   const all = await svc.listAdLocalizationJobs({}, { take: 60, order: { created_at: "DESC" } })
   // "uploaded" studio items haven't generated anything yet — Fronta shows work
   const jobs = all.filter((j: any) => j.status !== "uploaded").slice(0, 40)

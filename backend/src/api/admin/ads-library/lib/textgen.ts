@@ -261,14 +261,26 @@ CÍLOVÝ PROJEKT:
 - Web: ${ctx.domain} (CTA odkaz: ${page?.url || `https://www.${ctx.domain}/`})
 - Poznámky: ${ctx.notes || "—"}
 ${pageBlock}
-OBRÁZEK REKLAMY (podle něj laď scénu a téma textů):
+OBRÁZEK REKLAMY (podle něj laď scénu, vypravěče i téma textů):
 ${opts.imageDescription}
 
+VYPRAVĚČ — NEJDŮLEŽITĚJŠÍ PRAVIDLO:
+- Pokud je na obrázku člověk (řádek PERSON výše), VŠECH 5 primaries i headlinů je psáno Z JEHO POHLEDU — jeho pohlaví, věk, jazyk a starosti. Muž ~25 mluví jako mladý chlap (rozchod, křivda, tlak okolí, přetlak v hlavě), žena ~55 svým hlasem (minulost, rodina, „takhle už to zůstane"). Vzory níže jsou psané ženou 50+ — vypravěče PŘEOBSAĎ na osobu z obrázku, strukturu a prodejní beats vzoru zachovej.
+- Pokud člověk na obrázku není (PERSON: none), ponech vypravěče ze vzoru.
+
+TÉMATA (vyber 1–2 na každý primary tak, aby seděla k osobě a scéně; žádné obecné „najdi klid"):
+minulost, kterou člověk vleče · rozchod · nefunkční vztah s partnerem · úzkosti a přetlak myšlenek · křivda · pomluvy · rozbité vztahy v rodině · pocit, že „takhle už to zůstane".
+
+HOOK (první 1–2 věty každého primary):
+- Napiš NOVÝ, unikátní scroll-stopper na míru vypravěči a tématu — trochu kontroverzní, virální, vyvolá touhu dočíst. Neber úvod ze vzoru.
+- Hook je VŽDY zpověď/přiznání vypravěče („Dva roky jsem všem lhal, že jsem v pohodě."), NIKDY výrok o čtenáři („Tvoje manželství je v troskách") — to Meta zamítá.
+- Každý z 5 hooků jiný.
+
 ZADÁNÍ:
-1. Napiš PŘESNĚ 5 primary textů — každý podle JEDNOHO z pěti vzorů níže, ve stejném pořadí. Zachovej úhel, strukturu, rytmus a prodejní prvky vzoru, ale příběh přepiš do jazyka ${ctx.langName}, do kontextu scény na obrázku a do faktů cílového projektu (kniha, autor, cena, odkaz). Nekopíruj nizozemské reálie doslova.
-2. Napiš 5 virálních headlinů (max ~40 znaků) — musí zaujmout pozornost a sedět k tématu obrázku.
+1. Napiš PŘESNĚ 5 primary textů — každý podle JEDNOHO z pěti vzorů níže, ve stejném pořadí. Zachovej úhel, strukturu, rytmus a prodejní prvky vzoru, ale příběh přepiš do jazyka ${ctx.langName}, do perspektivy vypravěče z obrázku, do kontextu scény a do faktů cílového projektu (kniha, autor, cena, odkaz). Nekopíruj nizozemské reálie doslova.
+2. Napiš 5 virálních headlinů (max ~40 znaků) — z pohledu téhož vypravěče, k tématu obrázku, s tahem na kliknutí.
 3. Každý primary konči CTA s odkazem ${page?.url || `https://www.${ctx.domain}/`}.
-4. Texty musí být spisovné a gramaticky bezchybné: správné skloňování, časování, pády, shoda, rody příčestí, konzistentní rod vypravěče, idiomatická stylistika jazyka ${ctx.langName}.
+4. Texty musí být spisovné a gramaticky bezchybné: správné skloňování, časování, pády, shoda, rody příčestí, konzistentní rod vypravěče, idiomatická stylistika jazyka ${ctx.langName}. Piš, jak se lidé mezi sebou reálně baví — žádná AI uhlazenost.
 
 ${HUMANIZER_RULES}
 

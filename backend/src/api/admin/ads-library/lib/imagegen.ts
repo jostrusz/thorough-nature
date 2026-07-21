@@ -141,7 +141,7 @@ export async function describeImage(url: string): Promise<{ description: string;
       body: JSON.stringify({
         contents: [{ parts: [
           inline,
-          { text: "Describe this advertising image in 4-6 sentences: the scene and setting, the person (age, gender, what they are doing), the mood, notable objects, and any visible text. Be concrete and factual." },
+          { text: "Describe this advertising image in 5-7 sentences: the scene and setting, the mood, notable objects, and any visible text. Then, on a separate final line, state explicitly: 'PERSON: none' if no person is visible, or 'PERSON: <apparent gender>, approx. <age range> years, <one short phrase about their look/vibe>' (e.g. 'PERSON: male, approx. 25-30 years, casual student type'). Be concrete and factual." },
         ]}],
         generationConfig: { responseModalities: ["TEXT"] },
       }),

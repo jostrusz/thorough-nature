@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
+import { sweepStaleJobs } from "../lib/stale-jobs"
 
 /**
  * GET /admin/ads-library/studio — persistent Studio items (newest first).
@@ -9,6 +10,7 @@ import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
+  await sweepStaleJobs(svc)
   const rows = await svc.listAdLocalizationJobs(
     { source_creative_id: "studio" },
     { take: 30, order: { created_at: "DESC" } }
