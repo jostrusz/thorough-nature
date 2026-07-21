@@ -160,22 +160,33 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const hash11 = await uploadImage(account, c.image_1x1_url)
     const hash916 = c.image_9x16_url ? await uploadImage(account, c.image_9x16_url) : null
 
-    // ── creative via asset_feed_spec, "flexible" shape: both images WITHOUT
-    // asset_customization_rules + all texts. Explicit rules can't be combined
-    // with multiple bodies/titles on a regular ad set, but ruleless multi-image
-    // passes and Meta picks the vertical for Stories/Reels by aspect ratio
-    // (verified live: ad 120258055174240112, 2 images + 5/5 texts). ──
+    // ── creative via asset_feed_spec. The only shape Meta accepts with BOTH
+    // placement-paired images AND all 5 texts (verified by live matrix test,
+    // ad 120258074019450112): every body/title carries a label, and each
+    // customization rule pins body_label/title_label alongside image_label.
+    // Ruleless multi-image creates an INVALID ad ("0 target rules for
+    // INSTAGRAM_STORY"), rules without text labels reject multiple bodies. ──
     const link = c.link_url || "https://www.marketing-hq.eu/"
     const textsSent = Math.min((c.primary_texts || []).length, 5)
     const assetFeed: any = {
-      images: hash916 ? [{ hash: hash11 }, { hash: hash916 }] : [{ hash: hash11 }],
-      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) => ({ text: t })),
-      titles: (c.headlines || []).slice(0, 5).map((t: string) => ({ text: t })),
+      images: hash916
+        ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
+        : [{ hash: hash11 }],
+      bodies: (c.primary_texts || []).slice(0, 5).map((t: string, i: number) =>
+        hash916 ? { text: t, adlabels: [{ name: `b${i + 1}` }] } : { text: t }),
+      titles: (c.headlines || []).slice(0, 5).map((t: string, i: number) =>
+        hash916 ? { text: t, adlabels: [{ name: `t${i + 1}` }] } : { text: t }),
       descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
       ad_formats: ["SINGLE_IMAGE"],
       call_to_action_types: [c.cta_type || "LEARN_MORE"],
       link_urls: [{ website_url: link }],
       optimization_type: "PLACEMENT",
+    }
+    if (hash916) {
+      assetFeed.asset_customization_rules = [
+        { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] }, image_label: { name: "vert" }, body_label: { name: "b1" }, title_label: { name: "t1" }, priority: 1 },
+        { customization_spec: {}, image_label: { name: "sq" }, body_label: { name: "b1" }, title_label: { name: "t1" }, priority: 2 },
+      ]
     }
     const creative = await graphPost(`${account}/adcreatives`, {
       name: `[LIB-${c.id.slice(-8)}] ${c.name}`,
