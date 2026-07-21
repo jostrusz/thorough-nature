@@ -3,6 +3,8 @@ import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
 import { describeImage } from "./imagegen"
 import { generateStudioTexts } from "./textgen"
 import { costUSD, round4 } from "./pricing"
+import { PROJECT_CONTEXT } from "./project-context"
+import { PAGE_CONTEXT } from "./page-context"
 
 /**
  * Studio "Vytvořit reklamy" job: vision-describe the uploaded 1:1, then write
@@ -54,10 +56,55 @@ export async function runStudioTextsJob(container: any, jobId: string) {
       tells: out.tells, cost_usd: round4(totalCost),
     })
 
+    // ── auto-save into the library — the card is what you localize and send
+    // onwards, so it must exist right after generation, no manual step ──
+    const ctx = PROJECT_CONTEXT[job.target_project]
+    let savedName = p.saved_name || null
+    let resultCreativeId = job.result_creative_id || null
+    if (ctx) {
+      const base = String(p.file_name || "studio").replace(/\.[a-z0-9]+$/i, "")
+      if (resultCreativeId) {
+        // regeneration → refresh the existing card's texts
+        const [existing] = await svc.listAdCreatives({ id: resultCreativeId })
+        if (existing) {
+          await svc.updateAdCreatives({
+            id: resultCreativeId,
+            primary_texts: out.primaries.slice(0, 5),
+            headlines: out.headlines.slice(0, 5),
+            metadata: { ...(existing.metadata || {}), studio_job_id: jobId, generating: false },
+          })
+          savedName = existing.name
+        } else {
+          resultCreativeId = null
+        }
+      }
+      if (!resultCreativeId) {
+        const created = await svc.createAdCreatives({
+          name: `${base}-${ctx.language}`,
+          project_id: job.target_project,
+          language: ctx.language,
+          tag: "test",
+          primary_texts: out.primaries.slice(0, 5),
+          headlines: out.headlines.slice(0, 5),
+          cta_type: "LEARN_MORE",
+          link_url: PAGE_CONTEXT[job.target_project]?.url || `https://www.${ctx.domain}/`,
+          media_type: "image",
+          image_1x1_url: p.image_url,
+          image_9x16_url: p.result916?.url || null,
+          source: "studio",
+          metadata: { studio_job_id: jobId, generating: false },
+        })
+        resultCreativeId = created.id
+        savedName = created.name
+        log(`auto-saved to library as ${created.name}`)
+      }
+    }
+
     await svc.updateAdLocalizationJobs({
       id: jobId, status: "done",
+      result_creative_id: resultCreativeId,
       params: {
-        ...p, cost_usd: round4(totalCost),
+        ...p, cost_usd: round4(totalCost), saved_name: savedName,
         result: {
           primaries: out.primaries, headlines: out.headlines,
           tells: out.tells, image_description: desc.description,

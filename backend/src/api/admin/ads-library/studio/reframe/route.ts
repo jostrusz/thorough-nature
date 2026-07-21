@@ -29,6 +29,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const result916 = { url, cost_usd: cost != null ? round4(cost) : null }
     const [fresh] = await svc.listAdLocalizationJobs({ id: item.id })
     await svc.updateAdLocalizationJobs({ id: item.id, params: { ...(fresh.params || {}), result916 } })
+    // the auto-saved library card gets the vertical too
+    if (fresh.result_creative_id) {
+      try { await svc.updateAdCreatives({ id: fresh.result_creative_id, image_9x16_url: url }) } catch {}
+    }
     res.json(result916)
   } catch (e: any) {
     res.status(502).json({ error: e.message, message: e.message })
