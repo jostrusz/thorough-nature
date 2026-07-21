@@ -92,6 +92,9 @@ function LibraryTab({ zoom }: any) {
   const [openFam, setOpenFam] = useState<Record<string, boolean>>({})
   const [wizard, setWizard] = useState<any>(null)
   const [metaModal, setMetaModal] = useState<any>(null)
+  const [bulkSel, setBulkSel] = useState<string[]>([])
+  const [bulkOpen, setBulkOpen] = useState(false)
+  const toggleBulk = (id: string) => setBulkSel((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id])
 
   const { data, isLoading } = useQuery({
     queryKey: ["ads-lib", q, project, tag, showArchived],
@@ -157,6 +160,9 @@ function LibraryTab({ zoom }: any) {
     return (
       <div style={{ ...S.card, overflow: "visible" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", padding: "12px 16px", borderBottom: "1px solid var(--border-base,#e5e7eb)" }}>
+          <input type="checkbox" checked={bulkSel.includes(a.id)} onChange={() => toggleBulk(a.id)}
+            title="Vybrat pro hromadné odeslání do Meta"
+            style={{ width: 17, height: 17, accentColor: "#7c3aed", flexShrink: 0, cursor: "pointer" }} />
           <b style={{ fontSize: isChild ? 14.5 : 15.5, overflowWrap: "anywhere" }}>{a.name}</b>
           <span style={S.chip}>{PROJECTS[a.project_id]?.flag || "🌐"} {a.language}</span>
           <span style={S.chip}>{a.project_id}</span>
@@ -280,6 +286,17 @@ function LibraryTab({ zoom }: any) {
               </div>)}
           </div>)
       })}
+      {bulkSel.length > 0 && (
+        <div style={{ position: "sticky", bottom: 14, marginTop: 14, background: "#7c3aed", color: "#fff", borderRadius: 13, padding: "12px 18px", display: "flex", alignItems: "center", gap: 14, boxShadow: "0 8px 30px rgba(124,58,237,.35)", zIndex: 20 }}>
+          <b style={{ fontSize: 14 }}>{bulkSel.length} {bulkSel.length === 1 ? "karta vybrána" : bulkSel.length < 5 ? "karty vybrány" : "karet vybráno"}</b>
+          <span style={{ marginLeft: "auto" }} />
+          <button style={{ ...S.btn, background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,.5)" }}
+            onClick={() => setBulkSel([])}>✖️ Zrušit výběr</button>
+          <button style={{ ...S.btn, background: "#fff", color: "#7c3aed", border: "none", fontWeight: 700 }}
+            onClick={() => setBulkOpen(true)}>🚀 Hromadně do Meta ({bulkSel.length})</button>
+        </div>)}
+      {bulkOpen && <BulkMetaModal creatives={creatives} selIds={bulkSel} kidsOf={kidsOf}
+        onClose={(sent: boolean) => { setBulkOpen(false); if (sent) { setBulkSel([]); qc.invalidateQueries({ queryKey: ["ads-lib"] }); qc.invalidateQueries({ queryKey: ["ads-jobs"] }) } }} />}
       {wizard && <LocalizeWizard wizard={wizard} onClose={() => { setWizard(null); qc.invalidateQueries({ queryKey: ["ads-lib"] }); qc.invalidateQueries({ queryKey: ["ads-jobs"] }) }} />}
       {metaModal && <MetaModal m={metaModal} onClose={() => { setMetaModal(null); qc.invalidateQueries({ queryKey: ["ads-lib"] }) }} />}
     </div>)
@@ -427,6 +444,164 @@ function LocalizeWizard({ wizard, onClose }: any) {
           <button style={S.btn} onClick={onClose}>Zavřít</button>
           {!sent && <button style={targets.length ? S.btnPri : { ...S.btnPri, opacity: .4 }} disabled={!targets.length || run.isPending}
             onClick={() => run.mutate()}>{run.isPending ? "Spouštím…" : `🚀 Spustit (${targets.length})`}</button>}
+        </div>
+      </div>
+    </div>)
+}
+
+/* ═══ Bulk Meta modal ═══ */
+function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
+  const [q, setQ] = useState("")
+  const [target, setTarget] = useState<any>(null)
+  const [resolving, setResolving] = useState(false)
+  const [resolveErr, setResolveErr] = useState("")
+  const [chosen, setChosen] = useState<Record<string, string>>({}) // selectedCardId -> version creative id
+  const [vars, setVars] = useState<Record<string, string[]>>({})   // versionId -> selected 1:1 variant urls
+  const [jobId, setJobId] = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
+
+  const byId = useMemo(() => Object.fromEntries(creatives.map((c: any) => [c.id, c])), [creatives])
+  const rows = selIds.map((id: string) => byId[id]).filter(Boolean)
+  const versionsOf = (card: any) => [card, ...kidsOf(card.id)]
+  const versionFor = (card: any) => byId[chosen[card.id]] || card
+  const accLang = target?.account_name?.match(/\(([A-Z]{2})\)/)?.[1] || null
+
+  const resolve = async () => {
+    setResolving(true); setResolveErr(""); setTarget(null)
+    try {
+      const r: any = await sdk.client.fetch(`/admin/ads-library/meta/resolve-adset?q=${encodeURIComponent(q)}`, { method: "GET" })
+      setTarget(r)
+      // preselect the language version matching the account's (XX) suffix
+      const lang = r.account_name?.match(/\(([A-Z]{2})\)/)?.[1]
+      if (lang) {
+        const next: Record<string, string> = {}
+        for (const card of rows) {
+          const hit = versionsOf(card).find((v: any) => v.language === lang)
+          if (hit) next[card.id] = hit.id
+        }
+        setChosen((c) => ({ ...next, ...c }))
+      }
+    } catch (e: any) { setResolveErr(e?.message || "ad set nejde načíst") }
+    setResolving(false)
+  }
+
+  const toggleVar = (versionId: string, url: string) => setVars((p) => {
+    const cur = p[versionId] || []
+    return { ...p, [versionId]: cur.includes(url) ? cur.filter((u) => u !== url) : [...cur, url] }
+  })
+  const plannedFor = (v: any) => Math.max(1, (vars[v.id] || []).length)
+  const totalPlanned = rows.reduce((n: number, card: any) => n + plannedFor(versionFor(card)), 0)
+
+  const jobsQ = useQuery({
+    queryKey: ["ads-jobs"],
+    queryFn: () => sdk.client.fetch("/admin/ads-library/jobs", { method: "GET" }),
+    enabled: !!jobId,
+    refetchInterval: jobId ? 3000 : false,
+  })
+  const job = jobId ? (jobsQ.data?.jobs || []).find((j: any) => j.id === jobId) : null
+  const jobFinished = job && (job.status === "done" || job.status === "failed")
+
+  const start = async () => {
+    setStarting(true)
+    try {
+      const items = rows.map((card: any) => {
+        const v = versionFor(card)
+        return { creative_id: v.id, variant_urls: vars[v.id] || [] }
+      })
+      const r: any = await sdk.client.fetch("/admin/ads-library/bulk-send-to-meta", {
+        method: "POST", body: { adset: q, items },
+      })
+      setJobId(r.job_id)
+    } catch (e: any) { setResolveErr(e?.message || "spuštění selhalo") }
+    setStarting(false)
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "4vh 16px" }}
+      onClick={(e) => e.target === e.currentTarget && onClose(!!jobId)}>
+      <div style={{ ...S.card, maxWidth: 680, width: "100%", maxHeight: "90vh", overflow: "auto", background: "var(--bg-base,#fff)" }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid #e5e7eb", display: "flex", position: "sticky", top: 0, background: "var(--bg-base,#fff)", zIndex: 2 }}>
+          <b style={{ fontSize: 15.5 }}>🚀 Hromadné odeslání — {rows.length} {rows.length === 1 ? "karta" : "karet"} → Meta</b>
+          <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={() => onClose(!!jobId)}>✕</button>
+        </div>
+        <div style={{ padding: "16px 18px" }}>
+          <div style={{ border: "1.5px solid #7c3aed", borderRadius: 11, padding: "11px 13px", background: "#faf5ff", marginBottom: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 650, marginBottom: 6 }}>⚡ Cílový ad set — vlož ID nebo URL z Ads Manageru</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input style={{ ...S.input, ...S.mono, flex: 1 }} placeholder="ID (120211234…) nebo celá URL"
+                value={q} onChange={(e) => { setQ(e.target.value); setTarget(null) }} disabled={!!jobId} />
+              <button style={q.trim() && !target ? S.btnPri : { ...S.btnPri, opacity: .4 }} disabled={!q.trim() || !!target || resolving}
+                onClick={resolve}>{resolving ? "…" : "Ověřit"}</button>
+            </div>
+            {resolveErr && <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>{resolveErr}</div>}
+            {target && <div style={{ fontSize: 12.5, color: "#15803d", fontWeight: 650, marginTop: 7 }}>
+              ✓ {target.account_name} → {target.campaign_name} → <b>{target.name}</b></div>}
+          </div>
+
+          {target && !jobId && (<>
+            {rows.map((card: any) => {
+              const v = versionFor(card)
+              const v11 = (v.variants || []).filter((x: any) => x.format === "1:1")
+              const already = v.metadata?.meta_adset_id === target.adset_id
+              const mismatch = accLang && v.language && accLang !== v.language
+              return (
+                <div key={card.id} style={{ borderTop: "1px dashed var(--border-base,#e5e7eb)", padding: "11px 0", display: "grid", gridTemplateColumns: "52px minmax(0,1fr) auto", gap: 12, alignItems: "start" }}>
+                  <img src={v.image_1x1_url || card.image_1x1_url} alt="" style={{ width: 52, height: 52, objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }} />
+                  <div style={{ minWidth: 0 }}>
+                    <b style={{ fontSize: 13 }}>{card.name}</b>
+                    {already && <span style={{ ...S.mono, fontSize: 10.5, marginLeft: 7, padding: "1px 8px", borderRadius: 999, background: "#fef3c7", color: "#b45309" }}>už v tomto ad setu</span>}
+                    {versionsOf(card).length > 1 && (
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", margin: "5px 0 2px" }}>
+                        {versionsOf(card).map((ver: any) => (
+                          <button key={ver.id} onClick={() => setChosen((c) => ({ ...c, [card.id]: ver.id }))}
+                            style={{ ...S.btn, padding: "3px 10px", fontSize: 11.5, ...(v.id === ver.id ? { borderColor: "#7c3aed", background: "#ede9fe", fontWeight: 650 } : {}) }}>
+                            {PROJECTS[ver.project_id]?.flag || "🌐"} {ver.language}{!ver.translated_from_id ? " (zdroj)" : ""}</button>))}
+                      </div>)}
+                    {mismatch && <div style={{ fontSize: 11.5, color: "#b45309" }}>⚠️ {v.language} verze do účtu ({accLang})</div>}
+                    {v11.length > 1 ? (
+                      <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginTop: 6 }}>
+                        {v11.map((x: any) => {
+                          const on = (vars[v.id] || []).includes(x.url)
+                          return (
+                            <span key={x.id} onClick={() => toggleVar(v.id, x.url)}
+                              style={{ width: 40, height: 40, borderRadius: 8, overflow: "hidden", cursor: "pointer", position: "relative",
+                                border: on ? "2px solid #7c3aed" : "2px solid var(--border-base,#e5e7eb)", boxShadow: on ? "0 0 0 2px #ede9fe" : "none" }}>
+                              <img src={x.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                              {on && <span style={{ position: "absolute", top: -2, right: 0, fontSize: 10 }}>✅</span>}
+                            </span>)
+                        })}
+                        <span style={{ fontSize: 11, color: "#6b7280" }}>každá vybraná 1:1 = samostatná reklama · nic nevybráno = oficiální</span>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 4 }}>
+                        1:1{v.image_9x16_url ? " + 9:16" : ""} · {(v.primary_texts || []).length}P/{(v.headlines || []).length}H</div>)}
+                  </div>
+                  <span style={{ ...S.mono, fontSize: 11.5, padding: "2px 9px", borderRadius: 999, background: "#ede9fe", color: "#7c3aed", whiteSpace: "nowrap" }}>
+                    → {plannedFor(v)} {plannedFor(v) === 1 ? "reklama" : "reklamy"}</span>
+                </div>)
+            })}
+            <div style={{ background: "var(--bg-subtle,#f9fafb)", borderRadius: 10, padding: "10px 13px", fontSize: 12.5, color: "#6b7280", marginTop: 10 }}>
+              Vytvoří se <b style={{ color: "#111827" }}>{totalPlanned} reklam</b>, všechny <b>⏸ PAUSED</b> — 1:1 (+ 9:16, pokud ji verze má) a všech 5P/5H textů.</div>
+          </>)}
+
+          {job && (
+            <div style={{ marginTop: 12 }}>
+              {(job.steps || []).map((s: any) => (
+                <div key={s.key} style={{ display: "flex", gap: 9, alignItems: "baseline", padding: "4px 0", fontSize: 12.5 }}>
+                  <span style={{ ...S.mono, fontSize: 11, padding: "2px 9px", borderRadius: 999, flexShrink: 0,
+                    background: s.status === "done" ? "#dcfce7" : s.status === "running" ? "#fef3c7" : s.status === "failed" ? "#fee2e2" : "var(--bg-subtle,#f3f4f6)",
+                    color: s.status === "done" ? "#15803d" : s.status === "running" ? "#b45309" : s.status === "failed" ? "#b91c1c" : "#6b7280" }}>
+                    {s.status === "done" ? "✓" : s.status === "running" ? "⏳" : s.status === "failed" ? "❌" : "·"}</span>
+                  <span style={{ overflowWrap: "anywhere" }}>{s.label}{s.detail ? <span style={{ color: "#6b7280" }}> — {s.detail}</span> : ""}</span>
+                </div>))}
+              {jobFinished && <div style={{ fontSize: 13.5, fontWeight: 650, marginTop: 8, color: job.status === "done" ? "#15803d" : "#b91c1c" }}>
+                {job.status === "done" ? "✅ Dávka dokončena — zkontroluj a zapni v Ads Manageru" : `❌ ${job.error || "dávka selhala"}`}</div>}
+            </div>)}
+        </div>
+        <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
+          <button style={S.btn} onClick={() => onClose(!!jobId)}>Zavřít</button>
+          {target && !jobId && <button style={S.btnPri} disabled={starting}
+            onClick={start}>{starting ? "Spouštím…" : `🚀 Vytvořit ${totalPlanned} PAUSED reklam`}</button>}
         </div>
       </div>
     </div>)
