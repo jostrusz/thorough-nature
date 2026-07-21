@@ -58,6 +58,9 @@ PRAVIDLA:
    stylistika cílového jazyka. Rod vypravěče drž konzistentně celým textem
    (viz Oslovení výše — např. žena mluví v ženském rodě). Před odevzdáním si
    každou větu přečti očima rodilého korektora.
+7. URL FORMÁT: každou adresu cílového projektu piš PŘESNĚ ve tvaru
+   https://www.${ctx.domain} — vždy s https:// a vždy s www. Nikdy ne holé
+   „${ctx.domain}" ani „www.${ctx.domain}" bez protokolu.
 
 ${HUMANIZER_RULES}
 
@@ -168,6 +171,18 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
   }
 }
 
+/**
+ * Ads must always link as https://www.<domain> — models occasionally emit the
+ * bare domain or drop the protocol, so the format is enforced here too, not
+ * just in the prompt. Only the project's own domain is touched (advertorial
+ * and foreign domains stay as written).
+ */
+export function normalizeProjectUrls(text: string, domain: string): string {
+  if (!text || !domain) return text
+  const esc = domain.replace(/\./g, "\\.")
+  return text.replace(new RegExp(`(?:https?://)?(?:www\\.)?${esc}`, "gi"), `https://www.${domain}`)
+}
+
 const sumUsage = (a: Usage, b: Usage): Usage => ({
   model: a.model,
   input: (a.input || 0) + (b.input || 0),
@@ -213,6 +228,8 @@ export async function translateTexts(opts: {
     tells = [`humanizer pass selhal: ${String(e.message).slice(0, 120)}`]
   }
 
+  primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain))
+  headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain))
   return { primaries, headlines, usage, tells, prompt }
 }
 
@@ -282,5 +299,7 @@ Odpověz POUZE validním JSON:
     tells = [`humanizer pass selhal: ${String(e.message).slice(0, 120)}`]
   }
 
+  primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain))
+  headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain))
   return { primaries, headlines, usage, tells, prompt }
 }
