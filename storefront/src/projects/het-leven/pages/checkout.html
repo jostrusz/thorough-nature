@@ -7227,6 +7227,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (el && el.classList.contains('valid')) validatedFields[fid] = true;
     });
     draft._validated = validatedFields;
+
+    // Stav výběru — bez něj se zákazník po nedokončené platbě vrátí sice
+    // s vyplněnými údaji, ale s košíkem shozeným zpět na výchozí 1 kus.
+    draft._selection = {
+      bundleQty: selectedBundleQty,
+      orderBump: orderBumpActive,
+      upsellQty: selectedUpsellQty,
+      paymentMethod: selectedMethod || null
+    };
+
     localStorage.setItem('checkout_draft', JSON.stringify(draft));
   }
 
@@ -7265,10 +7275,72 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (countryEl && draft.country) {
         countryEl.dispatchEvent(new Event('change'));
       }
+      restoreSelectionFromDraft(draft._selection);
       console.log('[Checkout Recovery] Form restored from localStorage');
     } catch (e) {
       console.warn('[Checkout Recovery] Restore failed:', e);
     }
+  }
+
+  /**
+   * Obnoví to, co si zákazník naklikal: balíček, order bump a jeho počet
+   * a nakonec platební metodu. Bez toho by se po nedokončené platbě vrátil
+   * s vyplněnými údaji, ale košíkem shozeným na výchozí 1 kus.
+   *
+   * Vše se obnovuje KLIKEM na původní prvky, ne nastavením proměnných — tím
+   * se využije stávající logika (přepočet souhrnu, sync UI) a nemůže vzniknout
+   * stav, kdy proměnná a to, co zákazník vidí, nesedí.
+   *
+   * Balíček i bump jsou v DOM hned, platební metody se dotahují asynchronně,
+   * proto se na ně čeká krátkým pollem.
+   */
+  function restoreSelectionFromDraft(sel) {
+    if (!sel) return;
+
+    // Čeká na prvek, který se vykresluje asynchronně (bundly se překreslují při
+    // změně země, platební metody se dotahují z /store/payment-options).
+    function whenPresent(selector, cb, maxTries) {
+      var tries = 0;
+      (function attempt() {
+        var el = document.querySelector(selector);
+        if (el) return cb(el);
+        if (++tries < (maxTries || 40)) setTimeout(attempt, 250);
+      })();
+    }
+
+    // ── Balíček + order bump ──
+    whenPresent('.bundle-option', function () {
+      if (sel.bundleQty && sel.bundleQty !== selectedBundleQty) {
+        var opt = document.querySelector('.bundle-option[data-qty="' + sel.bundleQty + '"]');
+        if (opt) opt.click();
+      }
+      if (sel.orderBump && !orderBumpActive) {
+        var bumpHeader = document.getElementById('order-bump-header');
+        if (bumpHeader) bumpHeader.click();
+      }
+      if (sel.orderBump && sel.upsellQty > 1) {
+        var incBtn = document.getElementById('ob-qty-inc');
+        // Klik zvyšuje o 1; stepper si sám hlídá horní mez.
+        for (var i = selectedUpsellQty; i < sel.upsellQty && incBtn; i++) incBtn.click();
+      }
+    });
+
+    // ── Platební metoda (+ scroll) ──
+    // Uložená metoda znamená, že zákazník už u platby jednou byl — po návratu
+    // ho tam rovnou vezmeme, protože je to jediné, co mu zbývá dodělat.
+    if (!sel.paymentMethod) return;
+    whenPresent('#payment-methods .payment-method[data-method="' + sel.paymentMethod + '"]',
+      function (el) {
+        // Brány se můžou načíst až po několika sekundách. Pokud si zákazník
+        // mezitím vybral sám, jeho volbu nepřepisujeme.
+        if (selectedMethod) return;
+        el.click();
+        setTimeout(function () {
+          var anchor = document.getElementById('payment-methods');
+          if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 250);
+        console.log('[Checkout Recovery] Selection restored → payment method', sel.paymentMethod);
+      });
   }
 
   // Create background cart on server after email is entered
@@ -7375,6 +7447,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   if (emailField) {
     emailField.addEventListener('blur', createBackgroundCart);
   }
+
+  // Uložit draft i při ZMĚNĚ VÝBĚRU (balíček, order bump, platební metoda).
+  // Delegace na document: prvky vznikají až za běhu (platební metody se dotahují
+  // asynchronně, bundly se překreslují při změně země) a bubble fáze zaručí,
+  // že původní handler stihne aktualizovat stav dřív, než ho zapíšeme.
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest) return;
+    var hit = e.target.closest(
+      '.bundle-option, #order-bump-header, #ob-qty-inc, #ob-qty-dec, ' +
+      '#payment-methods .payment-method, #payment-methods .klarna-sub-method'
+    );
+    if (hit) setTimeout(saveFormToStorage, 60);
+  });
 
   // Restore form on page load
   restoreFormFromStorage();
