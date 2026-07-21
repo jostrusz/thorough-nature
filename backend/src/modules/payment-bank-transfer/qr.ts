@@ -37,14 +37,11 @@ export function paymentReference(orderNo: string, currency: string): string {
  * Field 10 is the STRUCTURED remittance (ISO 11649 RF creditor reference),
  * field 11 the UNSTRUCTURED one (free text); only one may be populated.
  *
- * We deliberately use the UNSTRUCTURED field. The structured RF reference is
- * the "proper" SEPA way, but many CZ/SK/PL retail banking apps silently drop it
- * when scanning a QR — the customer never sees a reference, pays without one,
- * and the credit lands on the account as a bare "Payment from <name>" that
- * nothing can match to a cart (verified on real Revolut credits, July 2026:
- * every incoming SK transfer arrived with reference = null). Free text goes
- * into "Správa pre príjemcu / Zpráva pro příjemce", which those same apps
- * prefill and transmit reliably.
+ * We use the STRUCTURED field. Verified by scanning both variants with a real
+ * Slovak mobile banking app (July 2026): field 10 prefills the "Reference"
+ * input, field 11 is silently ignored. The RF reference also survives the SEPA
+ * transfer end-to-end in RmtInf/Strd/CdtrRefInf, so it reaches Revolut and the
+ * reconcile job can match the credit back to its cart.
  */
 function epcString(amount: number, ref: string, bank: any): string {
   return [
@@ -54,21 +51,18 @@ function epcString(amount: number, ref: string, bank: any): string {
     String(bank.iban || "").replace(/\s/g, ""),
     "EUR" + Number(amount).toFixed(2),
     "",                                    // 9 — purpose
-    "",                                    // 10 — structured (must stay empty)
-    unstructuredRemittance(ref),           // 11 — unstructured, what banks show
+    structuredRemittance(ref),             // 10 — structured RF, what banks prefill
+    "",                                    // 11 — unstructured (must stay empty)
     "",
   ].join("\n")
 }
 
-/** Free-text remittance line: the raw reference plus its RF form, so the
- *  credit is matchable whichever one the bank ends up transmitting. */
-export function unstructuredRemittance(ref: string): string {
+/** The ISO 11649 form of a reference, capped at the EPC field-10 limit. */
+export function structuredRemittance(ref: string): string {
   const raw = String(ref || "").trim()
   if (!raw) return ""
   const rf = /^RF\d\d/i.test(raw) ? raw.toUpperCase() : rfReference(raw)
-  const digits = raw.replace(/\D/g, "")
-  const text = digits && !raw.toUpperCase().startsWith("RF") ? `${digits} ${rf}` : rf
-  return text.substring(0, 140)
+  return rf.substring(0, 35)
 }
 
 // Czech "QR Platba" (SPD 1.0) — CZK, VS in X-VS.

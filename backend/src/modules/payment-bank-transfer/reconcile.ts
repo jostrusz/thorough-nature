@@ -111,6 +111,11 @@ export async function getRevolutCredits(logger: any): Promise<any[]> {
         amount,
         currency: String(leg?.currency || "").toUpperCase(),
         text,
+        // Separator-free copy of the same text. Banks format the reference in
+        // whatever way they like — "RF54 2065 4546 8", "/RFB/RF54206545468",
+        // "VS:206545468" — so we search the stripped form, which is a superset
+        // of the raw one for our alphanumeric needles.
+        norm: text.replace(/[^A-Z0-9]/g, ""),
         // Payer name for the no-reference fallback. CZ/SK banks routinely strip
         // the remittance line, leaving only "Payment from <name>".
         payer: nameKey(String(leg?.description || t?.description || "").replace(/^payment from\s*/i, "")),
@@ -194,9 +199,11 @@ export async function reconcileCart(cart: any, credits: any[], usedTxnIds: Set<s
     return true
   })
 
-  // 1) reference in the remittance text — the reliable path
+  // 1) reference in the remittance text — the reliable path. Since the QR now
+  //    carries the RF in the structured EPC field, this is what nearly every
+  //    credit should hit; the digits-only form covers manual typers.
   let match = eligible.find((c) => {
-    const t = c.text
+    const t = c.norm || c.text.replace(/[^A-Z0-9]/g, "")
     return t.indexOf(rf) !== -1 || (digits.length >= 3 && t.indexOf(digits) !== -1)
   })
 
