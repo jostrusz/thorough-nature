@@ -66,8 +66,13 @@
 <body>
 
 <!-- ═══ PRELOADER ═══ -->
+<!-- Stejná varianta jako na checkoutu: logo v .preloader-logo-wrap se
+     shine efektem přejíždějícím přes něj (viz .preloader-shine ve style.css). -->
 <div class="preloader" id="preloader">
- <img src="images/biblia-kotow-logo.png" alt="Ładowanie..." class="preloader-logo" width="320" height="76">
+ <div class="preloader-logo-wrap">
+  <img src="images/biblia-kotow-logo.png" alt="Ładowanie..." class="preloader-logo" width="320" height="76">
+  <div class="preloader-shine"></div>
+ </div>
 </div>
 
 <!-- ═══ NAVIGAČNÍ MENU ═══ -->

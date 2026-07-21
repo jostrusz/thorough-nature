@@ -43,6 +43,43 @@
 /* ══ Reset & Base ══ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); }
+
+/* ══ PRELOADER ══
+   Stejná varianta jako na checkoutu a indexu: pulzující logo + shine.
+   Skryje se po window.load (viz skript na konci body). */
+.preloader {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 99999;
+  transition: opacity 0.6s cubic-bezier(.4,0,.2,1), visibility 0.6s;
+}
+.preloader.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+.preloader-logo-wrap { position: relative; overflow: hidden; display: inline-block; }
+.preloader-logo {
+  width: auto; height: 76px;
+  aspect-ratio: 500 / 225;
+  display: block;
+  animation: preloaderPulse 1.4s ease-in-out infinite;
+}
+.preloader-shine {
+  position: absolute;
+  top: -100%; left: 0;
+  width: 50%; height: 300%;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%);
+  animation: preloaderShine 2s ease-in-out infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+@keyframes preloaderPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+@keyframes preloaderShine {
+  0% { transform: translateX(-160%); }
+  100% { transform: translateX(320%); }
+}
 .ty-page {
   font-family: 'Cabin', sans-serif;
   color: var(--body);
@@ -484,6 +521,14 @@ body { background: var(--bg); }
 </style>
 </head>
 <body>
+
+<!-- ═══ PRELOADER ═══ -->
+<div class="preloader" id="preloader">
+ <div class="preloader-logo-wrap">
+  <img src="images/biblia-kotow-logo.png" alt="Ładowanie..." class="preloader-logo" width="320" height="76">
+  <div class="preloader-shine"></div>
+ </div>
+</div>
 
 <!-- Konfety -->
 <div class="ty-confetti" id="ty-confetti"></div>
@@ -1387,6 +1432,16 @@ body { background: var(--bg); }
     document.querySelectorAll('.ty-reveal').forEach(function(el){ el.classList.add('is-visible'); });
   }
 })();
+</script>
+
+<!-- ═══ Preloader — skrytí po načtení ═══ -->
+<script>
+window.addEventListener('load', function() {
+ var preloader = document.getElementById('preloader');
+ if (preloader) {
+  setTimeout(function() { preloader.classList.add('loaded'); }, 400);
+ }
+});
 </script>
 
 </body>
