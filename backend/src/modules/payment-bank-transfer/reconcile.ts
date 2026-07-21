@@ -234,6 +234,27 @@ export async function reconcileCart(cart: any, credits: any[], usedTxnIds: Set<s
     return null
   }
 
+  // One credit may only ever produce ONE order. A cart can stay open while an
+  // order for the same payment already exists — e.g. it was recovered by hand
+  // (which does not complete the cart) — and without this guard the next tick
+  // would happily create a duplicate and ship a second parcel.
+  try {
+    const { rows: dupe } = await pool.query(
+      `SELECT id, metadata->>'custom_order_number' AS no FROM "order"
+        WHERE metadata->>'revolut_transaction_id' = $1 AND deleted_at IS NULL LIMIT 1`,
+      [String(match.id)]
+    )
+    if (dupe[0]) {
+      usedTxnIds.add(match.id)
+      logger.warn(`[Bank Transfer Reconcile] cart ${cart.cart_id}: Revolut txn ${match.id} already produced order ${dupe[0].no || dupe[0].id} — closing cart without a second order`)
+      // Close the cart so it stops showing up as awaiting on every tick.
+      await pool.query(`UPDATE cart SET completed_at = NOW(), updated_at = NOW() WHERE id = $1 AND completed_at IS NULL`, [cart.cart_id])
+      return null
+    }
+  } catch (e: any) {
+    logger.warn(`[Bank Transfer Reconcile] duplicate check failed for ${match.id}: ${e.message}`)
+  }
+
   usedTxnIds.add(match.id)
 
   // Complete the cart → the order is created now, already paid.
