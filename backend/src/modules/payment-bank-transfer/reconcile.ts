@@ -106,11 +106,40 @@ export async function getRevolutCredits(logger: any): Promise<any[]> {
       const amount = Number(leg?.amount)
       if (!isFinite(amount) || amount <= 0) continue
       const text = [t?.reference, leg?.description, t?.description].filter(Boolean).join(" ").toUpperCase()
-      out.push({ id: String(t?.id || leg?.leg_id || ""), amount, currency: String(leg?.currency || "").toUpperCase(), text })
+      out.push({
+        id: String(t?.id || leg?.leg_id || ""),
+        amount,
+        currency: String(leg?.currency || "").toUpperCase(),
+        text,
+        // Payer name for the no-reference fallback. CZ/SK banks routinely strip
+        // the remittance line, leaving only "Payment from <name>".
+        payer: nameKey(String(leg?.description || t?.description || "").replace(/^payment from\s*/i, "")),
+        at: Date.parse(t?.completed_at || t?.created_at || "") || 0,
+      })
     }
   }
   _creditsCache = { data: out, at: Date.now() }
   return out
+}
+
+/**
+ * Diacritics-insensitive, order-insensitive name key: "Kristína Vojtylová" and
+ * the Revolut payer "Kristina Vojtylova" collapse to the same token set.
+ */
+export function nameKey(name: string): string {
+  return String(name || "")
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .toLowerCase().replace(/[^a-z0-9 ]/g, " ")
+    .split(/\s+/).filter((w) => w.length > 1).sort().join(" ")
+}
+
+/** Do two name keys describe the same person? Requires ≥2 shared tokens
+ *  (given + family name), so a lone common first name never matches. */
+function sameName(a: string, b: string): boolean {
+  if (!a || !b) return false
+  if (a === b) return true
+  const A = new Set(a.split(" ")), B = b.split(" ")
+  return B.filter((w) => A.has(w)).length >= 2
 }
 
 async function cartTotal(pool: any, cartId: string): Promise<number> {
@@ -159,15 +188,46 @@ export async function reconcileCart(cart: any, credits: any[], usedTxnIds: Set<s
   const digits = rawRef.replace(/[^0-9]/g, "")
   const cartCcy = String(cart.currency_code || "").toUpperCase()
 
-  const match = credits.find((c) => {
+  const eligible = credits.filter((c) => {
     if (usedTxnIds.has(c.id)) return false
     if (cartCcy && c.currency && c.currency !== cartCcy) return false
+    return true
+  })
+
+  // 1) reference in the remittance text — the reliable path
+  let match = eligible.find((c) => {
     const t = c.text
     return t.indexOf(rf) !== -1 || (digits.length >= 3 && t.indexOf(digits) !== -1)
   })
-  if (!match) return null
 
   const total = await cartTotal(pool, cart.cart_id)
+
+  // 2) fallback: no reference survived the bank (typical for CZ/SK transfers,
+  //    where the credit arrives as a bare "Payment from <name>"). Match on
+  //    payer name + exact amount + a credit that landed AFTER the cart was
+  //    created. All three must line up, and the payer must share given AND
+  //    family name with the shipping address, so a mismatch is very unlikely.
+  let matchedBy = "reference"
+  if (!match && total > 0) {
+    const cartName = nameKey(cart.customer_name || "")
+    const createdAt = Date.parse(cart.created_at || "") || 0
+    if (cartName && createdAt) {
+      const byName = eligible.filter((c) =>
+        sameName(cartName, c.payer || "") &&
+        Math.abs(c.amount - total) <= AMOUNT_TOLERANCE &&
+        c.at >= createdAt - 60_000
+      )
+      // ambiguity guard: only act when exactly one credit fits
+      if (byName.length === 1) {
+        match = byName[0]
+        matchedBy = "payer name + amount"
+        logger.info(`[Bank Transfer Reconcile] cart ${cart.cart_id}: no reference in credit, matched by payer name "${match.payer}" + ${match.amount} ${match.currency}`)
+      } else if (byName.length > 1) {
+        logger.warn(`[Bank Transfer Reconcile] cart ${cart.cart_id}: ${byName.length} credits fit payer name + amount — skipping to avoid a wrong match`)
+      }
+    }
+  }
+  if (!match) return null
   if (total > 0 && match.amount < total - AMOUNT_TOLERANCE) {
     logger.error(`[Bank Transfer Reconcile] underpayment cart ${cart.cart_id}: paid=${match.amount} total=${total} — skip`)
     await alert("Bank transfer: underpayment", `Cart ${cart.cart_id} (ref ${rawRef}) paid ${match.amount} ${match.currency} but total ${total}. Revolut txn ${match.id}. Manual review.`)
@@ -211,15 +271,21 @@ export async function reconcileCart(cart: any, credits: any[], usedTxnIds: Set<s
   )
   await captureAndEmit(orderId, pool, container, logger)
 
-  logger.info(`[Bank Transfer Reconcile] ✅ Cart ${cart.cart_id} (ref ${rawRef}) → order ${orderId} (${match.amount} ${match.currency})`)
+  logger.info(`[Bank Transfer Reconcile] ✅ Cart ${cart.cart_id} (ref ${rawRef}, matched by ${matchedBy}) → order ${orderId} (${match.amount} ${match.currency})`)
   await alert("Bank transfer: order created (paid)", `Ref ${rawRef} paid ${match.amount} ${match.currency} → order ${orderId} created + captured. (Revolut txn ${match.id})`)
   return orderId
 }
 
 const AWAITING_CART_SQL = `
-  SELECT c.id AS cart_id, c.email, c.currency_code,
-         c.metadata->>'bank_transfer_reference' AS reference
+  SELECT c.id AS cart_id, c.email, c.currency_code, c.created_at,
+         c.metadata->>'bank_transfer_reference' AS reference,
+         COALESCE(
+           NULLIF(TRIM(CONCAT_WS(' ', sa.first_name, sa.last_name)), ''),
+           NULLIF(TRIM(CONCAT_WS(' ', ba.first_name, ba.last_name)), '')
+         ) AS customer_name
   FROM cart c
+  LEFT JOIN cart_address sa ON sa.id = c.shipping_address_id
+  LEFT JOIN cart_address ba ON ba.id = c.billing_address_id
   JOIN cart_payment_collection cpc ON cpc.cart_id = c.id
   JOIN payment_collection pc ON pc.id = cpc.payment_collection_id
   JOIN payment_session ps ON ps.payment_collection_id = pc.id
@@ -235,7 +301,7 @@ export async function reconcileSingleCart(cartId: string, container: any, logger
   const { Pool } = require("pg")
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
   try {
-    const { rows } = await pool.query(`${AWAITING_CART_SQL} AND c.id = $1 GROUP BY c.id LIMIT 1`, [cartId])
+    const { rows } = await pool.query(`${AWAITING_CART_SQL} AND c.id = $1 GROUP BY c.id, sa.id, ba.id LIMIT 1`, [cartId])
     if (!rows[0]) return null
     return await reconcileCart(rows[0], credits, new Set<string>(), pool, container, logger)
   } catch (e: any) {
@@ -251,7 +317,7 @@ export async function reconcileAllAwaitingCarts(container: any, logger: any): Pr
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
   const usedTxnIds = new Set<string>()
   try {
-    const { rows: carts } = await pool.query(`${AWAITING_CART_SQL} GROUP BY c.id ORDER BY c.created_at DESC LIMIT 200`)
+    const { rows: carts } = await pool.query(`${AWAITING_CART_SQL} GROUP BY c.id, sa.id, ba.id ORDER BY c.created_at DESC LIMIT 200`)
     logger.info(`[Bank Transfer Reconcile] tick: ${credits.length} incoming credits, ${carts.length} awaiting carts`)
     for (const cart of carts) {
       try { await reconcileCart(cart, credits, usedTxnIds, pool, container, logger) }

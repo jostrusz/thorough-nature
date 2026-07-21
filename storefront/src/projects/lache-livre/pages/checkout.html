@@ -3531,12 +3531,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // EPC069-12 (GiroCode) SEPA Credit Transfer — EUR only, RF v štruktúrovanom poli.
   function btEpcString(amount, ref) {
     var bt = btCfg() || {};
+    // Pole 10 = structured (RF), pole 11 = unstructured (volný text) — vyplnit
+    // lze jen jedno. Používáme UNSTRUCTURED: CZ/SK/PL bankovní appky structured
+    // RF referenci při skenování QR běžně zahodí a platba pak dorazí bez
+    // jakéhokoli symbolu (ověřeno na reálných Revolut příchozích, 7/2026).
+    // Volný text jde do „Správa pre príjemcu" a banky ho přenášejí spolehlivě.
+    var rfRef = /^RF\d\d/i.test(ref) ? String(ref).toUpperCase() : btRfReference(ref);
+    var digits = String(ref).replace(/\D/g, '');
+    var note = (digits && !/^RF/i.test(String(ref)) ? digits + ' ' + rfRef : rfRef).substring(0, 140);
     return ['BCD', '002', '1', 'SCT',
       bt.bic || '',
       (bt.beneficiary || '').substring(0, 70),
       (bt.iban || '').replace(/\s/g, ''),
       'EUR' + Number(amount).toFixed(2),
-      '', ref, '', ''
+      '', '', note, ''
     ].join('\n');
   }
   // Czech "QR Platba" (SPD 1.0) — CZK, variabilný symbol v X-VS. Skenujú CZ/SK banky.

@@ -31,7 +31,21 @@ export function paymentReference(orderNo: string, currency: string): string {
   return String(currency).toUpperCase() === "EUR" ? rfReference(orderNo) : vsReference(orderNo)
 }
 
-// EPC069-12 (GiroCode) SEPA Credit Transfer — EUR, RF in the structured field.
+/**
+ * EPC069-12 (GiroCode) SEPA Credit Transfer — EUR.
+ *
+ * Field 10 is the STRUCTURED remittance (ISO 11649 RF creditor reference),
+ * field 11 the UNSTRUCTURED one (free text); only one may be populated.
+ *
+ * We deliberately use the UNSTRUCTURED field. The structured RF reference is
+ * the "proper" SEPA way, but many CZ/SK/PL retail banking apps silently drop it
+ * when scanning a QR — the customer never sees a reference, pays without one,
+ * and the credit lands on the account as a bare "Payment from <name>" that
+ * nothing can match to a cart (verified on real Revolut credits, July 2026:
+ * every incoming SK transfer arrived with reference = null). Free text goes
+ * into "Správa pre príjemcu / Zpráva pro příjemce", which those same apps
+ * prefill and transmit reliably.
+ */
 function epcString(amount: number, ref: string, bank: any): string {
   return [
     "BCD", "002", "1", "SCT",
@@ -39,8 +53,22 @@ function epcString(amount: number, ref: string, bank: any): string {
     String(bank.beneficiary || "").substring(0, 70),
     String(bank.iban || "").replace(/\s/g, ""),
     "EUR" + Number(amount).toFixed(2),
-    "", ref, "", "",
+    "",                                    // 9 — purpose
+    "",                                    // 10 — structured (must stay empty)
+    unstructuredRemittance(ref),           // 11 — unstructured, what banks show
+    "",
   ].join("\n")
+}
+
+/** Free-text remittance line: the raw reference plus its RF form, so the
+ *  credit is matchable whichever one the bank ends up transmitting. */
+export function unstructuredRemittance(ref: string): string {
+  const raw = String(ref || "").trim()
+  if (!raw) return ""
+  const rf = /^RF\d\d/i.test(raw) ? raw.toUpperCase() : rfReference(raw)
+  const digits = raw.replace(/\D/g, "")
+  const text = digits && !raw.toUpperCase().startsWith("RF") ? `${digits} ${rf}` : rf
+  return text.substring(0, 140)
 }
 
 // Czech "QR Platba" (SPD 1.0) — CZK, VS in X-VS.
