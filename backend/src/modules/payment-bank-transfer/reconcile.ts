@@ -212,11 +212,17 @@ export async function reconcileCart(cart: any, credits: any[], usedTxnIds: Set<s
     const cartName = nameKey(cart.customer_name || "")
     const createdAt = Date.parse(cart.created_at || "") || 0
     if (cartName && createdAt) {
-      const byName = eligible.filter((c) =>
-        sameName(cartName, c.payer || "") &&
-        Math.abs(c.amount - total) <= AMOUNT_TOLERANCE &&
-        c.at >= createdAt - 60_000
-      )
+      // Surname is the discriminator: banks reorder given/family name freely
+      // ("Payment from Tesárik Michal"), so we look the shipping-address
+      // surname up anywhere in the payer string, diacritics- and case-blind.
+      const surname = nameKey(cart.last_name || "")
+      const byName = eligible.filter((c) => {
+        const payer = c.payer || ""
+        const bySurname = surname.length >= 3 && payer.split(" ").includes(surname)
+        return (bySurname || sameName(cartName, payer)) &&
+          Math.abs(c.amount - total) <= AMOUNT_TOLERANCE &&
+          c.at >= createdAt - 60_000
+      })
       // ambiguity guard: only act when exactly one credit fits
       if (byName.length === 1) {
         match = byName[0]
@@ -303,7 +309,8 @@ const AWAITING_CART_SQL = `
          COALESCE(
            NULLIF(TRIM(CONCAT_WS(' ', sa.first_name, sa.last_name)), ''),
            NULLIF(TRIM(CONCAT_WS(' ', ba.first_name, ba.last_name)), '')
-         ) AS customer_name
+         ) AS customer_name,
+         COALESCE(NULLIF(TRIM(sa.last_name), ''), NULLIF(TRIM(ba.last_name), '')) AS last_name
   FROM cart c
   LEFT JOIN cart_address sa ON sa.id = c.shipping_address_id
   LEFT JOIN cart_address ba ON ba.id = c.billing_address_id
