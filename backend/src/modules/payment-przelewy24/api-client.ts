@@ -112,7 +112,13 @@ export interface IP24RegisterInput {
   timeLimit?: number // minutes, 0-99
   waitForResult?: boolean
   regulationAccept?: boolean
+  /** Payment Service User — MANDATORY when the token is later charged through
+   *  blik/chargeByCode (BLIK level 0). P24 rejects the charge without it. */
+  psu?: { ip: string; userAgent: string }
 }
+
+/** P24 numeric method id for BLIK — needed for the level-0 (in-shop) flow. */
+export const P24_METHOD_BLIK = 154
 
 export interface IP24Result<T = any> {
   success: boolean
@@ -219,6 +225,14 @@ export class Przelewy24ApiClient {
       if (input.timeLimit != null) payload.timeLimit = Number(input.timeLimit)
       if (input.waitForResult != null) payload.waitForResult = !!input.waitForResult
       if (input.regulationAccept != null) payload.regulationAccept = !!input.regulationAccept
+      // BLIK level 0 requires the PSU object at REGISTER time — it cannot be
+      // supplied later on the charge call.
+      if (input.psu?.ip && input.psu?.userAgent) {
+        payload.additional = {
+          ...(payload.additional || {}),
+          PSU: { IP: input.psu.ip, userAgent: String(input.psu.userAgent).slice(0, 255) },
+        }
+      }
 
       const r = await this.http.post("/transaction/register", payload)
       const token = r.data?.data?.token
@@ -226,6 +240,44 @@ export class Przelewy24ApiClient {
         return { success: false, error: r.data?.error || "No token returned from P24" }
       }
       return { success: true, data: { token, redirectUrl: this.paymentUrl(token) } }
+    } catch (e: any) {
+      return this.err(e)
+    }
+  }
+
+  /**
+   * POST /paymentMethod/blik/chargeByCode — BLIK level 0 ("in-shop").
+   *
+   * The customer types the 6-digit code straight into our checkout; P24 pushes a
+   * confirmation prompt to their banking app. No redirect anywhere.
+   *
+   * Requires a token from registerTransaction that carried `psu` (P24 rejects the
+   * charge otherwise) and `method: 154`.
+   *
+   * Observed error codes (probed against the live merchant):
+   *   98  — request rejected by validation (malformed code: wrong length/charset)
+   *  103  — request accepted, BLIK rejected the code (wrong/expired/unknown)
+   * A success returns 201 with data.orderId; the customer then has ~30s to confirm
+   * in the app, after which the status notification arrives on the webhook.
+   */
+  async chargeBlikByCode(input: {
+    token: string
+    blikCode: string
+  }): Promise<IP24Result<{ orderId: number; message?: string }>> {
+    try {
+      const code = String(input.blikCode || "").replace(/\D/g, "")
+      if (code.length !== 6) {
+        return { success: false, error: "BLIK code must be exactly 6 digits", errorCode: 98 }
+      }
+      const r = await this.http.post("/paymentMethod/blik/chargeByCode", {
+        token: String(input.token),
+        blikCode: code,
+      })
+      const data = r.data?.data
+      if (!data?.orderId) {
+        return { success: false, error: r.data?.error || "BLIK charge returned no orderId" }
+      }
+      return { success: true, data: { orderId: data.orderId, message: data.message } }
     } catch (e: any) {
       return this.err(e)
     }

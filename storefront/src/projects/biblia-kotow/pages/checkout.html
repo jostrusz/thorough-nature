@@ -2350,6 +2350,65 @@ body {
 .preloader-shine { position: absolute; top: -100%; left: 0; width: 50%; height: 300%; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%); animation: preloaderShine 2s ease-in-out infinite; pointer-events: none; will-change: transform; }
 @keyframes preloaderPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.04); opacity: 0.92; } }
 @keyframes preloaderShine { 0% { transform: translateX(-160%); } 100% { transform: translateX(320%); } }
+
+/* ═══ BLIK LEVEL 0 — inline panel (kod na naszej stronie, bez przekierowania) ═══ */
+.blik-overlay {
+  position: fixed; inset: 0; z-index: 100000;
+  background: rgba(26,26,46,0.55); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: blikFadeIn .25s ease;
+}
+@keyframes blikFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.blik-card {
+  background: #fff; border-radius: 18px; width: 100%; max-width: 420px;
+  padding: 28px 26px 24px; box-shadow: 0 24px 60px rgba(26,26,46,.28);
+  text-align: center; font-family: 'DM Sans', sans-serif;
+  animation: blikSlideUp .3s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes blikSlideUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.blik-logo { height: 34px; width: auto; margin: 0 auto 14px; display: block; }
+.blik-title { font-size: 19px; font-weight: 700; color: #1a1a2e; margin: 0 0 6px; }
+.blik-sub { font-size: 13.5px; color: #666; line-height: 1.5; margin: 0 0 18px; }
+.blik-amount { font-weight: 700; color: #1a1a2e; }
+.blik-code-input {
+  width: 100%; text-align: center;
+  font-size: 30px; font-weight: 700; letter-spacing: 12px; text-indent: 12px;
+  font-variant-numeric: tabular-nums;
+  padding: 14px 10px; border: 2px solid #E5E0EA; border-radius: 12px;
+  color: #1a1a2e; background: #FAF8FC; outline: none;
+  transition: border-color .18s, box-shadow .18s;
+}
+.blik-code-input:focus { border-color: #C27BA0; box-shadow: 0 0 0 4px rgba(194,123,160,.16); background: #fff; }
+.blik-code-input.error { border-color: #DC3522; box-shadow: 0 0 0 4px rgba(220,53,34,.12); }
+.blik-error { color: #DC3522; font-size: 13px; margin: 10px 0 0; min-height: 18px; line-height: 1.4; }
+.blik-submit {
+  width: 100%; margin-top: 16px; padding: 15px 18px; border: none; border-radius: 12px;
+  background: #C27BA0; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: filter .18s, opacity .18s;
+}
+.blik-submit:hover:not(:disabled) { filter: brightness(1.06); }
+.blik-submit:disabled { opacity: .55; cursor: not-allowed; }
+.blik-cancel {
+  display: inline-block; margin-top: 12px; background: none; border: none;
+  color: #999; font-size: 13px; cursor: pointer; text-decoration: underline;
+}
+.blik-cancel:hover { color: #666; }
+.blik-waiting { padding: 8px 0 4px; }
+.blik-spinner {
+  width: 46px; height: 46px; margin: 0 auto 16px;
+  border: 3px solid rgba(194,123,160,.22); border-top-color: #C27BA0;
+  border-radius: 50%; animation: blikSpin .9s linear infinite;
+}
+@keyframes blikSpin { to { transform: rotate(360deg); } }
+.blik-steps { text-align: left; margin: 16px auto 0; max-width: 300px; }
+.blik-step { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; color: #555; margin-bottom: 8px; line-height: 1.45; }
+.blik-step span:first-child { flex-shrink: 0; }
+.blik-timer { font-size: 12.5px; color: #999; margin-top: 12px; }
+.blik-secure { font-size: 11.5px; color: #aaa; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+@media (max-width: 420px) {
+  .blik-card { padding: 24px 18px 20px; }
+  .blik-code-input { font-size: 25px; letter-spacing: 9px; text-indent: 9px; }
+}
 </style>
 <div class="preloader" id="preloader">
  <div class="preloader-logo-wrap">
@@ -7474,6 +7533,185 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   })();
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     BLIK LEVEL 0 — inline platba bez redirectu.
+
+     Tok: zákazník zadá 6místný kód → POST /store/p24-blik-charge → P24 pošle
+     push do jeho bankovní appky → my pollujeme /store/p24-payment-status
+     → po potvrzení completeCart → upsell/thank-you.
+
+     Kód BLIK platí ~2 min, potvrzení v appce ~30 s. Když se kód nepovede
+     (P24 kód 98 = špatný formát, 103 = odmítnutý/expirovaný), necháme
+     zákazníka zadat nový. Při jiné chybě nabídneme přechod na hostovanou
+     stránku P24 (fallbackUrl), aby nikdy neskončil ve slepé uličce.
+     ═══════════════════════════════════════════════════════════════════════ */
+  // opts nese hodnoty, které žijí jen uvnitř submit handleru (orderBump, total) —
+  // openBlikPanel je v jiném scope, takže si je nesmí sahat přímo.
+  function openBlikPanel(cartId, fallbackUrl, opts) {
+    opts = opts || {};
+    var POLL_EVERY = 2500;      // ms
+    var POLL_MAX = 48;          // ≈2 min — pokrývá potvrzení v appce i webhook
+    var overlay = document.createElement('div');
+    overlay.className = 'blik-overlay';
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    var amountTxt = (document.querySelector('.btn-text') || {}).textContent || '';
+    var priceMatch = amountTxt.match(/\d[\d\s.,]*\s*zł/);
+    var price = priceMatch ? priceMatch[0] : ((opts.total != null ? opts.total : '') + ' zł');
+
+    // medusaFetch zahazuje tělo chybové odpovědi (hodí jen Error se zprávou),
+    // ale my z něj potřebujeme `retryable` a `redirect_url`. Proto vlastní volání.
+    function blikPost(path, payload) {
+      return fetch(MEDUSA_URL + path, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey
+        },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          return { ok: res.ok, data: data || {} };
+        });
+      });
+    }
+
+    function close() {
+      overlay.remove();
+      document.body.style.overflow = '';
+      var btn = document.getElementById('submit-btn');
+      if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
+    }
+
+    function goToSuccess() {
+      return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+        .then(function (completeRes) {
+          var order = window.__extractOrderOrThrow(completeRes);
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          if (PROJECT_CONFIG.upsellEnabled === false) {
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else if (opts.orderBump) {
+            localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        });
+    }
+
+    // ── Krok 2: čekání na potvrzení v bankovní aplikaci ──
+    function renderWaiting() {
+      overlay.innerHTML =
+        '<div class="blik-card">' +
+          '<div class="blik-waiting">' +
+            '<div class="blik-spinner"></div>' +
+            '<div class="blik-title">Potwierdź płatność w aplikacji</div>' +
+            '<p class="blik-sub">Wysłaliśmy prośbę o potwierdzenie do Twojej aplikacji bankowej.</p>' +
+            '<div class="blik-steps">' +
+              '<div class="blik-step"><span>1️⃣</span><span>Otwórz aplikację swojego banku</span></div>' +
+              '<div class="blik-step"><span>2️⃣</span><span>Sprawdź kwotę <strong>' + price + '</strong></span></div>' +
+              '<div class="blik-step"><span>3️⃣</span><span>Zatwierdź płatność</span></div>' +
+            '</div>' +
+            '<p class="blik-timer" id="blik-timer">Czekamy na potwierdzenie…</p>' +
+            '<p class="blik-sub" style="margin:14px 0 0;font-size:12.5px;">Nie zamykaj tej strony — przekierujemy Cię automatycznie.</p>' +
+          '</div>' +
+        '</div>';
+
+      var attempt = 0;
+      var timerEl = document.getElementById('blik-timer');
+      (function poll() {
+        attempt++;
+        if (timerEl) {
+          var left = Math.max(0, Math.round((POLL_MAX - attempt) * POLL_EVERY / 1000));
+          timerEl.textContent = 'Czekamy na potwierdzenie… (' + left + ' s)';
+        }
+        medusaFetch('/store/p24-payment-status?cart_id=' + encodeURIComponent(cartId), { method: 'GET' })
+          .then(function (st) {
+            if (st && st.paid) return goToSuccess();
+            if (attempt >= POLL_MAX) return renderTimeout();
+            setTimeout(poll, POLL_EVERY);
+          })
+          .catch(function () {
+            // Výpadek sítě nesmí ukončit čekání — platba může doběhnout.
+            if (attempt >= POLL_MAX) return renderTimeout();
+            setTimeout(poll, POLL_EVERY);
+          });
+      })();
+    }
+
+    // Timeout: platba mohla proběhnout a jen doznívá (webhook + safety-net),
+    // takže NEtlačíme na opakování — to by hrozilo dvojí platbou.
+    function renderTimeout() {
+      overlay.innerHTML =
+        '<div class="blik-card">' +
+          '<div class="blik-title">Płatność jest przetwarzana ⏳</div>' +
+          '<p class="blik-sub">Jeśli potwierdziłeś/aś płatność w aplikacji, potwierdzenie może chwilę potrwać — <strong>otrzymasz je e-mailem</strong>.<br><br>Prosimy, <strong>nie płać ponownie</strong>, aby nie obciążyć konta dwa razy.</p>' +
+          '<button class="blik-submit" type="button" id="blik-close">Rozumiem</button>' +
+        '</div>';
+      document.getElementById('blik-close').addEventListener('click', close);
+    }
+
+    // ── Krok 1: zadání kódu ──
+    function renderCodeStep(errMsg) {
+      overlay.innerHTML =
+        '<div class="blik-card">' +
+          '<img src="/icons/blik-pl.svg" alt="BLIK" class="blik-logo" onerror="this.style.display=\'none\'">' +
+          '<div class="blik-title">Wpisz kod BLIK</div>' +
+          '<p class="blik-sub">Otwórz aplikację swojego banku i przepisz 6-cyfrowy kod.<br>Do zapłaty: <span class="blik-amount">' + price + '</span></p>' +
+          '<input class="blik-code-input' + (errMsg ? ' error' : '') + '" id="blik-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="______" aria-label="Kod BLIK">' +
+          '<p class="blik-error" id="blik-err">' + (errMsg || '') + '</p>' +
+          '<button class="blik-submit" type="button" id="blik-pay" disabled>Zapłać ' + price + '</button>' +
+          '<button class="blik-cancel" type="button" id="blik-abort">Anuluj</button>' +
+          '<div class="blik-secure"><span>🔒</span><span>Płatność zabezpieczona przez Przelewy24</span></div>' +
+        '</div>';
+
+      var input = document.getElementById('blik-code');
+      var payBtn = document.getElementById('blik-pay');
+      var errEl = document.getElementById('blik-err');
+      setTimeout(function () { input.focus(); }, 60);
+
+      input.addEventListener('input', function () {
+        input.value = input.value.replace(/\D/g, '').slice(0, 6);
+        payBtn.disabled = input.value.length !== 6;
+        input.classList.remove('error');
+        errEl.textContent = '';
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && input.value.length === 6) payBtn.click();
+      });
+
+      document.getElementById('blik-abort').addEventListener('click', close);
+
+      payBtn.addEventListener('click', function () {
+        payBtn.disabled = true;
+        payBtn.textContent = 'Wysyłamy…';
+        blikPost('/store/p24-blik-charge', { cart_id: cartId, blik_code: input.value })
+          .then(function (r) {
+            if (r.ok && r.data.accepted) return renderWaiting();
+            // retryable (P24 98/103) → kód byl odmítnut, necháme zadat nový.
+            if (r.data.retryable) {
+              return renderCodeStep('Nieprawidłowy lub nieaktualny kod. Wygeneruj nowy w aplikacji i spróbuj ponownie.');
+            }
+            // Neopravitelné (např. session bez PSU) → radši hostovaná stránka P24
+            // než slepá ulička.
+            var url = r.data.redirect_url || fallbackUrl;
+            if (url) { window.location.href = url; return; }
+            renderCodeStep('Coś poszło nie tak. Spróbuj ponownie.');
+          })
+          .catch(function () {
+            // Síťová chyba — kód se nemusel odeslat, necháme zkusit znovu.
+            renderCodeStep('Problem z połączeniem. Spróbuj ponownie.');
+          });
+      });
+    }
+
+    renderCodeStep(null);
+  }
+
   /* ─── PROMO KÓDY — odstraněno ─── */
   var savedPromoCode = '';
   var promoAppliedToCart = false;
@@ -8237,6 +8475,20 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               window.location.href = PROJECT_CONFIG.upsellUrl;
             }
           });
+        }
+
+        // ─── BLIK LEVEL 0 (inline) ───
+        // Backend registered the P24 transaction with a PSU object, so the token
+        // can be charged by code. Instead of redirecting, open the 6-digit panel;
+        // the customer confirms in their banking app and never leaves the page.
+        // If anything about that setup is missing, blikInline is false and we fall
+        // through to the normal redirect below.
+        if (providerData.blikInline && selectedMethod === 'blik') {
+          openBlikPanel(result.cartId, redirectUrl, {
+            orderBump: checkoutOrderBump,
+            total: checkoutTotal
+          });
+          return;
         }
 
         if (redirectUrl) {

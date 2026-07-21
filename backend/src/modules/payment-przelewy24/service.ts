@@ -9,6 +9,7 @@ import {
   Przelewy24ApiClient,
   credsFromGatewayConfig,
   pickP24Config,
+  P24_METHOD_BLIK,
 } from "./api-client"
 import { logPaymentEvent } from "../payment-debug/utils/log"
 
@@ -153,6 +154,39 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
             ? METHOD_CHANNELS[methodCode]
             : undefined
 
+      // ── BLIK level 0 (in-shop) ──────────────────────────────────────────────
+      // The customer types the 6-digit code on OUR checkout and confirms in their
+      // banking app — no redirect. P24 demands the PSU object (client IP + UA) at
+      // REGISTER time; without it blik/chargeByCode is refused later.
+      //
+      // UA comes from the storefront; the IP is stamped onto cart.metadata by the
+      // stampClientIpOnCart middleware (same pair Meta CAPI needs). If either is
+      // missing we simply skip PSU — the session then still works as a normal
+      // redirect, so a missing IP degrades the UX instead of breaking checkout.
+      const isBlik = methodCode === "blik"
+      let psu: { ip: string; userAgent: string } | undefined
+      if (isBlik) {
+        const ua = sessionData?.client_user_agent || sessionData?.userAgent || null
+        let ip = sessionData?.client_ip_address || null
+        if (!ip && cartId) {
+          try {
+            const { rows } = await this.getPool().query(
+              `SELECT metadata FROM cart WHERE id = $1 LIMIT 1`,
+              [cartId]
+            )
+            ip = rows[0]?.metadata?.client_ip_address || null
+          } catch (e: any) {
+            this.logger_.warn(`[Przelewy24] Could not read client IP from cart: ${e.message}`)
+          }
+        }
+        if (ip && ua) psu = { ip: String(ip), userAgent: String(ua) }
+        else {
+          this.logger_.warn(
+            `[Przelewy24] BLIK inline unavailable (ip=${!!ip}, ua=${!!ua}) — falling back to redirect`
+          )
+        }
+      }
+
       const result = await client.registerTransaction({
         sessionId,
         amount, // MAJOR units — api-client converts to grosze
@@ -163,11 +197,16 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         language: "pl",
         urlReturn: returnUrl,
         urlStatus: `${backendUrl}/webhooks/przelewy24`,
+        // Numeric method wins when the storefront sent one; otherwise BLIK inline
+        // pins method 154 so the token is chargeable by code.
         method: sessionData?.method != null && !isNaN(Number(sessionData.method))
           ? Number(sessionData.method)
-          : undefined,
+          : psu
+            ? P24_METHOD_BLIK
+            : undefined,
         channel: mappedChannel,
         client: clientName || undefined,
+        psu,
       })
 
       logPaymentEvent({
@@ -201,8 +240,14 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
           p24SessionId: sessionId,
           sessionId,
           p24Token: result.data.token,
+          // checkoutUrl stays populated even for BLIK inline: if the customer
+          // cancels or the code keeps failing, the storefront can still hand them
+          // over to the hosted page instead of dead-ending.
           checkoutUrl: result.data.redirectUrl,
           redirectUrl: result.data.redirectUrl,
+          // Storefront switch: true → render the 6-digit code panel instead of
+          // redirecting. Only set when PSU made it into the registration.
+          blikInline: !!psu,
           amount,
           currency: (currency_code || "PLN").toUpperCase(),
           project_slug: projectSlug,

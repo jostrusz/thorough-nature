@@ -49,6 +49,46 @@ function stampClientIpOnCart(req: any, _res: any, next: any) {
   next()
 }
 
+/** Extract the caller's public IP from proxy headers (Railway sits behind one). */
+function clientIpFrom(req: any): string {
+  const fwd = (req.headers["x-forwarded-for"] as string) || ""
+  return (
+    fwd.split(",")[0]?.trim() ||
+    (req.headers["x-real-ip"] as string) ||
+    (req as any).ip ||
+    (req.socket as any)?.remoteAddress ||
+    ""
+  )
+}
+
+/**
+ * Stamp the client IP (and, as a fallback, the UA) into the payment-session
+ * `data` payload. Przelewy24's BLIK level-0 flow needs both as a PSU object at
+ * registration time; the storefront can supply the UA but never its own IP.
+ *
+ * Deliberately best-effort: a failure here must never block checkout — the
+ * provider then simply registers without PSU and falls back to the hosted page.
+ */
+function stampClientIpOnPaymentSession(req: any, _res: any, next: any) {
+  try {
+    if (req.body && typeof req.body === "object") {
+      const data = req.body.data
+      if (data && typeof data === "object") {
+        if (!data.client_ip_address) {
+          const ip = clientIpFrom(req)
+          if (ip) data.client_ip_address = ip
+        }
+        if (!data.client_user_agent && req.headers["user-agent"]) {
+          data.client_user_agent = String(req.headers["user-agent"]).slice(0, 255)
+        }
+      }
+    }
+  } catch {
+    // Tracking/PSU enrichment must never break a payment session
+  }
+  next()
+}
+
 export default defineMiddlewares({
   routes: [
     {
@@ -74,6 +114,15 @@ export default defineMiddlewares({
       method: ["POST"],
       matcher: "/store/carts/*",
       middlewares: [stampClientIpOnCart],
+    },
+    {
+      // Przelewy24 BLIK level 0 needs a PSU object (client IP + user agent) at
+      // transaction/register time — P24 refuses blik/chargeByCode without it.
+      // A browser cannot know its own public IP, so we stamp the server-observed
+      // one onto the payment-session payload the same way we do for cart metadata.
+      method: ["POST"],
+      matcher: "/store/payment-collections/*/payment-sessions",
+      middlewares: [stampClientIpOnPaymentSession],
     },
     {
       method: ["POST"],
