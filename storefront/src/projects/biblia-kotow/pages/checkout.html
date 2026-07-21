@@ -5126,8 +5126,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (PAYU_CZ_ICONS[code]) {
       return '<img src="/icons/' + PAYU_CZ_ICONS[code] + '" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
+    // Official brand logos whose filename differs from the method code
+    // (same assets as zivot-zaslugy — real Przelewy24 / BLIK marks, not lookalikes).
+    var BRAND_ICONS = { blik: 'blik-pl.svg', przelewy24: 'przelewy24-real.png', p24: 'przelewy24-real.png' };
+    if (BRAND_ICONS[code]) {
+      return '<img src="/icons/' + BRAND_ICONS[code] + '" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
+    }
     // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'przelewy24', 'blik'];
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer'];
     if (iconMethods.indexOf(code) !== -1) {
       return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
