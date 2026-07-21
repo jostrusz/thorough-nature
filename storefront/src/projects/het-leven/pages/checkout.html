@@ -7230,11 +7230,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Stav výběru — bez něj se zákazník po nedokončené platbě vrátí sice
     // s vyplněnými údaji, ale s košíkem shozeným zpět na výchozí 1 kus.
+    //
+    // POZOR na platební metodu: tahle funkce běží i během obnovy (klik na bundle
+    // ji spustí) a v tu chvíli ještě nejsou načtené brány, takže selectedMethod
+    // je prázdný. Kdybychom ho zapsali, obnova by si smazala vlastní podklad
+    // dřív, než ho stihne použít. Prázdnou hodnotou proto NIKDY nepřepisujeme
+    // dříve uloženou metodu.
+    var prevMethod = null;
+    try {
+      var prevRaw = localStorage.getItem('checkout_draft');
+      if (prevRaw) prevMethod = (JSON.parse(prevRaw)._selection || {}).paymentMethod || null;
+    } catch (e) { /* poškozený draft → bereme jako prázdný */ }
+
     draft._selection = {
       bundleQty: selectedBundleQty,
       orderBump: orderBumpActive,
       upsellQty: selectedUpsellQty,
-      paymentMethod: selectedMethod || null
+      paymentMethod: selectedMethod || prevMethod
     };
 
     localStorage.setItem('checkout_draft', JSON.stringify(draft));
@@ -7333,7 +7345,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       function (el) {
         // Brány se můžou načíst až po několika sekundách. Pokud si zákazník
         // mezitím vybral sám, jeho volbu nepřepisujeme.
-        if (selectedMethod) return;
+        //
+        // Nelze se ptát na selectedMethod — renderer si první metodu vybírá sám,
+        // takže by byl vždy vyplněný a obnova by nikdy neproběhla. Řídíme se
+        // proto příznakem, který se nastaví jen při DŮVĚRYHODNÉM kliku (isTrusted),
+        // tedy skutečném kliknutí myší, ne programovém .click().
+        if (window.__hlUserChoseMethod) return;
         el.click();
         setTimeout(function () {
           var anchor = document.getElementById('payment-methods');
@@ -7458,7 +7475,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '.bundle-option, #order-bump-header, #ob-qty-inc, #ob-qty-dec, ' +
       '#payment-methods .payment-method, #payment-methods .klarna-sub-method'
     );
-    if (hit) setTimeout(saveFormToStorage, 60);
+    if (!hit) return;
+    // Skutečný klik zákazníka do sekce plateb → od teď jeho volbu neobnovujeme.
+    // e.isTrusted odliší člověka od programového .click() při obnově.
+    if (e.isTrusted && e.target.closest('#payment-methods')) {
+      window.__hlUserChoseMethod = true;
+    }
+    setTimeout(saveFormToStorage, 60);
   });
 
   // Restore form on page load
