@@ -94,27 +94,41 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   try {
-    // ── identity from the account's latest creatives — page and IG may live
-    // on different rows, and ads targeting IG positions hard-require the IG id.
-    // Only pages the token actually has a role on qualify: accounts sometimes
-    // carry creatives posted from a foreign page (seen live: the NO account's
-    // newest creatives used the FR "La Bible des Chats" page → publish error). ──
-    const [last, mine] = await Promise.all([
-      graphGet(`${account}/adcreatives`, { fields: "object_story_spec{page_id,instagram_user_id}", limit: 25 }),
-      graphGet("me/accounts", { fields: "id,name", limit: 100 }).catch(() => ({ data: [] })),
-    ])
+    // ── page identity. Preference order:
+    //  1) explicit b.page_id from the modal picker
+    //  2) identity copied from an existing ad in the TARGET ad set
+    //  3) the account's latest creatives
+    // Candidates from 2)/3) must be pages the token has a role on — accounts
+    // sometimes carry creatives posted from a foreign page (seen live: the NO
+    // account's creatives used the FR "La Bible des Chats" page → error). ──
+    const mine = await graphGet("me/accounts", { fields: "id,name", limit: 100 }).catch(() => ({ data: [] }))
     const usable = new Set((mine.data || []).map((p: any) => String(p.id)))
-    const specs = (last.data || []).map((x: any) => x.object_story_spec).filter(Boolean)
-    const pageId =
-      specs.find((s: any) => s.page_id && usable.has(String(s.page_id)))?.page_id ||
-      specs.find((s: any) => s.page_id)?.page_id
-    const igId = specs.find((s: any) => s.instagram_user_id)?.instagram_user_id
-    if (!pageId) return fail(400, "v účtu není žádná kreativa, ze které jde převzít FB stránku")
-    if (!usable.has(String(pageId))) {
-      const name = (mine.data || []).length
-        ? `token má role jen na: ${(mine.data || []).map((p: any) => p.name).join(", ")}`
-        : "token nevidí žádné stránky"
-      return fail(400, `kreativy účtu používají stránku ${pageId}, ke které API token nemá roli inzerenta (${name}) — přidej system usera k té stránce v Business settings, nebo vytvoř v účtu kreativu pod svojí stránkou`)
+    let pageId: string | null = null
+    let igId: string | null = null
+
+    if (b.page_id) {
+      pageId = String(b.page_id)
+      if (!usable.has(pageId)) return fail(400, `na stránku ${pageId} nemá API token roli inzerenta`)
+    }
+    const collect = (rows: any[]) => {
+      const specs = rows.map((x: any) => x.object_story_spec || x.creative?.object_story_spec).filter(Boolean)
+      if (!pageId) pageId = specs.find((s: any) => s.page_id && usable.has(String(s.page_id)))?.page_id || null
+      // IG id belongs to a page — only reuse it when it came with our chosen page
+      if (!igId) igId = specs.find((s: any) => String(s.page_id) === String(pageId) && s.instagram_user_id)?.instagram_user_id || null
+    }
+    if (b.adset_id && (!pageId || !igId)) {
+      try {
+        const inSet = await graphGet(`${String(b.adset_id).trim()}/ads`, { fields: "creative{object_story_spec{page_id,instagram_user_id}}", limit: 10 })
+        collect(inSet.data || [])
+      } catch {}
+    }
+    if (!pageId || !igId) {
+      const last = await graphGet(`${account}/adcreatives`, { fields: "object_story_spec{page_id,instagram_user_id}", limit: 25 })
+      collect(last.data || [])
+    }
+    if (!pageId) {
+      const names = (mine.data || []).map((p: any) => p.name).join(", ") || "žádné"
+      return fail(400, `nenašel jsem stránku, na kterou má token roli inzerenta (dostupné stránky: ${names}) — vyber stránku ručně v poli „FB stránka"`)
     }
     const spec: any = { page_id: pageId }
     if (igId) spec.instagram_user_id = igId

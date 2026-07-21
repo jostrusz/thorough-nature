@@ -448,7 +448,9 @@ function MetaModal({ m, onClose }: any) {
   const [newBudget, setNewBudget] = useState(20)
   const [copyFrom, setCopyFrom] = useState("")
   const [quickAdset, setQuickAdset] = useState("")
+  const [pageId, setPageId] = useState("")
   const [result, setResult] = useState<any>(null)
+  const pagesQ = useQuery({ queryKey: ["ads-meta-pages"], queryFn: () => sdk.client.fetch("/admin/ads-library/meta/pages", { method: "GET" }) })
 
   const campsQ = useQuery({
     queryKey: ["ads-meta-camps", account],
@@ -459,9 +461,10 @@ function MetaModal({ m, onClose }: any) {
     mutationFn: () => sdk.client.fetch(`/admin/ads-library/creatives/${a.id}/send-to-meta`, {
       method: "POST",
       body: quickAdset.trim()
-        ? { adset_id: quickAdset.trim() } // account is resolved from the ad set
+        ? { adset_id: quickAdset.trim(), ...(pageId ? { page_id: pageId } : {}) } // account is resolved from the ad set
         : {
             account_id: account, campaign_id: campaign?.id,
+            ...(pageId ? { page_id: pageId } : {}),
             ...(newSet
               ? { new_adset: { name: newName, daily_budget_eur: newBudget, copy_from_adset_id: copyFrom } }
               : { adset_id: adset?.id }),
@@ -515,6 +518,13 @@ function MetaModal({ m, onClose }: any) {
                   ⚠️ Posíláš <b>{a.language}</b> verzi do účtu <b>{accName}</b> ({accLang}). Nechtěl jsi vybrat jinou jazykovou verzi nahoře?</div>
               ) : null
             })()}
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 12.5, color: "#6b7280", fontWeight: 650 }}>📄 FB stránka</span>
+              <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={pageId} onChange={(e) => setPageId(e.target.value)}>
+                <option value="">🤖 automaticky — z reklam v cílovém ad setu</option>
+                {(pagesQ.data?.pages || []).map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+            </div>
             <div style={{ border: "1.5px solid #7c3aed", borderRadius: 10, padding: "11px 13px", marginBottom: 14, background: "#faf5ff" }}>
               <div style={{ fontSize: 13, fontWeight: 650, marginBottom: 6 }}>⚡ Rychlá cesta — vlož Ad set ID nebo URL</div>
               <div style={{ display: "flex", gap: 8 }}>
