@@ -605,12 +605,26 @@ function RateHint({ models, id }: any) {
 
 /* ═══ Fronta ═══ */
 function QueueTab({ zoom }: any) {
+  const qc = useQueryClient()
   const [openJob, setOpenJob] = useState<string | null>(null)
+  const [retrying, setRetrying] = useState<string | null>(null)
   const { data } = useQuery({
     queryKey: ["ads-jobs"],
     queryFn: () => sdk.client.fetch("/admin/ads-library/jobs", { method: "GET" }),
     refetchInterval: 4000,
   })
+  const retryTexts = async (jobId: string) => {
+    setRetrying(jobId)
+    try {
+      await sdk.client.fetch(`/admin/ads-library/jobs/${jobId}/retry-texts`, { method: "POST" })
+      qc.invalidateQueries({ queryKey: ["ads-lib"] })
+      qc.invalidateQueries({ queryKey: ["ads-studio"] })
+    } catch (e: any) {
+      window.alert(`Opakování selhalo: ${e?.message || e}`)
+    }
+    setRetrying(null)
+    qc.invalidateQueries({ queryKey: ["ads-jobs"] })
+  }
   const jobs = data?.jobs || []
   const stepChip = (s: any) => {
     const bg = s.status === "done" ? "#dcfce7" : s.status === "running" ? "#fef3c7" : s.status === "failed" ? "#fee2e2" : "var(--bg-subtle,#f3f4f6)"
@@ -636,9 +650,16 @@ function QueueTab({ zoom }: any) {
             <b style={{ fontSize: 13.5 }}>{j.source_name} → {PROJECTS[j.target_project]?.flag || "🌐"} {j.target_project}</b>
             <div style={{ display: "flex", gap: 6, marginTop: 5, flexWrap: "wrap" }}>{(j.steps || []).map(stepChip)}</div>
             {j.error && <div style={{ fontSize: 12, color: "#b91c1c", marginTop: 4 }}>{j.error}</div>}
-            <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "3px 0", fontSize: 12.5 }}
-              onClick={() => setOpenJob(openJob === j.id ? null : j.id)}>
-              {openJob === j.id ? "Skrýt zadání ▴" : "📋 Zobrazit zadání (prompty, modely) ▾"}</button>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+              <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "3px 0", fontSize: 12.5 }}
+                onClick={() => setOpenJob(openJob === j.id ? null : j.id)}>
+                {openJob === j.id ? "Skrýt zadání ▴" : "📋 Zobrazit zadání (prompty, modely) ▾"}</button>
+              {j.status === "failed" && (
+                <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#7c3aed", color: "#7c3aed", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
+                  disabled={!!retrying}
+                  title="Znovu vygeneruje texty stejným promptem a modelem — obrázky zůstanou"
+                  onClick={() => retryTexts(j.id)}>{retrying === j.id ? "⏳ generuji texty…" : "↻ Zkusit texty znovu"}</button>)}
+            </div>
             {openJob === j.id && (
               <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--bg-subtle,#f9fafb)", borderRadius: 9, border: "1px solid var(--border-base,#e5e7eb)" }}>
                 <div style={{ ...S.mono, fontSize: 11.5, color: "#6b7280", marginBottom: 8 }}>

@@ -81,20 +81,39 @@ function parseJson(text: string, truncated: boolean) {
   try {
     return JSON.parse(raw)
   } catch {
-    // models occasionally emit literal newlines inside JSON strings — escape
-    // control chars that sit inside a string literal and retry once
-    let out = "", inStr = false, escaped = false
-    for (const ch of raw) {
-      if (escaped) { out += ch; escaped = false; continue }
-      if (ch === "\\") { out += ch; escaped = inStr; continue }
-      if (ch === '"') { inStr = !inStr; out += ch; continue }
-      if (inStr && ch === "\n") { out += "\\n"; continue }
-      if (inStr && ch === "\r") { continue }
-      if (inStr && ch === "\t") { out += "\\t"; continue }
-      out += ch
-    }
-    return JSON.parse(out)
+    return JSON.parse(repairJson(raw))
   }
+}
+
+/**
+ * Models occasionally break JSON in two ways: literal newlines inside strings,
+ * and unescaped double quotes inside the text itself (very common with ad copy
+ * that quotes a thought or a book title). A quote only really closes a string
+ * when the next non-space char is a structural one — otherwise it belongs to
+ * the content and gets escaped.
+ */
+function repairJson(raw: string): string {
+  let out = "", inStr = false, escaped = false
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i]
+    if (escaped) { out += ch; escaped = false; continue }
+    if (ch === "\\") { out += ch; escaped = inStr; continue }
+    if (ch === '"') {
+      if (!inStr) { inStr = true; out += ch; continue }
+      const next = raw.slice(i + 1).match(/^\s*(.)/)?.[1]
+      if (next === undefined || next === "," || next === "]" || next === "}" || next === ":") {
+        inStr = false; out += ch // genuinely closes the string
+      } else {
+        out += '\\"' // quote inside the content
+      }
+      continue
+    }
+    if (inStr && ch === "\n") { out += "\\n"; continue }
+    if (inStr && ch === "\r") continue
+    if (inStr && ch === "\t") { out += "\\t"; continue }
+    out += ch
+  }
+  return out
 }
 
 /** One LLM call, provider-agnostic. Returns raw text + billed usage. */
