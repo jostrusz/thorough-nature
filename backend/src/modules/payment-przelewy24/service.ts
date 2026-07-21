@@ -135,6 +135,24 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         event_data: { sessionId, amount, currency: currency_code, method: sessionData?.method ?? null },
       })
 
+      // Storefront sends string method codes ('blik', 'przelewy24', 'creditcard');
+      // map them to the P24 channel bitmask so the hosted page opens directly on
+      // the chosen method (1 = cards+wallets, 2 = przelewy, 64 = pay-by-links,
+      // 8192 = BLIK). Unknown/absent code → no channel → P24 shows all methods.
+      const METHOD_CHANNELS: Record<string, number> = {
+        blik: 8192,
+        przelewy24: 2 | 64,
+        creditcard: 1,
+        card: 1,
+      }
+      const methodCode = typeof sessionData?.method === "string" ? sessionData.method : null
+      const mappedChannel =
+        sessionData?.channel != null
+          ? Number(sessionData.channel)
+          : methodCode && METHOD_CHANNELS[methodCode] != null
+            ? METHOD_CHANNELS[methodCode]
+            : undefined
+
       const result = await client.registerTransaction({
         sessionId,
         amount, // MAJOR units — api-client converts to grosze
@@ -148,7 +166,7 @@ export class Przelewy24PaymentProvider extends AbstractPaymentProvider {
         method: sessionData?.method != null && !isNaN(Number(sessionData.method))
           ? Number(sessionData.method)
           : undefined,
-        channel: sessionData?.channel != null ? Number(sessionData.channel) : undefined,
+        channel: mappedChannel,
         client: clientName || undefined,
       })
 

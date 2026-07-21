@@ -5127,7 +5127,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return '<img src="/icons/' + PAYU_CZ_ICONS[code] + '" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
     // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer'];
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer', 'przelewy24', 'blik'];
     if (iconMethods.indexOf(code) !== -1) {
       return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
