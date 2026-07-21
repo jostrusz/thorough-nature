@@ -125,11 +125,14 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           continue
         }
 
-        // 4. Check payment — check ALL payment collections (first may be canceled after upsell)
+        // 4. Check payment — check ALL payment collections (first may be canceled after upsell).
+        // Manually created orders (bank transfer against an invoice, recovered
+        // orphaned gateway payments) have the payment verified outside Medusa
+        // and carry no payment_collection, so they'd loop on "Waiting for payment".
         const paidStatuses = ["captured", "completed", "authorized"]
         const isPaid = ((order as any).payment_collections || []).some(
           (pc: any) => paidStatuses.includes(pc.status)
-        )
+        ) || (order as any).metadata?.created_manually === true
         const isCOD = (order as any).metadata?.payment_method === "cod"
 
         // Bank Transfer (SEPA QR) gate: the bank_transfer provider returns
