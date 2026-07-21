@@ -193,9 +193,12 @@ export function useSendToPostNord() {
 export function useSendToHuset() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (orderId: string) => {
+    // `resend` ships a replacement for an order already in the WMS (new -R ref)
+    mutationFn: async (vars: string | { orderId: string; resend?: boolean }) => {
+      const { orderId, resend } = typeof vars === "string" ? { orderId: vars, resend: false } : vars
       return sdk.client.fetch(`/admin/huset/orders/${orderId}/send`, {
         method: "POST",
+        body: resend ? { resend: true, force: true } : {},
       })
     },
     onSuccess: () => {

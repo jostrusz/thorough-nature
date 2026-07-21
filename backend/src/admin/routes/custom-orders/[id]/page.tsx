@@ -787,13 +787,20 @@ const OrderDetailPage = () => {
 
   const handleSendToHuset = useCallback(() => {
     if (!id) return
-    if (order?.metadata?.huset_status) {
-      const confirmed = window.confirm("This order was already sent to Huset WMS. Send again?")
+    const alreadySent = !!(order?.metadata?.huset_outgoing_delivery_order_id || order?.metadata?.huset_status)
+    if (alreadySent) {
+      const ref = order?.metadata?.huset_order_ref || ""
+      const confirmed = window.confirm(
+        `This order is already in Huset WMS${ref ? ` as ${ref}` : ""}.\n\n` +
+        `Send a REPLACEMENT shipment? A new reference (-R2, -R3 …) will be created and the parcel will be picked and shipped again.`
+      )
       if (!confirmed) return
     }
-    sendToHuset.mutate(id, {
-      onSuccess: () => {
-        toast.success("Order sent to Huset WMS ✓")
+    sendToHuset.mutate({ orderId: id, resend: alreadySent }, {
+      onSuccess: (r: any) => {
+        toast.success(alreadySent
+          ? `Replacement sent to Huset WMS ✓${r?.orderRef ? ` (${r.orderRef})` : ""}`
+          : "Order sent to Huset WMS ✓")
       },
       onError: (err: any) => {
         toast.error(err?.message || "Failed to send to Huset")

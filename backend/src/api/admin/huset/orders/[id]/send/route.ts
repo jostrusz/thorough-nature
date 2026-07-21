@@ -3,6 +3,12 @@
  * POST /admin/huset/orders/:id/send — manually send an order to the Huset WMS
  * (bypasses the hold window; payment must still be confirmed unless force=true).
  * :id is the Medusa order id.
+ *
+ * Body:
+ *   force  — skip the payment gate (replacement shipments)
+ *   resend — the order is already in Huset: ship it AGAIN as a replacement.
+ *            A fresh order_ref suffix (-R2, -R3 …) is used because the WMS
+ *            keys deliveries by reference and would otherwise reject/overwrite.
  */
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { HUSET_MODULE } from "../../../../../../modules/huset"
@@ -13,6 +19,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   try {
     const orderId = req.params.id
     const force = (req.body as any)?.force === true
+    const resend = (req.body as any)?.resend === true
     const config = getHusetConfig()
     const husetService = req.scope.resolve(HUSET_MODULE) as any
     const query = req.scope.resolve("query") as any
@@ -53,11 +60,46 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       })
     }
 
-    if (orderMap.outgoing_delivery_order_id) {
+    if (orderMap.outgoing_delivery_order_id && !resend) {
       res.status(400).json({
-        error: `Order already sent to Huset (OutgoingDeliveryOrderId: ${orderMap.outgoing_delivery_order_id})`,
+        error: `Order already sent to Huset (OutgoingDeliveryOrderId: ${orderMap.outgoing_delivery_order_id}). Pass { "resend": true } to ship a replacement.`,
+        already_sent: true,
+        outgoing_delivery_order_id: orderMap.outgoing_delivery_order_id,
+        order_ref: orderMap.order_ref,
+        delivery_status: orderMap.delivery_status,
       })
       return
+    }
+
+    // Replacement shipment: bump the -R suffix and clear the previous WMS ids,
+    // so the delivery is created fresh instead of colliding with the old one.
+    let previous: any = null
+    if (resend && orderMap.outgoing_delivery_order_id) {
+      const base = String(orderMap.order_ref).replace(/-R\d+$/, "")
+      const nextNo = Number(String(orderMap.order_ref).match(/-R(\d+)$/)?.[1] || 1) + 1
+      previous = {
+        order_ref: orderMap.order_ref,
+        outgoing_delivery_order_id: orderMap.outgoing_delivery_order_id,
+        delivery_status: orderMap.delivery_status,
+        at: new Date().toISOString(),
+      }
+      orderMap = await husetService.updateHusetOrderMaps({
+        id: orderMap.id,
+        order_ref: `${base}-R${nextNo}`,
+        outgoing_delivery_order_id: null,
+        outgoing_delivery_id: null,
+        tracking_number: null,
+        tracking_url: null,
+        delivery_status: "WAITING",
+        delivery_status_updated_at: new Date().toISOString(),
+        dispatched_at: null,
+        delivered_at: null,
+        last_error: null,
+        metadata: {
+          ...(orderMap.metadata || {}),
+          resends: [...((orderMap.metadata || {}).resends || []), previous].slice(-10),
+        },
+      })
     }
 
     // Payment gate (force=true overrides — e.g. replacement shipments)
