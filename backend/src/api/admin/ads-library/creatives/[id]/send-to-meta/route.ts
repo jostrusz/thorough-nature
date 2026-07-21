@@ -1,49 +1,8 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ADS_LIBRARY_MODULE } from "../../../../../../modules/ads-library"
-import { metaToken, graphGet } from "../../../lib/meta"
-
-const GRAPH = "https://graph.facebook.com/v23.0"
-
-async function graphPost(path: string, body: Record<string, any>) {
-  const form = new URLSearchParams({ access_token: metaToken() })
-  for (const [k, v] of Object.entries(body)) {
-    if (v !== undefined && v !== null) form.set(k, typeof v === "object" ? JSON.stringify(v) : String(v))
-  }
-  const res = await fetch(`${GRAPH}/${path}`, { method: "POST", body: form })
-  const json = await res.json()
-  if (!res.ok || json.error) {
-    throw new Error(`[Meta ${path}] ${json?.error?.error_user_msg || json?.error?.message || res.status}`)
-  }
-  return json
-}
-
-/** Upload an image from URL into the ad account's image library → image_hash. */
-async function uploadImage(account: string, url: string): Promise<string> {
-  const img = await fetch(url)
-  if (!img.ok) throw new Error(`stažení obrázku selhalo (${img.status})`)
-  const b64 = Buffer.from(await img.arrayBuffer()).toString("base64")
-  const json = await graphPost(`${account}/adimages`, { bytes: b64 })
-  const first = Object.values(json.images || {})[0] as any
-  if (!first?.hash) throw new Error("adimages nevrátil hash")
-  return first.hash
-}
-
-/**
- * Accepts a bare ad set id OR a full Ads Manager URL and returns the id.
- * URL shapes seen in the wild: ...&selected_adset_ids=120210000000000000...,
- * ...&adset_ids=[%22120210...%22]..., or the id embedded in the path.
- */
-function normalizeAdsetId(input: string): string | null {
-  const s = decodeURIComponent(String(input || "").trim())
-  if (/^\d{10,}$/.test(s)) return s
-  const named = s.match(/(?:selected_adset_ids|adset_ids?)[=%[\]"':\s]*(\d{10,})/)
-  if (named) return named[1]
-  // fall back to the longest digit run — adset ids are 15+ digits
-  const runs = s.match(/\d{10,}/g) || []
-  runs.sort((a, b) => b.length - a.length)
-  return runs[0] || null
-}
+import { graphGet } from "../../../lib/meta"
+import { graphPost, normalizeAdsetId, resolveIdentity, createPausedAd } from "../../../lib/meta-send"
 
 /**
  * POST /admin/ads-library/creatives/:id/send-to-meta
@@ -51,8 +10,8 @@ function normalizeAdsetId(input: string): string | null {
  *        is resolved from the ad set itself, nothing else needed
  *    or { account_id, campaign_id, adset_id }
  *    or { account_id, campaign_id, new_adset: { name, daily_budget_eur, copy_from_adset_id } }
- * Creates an ad in PAUSED state. page_id/IG identity is taken from the
- * account's most recent creative (data-driven, nothing hardcoded).
+ * Creates a PAUSED ad via the shared createPausedAd (Ads Manager multi-text
+ * shape: 1:1 in link_data + all bodies/titles, DEGREES_OF_FREEDOM).
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
@@ -94,44 +53,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   try {
-    // ── page identity. Preference order:
-    //  1) explicit b.page_id from the modal picker
-    //  2) identity copied from an existing ad in the TARGET ad set
-    //  3) the account's latest creatives
-    // Candidates from 2)/3) must be pages the token has a role on — accounts
-    // sometimes carry creatives posted from a foreign page (seen live: the NO
-    // account's creatives used the FR "La Bible des Chats" page → error). ──
-    const mine = await graphGet("me/accounts", { fields: "id,name", limit: 100 }).catch(() => ({ data: [] }))
-    const usable = new Set((mine.data || []).map((p: any) => String(p.id)))
-    let pageId: string | null = null
-    let igId: string | null = null
-
-    if (b.page_id) {
-      pageId = String(b.page_id)
-      if (!usable.has(pageId)) return fail(400, `na stránku ${pageId} nemá API token roli inzerenta`)
-    }
-    const collect = (rows: any[]) => {
-      const specs = rows.map((x: any) => x.object_story_spec || x.creative?.object_story_spec).filter(Boolean)
-      if (!pageId) pageId = specs.find((s: any) => s.page_id && usable.has(String(s.page_id)))?.page_id || null
-      // IG id belongs to a page — only reuse it when it came with our chosen page
-      if (!igId) igId = specs.find((s: any) => String(s.page_id) === String(pageId) && s.instagram_user_id)?.instagram_user_id || null
-    }
-    if (b.adset_id && (!pageId || !igId)) {
-      try {
-        const inSet = await graphGet(`${String(b.adset_id).trim()}/ads`, { fields: "creative{object_story_spec{page_id,instagram_user_id}}", limit: 10 })
-        collect(inSet.data || [])
-      } catch {}
-    }
-    if (!pageId || !igId) {
-      const last = await graphGet(`${account}/adcreatives`, { fields: "object_story_spec{page_id,instagram_user_id}", limit: 25 })
-      collect(last.data || [])
-    }
-    if (!pageId) {
-      const names = (mine.data || []).map((p: any) => p.name).join(", ") || "žádné"
-      return fail(400, `nenašel jsem stránku, na kterou má token roli inzerenta (dostupné stránky: ${names}) — vyber stránku ručně v poli „FB stránka"`)
-    }
-    const spec: any = { page_id: pageId }
-    if (igId) spec.instagram_user_id = igId
+    const spec = await resolveIdentity(account)
 
     // ── ad set (existing or new) ──
     let adsetId = b.adset_id ? String(b.adset_id).trim() : null
@@ -156,65 +78,17 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
     if (!adsetId) return fail(400, "adset_id nebo new_adset je povinný")
 
-    // ── images ──
-    const hash11 = await uploadImage(account, c.image_1x1_url)
-    const hash916 = c.image_9x16_url ? await uploadImage(account, c.image_9x16_url) : null
-
-    // ── creative via asset_feed_spec. Both placement-paired images AND all
-    // 5+5 texts: every body/title shares ONE common label ("allb"/"allt") and
-    // each customization rule references that label next to its image_label,
-    // so Meta rotates all texts while pairing 1:1 → feed and 9:16 → Stories.
-    // (Verified live, ad 120258074257180112: 2 img / 5P / 5H, both previews
-    // render. Ruleless multi-image is invalid — "0 target rules for
-    // INSTAGRAM_STORY"; rules without text labels reject multiple bodies;
-    // per-text labels only ever serve one text per placement.) ──
-    const link = c.link_url || "https://www.marketing-hq.eu/"
-    const textsSent = Math.min((c.primary_texts || []).length, 5)
-    const assetFeed: any = {
-      images: hash916
-        ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
-        : [{ hash: hash11 }],
-      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) =>
-        hash916 ? { text: t, adlabels: [{ name: "allb" }] } : { text: t }),
-      titles: (c.headlines || []).slice(0, 5).map((t: string) =>
-        hash916 ? { text: t, adlabels: [{ name: "allt" }] } : { text: t }),
-      descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
-      ad_formats: ["SINGLE_IMAGE"],
-      call_to_action_types: [c.cta_type || "LEARN_MORE"],
-      link_urls: [{ website_url: link }],
-      optimization_type: "PLACEMENT",
-    }
-    if (hash916) {
-      const textLabels = { body_label: { name: "allb" }, title_label: { name: "allt" } }
-      assetFeed.asset_customization_rules = [
-        { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] }, image_label: { name: "vert" }, ...textLabels, priority: 1 },
-        { customization_spec: {}, image_label: { name: "sq" }, ...textLabels, priority: 2 },
-      ]
-    }
-    const creative = await graphPost(`${account}/adcreatives`, {
-      name: `[LIB-${c.id.slice(-8)}] ${c.name}`,
-      object_story_spec: { page_id: spec.page_id, instagram_user_id: spec.instagram_user_id },
-      asset_feed_spec: assetFeed,
-      url_tags: "utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&fbadid={{ad.id}}&fbadsetid={{adset.id}}",
-    })
-
-    // ── ad, always PAUSED ──
-    const ad = await graphPost(`${account}/ads`, {
-      name: `[LIB-${c.id.slice(-8)}] ${c.name}`,
-      adset_id: adsetId,
-      creative: { creative_id: creative.id },
-      status: "PAUSED",
-    })
+    const r = await createPausedAd({ account, adsetId, spec, creative: c })
 
     await svc.updateAdCreatives({
       id: c.id,
-      meta_ad_id: ad.id, meta_creative_id: creative.id, meta_account_id: account,
+      meta_ad_id: r.ad_id, meta_creative_id: r.creative_id, meta_account_id: account,
       metadata: { ...(c.metadata || {}), sent_to_meta_at: new Date().toISOString(), meta_adset_id: adsetId },
     })
     res.json({
-      ad_id: ad.id, creative_id: creative.id, adset_id: adsetId, status: "PAUSED",
+      ad_id: r.ad_id, creative_id: r.creative_id, adset_id: adsetId, status: "PAUSED",
       adset_name: adsetInfo?.name, campaign_name: adsetInfo?.campaign?.name, account_id: account,
-      images_sent: hash916 ? 2 : 1, texts_sent: textsSent,
+      images_sent: r.images_sent, texts_sent: r.texts_sent,
     })
   } catch (e: any) {
     fail(502, e.message)

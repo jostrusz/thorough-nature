@@ -93,63 +93,55 @@ export async function resolveIdentity(account: string) {
 }
 
 /**
- * Create one PAUSED ad from a library creative. `image1x1`/`image916` default
- * to the card's official images; pass a variant URL to A/B a specific visual.
+ * Create one PAUSED ad from a library creative — the EXACT shape Ads Manager
+ * builds for "multiple text options" ads (copied from a manual winning ad):
+ * one 1:1 image inside object_story_spec.link_data + asset_feed_spec with all
+ * bodies/titles and optimization_type DEGREES_OF_FREEDOM. Meta's own
+ * cv_transformation renders Stories/Reels from the 1:1.
+ *
+ * Deliberately NOT per-placement media (PLACEMENT rules): Meta can't combine
+ * that with multiple texts — rules force a single body/title, and shipping
+ * all 5 primaries + 5 headlines is the harder requirement here.
  */
 export async function createPausedAd(opts: {
   account: string
   adsetId: string
-  spec: any // object_story_spec identity
+  spec: any // { page_id, instagram_user_id? }
   creative: any // ad_creative row
   image1x1?: string
-  image916?: string | null
   nameSuffix?: string
 }) {
   const c = opts.creative
   const img11 = opts.image1x1 || c.image_1x1_url
-  const img916 = opts.image916 === undefined ? c.image_9x16_url : opts.image916
   if (!img11) throw new Error("kreativa nemá 1:1 obrázek")
   if (!c.primary_texts?.length || !c.headlines?.length) throw new Error("kreativa potřebuje aspoň 1 primary text a 1 headline")
 
   const hash11 = await uploadImage(opts.account, img11)
-  const hash916 = img916 ? await uploadImage(opts.account, img916) : null
   const link = c.link_url || "https://www.marketing-hq.eu/"
-  // Two images REQUIRE asset_customization_rules with full placement coverage
-  // (a catch-all rule) — without them the ad is created but delivery fails
-  // with "0 target rules for format X". Rules must reference exactly one
-  // body/title/link via labels; the remaining texts stay in the feed as the
-  // optimization pool (this mirrors what Ads Manager builds manually).
-  const assetFeed: any = {
-    images: hash916
-      ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
-      : [{ hash: hash11 }],
-    bodies: (c.primary_texts || []).slice(0, 5).map((t: string, i: number) =>
-      hash916 && i === 0 ? { text: t, adlabels: [{ name: "b1" }] } : { text: t }),
-    titles: (c.headlines || []).slice(0, 5).map((t: string, i: number) =>
-      hash916 && i === 0 ? { text: t, adlabels: [{ name: "t1" }] } : { text: t }),
-    descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
-    ad_formats: ["SINGLE_IMAGE"],
-    call_to_action_types: [c.cta_type || "LEARN_MORE"],
-    link_urls: hash916 ? [{ website_url: link, adlabels: [{ name: "l1" }] }] : [{ website_url: link }],
-    optimization_type: "PLACEMENT",
-  }
-  if (hash916) {
-    assetFeed.asset_customization_rules = [
-      { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] },
-        image_label: { name: "vert" }, body_label: { name: "b1" }, title_label: { name: "t1" }, link_url_label: { name: "l1" }, priority: 1 },
-      { customization_spec: {},
-        image_label: { name: "sq" }, body_label: { name: "b1" }, title_label: { name: "t1" }, link_url_label: { name: "l1" }, priority: 2 },
-    ]
-  }
   const name = `[LIB-${c.id.slice(-8)}] ${c.name}${opts.nameSuffix || ""}`
   const creative = await graphPost(`${opts.account}/adcreatives`, {
     name,
-    object_story_spec: opts.spec,
-    asset_feed_spec: assetFeed,
+    object_story_spec: {
+      ...opts.spec,
+      link_data: {
+        link,
+        image_hash: hash11,
+        call_to_action: { type: c.cta_type || "LEARN_MORE" },
+      },
+    },
+    asset_feed_spec: {
+      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) => ({ text: t })),
+      titles: (c.headlines || []).slice(0, 5).map((t: string) => ({ text: t })),
+      descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
+      optimization_type: "DEGREES_OF_FREEDOM",
+    },
     url_tags: "utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&fbadid={{ad.id}}&fbadsetid={{adset.id}}",
   })
   const ad = await graphPost(`${opts.account}/ads`, {
     name, adset_id: opts.adsetId, creative: { creative_id: creative.id }, status: "PAUSED",
   })
-  return { ad_id: ad.id, creative_id: creative.id, images_sent: hash916 ? 2 : 1 }
+  return {
+    ad_id: ad.id, creative_id: creative.id, images_sent: 1,
+    texts_sent: Math.min((c.primary_texts || []).length, 5),
+  }
 }
