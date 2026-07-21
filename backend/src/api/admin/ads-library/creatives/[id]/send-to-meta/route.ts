@@ -160,22 +160,24 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const hash11 = await uploadImage(account, c.image_1x1_url)
     const hash916 = c.image_9x16_url ? await uploadImage(account, c.image_9x16_url) : null
 
-    // ── creative via asset_feed_spec. The only shape Meta accepts with BOTH
-    // placement-paired images AND all 5 texts (verified by live matrix test,
-    // ad 120258074019450112): every body/title carries a label, and each
-    // customization rule pins body_label/title_label alongside image_label.
-    // Ruleless multi-image creates an INVALID ad ("0 target rules for
-    // INSTAGRAM_STORY"), rules without text labels reject multiple bodies. ──
+    // ── creative via asset_feed_spec. Both placement-paired images AND all
+    // 5+5 texts: every body/title shares ONE common label ("allb"/"allt") and
+    // each customization rule references that label next to its image_label,
+    // so Meta rotates all texts while pairing 1:1 → feed and 9:16 → Stories.
+    // (Verified live, ad 120258074257180112: 2 img / 5P / 5H, both previews
+    // render. Ruleless multi-image is invalid — "0 target rules for
+    // INSTAGRAM_STORY"; rules without text labels reject multiple bodies;
+    // per-text labels only ever serve one text per placement.) ──
     const link = c.link_url || "https://www.marketing-hq.eu/"
     const textsSent = Math.min((c.primary_texts || []).length, 5)
     const assetFeed: any = {
       images: hash916
         ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
         : [{ hash: hash11 }],
-      bodies: (c.primary_texts || []).slice(0, 5).map((t: string, i: number) =>
-        hash916 ? { text: t, adlabels: [{ name: `b${i + 1}` }] } : { text: t }),
-      titles: (c.headlines || []).slice(0, 5).map((t: string, i: number) =>
-        hash916 ? { text: t, adlabels: [{ name: `t${i + 1}` }] } : { text: t }),
+      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) =>
+        hash916 ? { text: t, adlabels: [{ name: "allb" }] } : { text: t }),
+      titles: (c.headlines || []).slice(0, 5).map((t: string) =>
+        hash916 ? { text: t, adlabels: [{ name: "allt" }] } : { text: t }),
       descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
       ad_formats: ["SINGLE_IMAGE"],
       call_to_action_types: [c.cta_type || "LEARN_MORE"],
@@ -183,9 +185,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       optimization_type: "PLACEMENT",
     }
     if (hash916) {
+      const textLabels = { body_label: { name: "allb" }, title_label: { name: "allt" } }
       assetFeed.asset_customization_rules = [
-        { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] }, image_label: { name: "vert" }, body_label: { name: "b1" }, title_label: { name: "t1" }, priority: 1 },
-        { customization_spec: {}, image_label: { name: "sq" }, body_label: { name: "b1" }, title_label: { name: "t1" }, priority: 2 },
+        { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] }, image_label: { name: "vert" }, ...textLabels, priority: 1 },
+        { customization_spec: {}, image_label: { name: "sq" }, ...textLabels, priority: 2 },
       ]
     }
     const creative = await graphPost(`${account}/adcreatives`, {
