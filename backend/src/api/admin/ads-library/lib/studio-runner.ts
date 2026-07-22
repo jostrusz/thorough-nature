@@ -106,7 +106,7 @@ export async function runStudioTextsJob(container: any, jobId: string) {
       params: {
         ...p, cost_usd: round4(totalCost), saved_name: savedName,
         result: {
-          primaries: out.primaries, headlines: out.headlines,
+          primaries: out.primaries, headlines: out.headlines, formulas: out.formulas || [],
           tells: out.tells, image_description: desc.description,
         },
       },

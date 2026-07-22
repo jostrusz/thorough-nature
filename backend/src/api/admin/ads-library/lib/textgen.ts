@@ -5,6 +5,7 @@ import { PAGE_CONTEXT } from "./page-context"
 import { hasRate, rateLabel, type Usage } from "./pricing"
 import { HUMANIZER_RULES, buildHumanizerPrompt } from "./humanizer-rules"
 import { AD_TEMPLATES } from "./ad-templates"
+import { HEADLINE_FORMULAS, HEADLINE_HUMANIZER, HEADLINE_MAX } from "./headline-rules"
 
 /**
  * Text adaptation via Anthropic (default) or OpenAI (when OPENAI_API_KEY set).
@@ -242,7 +243,7 @@ export async function generateStudioTexts(opts: {
   modelId: string
   targetProject: string
   imageDescription: string
-}): Promise<{ primaries: string[]; headlines: string[]; usage: Usage; tells: string[]; prompt: string }> {
+}): Promise<{ primaries: string[]; headlines: string[]; usage: Usage; tells: string[]; prompt: string; formulas: string[] }> {
   const ctx = PROJECT_CONTEXT[opts.targetProject]
   if (!ctx) throw new Error(`neznámý projekt: ${opts.targetProject}`)
   const page = PAGE_CONTEXT[opts.targetProject]
@@ -278,40 +279,57 @@ HOOK (první 1–2 věty každého primary):
 
 ZADÁNÍ:
 1. Napiš PŘESNĚ 5 primary textů — každý podle JEDNOHO z pěti vzorů níže, ve stejném pořadí. Zachovej úhel, strukturu, rytmus a prodejní prvky vzoru, ale příběh přepiš do jazyka ${ctx.langName}, do perspektivy vypravěče z obrázku, do kontextu scény a do faktů cílového projektu (kniha, autor, cena, odkaz). Nekopíruj nizozemské reálie doslova.
-2. Napiš 5 virálních headlinů (max ~40 znaků) — z pohledu téhož vypravěče, k tématu obrázku, s tahem na kliknutí.
+2. Napiš PŘESNĚ 5 headlinů podle pravidel v sekci HEADLINY níže — z pohledu téhož vypravěče a k tématu obrázku.
 3. Každý primary konči CTA s odkazem ${page?.url || `https://www.${ctx.domain}/`}.
 4. Texty musí být spisovné a gramaticky bezchybné: správné skloňování, časování, pády, shoda, rody příčestí, konzistentní rod vypravěče, idiomatická stylistika jazyka ${ctx.langName}. Piš, jak se lidé mezi sebou reálně baví — žádná AI uhlazenost.
+
+${HEADLINE_FORMULAS}
 
 ${HUMANIZER_RULES}
 
 VZORY (NL originály — přebíráš úhel a styl, ne doslovný text):
 ${AD_TEMPLATES.map((t, i) => `━━━ VZOR ${i + 1} — ${t.name} ━━━\n${t.text}`).join("\n\n")}
 
-Odpověz POUZE validním JSON:
-{"primaries": ["...5 textů v pořadí vzorů..."], "headlines": ["...5 headlinů..."]}`
+Odpověz POUZE validním JSON. U každého headlinu uveď použitou formuli (how-to, otazka, socialni-dukaz, negativni-uhel, if-then, cena, srovnani):
+{"primaries": ["...5 textů v pořadí vzorů..."], "headlines": ["...5 headlinů..."], "headline_formulas": ["...5 názvů formulí ve stejném pořadí..."]}`
 
   const p1 = await callLLM(opts.modelId, prompt)
   const out = parseJson(p1.text, p1.truncated)
   let primaries: string[] = out.primaries || []
   let headlines: string[] = out.headlines || []
+  const formulas: string[] = out.headline_formulas || []
   let usage = p1.usage
   let tells: string[] = []
 
   try {
-    const p2 = await callLLM(opts.modelId, buildHumanizerPrompt(ctx.langName, primaries, headlines))
+    const p2 = await callLLM(opts.modelId, buildHumanizerPrompt(
+      ctx.langName, primaries, headlines, { headlineRules: HEADLINE_HUMANIZER }
+    ))
     const fixed = parseJson(p2.text, p2.truncated)
     usage = sumUsage(usage, p2.usage)
     tells = Array.isArray(fixed.tells) ? fixed.tells.map(String).slice(0, 12) : []
     if ((fixed.primaries || []).length === primaries.length && (fixed.headlines || []).length === headlines.length) {
       primaries = fixed.primaries
-      headlines = fixed.headlines
+      // a rewrite that busts the mobile truncation limit is worse than the
+      // original AI-ish wording — keep whichever fits
+      headlines = headlines.map((orig: string, i: number) => {
+        const rewritten = String(fixed.headlines[i] ?? orig)
+        if (rewritten.length <= HEADLINE_MAX || rewritten.length <= orig.length) return rewritten
+        tells.push(`H${i + 1}: přepis měl ${rewritten.length} znaků (limit ${HEADLINE_MAX}) — ponechán původní`)
+        return orig
+      })
     }
   } catch (e: any) {
     console.warn(`[Ads Library] studio humanizer pass failed: ${e.message}`)
     tells = [`humanizer pass selhal: ${String(e.message).slice(0, 120)}`]
   }
 
+  // report anything still over the limit so it is visible in the queue detail
+  headlines.forEach((h: string, i: number) => {
+    if (h.length > HEADLINE_MAX) tells.push(`H${i + 1} má ${h.length} znaků — na mobilu se ořízne`)
+  })
+
   primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain))
   headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain))
-  return { primaries, headlines, usage, tells, prompt }
+  return { primaries, headlines, usage, tells, prompt, formulas }
 }

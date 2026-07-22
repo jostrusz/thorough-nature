@@ -1029,11 +1029,13 @@ function StudioTab({ zoom }: any) {
                     <span style={{ fontSize: 10.5, color: "#7c3aed", background: "#ede9fe", borderRadius: 999, padding: "1px 8px", flexShrink: 0 }}>{TPL_NAMES[i] || "vzor"}</span>
                     <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p}</span>
                   </div>))}
-                <div style={{ ...S.eyebrow, marginTop: 8 }}>5× headline</div>
+                <div style={{ ...S.eyebrow, marginTop: 8 }}>5× headline — každý jinou formulí</div>
                 {it.result.headlines.map((h: string, i: number) => (
                   <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline", padding: "2px 0", fontSize: 12.5 }}>
                     <b style={{ ...S.mono, fontSize: 10.5, color: "#6b7280", flexShrink: 0 }}>H{i + 1}</b>
+                    {it.result.formulas?.[i] && <span style={{ fontSize: 10.5, color: "#7c3aed", background: "#ede9fe", borderRadius: 999, padding: "1px 8px", flexShrink: 0 }}>{it.result.formulas[i]}</span>}
                     <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{h}</span>
+                    <span style={{ ...S.mono, fontSize: 10, color: h.length > 40 ? "#b91c1c" : "#9ca3af", flexShrink: 0, marginLeft: "auto" }}>{h.length}</span>
                   </div>))}
                 <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 7 }}>
                   🧬 {it.result.tells?.length ? `${it.result.tells.length} oprav humanizeru` : "čisté"}{it.cost != null ? ` · 💰 ≈ $${it.cost}` : ""}{it.result916?.cost_usd != null ? ` + 9:16 $${it.result916.cost_usd}` : ""}</div>
