@@ -5385,6 +5385,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'bank_cz_mo':    { code: 'BANK_CZ_MO_PSD2',   label: 'Moneta Money Bank', desc: 'Online převod', icon: '/icons/moneta.svg' },
     'bank_cz_fb':    { code: 'BANK_CZ_FB_PSD2',   label: 'Fio banka',         desc: 'Online převod', icon: '/icons/fio-banka.svg' },
     'bank_cz_mb':    { code: 'BANK_CZ_MB_PSD2',   label: 'mBank',             desc: 'Online převod', icon: '/icons/mbank.svg' },
+    'bank_cz_ab':    { code: 'BANK_CZ_AB_PSD2',   label: 'Air Bank',          desc: 'Online převod', icon: '/icons/airbank.svg' },
+    'bank_cz_pb':    { code: 'BANK_CZ_PB_PSD2',   label: 'Partners Banka',    desc: 'Online převod', icon: '/icons/partners-banka.svg' },
     'bank_cz_uc':    { code: 'BANK_CZ_UC_PSD2',   label: 'UniCredit Bank',    desc: 'Online převod', icon: '/icons/unicredit.svg' },
     'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Jiná banka',        desc: 'Bankovní převod', icon: '/icons/bank-generic.svg' },
   };
@@ -5400,6 +5402,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     { key: 'mo',   label: 'Moneta Money Bank', icon: '/icons/moneta.svg',           comgate: 'bank_cz_mo',   payu: 'pg' },
     { key: 'fio',  label: 'Fio banka',         icon: '/icons/fio-banka.svg',        comgate: 'bank_cz_fb',   payu: 'pf' },
     { key: 'mb',   label: 'mBank',             icon: '/icons/mbank.svg',            comgate: 'bank_cz_mb',   payu: 'mp' },
+    { key: 'ab',   label: 'Air Bank',          icon: '/icons/airbank.svg',          comgate: 'bank_cz_ab',   payu: null },
+    { key: 'pb',   label: 'Partners Banka',    icon: '/icons/partners-banka.svg',   comgate: 'bank_cz_pb',   payu: null },
     { key: 'uc',   label: 'UniCredit Bank',    icon: '/icons/unicredit.svg',        comgate: 'bank_cz_uc',   payu: 'uc' },
   ];
   // Active tiles collected from /store/payment-options: key → {method, provider, provider_id}
