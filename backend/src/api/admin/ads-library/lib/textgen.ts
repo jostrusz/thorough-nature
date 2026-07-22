@@ -6,6 +6,7 @@ import { hasRate, rateLabel, type Usage } from "./pricing"
 import { HUMANIZER_RULES, buildHumanizerPrompt } from "./humanizer-rules"
 import { AD_TEMPLATES } from "./ad-templates"
 import { HEADLINE_FORMULAS, HEADLINE_HUMANIZER, HEADLINE_MAX } from "./headline-rules"
+import { REMARKETING_TEMPLATES, REMARKETING_VOICE } from "./ad-templates-remarketing"
 
 /**
  * Text adaptation via Anthropic (default) or OpenAI (when OPENAI_API_KEY set).
@@ -243,9 +244,14 @@ export async function generateStudioTexts(opts: {
   modelId: string
   targetProject: string
   imageDescription: string
+  /** "acquisition" (default) uses the testimonial templates, "remarketing"
+   *  the brand-to-returning-visitor ones. */
+  mode?: "acquisition" | "remarketing"
 }): Promise<{ primaries: string[]; headlines: string[]; usage: Usage; tells: string[]; prompt: string; formulas: string[] }> {
   const ctx = PROJECT_CONTEXT[opts.targetProject]
   if (!ctx) throw new Error(`neznámý projekt: ${opts.targetProject}`)
+  const remarketing = opts.mode === "remarketing"
+  const templates = remarketing ? REMARKETING_TEMPLATES : AD_TEMPLATES
   const page = PAGE_CONTEXT[opts.targetProject]
   const pageBlock = page ? `
 KONTEXT CÍLOVÉ PRODEJNÍ STRÁNKY (${page.url}):
@@ -265,21 +271,21 @@ ${pageBlock}
 OBRÁZEK REKLAMY (podle něj laď scénu, vypravěče i téma textů):
 ${opts.imageDescription}
 
-VYPRAVĚČ — NEJDŮLEŽITĚJŠÍ PRAVIDLO:
+${remarketing ? REMARKETING_VOICE : `VYPRAVĚČ — NEJDŮLEŽITĚJŠÍ PRAVIDLO:
 - Pokud je na obrázku člověk (řádek PERSON výše), VŠECH 5 primaries i headlinů je psáno Z JEHO POHLEDU — jeho pohlaví, věk, jazyk a starosti. Muž ~25 mluví jako mladý chlap (rozchod, křivda, tlak okolí, přetlak v hlavě), žena ~55 svým hlasem (minulost, rodina, „takhle už to zůstane"). Vzory níže jsou psané ženou 50+ — vypravěče PŘEOBSAĎ na osobu z obrázku, strukturu a prodejní beats vzoru zachovej.
 - Pokud člověk na obrázku není (PERSON: none), ponech vypravěče ze vzoru.
-
-TÉMATA (vyber 1–2 na každý primary tak, aby seděla k osobě a scéně; žádné obecné „najdi klid"):
-minulost, kterou člověk vleče · rozchod · nefunkční vztah s partnerem · úzkosti a přetlak myšlenek · křivda · pomluvy · rozbité vztahy v rodině · pocit, že „takhle už to zůstane".
 
 HOOK (první 1–2 věty každého primary):
 - Napiš NOVÝ, unikátní scroll-stopper na míru vypravěči a tématu — trochu kontroverzní, virální, vyvolá touhu dočíst. Neber úvod ze vzoru.
 - Hook je VŽDY zpověď/přiznání vypravěče („Dva roky jsem všem lhal, že jsem v pohodě."), NIKDY výrok o čtenáři („Tvoje manželství je v troskách") — to Meta zamítá.
-- Každý z 5 hooků jiný.
+- Každý z 5 hooků jiný.`}
+
+TÉMATA (vyber 1–2 na každý primary tak, aby seděla k osobě a scéně; žádné obecné „najdi klid"):
+minulost, kterou člověk vleče · rozchod · nefunkční vztah s partnerem · úzkosti a přetlak myšlenek · křivda · pomluvy · rozbité vztahy v rodině · pocit, že „takhle už to zůstane".
 
 ZADÁNÍ:
-1. Napiš PŘESNĚ 5 primary textů — každý podle JEDNOHO z pěti vzorů níže, ve stejném pořadí. Zachovej úhel, strukturu, rytmus a prodejní prvky vzoru, ale příběh přepiš do jazyka ${ctx.langName}, do perspektivy vypravěče z obrázku, do kontextu scény a do faktů cílového projektu (kniha, autor, cena, odkaz). Nekopíruj nizozemské reálie doslova.
-2. Napiš PŘESNĚ 5 headlinů podle pravidel v sekci HEADLINY níže — z pohledu téhož vypravěče a k tématu obrázku.
+1. Napiš PŘESNĚ 5 primary textů — každý podle JEDNOHO z pěti vzorů níže, ve stejném pořadí. Zachovej úhel, strukturu, rytmus a prodejní prvky vzoru, ale příběh přepiš do jazyka ${ctx.langName}, ${remarketing ? "do oslovení návštěvnice/návštěvníka podle osoby na obrázku" : "do perspektivy vypravěče z obrázku"}, do kontextu scény a do faktů cílového projektu (kniha, autor, cena, odkaz). Nekopíruj reálie vzoru doslova — čísla stran, bonusy, dopravu a garanci ber z kontextu projektu výše.
+2. Napiš PŘESNĚ 5 headlinů podle pravidel v sekci HEADLINY níže — ${remarketing ? "v duchu remarketingu (člověk už web viděl)" : "z pohledu téhož vypravěče"} a k tématu obrázku.
 3. Každý primary konči CTA s odkazem ${page?.url || `https://www.${ctx.domain}/`}.
 4. Texty musí být spisovné a gramaticky bezchybné: správné skloňování, časování, pády, shoda, rody příčestí, konzistentní rod vypravěče, idiomatická stylistika jazyka ${ctx.langName}. Piš, jak se lidé mezi sebou reálně baví — žádná AI uhlazenost.
 
@@ -287,8 +293,8 @@ ${HEADLINE_FORMULAS}
 
 ${HUMANIZER_RULES}
 
-VZORY (NL originály — přebíráš úhel a styl, ne doslovný text):
-${AD_TEMPLATES.map((t, i) => `━━━ VZOR ${i + 1} — ${t.name} ━━━\n${t.text}`).join("\n\n")}
+VZORY (${remarketing ? "české remarketingové" : "NL"} originály — přebíráš úhel a styl, ne doslovný text):
+${templates.map((t, i) => `━━━ VZOR ${i + 1} — ${t.name} ━━━\n${t.text}`).join("\n\n")}
 
 Odpověz POUZE validním JSON. U každého headlinu uveď použitou formuli (how-to, otazka, socialni-dukaz, negativni-uhel, if-then, cena, srovnani):
 {"primaries": ["...5 textů v pořadí vzorů..."], "headlines": ["...5 headlinů..."], "headline_formulas": ["...5 názvů formulí ve stejném pořadí..."]}`
@@ -303,7 +309,13 @@ Odpověz POUZE validním JSON. U každého headlinu uveď použitou formuli (how
 
   try {
     const p2 = await callLLM(opts.modelId, buildHumanizerPrompt(
-      ctx.langName, primaries, headlines, { headlineRules: HEADLINE_HUMANIZER }
+      ctx.langName, primaries, headlines,
+      {
+        headlineRules: HEADLINE_HUMANIZER,
+        extraNote: remarketing
+          ? "POZOR: tyhle texty jsou REMARKETINGOVÉ — přímé oslovení ve 2. osobě («Byla jsi tady», «Řekla sis pak»), emoji hooky 😶/📦, blok benefitů s ✅🎁✍️🚚💯 a citace s křestním jménem a věkem jsou ZÁMĚR. Nepřepisuj je do ich-formy ani nemaž strukturu."
+          : undefined,
+      }
     ))
     const fixed = parseJson(p2.text, p2.truncated)
     usage = sumUsage(usage, p2.usage)

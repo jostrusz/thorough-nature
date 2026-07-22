@@ -42,9 +42,10 @@ export async function runStudioTextsJob(container: any, jobId: string) {
     log(`popis hotový (${desc.description.length} znaků)`)
 
     // 2) texts from templates
-    await setStep("texts", { status: "running" })
+    await setStep("texts", { status: "running", detail: p.mode === "remarketing" ? "🔁 remarketing" : "✍️ akviziční" })
     const out = await generateStudioTexts({
       modelId: p.txt_model, targetProject: job.target_project, imageDescription: desc.description,
+      mode: p.mode === "remarketing" ? "remarketing" : "acquisition",
     })
     addCost(out.usage)
     if (out.primaries.length < 5 || out.headlines.length < 5) {

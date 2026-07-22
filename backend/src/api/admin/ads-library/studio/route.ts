@@ -24,6 +24,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       name: j.params?.file_name || "obrázek",
       url: j.params?.image_url,
       txt_model: j.params?.txt_model,
+      mode: j.params?.mode || "acquisition",
       result: j.params?.result || null,
       cost: j.params?.cost_usd ?? null,
       result916: j.params?.result916 || null,

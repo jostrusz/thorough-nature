@@ -41,6 +41,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     ],
     params: {
       ...p, txt_model: b.txt_model || "claude-opus-4-8",
+      mode: b.mode === "remarketing" ? "remarketing" : "acquisition",
       result: null, cost_usd: null, history: history.slice(-5),
     },
   })

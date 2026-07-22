@@ -893,6 +893,7 @@ function StudioTab({ zoom }: any) {
   const [uploading, setUploading] = useState<string[]>([])
   const [proj, setProj] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<Record<string, string>>({}) // itemId -> "reframe"|"save"
+  const [mode, setMode] = useState<Record<string, string>>({}) // itemId -> "acquisition"|"remarketing"
   const [histOpen, setHistOpen] = useState<Record<string, boolean>>({})
   const [err, setErr] = useState<Record<string, string>>({})
 
@@ -934,7 +935,8 @@ function StudioTab({ zoom }: any) {
     setErr((e) => ({ ...e, [it.id]: "" }))
     try {
       await sdk.client.fetch("/admin/ads-library/studio/generate", {
-        method: "POST", body: { item_id: it.id, project_id: project, txt_model: txtModel },
+        method: "POST",
+        body: { item_id: it.id, project_id: project, txt_model: txtModel, mode: mode[it.id] ?? it.mode ?? "acquisition" },
       })
     } catch (e: any) { setErr((p) => ({ ...p, [it.id]: e?.message || "spuštění selhalo" })) }
     refresh()
@@ -967,7 +969,8 @@ function StudioTab({ zoom }: any) {
     refresh()
   }
 
-  const TPL_NAMES = ["letní hlavní", "varianta B", "testimonial", "advertorial", "redakce"]
+  const TPL_ACQ = ["letní hlavní", "varianta B", "testimonial", "advertorial", "redakce"]
+  const TPL_REM = ["nespavost", "vztek + sklad", "vina", "rozchod", "noc + sklad"]
   const running = (it: any) => it.status === "queued" || it.status === "running"
   return (
     <div style={{ ...S.card, overflow: "visible" }}>
@@ -1010,6 +1013,18 @@ function StudioTab({ zoom }: any) {
                 <option value="">— vyber projekt —</option>
                 {Object.keys(PROJECTS).map((p) => <option key={p} value={p}>{PROJECTS[p].flag} {p}</option>)}
               </select>
+              <div style={{ display: "inline-flex", gap: 2, background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: 2 }}>
+                {[["acquisition", "✍️ Akviziční"], ["remarketing", "🔁 Remarketing"]].map(([m, label]) => {
+                  const on = (mode[it.id] ?? it.mode ?? "acquisition") === m
+                  return (
+                    <button key={m} onClick={() => setMode((p) => ({ ...p, [it.id]: m }))}
+                      title={m === "remarketing" ? "Šablony pro návštěvníky, co už web viděli" : "Šablony pro nové publikum"}
+                      style={{ fontSize: 12, padding: "5px 10px", borderRadius: 7, border: "none", cursor: "pointer",
+                        background: on ? "var(--bg-base,#fff)" : "transparent", fontWeight: on ? 650 : 400,
+                        color: on ? "#7c3aed" : "#6b7280", boxShadow: on ? "0 1px 2px rgba(0,0,0,.08)" : "none" }}>
+                      {label}</button>)
+                })}
+              </div>
               <button style={!running(it) && (proj[it.id] ?? it.project) ? S.btnPri : { ...S.btnPri, opacity: .4 }}
                 disabled={running(it) || !(proj[it.id] ?? it.project)}
                 onClick={() => generate(it)}>{running(it) ? "⏳ generuji…" : it.result || it.history?.length ? "↻ Přegenerovat texty" : "✍️ Vytvořit reklamy"}</button>
@@ -1022,11 +1037,11 @@ function StudioTab({ zoom }: any) {
             {running(it) && <div style={{ fontSize: 12.5, color: "#b45309", marginTop: 8 }}>⏳ Agent popisuje obrázek a píše 5 primary + 5 headlinů ze vzorů… (1–3 min, detail ve ⚙️ Frontě)</div>}
             {it.result && (
               <div style={{ marginTop: 10, background: "var(--bg-subtle,#f9fafb)", border: "1px solid var(--border-base,#e5e7eb)", borderRadius: 11, padding: "10px 13px" }}>
-                <div style={S.eyebrow}>5× primary — {PROJECTS[it.project]?.flag} {it.project} · {it.txt_model}</div>
+                <div style={S.eyebrow}>5× primary — {PROJECTS[it.project]?.flag} {it.project} · {it.mode === "remarketing" ? "🔁 remarketing" : "✍️ akviziční"} · {it.txt_model}</div>
                 {it.result.primaries.map((p: string, i: number) => (
                   <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline", padding: "2px 0", fontSize: 12.5 }}>
                     <b style={{ ...S.mono, fontSize: 10.5, color: "#6b7280", flexShrink: 0 }}>P{i + 1}</b>
-                    <span style={{ fontSize: 10.5, color: "#7c3aed", background: "#ede9fe", borderRadius: 999, padding: "1px 8px", flexShrink: 0 }}>{TPL_NAMES[i] || "vzor"}</span>
+                    <span style={{ fontSize: 10.5, color: "#7c3aed", background: "#ede9fe", borderRadius: 999, padding: "1px 8px", flexShrink: 0 }}>{(it.mode === "remarketing" ? TPL_REM : TPL_ACQ)[i] || "vzor"}</span>
                     <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p}</span>
                   </div>))}
                 <div style={{ ...S.eyebrow, marginTop: 8 }}>5× headline — každý jinou formulí</div>

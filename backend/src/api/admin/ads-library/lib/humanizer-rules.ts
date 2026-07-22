@@ -61,14 +61,14 @@ PŘÍKLADY ŠPATNĚ → SPRÁVNĚ:
  */
 export function buildHumanizerPrompt(
   langName: string, primaries: string[], headlines: string[],
-  opts?: { headlineRules?: string }
+  opts?: { headlineRules?: string; extraNote?: string }
 ) {
   return `Jsi přísný editor, který v textu odhaluje stopy AI generování a překladatelštiny. Níže je přeložená facebooková reklama v jazyce: ${langName}.
 
 KROK 1: Najdi konkrétní místa, která působí AI-generovaně nebo jako doslovný překlad — podle těchto pravidel:
 
 ${HUMANIZER_RULES}
-${opts?.headlineRules ? `\n${opts.headlineRules}\n` : ""}
+${opts?.headlineRules ? `\n${opts.headlineRules}\n` : ""}${opts?.extraNote ? `\n${opts.extraNote}\n` : ""}
 KROK 2: Přepiš texty tak, aby všechna nalezená místa zmizela. Zachovej: jazyk, strukturu odstavců, délku, fakta, čísla, emoji, odkazy a rod vypravěče. Neměň, co je v pořádku.
 
 TEXTY KE KONTROLE:
