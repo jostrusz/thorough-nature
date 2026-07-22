@@ -3199,10 +3199,18 @@ body {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       Zabezpečená platba
     </div>
-    <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Platbou kartou potvrzuješ, že tvoje údaje zpracuje Airwallex v souladu se <a href="https://www.airwallex.com/privacy-policy" target="_blank" rel="noopener" style="color:#999;text-decoration:underline;">Zásadami ochrany soukromí Airwallex</a>.</p>
+    <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Platební údaje zadáváš přímo v zabezpečeném prostředí platební brány — my se k nim nedostaneme.</p>
   </div>
   <div class="checkout-footer-company">
-    Platby zabezpečeny přes <strong>PayU</strong> a <strong>PayPal</strong>.
+    Platby zabezpečeny přes <strong>Comgate</strong> a <strong>PayPal</strong>.
+    <!-- Loga poskytovatele a karetních asociací — požadavek Comgate. Checkout má
+         světlé pozadí, takže loga s černým wordmarkem drží kontrast bez plotny. -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:10px;">
+      <a href="https://www.comgate.eu/cs/platebni-brana" target="_blank" rel="noopener" aria-label="Platební brána Comgate" style="display:inline-flex;align-items:center;text-decoration:none;border:none;">
+        <img src="/icons/comgate.svg" alt="Comgate" style="height:20px;width:auto;display:block;" onerror="this.style.display='none'"></a>
+      <img src="/icons/visa.svg" alt="Visa" style="height:24px;width:auto;display:block;border-radius:3px;border:1px solid rgba(184,92,74,0.12);" onerror="this.style.display='none'">
+      <img src="/icons/mastercard.svg" alt="Mastercard" style="height:24px;width:auto;display:block;border-radius:3px;border:1px solid rgba(184,92,74,0.12);" onerror="this.style.display='none'">
+    </div>
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Život, jaký si zasloužíš · Všechna práva vyhrazena<br>
