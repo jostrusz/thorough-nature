@@ -34,7 +34,11 @@ const METHODS = [
   // Cvak (BANK_CZ_AB_CVAK) — Air Bank A2A payment confirmed in the My Air app.
   { code: "bank_cz_cvak", display_name: "Cvak — Air Bank", icon: "bank_cz_cvak" },
   { code: "bank_cz_other", display_name: "Jiná banka (převod)", icon: "bank_transfer" },
-  { code: "creditcard", display_name: "Credit/Debit Card", icon: "card", config: { type: "embedded" }, anyCurrency: true },
+  // Cards stay INACTIVE until Comgate finishes the VISA/Mastercard approval — as of
+  // 2026-07-22 the /v1.0/methods call for MID 516080 returns no CARD_CZ_COMGATE, so
+  // a card payment would be rejected by the gateway. Cards run through PayU meanwhile.
+  // Flip `active: true` here (and re-run) once Comgate confirms the approval.
+  { code: "creditcard", display_name: "Credit/Debit Card", icon: "card", config: { type: "embedded" }, anyCurrency: true, active: false },
 ]
 
 export default async function seedComgateZivotZaslugy() {
@@ -95,6 +99,7 @@ export default async function seedComgateZivotZaslugy() {
       const m = METHODS[i]
       const currencies = m.anyCurrency ? [] : ["CZK"]
       const countries = m.anyCurrency ? [] : ["cz"]
+      const isActive = m.active !== false
       const { rows: have } = await pool.query(
         `SELECT id FROM payment_method_config
           WHERE gateway_id = $1 AND code = $2 AND deleted_at IS NULL`,
@@ -103,12 +108,12 @@ export default async function seedComgateZivotZaslugy() {
       if (have[0]) {
         await pool.query(
           `UPDATE payment_method_config
-              SET display_name = $1, icon = $2, sort_order = $3, is_active = true,
+              SET display_name = $1, icon = $2, sort_order = $3, is_active = $8,
                   supported_currencies = $4::jsonb, available_countries = $5::jsonb,
                   config = $6::jsonb, updated_at = NOW()
             WHERE id = $7`,
           [m.display_name, m.icon, i, JSON.stringify(currencies), JSON.stringify(countries),
-           m.config ? JSON.stringify(m.config) : null, have[0].id]
+           m.config ? JSON.stringify(m.config) : null, have[0].id, isActive]
         )
         updated++
       } else {
@@ -116,10 +121,10 @@ export default async function seedComgateZivotZaslugy() {
           `INSERT INTO payment_method_config
              (id, gateway_id, code, display_name, icon, sort_order, is_active,
               supported_currencies, available_countries, config, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, true, $7::jsonb, $8::jsonb, $9::jsonb, NOW(), NOW())`,
+           VALUES ($1, $2, $3, $4, $5, $6, $10, $7::jsonb, $8::jsonb, $9::jsonb, NOW(), NOW())`,
           [ulid(), gatewayId, m.code, m.display_name, m.icon, i,
            JSON.stringify(currencies), JSON.stringify(countries),
-           m.config ? JSON.stringify(m.config) : null]
+           m.config ? JSON.stringify(m.config) : null, isActive]
         )
         created++
       }
