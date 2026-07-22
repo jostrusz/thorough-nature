@@ -61,8 +61,36 @@ async function fetchAsInline(url: string, label: string): Promise<any> {
 }
 
 /**
+ * Retry wrapper for transient Gemini failures. Image generation regularly
+ * takes 60-150 s, so a request that hits the 3-minute ceiling, a 429 or a 5xx
+ * is almost always bad luck rather than a bad request — one lost job out of a
+ * bulk run used to leave the card without its 1:1 (and the 9:16 with nothing
+ * to reframe from). Deterministic failures (safety block, 400, missing key)
+ * are re-thrown immediately: retrying them only burns time and tokens.
+ */
+const TRANSIENT = /timeout|aborted|ETIMEDOUT|ECONNRESET|ENOTFOUND|EAI_AGAIN|socket hang up|fetch failed|\b(429|500|502|503|504)\b|rate.?limit|overloaded|unavailable|internal error/i
+
+async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 3): Promise<T> {
+  let last: any
+  for (let attempt = 1; attempt <= tries; attempt++) {
+    try {
+      return await fn()
+    } catch (e: any) {
+      last = e
+      if (attempt === tries || !TRANSIENT.test(e?.message || "")) throw e
+      // 4 s, then 12 s — long enough for a rate-limit window to roll over
+      const waitMs = 4000 * Math.pow(3, attempt - 1)
+      console.warn(`[Ads Library] ${label} pokus ${attempt}/${tries} selhal (${e.message}) → čekám ${waitMs / 1000}s`)
+      await new Promise((r) => setTimeout(r, waitMs))
+    }
+  }
+  throw last
+}
+
+/**
  * Generate one image. `refs` = image URLs passed as reference inputs
  * (source creative, target book cover). Returns a JPEG/PNG Buffer.
+ * Transient API failures are retried up to 3× (see withRetry).
  */
 export async function generateImage(opts: {
   modelId: string
@@ -85,42 +113,45 @@ export async function generateImage(opts: {
   }
   parts.push({ text: opts.prompt })
 
-  let res: Response
-  try {
-    res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            responseModalities: ["IMAGE"],
-            // 2K = 2048px. On gemini-3-pro-image it bills the SAME as the 1K
-            // default (verified live: 1199 vs 1211 output tokens) while giving
-            // 4× the pixels — and 1024px sits just under Meta's recommended
-            // 1080px feed minimum. On the Flash model 2K does cost ~1.85×.
-            imageConfig: { aspectRatio: opts.aspectRatio, imageSize: IMAGE_SIZE },
-          },
-        }),
-        signal: AbortSignal.timeout(180000),
-      }
-    )
-  } catch (e: any) {
-    throw new Error(`Gemini API nedostupné (${e?.cause?.code || e.message})`)
-  }
-  const json = await res.json()
-  if (!res.ok) {
-    throw new Error(`[Gemini ${model}] ${json?.error?.message || res.status}`)
-  }
-  const imgPart = json?.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData || p.inline_data)
-  const inline = imgPart?.inlineData || imgPart?.inline_data
-  if (!inline?.data) {
-    const block = json?.candidates?.[0]?.finishReason || json?.promptFeedback?.blockReason
-    throw new Error(`[Gemini ${model}] nevrátil obrázek${block ? ` (${block})` : ""}`)
-  }
-  const usage = readUsage(json, model)
-  return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png", usage }
+  return withRetry(`generateImage ${opts.aspectRatio}`, async () => {
+    let res: Response
+    try {
+      res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: {
+              responseModalities: ["IMAGE"],
+              // 2K = 2048px. On gemini-3-pro-image it bills the SAME as the 1K
+              // default (verified live: 1199 vs 1211 output tokens) while giving
+              // 4× the pixels — and 1024px sits just under Meta's recommended
+              // 1080px feed minimum. On the Flash model 2K does cost ~1.85×.
+              imageConfig: { aspectRatio: opts.aspectRatio, imageSize: IMAGE_SIZE },
+            },
+          }),
+          // 2K renders on the Pro model regularly run past two minutes
+          signal: AbortSignal.timeout(300000),
+        }
+      )
+    } catch (e: any) {
+      throw new Error(`Gemini API nedostupné (${e?.cause?.code || e.message})`)
+    }
+    const json = await res.json()
+    if (!res.ok) {
+      throw new Error(`[Gemini ${model}] ${json?.error?.message || res.status} (HTTP ${res.status})`)
+    }
+    const imgPart = json?.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData || p.inline_data)
+    const inline = imgPart?.inlineData || imgPart?.inline_data
+    if (!inline?.data) {
+      const block = json?.candidates?.[0]?.finishReason || json?.promptFeedback?.blockReason
+      throw new Error(`[Gemini ${model}] nevrátil obrázek${block ? ` (${block})` : ""}`)
+    }
+    const usage = readUsage(json, model)
+    return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png", usage }
+  })
 }
 
 /**

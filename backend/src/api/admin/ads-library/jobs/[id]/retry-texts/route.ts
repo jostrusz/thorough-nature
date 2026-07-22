@@ -23,6 +23,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
   const p = job.params || {}
   const model = b.txt_model || p.txt_model || "claude-opus-4-8"
+  // A texts-only retry must not paper over an image step that failed earlier —
+  // the job used to end up green with a missing 1:1, which reads as "hotovo"
+  // in the queue. Only the texts step gets its status rewritten below.
+  const finalStatus = async () => {
+    const [fresh] = await svc.listAdLocalizationJobs({ id: job.id })
+    const broken = (fresh.steps || []).filter((s: any) => s.key !== "texts" && s.status === "failed")
+    return broken.length
+      ? { status: "failed", error: `nedokončené kroky: ${broken.map((s: any) => s.label || s.key).join(", ")}` }
+      : { status: "done", error: null }
+  }
   const setTexts = async (patch: any) => {
     const [fresh] = await svc.listAdLocalizationJobs({ id: job.id })
     const steps = (fresh.steps || []).map((s: any) => (s.key === "texts" ? { ...s, ...patch } : s))
@@ -44,7 +54,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
       const cost = round4(Number(p.cost_usd || 0) + (costUSD(out.usage) || 0) + (costUSD(desc.usage) || 0))
       await svc.updateAdLocalizationJobs({
-        id: job.id, status: "done", error: null,
+        id: job.id, ...(await finalStatus()),
         params: { ...p, txt_model: model, cost_usd: cost,
           result: { primaries: out.primaries, headlines: out.headlines, tells: out.tells, image_description: desc.description } },
       })
@@ -70,7 +80,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
       const cost = round4(Number(p.cost_usd || 0) + (costUSD(out.usage) || 0))
       await svc.updateAdLocalizationJobs({
-        id: job.id, status: "done", error: null, params: { ...p, txt_model: model, cost_usd: cost },
+        id: job.id, ...(await finalStatus()), params: { ...p, txt_model: model, cost_usd: cost },
       })
     }
 
