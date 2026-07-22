@@ -590,7 +590,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
                 </div>)
             })}
             <div style={{ background: "var(--bg-subtle,#f9fafb)", borderRadius: 10, padding: "10px 13px", fontSize: 12.5, color: "#6b7280", marginTop: 10 }}>
-              Vytvoří se <b style={{ color: "#111827" }}>{totalPlanned} reklam</b>, všechny <b>⏸ PAUSED</b> — 1:1 obrázek + <b>všechny primary texty a headliny</b> (multi-text, jako ruční reklamy).</div>
+              Vytvoří se <b style={{ color: "#111827" }}>{totalPlanned} reklam</b>, všechny <b>⏸ PAUSED</b> — 1:1 + 9:16 podle placementu + <b>všechny primary texty a headliny</b> + vylepšení kreativy.</div>
           </>)}
 
           {job && (
@@ -674,7 +674,7 @@ function MetaModal({ m, onClose }: any) {
               {result.adset_name && <div style={{ fontSize: 13.5, marginBottom: 6 }}>
                 📁 {result.campaign_name ? `${result.campaign_name} → ` : ""}<b>{result.adset_name}</b></div>}
               {result.texts_sent != null && <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 6 }}>
-                🖼️ 1:1 · ✍️ {result.texts_sent}× primary + headliny (multi-text)</div>}
+                🖼️ {result.images_sent === 2 ? "1:1 + 9:16 (placement)" : "1:1"} · ✍️ {result.texts_sent}× primary + headliny</div>}
               <div style={{ ...S.mono, fontSize: 12.5, color: "#6b7280", lineHeight: 1.8 }}>
                 ad_id: {result.ad_id}<br />creative_id: {result.creative_id}<br />adset_id: {result.adset_id}</div>
               <div style={{ fontSize: 13.5, marginTop: 10 }}>Zkontroluj náhled v Ads Manageru a zapni ji tam.</div>
@@ -691,8 +691,8 @@ function MetaModal({ m, onClose }: any) {
                 </div>
               </div>)}
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
-              Posílá se: <b>{a.name}</b> — 1:1 obrázek + <b>všech {(a.primary_texts || []).length}× primary a {(a.headlines || []).length}× headline</b> (stejný tvar jako ruční reklamy;
-              Stories/Reels si Meta dopočítá z 1:1 — per-placement média nejdou kombinovat s více texty), CTA, odkaz s UTM.
+              Posílá se: <b>{a.name}</b> — {a.image_9x16_url ? "1:1 do feedu + 9:16 do Stories/Reels" : "1:1 (9:16 tato verze nemá)"} + <b>všech {(a.primary_texts || []).length}× primary a {(a.headlines || []).length}× headline</b>,
+              CTA, odkaz s UTM, vylepšení kreativy (rekompozice, animace, retuš, enhance CTA).
               Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
             {(() => {
               const accName = (accountsQ.data?.accounts || []).find((x: any) => x.id === account)?.name || ""

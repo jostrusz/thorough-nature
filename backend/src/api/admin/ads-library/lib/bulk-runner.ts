@@ -37,7 +37,7 @@ export async function runBulkSendJob(container: any, jobId: string) {
           nameSuffix: plan.suffix || "",
         })
         ok++
-        await setStep(plan.key, { status: "done", detail: `ad ${r.ad_id} · 1:1 + ${r.texts_sent}P/H` })
+        await setStep(plan.key, { status: "done", detail: `ad ${r.ad_id} · ${r.images_sent === 2 ? "1:1+9:16" : "1:1"} · ${r.texts_sent}P/H` })
         // remember where the card went (bulk list under metadata)
         const sent = Array.isArray(c.metadata?.meta_bulk_ads) ? c.metadata.meta_bulk_ads : []
         await svc.updateAdCreatives({

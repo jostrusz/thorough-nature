@@ -93,15 +93,28 @@ export async function resolveIdentity(account: string) {
 }
 
 /**
- * Create one PAUSED ad from a library creative — the EXACT shape Ads Manager
- * builds for "multiple text options" ads (copied from a manual winning ad):
- * one 1:1 image inside object_story_spec.link_data + asset_feed_spec with all
- * bodies/titles and optimization_type DEGREES_OF_FREEDOM. Meta's own
- * cv_transformation renders Stories/Reels from the 1:1.
+ * Creative enhancements enabled on every ad we create. `standard_enhancements`
+ * is retired by Meta ("select individual features instead"), so the bundle is
+ * spelled out. Text-rewriting features (text_optimizations, text_generation,
+ * feed_caption_optimization) stay OFF — they would undo the humanizer pass.
+ */
+const CREATIVE_FEATURES = [
+  "cv_transformation",              // recompose the image per placement
+  "image_animation",                // subtle motion on a still image
+  "image_touchups",                 // straighten / sharpen
+  "image_brightness_and_contrast",  // light auto-grading
+  "enhance_cta",                    // smarter CTA wording
+]
+
+/**
+ * Create one PAUSED ad from a library creative.
  *
- * Deliberately NOT per-placement media (PLACEMENT rules): Meta can't combine
- * that with multiple texts — rules force a single body/title, and shipping
- * all 5 primaries + 5 headlines is the harder requirement here.
+ * Shape (verified live): per-placement media AND all 5 bodies/titles at once.
+ * The trick is a SHARED adlabel — every body carries the same label and both
+ * customization rules point at it, so a rule matches the whole text pool
+ * instead of one asset. Rules must cover every placement (the second rule has
+ * an empty customization_spec = catch-all), otherwise delivery fails with
+ * "0 target rules for format X".
  */
 export async function createPausedAd(opts: {
   account: string
@@ -109,31 +122,54 @@ export async function createPausedAd(opts: {
   spec: any // { page_id, instagram_user_id? }
   creative: any // ad_creative row
   image1x1?: string
+  image916?: string | null
   nameSuffix?: string
 }) {
   const c = opts.creative
   const img11 = opts.image1x1 || c.image_1x1_url
+  const img916 = opts.image916 === undefined ? c.image_9x16_url : opts.image916
   if (!img11) throw new Error("kreativa nemá 1:1 obrázek")
   if (!c.primary_texts?.length || !c.headlines?.length) throw new Error("kreativa potřebuje aspoň 1 primary text a 1 headline")
 
   const hash11 = await uploadImage(opts.account, img11)
+  const hash916 = img916 ? await uploadImage(opts.account, img916) : null
   const link = c.link_url || "https://www.marketing-hq.eu/"
+  const bodies = (c.primary_texts || []).slice(0, 5)
+  const titles = (c.headlines || []).slice(0, 5)
+
+  const assetFeed: any = {
+    images: hash916
+      ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
+      : [{ hash: hash11 }],
+    // shared label keeps ALL texts available inside a placement rule
+    bodies: bodies.map((t: string) => hash916 ? { text: t, adlabels: [{ name: "allB" }] } : { text: t }),
+    titles: titles.map((t: string) => hash916 ? { text: t, adlabels: [{ name: "allT" }] } : { text: t }),
+    descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
+    ad_formats: ["SINGLE_IMAGE"],
+    call_to_action_types: [c.cta_type || "LEARN_MORE"],
+    link_urls: hash916 ? [{ website_url: link, adlabels: [{ name: "allL" }] }] : [{ website_url: link }],
+    optimization_type: hash916 ? "PLACEMENT" : "DEGREES_OF_FREEDOM",
+  }
+  if (hash916) {
+    const labels = { body_label: { name: "allB" }, title_label: { name: "allT" }, link_url_label: { name: "allL" } }
+    assetFeed.asset_customization_rules = [
+      { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] },
+        image_label: { name: "vert" }, ...labels, priority: 1 },
+      { customization_spec: {}, image_label: { name: "sq" }, ...labels, priority: 2 },
+    ]
+  }
+
   const name = `[LIB-${c.id.slice(-8)}] ${c.name}${opts.nameSuffix || ""}`
   const creative = await graphPost(`${opts.account}/adcreatives`, {
     name,
-    object_story_spec: {
-      ...opts.spec,
-      link_data: {
-        link,
-        image_hash: hash11,
-        call_to_action: { type: c.cta_type || "LEARN_MORE" },
-      },
-    },
-    asset_feed_spec: {
-      bodies: (c.primary_texts || []).slice(0, 5).map((t: string) => ({ text: t })),
-      titles: (c.headlines || []).slice(0, 5).map((t: string) => ({ text: t })),
-      descriptions: c.description_text ? [{ text: c.description_text }] : undefined,
-      optimization_type: "DEGREES_OF_FREEDOM",
+    object_story_spec: hash916
+      ? opts.spec
+      : { ...opts.spec, link_data: { link, image_hash: hash11, call_to_action: { type: c.cta_type || "LEARN_MORE" } } },
+    asset_feed_spec: assetFeed,
+    degrees_of_freedom_spec: {
+      creative_features_spec: Object.fromEntries(
+        CREATIVE_FEATURES.map((k) => [k, { enroll_status: "OPT_IN" }])
+      ),
     },
     url_tags: "utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&fbadid={{ad.id}}&fbadsetid={{adset.id}}",
   })
@@ -141,7 +177,7 @@ export async function createPausedAd(opts: {
     name, adset_id: opts.adsetId, creative: { creative_id: creative.id }, status: "PAUSED",
   })
   return {
-    ad_id: ad.id, creative_id: creative.id, images_sent: 1,
-    texts_sent: Math.min((c.primary_texts || []).length, 5),
+    ad_id: ad.id, creative_id: creative.id,
+    images_sent: hash916 ? 2 : 1, texts_sent: bodies.length,
   }
 }
