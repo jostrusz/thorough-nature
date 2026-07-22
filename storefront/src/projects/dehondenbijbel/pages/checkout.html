@@ -3066,6 +3066,10 @@ body {
               <svg class="validation-icon check" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
               <svg class="validation-icon cross" viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="3" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               <div class="field-error">Vul je postcode in</div>
+              <div class="field-warning" id="postal-warning">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 9v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                <span>Nederlandse postcodes hebben meestal ook 2 letters (bijv. 1234 AB)</span>
+              </div>
             </div>
           </div>
 
@@ -6231,6 +6235,26 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     addressField.addEventListener('input', function() {
       addressWarning.style.display = 'none';
     });
+  }
+
+  /* ─── PSČ HINT — NL vyžaduje 2 písmena (neblokující upozornění, netýká se submitu) ─── */
+  var postalField = document.getElementById('postal_code');
+  var postalWarning = document.getElementById('postal-warning');
+  var postalCountrySelect = document.getElementById('country');
+  function checkNLPostalCodeHint() {
+    if (!postalField || !postalWarning) return;
+    var val = postalField.value.trim();
+    var country = postalCountrySelect ? postalCountrySelect.value : '';
+    if (country !== 'NL' || !val) { postalWarning.style.display = 'none'; return; }
+    var letterCount = (val.match(/[a-zA-Z]/g) || []).length;
+    postalWarning.style.display = letterCount < 2 ? 'block' : 'none';
+  }
+  if (postalField && postalWarning) {
+    postalField.addEventListener('blur', checkNLPostalCodeHint);
+    postalField.addEventListener('input', function() { postalWarning.style.display = 'none'; });
+  }
+  if (postalCountrySelect) {
+    postalCountrySelect.addEventListener('change', checkNLPostalCodeHint);
   }
 
   /* ─── FIREMNÍ POLE (B2B) — toggle + label podle země ─── */
