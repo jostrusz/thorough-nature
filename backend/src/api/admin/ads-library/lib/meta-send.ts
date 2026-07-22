@@ -93,17 +93,29 @@ export async function resolveIdentity(account: string) {
 }
 
 /**
- * Creative enhancements enabled on every ad we create. `standard_enhancements`
- * is retired by Meta ("select individual features instead"), so the bundle is
- * spelled out. Text-rewriting features (text_optimizations, text_generation,
- * feed_caption_optimization) stay OFF — they would undo the humanizer pass.
+ * Creative enhancements enabled on every ad we create — the full set behind
+ * the Advantage+ creative toggles in Ads Manager's Advanced preview. Each
+ * name was probed live against the API; `standard_enhancements` (retired) and
+ * `text_generation` ("Obsah není platný") are the only ones that don't work.
  */
 const CREATIVE_FEATURES = [
+  // Visual touch-ups + Add animation
   "cv_transformation",              // recompose the image per placement
   "image_animation",                // subtle motion on a still image
   "image_touchups",                 // straighten / sharpen
   "image_brightness_and_contrast",  // light auto-grading
   "enhance_cta",                    // smarter CTA wording
+  // Add overlays
+  "add_text_overlay",
+  // Add music
+  "music_generation",
+  "audio",
+  // Text improvements — Meta may reshuffle/rephrase the copy
+  "text_optimizations",
+  "text_formatting_optimization",
+  // Flex media (media_type_automation is catalog-only — ad creation fails)
+  "media_liquidity_animated_image",
+  "adapt_to_placement",
 ]
 
 /**
