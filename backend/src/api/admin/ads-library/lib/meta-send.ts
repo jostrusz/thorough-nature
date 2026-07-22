@@ -78,18 +78,112 @@ export async function resolveAdsetInput(input: string) {
   }
 }
 
-/** Page + IG identity from the account's latest creatives (may live on different rows). */
-export async function resolveIdentity(account: string) {
+/**
+ * Identity pairs {page_id, instagram_user_id} the account actually uses.
+ * `/ads` first, `/adcreatives` only as a fallback: the creatives edge returns
+ * the account's oldest rows, which name pages the token no longer has a role
+ * on (act_686157092660670 → 116213644918821, act_1471528183462313 →
+ * 339396955930970), while the live ads on those same accounts run under pages
+ * we can publish as. Reading creatives first is what made auto-identity pick
+ * an unusable page.
+ */
+async function recentSpecs(account: string) {
+  const fromAds = await graphGet(`${account}/ads`, {
+    fields: "creative{object_story_spec{page_id,instagram_user_id}}", limit: 25,
+  }).catch(() => ({ data: [] }))
+  const specs = (fromAds.data || [])
+    .map((x: any) => x.creative?.object_story_spec)
+    .filter((s: any) => s?.page_id)
+  if (specs.length) return specs
   const last = await graphGet(`${account}/adcreatives`, {
-    fields: "object_story_spec{page_id,instagram_user_id}", limit: 10,
-  })
-  const specs = (last.data || []).map((x: any) => x.object_story_spec).filter(Boolean)
-  const pageId = specs.find((s: any) => s.page_id)?.page_id
-  const igId = specs.find((s: any) => s.instagram_user_id)?.instagram_user_id
-  if (!pageId) throw new Error("v účtu není žádná kreativa, ze které jde převzít FB stránku")
-  const spec: any = { page_id: pageId }
-  if (igId) spec.instagram_user_id = igId
-  return spec
+    fields: "object_story_spec{page_id,instagram_user_id}", limit: 25,
+  }).catch(() => ({ data: [] }))
+  return (last.data || []).map((x: any) => x.object_story_spec).filter((s: any) => s?.page_id)
+}
+
+/** Pages the API token actually has an advertiser role on — the only ones we
+ *  may publish as. Accounts do carry creatives posted from foreign pages (the
+ *  NO account advertises as 339396955930970, which this token cannot use), so
+ *  every candidate is checked against this set before it reaches an ad. */
+async function usablePages() {
+  const mine = await graphGet("me/accounts", { fields: "id,name", limit: 100 }).catch(() => ({ data: [] }))
+  return (mine.data || []).map((p: any) => ({ id: String(p.id), name: p.name }))
+}
+
+/**
+ * Pages offered by the picker for a given ad account: token-usable pages,
+ * with the one the account already advertises under floated to the top and
+ * flagged in_use. `promote_pages` alone is not enough (it misses pages an
+ * account actively runs ads with) and creatives alone are not safe (they may
+ * name a page we have no role on) — so the intersection is what's offered.
+ */
+export async function listAccountPages(account: string) {
+  const [mine, promoted, specs] = await Promise.all([
+    usablePages(),
+    graphGet(`${account}/promote_pages`, { fields: "id,name", limit: 50 }).catch(() => ({ data: [] })),
+    recentSpecs(account),
+  ])
+  const inUse = new Set(specs.map((s: any) => String(s.page_id)))
+  const promotedIds = new Set((promoted.data || []).map((p: any) => String(p.id)))
+  const igByPage = new Map<string, string>()
+  for (const s of specs) {
+    if (s.instagram_user_id && !igByPage.has(String(s.page_id))) igByPage.set(String(s.page_id), s.instagram_user_id)
+  }
+  return mine
+    .map((p: any) => ({
+      ...p,
+      in_use: inUse.has(p.id),
+      promoted: promotedIds.has(p.id),
+      instagram_user_id: igByPage.get(p.id) || null,
+    }))
+    .sort((a: any, b: any) =>
+      Number(b.in_use) - Number(a.in_use) ||
+      Number(b.promoted) - Number(a.promoted) ||
+      a.name.localeCompare(b.name))
+}
+
+/**
+ * Page + IG identity for new ads. Preference order matches the single-send
+ * route: explicit pick → identity of an existing ad in the TARGET ad set →
+ * the account's recent creatives. Only token-usable pages qualify, and the IG
+ * id is reused only when it came paired with the chosen page (IG identity is
+ * mandatory for Stories/Reels).
+ */
+export async function resolveIdentity(account: string, pageId?: string | null, adsetId?: string | null) {
+  const mine = await usablePages()
+  const usable = new Set(mine.map((p: any) => p.id))
+  let chosen: string | null = null
+
+  if (pageId) {
+    chosen = String(pageId)
+    if (!usable.has(chosen)) {
+      throw new Error(`na stránku ${chosen} nemá API token roli inzerenta — přidej system usera k té stránce v Business settings`)
+    }
+  }
+
+  const pools: any[][] = []
+  if (adsetId) {
+    const inSet = await graphGet(`${String(adsetId).trim()}/ads`, {
+      fields: "creative{object_story_spec{page_id,instagram_user_id}}", limit: 10,
+    }).catch(() => ({ data: [] }))
+    pools.push((inSet.data || []).map((x: any) => x.creative?.object_story_spec).filter((s: any) => s?.page_id))
+  }
+  pools.push(await recentSpecs(account))
+
+  for (const specs of pools) {
+    if (!chosen) chosen = specs.find((s: any) => usable.has(String(s.page_id)))?.page_id || null
+    if (chosen) {
+      const ig = specs.find((s: any) => String(s.page_id) === String(chosen) && s.instagram_user_id)?.instagram_user_id
+      if (ig) return { page_id: String(chosen), instagram_user_id: ig }
+    }
+  }
+
+  if (!chosen) {
+    const names = mine.length ? mine.map((p: any) => p.name).join(", ") : "token nevidí žádné stránky"
+    throw new Error(`nenašel jsem stránku použitelnou tímto tokenem (${names}) — vyber ji ručně v poli FB stránka`)
+  }
+  // no IG paired with this page — Meta falls back to the page-backed IG account
+  return { page_id: String(chosen) }
 }
 
 /**

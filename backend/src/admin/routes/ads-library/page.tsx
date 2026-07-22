@@ -474,6 +474,38 @@ function LocalizeWizard({ wizard, onClose }: any) {
     </div>)
 }
 
+/* ═══ Výběr FB stránky (sdílené single + bulk) ═══ */
+function PagePicker({ account, value, onChange }: any) {
+  const q = useQuery({
+    queryKey: ["ads-fb-pages", account],
+    queryFn: () => sdk.client.fetch(`/admin/ads-library/meta/pages?account=${encodeURIComponent(account)}`, { method: "GET" }),
+    enabled: !!account,
+    staleTime: 5 * 60 * 1000,
+  })
+  const pages = q.data?.pages || []
+  // default = stránka, kterou účet už používá (přesně to, co by odesílač zvolil sám)
+  useEffect(() => {
+    if (!value && pages.length) onChange(String(pages.find((p: any) => p.in_use)?.id || pages[0].id))
+  }, [pages.length])
+
+  if (!account) return null
+  return (
+    <div style={{ marginTop: 10 }}>
+      <span style={S.eyebrow}>📘 Facebook stránka — pod kterou reklamy vzniknou</span>
+      {q.isLoading ? <div style={{ fontSize: 12.5, color: "#6b7280", marginTop: 6 }}>načítám stránky účtu…</div>
+      : q.error ? <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>stránky nejdou načíst ({(q.error as any)?.message || "chyba"}) — použije se stránka z posledních reklam účtu</div>
+      : !pages.length ? <div style={{ fontSize: 12.5, color: "#92400e", marginTop: 6 }}>účet nenabízí žádnou stránku — použije se ta z posledních reklam</div>
+      : (<>
+        <select style={{ ...S.input, marginTop: 6 }} value={value || ""} onChange={(e) => onChange(e.target.value)}>
+          {pages.map((p: any) => (
+            <option key={p.id} value={p.id}>{p.in_use ? "★ " : ""}{p.name}{p.in_use ? " — už se v účtu používá" : ""}</option>))}
+        </select>
+        <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 4 }}>
+          ★ = stránka, pod kterou účet inzeruje teď. Instagram se převezme od ní.</div>
+      </>)}
+    </div>)
+}
+
 /* ═══ Bulk Meta modal ═══ */
 function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
   const [q, setQ] = useState("")
@@ -484,6 +516,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
   const [vars, setVars] = useState<Record<string, string[]>>({})   // versionId -> selected 1:1 variant urls
   const [jobId, setJobId] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
+  const [pageId, setPageId] = useState<string>("")
 
   const byId = useMemo(() => Object.fromEntries(creatives.map((c: any) => [c.id, c])), [creatives])
   const rows = selIds.map((id: string) => byId[id]).filter(Boolean)
@@ -492,7 +525,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
   const accLang = target?.account_name?.match(/\(([A-Z]{2})\)/)?.[1] || null
 
   const resolve = async () => {
-    setResolving(true); setResolveErr(""); setTarget(null)
+    setResolving(true); setResolveErr(""); setTarget(null); setPageId("")
     try {
       const r: any = await sdk.client.fetch(`/admin/ads-library/meta/resolve-adset?q=${encodeURIComponent(q)}`, { method: "GET" })
       setTarget(r)
@@ -534,7 +567,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
         return { creative_id: v.id, variant_urls: vars[v.id] || [] }
       })
       const r: any = await sdk.client.fetch("/admin/ads-library/bulk-send-to-meta", {
-        method: "POST", body: { adset: q, items },
+        method: "POST", body: { adset: q, items, page_id: pageId || null },
       })
       setJobId(r.job_id)
     } catch (e: any) { setResolveErr(e?.message || "spuštění selhalo") }
@@ -561,6 +594,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
             {resolveErr && <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>{resolveErr}</div>}
             {target && <div style={{ fontSize: 12.5, color: "#15803d", fontWeight: 650, marginTop: 7 }}>
               ✓ {target.account_name} → {target.campaign_name} → <b>{target.name}</b></div>}
+            {target && <PagePicker account={target.account} value={pageId} onChange={setPageId} />}
           </div>
 
           {target && !jobId && (<>
@@ -650,7 +684,11 @@ function MetaModal({ m, onClose }: any) {
   const [quickAdset, setQuickAdset] = useState("")
   const [pageId, setPageId] = useState("")
   const [result, setResult] = useState<any>(null)
-  const pagesQ = useQuery({ queryKey: ["ads-meta-pages"], queryFn: () => sdk.client.fetch("/admin/ads-library/meta/pages", { method: "GET" }) })
+  const pagesQ = useQuery({
+    queryKey: ["ads-meta-pages", account],
+    queryFn: () => sdk.client.fetch(
+      `/admin/ads-library/meta/pages${account ? `?account=${encodeURIComponent(account)}` : ""}`, { method: "GET" }),
+  })
 
   const campsQ = useQuery({
     queryKey: ["ads-meta-camps", account],
@@ -722,7 +760,8 @@ function MetaModal({ m, onClose }: any) {
               <span style={{ fontSize: 12.5, color: "#6b7280", fontWeight: 650 }}>📄 FB stránka</span>
               <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={pageId} onChange={(e) => setPageId(e.target.value)}>
                 <option value="">🤖 automaticky — z reklam v cílovém ad setu</option>
-                {(pagesQ.data?.pages || []).map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                {(pagesQ.data?.pages || []).map((p: any) =>
+                  <option key={p.id} value={p.id}>{p.in_use ? "★ " : ""}{p.name}{p.in_use ? " — už se v účtu používá" : ""}</option>)}
               </select>
             </div>
             <div style={{ border: "1.5px solid #7c3aed", borderRadius: 10, padding: "11px 13px", marginBottom: 14, background: "#faf5ff" }}>

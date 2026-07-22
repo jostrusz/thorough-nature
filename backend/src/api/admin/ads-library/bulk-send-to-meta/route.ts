@@ -6,7 +6,8 @@ import { runBulkSendJob } from "../lib/bulk-runner"
 
 /**
  * POST /admin/ads-library/bulk-send-to-meta
- * Body: { adset: "<id nebo URL>", items: [{ creative_id, variant_urls?: string[] }] }
+ * Body: { adset: "<id nebo URL>", page_id?, items: [{ creative_id, variant_urls?: string[] }] }
+ *   page_id — FB stránka pro celou dávku; bez ní se převezme z posledních kreativ účtu
  * Each selected 1:1 variant URL becomes its own PAUSED ad (suffix · v1/v2…);
  * with no variant_urls the card's official 1:1 makes a single ad. Runs as an
  * async job — poll /jobs for progress.
@@ -55,6 +56,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     params: {
       bulk: true,
       account: target.account, adset_id: target.adset_id,
+      page_id: b.page_id ? String(b.page_id).trim() : null,
       label: `🚀 ${plan.length} reklam → ${target.name}`,
       thumb: thumbs[0] || null,
       plan,

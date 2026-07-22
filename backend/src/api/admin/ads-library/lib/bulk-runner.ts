@@ -23,7 +23,7 @@ export async function runBulkSendJob(container: any, jobId: string) {
     const [job] = await svc.listAdLocalizationJobs({ id: jobId })
     const p = job.params || {}
     await svc.updateAdLocalizationJobs({ id: jobId, status: "running" })
-    const spec = await resolveIdentity(p.account)
+    const spec = await resolveIdentity(p.account, p.page_id || null, p.adset_id)
 
     let ok = 0, failed = 0
     for (const plan of p.plan || []) {

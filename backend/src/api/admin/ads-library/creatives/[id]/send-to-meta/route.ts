@@ -53,7 +53,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   }
 
   try {
-    const spec = await resolveIdentity(account)
+    // explicit pick from the modal wins; otherwise the identity is taken from
+    // an existing ad in the target ad set, then the account's creatives
+    const spec = await resolveIdentity(
+      account,
+      b.page_id ? String(b.page_id).trim() : null,
+      b.adset_id ? String(b.adset_id).trim() : null,
+    )
 
     // ── ad set (existing or new) ──
     let adsetId = b.adset_id ? String(b.adset_id).trim() : null
