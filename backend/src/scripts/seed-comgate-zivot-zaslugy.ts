@@ -7,11 +7,11 @@
  * identical payment strip.
  *
  * Credentials come from the Comgate portal → Integrace → Propojení obchodu:
- *   COMGATE_MID    — the merchant id (6 digits, e.g. 515515)
+ *   COMGATE_MID    — "Identifikátor propojení obchodu" (516080 for nejdriv-ja.cz)
  *   COMGATE_SECRET — the "Heslo" field of the connection
  *
  * Run:
- *   COMGATE_MID=xxxxxx COMGATE_SECRET=yyyy npx medusa exec ./src/scripts/seed-comgate-zivot-zaslugy.ts
+ *   COMGATE_MID=516080 COMGATE_SECRET=yyyy npx medusa exec ./src/scripts/seed-comgate-zivot-zaslugy.ts
  *
  * Idempotent: re-running updates the existing gateway instead of adding a second one.
  */
@@ -31,6 +31,8 @@ const METHODS = [
   { code: "bank_cz_mo", display_name: "Moneta Money Bank", icon: "bank_cz_mo" },
   { code: "bank_cz_csob", display_name: "ČSOB", icon: "bank_cz_csob" },
   { code: "bank_cz_uc", display_name: "UniCredit Bank", icon: "bank_cz_uc" },
+  // Cvak (BANK_CZ_AB_CVAK) — Air Bank A2A payment confirmed in the My Air app.
+  { code: "bank_cz_cvak", display_name: "Cvak — Air Bank", icon: "bank_cz_cvak" },
   { code: "bank_cz_other", display_name: "Jiná banka (převod)", icon: "bank_transfer" },
   { code: "creditcard", display_name: "Credit/Debit Card", icon: "card", config: { type: "embedded" }, anyCurrency: true },
 ]

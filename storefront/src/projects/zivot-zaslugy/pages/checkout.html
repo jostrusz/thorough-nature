@@ -5373,6 +5373,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'bank_cz_ab': 'BANK_CZ_AB_PSD2',
     'bank_cz_pb': 'BANK_CZ_PB_PSD2',
     'bank_cz_uc': 'BANK_CZ_UC_PSD2',
+    'bank_cz_cvak': 'BANK_CZ_AB_CVAK',
     'bank_cz_other': 'BANK_CZ_OTHER',
   };
 
@@ -5388,6 +5389,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'bank_cz_ab':    { code: 'BANK_CZ_AB_PSD2',   label: 'Air Bank',          desc: 'Online převod', icon: '/icons/airbank.svg' },
     'bank_cz_pb':    { code: 'BANK_CZ_PB_PSD2',   label: 'Partners Banka',    desc: 'Online převod', icon: '/icons/partners-banka.svg' },
     'bank_cz_uc':    { code: 'BANK_CZ_UC_PSD2',   label: 'UniCredit Bank',    desc: 'Online převod', icon: '/icons/unicredit.svg' },
+    'bank_cz_cvak':  { code: 'BANK_CZ_AB_CVAK',   label: 'Cvak',              desc: 'Potvrdíte v aplikaci My Air', icon: '/icons/cvak.png' },
     'bank_cz_other': { code: 'BANK_CZ_OTHER',     label: 'Jiná banka',        desc: 'Bankovní převod', icon: '/icons/bank-generic.svg' },
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
@@ -5405,6 +5407,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     { key: 'ab',   label: 'Air Bank',          icon: '/icons/airbank.svg',          comgate: 'bank_cz_ab',   payu: null },
     { key: 'pb',   label: 'Partners Banka',    icon: '/icons/partners-banka.svg',   comgate: 'bank_cz_pb',   payu: null },
     { key: 'uc',   label: 'UniCredit Bank',    icon: '/icons/unicredit.svg',        comgate: 'bank_cz_uc',   payu: 'uc' },
+    // Cvak (Air Bank) — A2A platba potvrzená přímo v aplikaci My Air, bez přihlašování
+    // do internetového bankovnictví. Vlastní popisek, průběh se od PSD2 tlačítka liší.
+    { key: 'cvak', label: 'Cvak',              icon: '/icons/cvak.png',             comgate: 'bank_cz_cvak', payu: null, desc: 'Potvrdíte v aplikaci My Air' },
   ];
   // Active tiles collected from /store/payment-options: key → {method, provider, provider_id}
   var czBankTiles = {};
@@ -5879,7 +5884,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             providerId: src.provider_id,
             logoHtml: '<img src="' + b.icon + '" alt="' + b.label + '" onerror="this.style.display=\'none\'">',
             label: b.label,
-            desc: 'Okamžitý online převod',
+            desc: b.desc || 'Okamžitý online převod',
             badge: b.popular ? 'Nejčastější volba' : null
           });
         });
