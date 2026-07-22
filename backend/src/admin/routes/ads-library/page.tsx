@@ -301,6 +301,8 @@ function LibraryTab({ zoom }: any) {
           <span style={{ marginLeft: "auto" }} />
           <button style={{ ...S.btn, background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,.5)" }}
             onClick={() => setBulkSel([])}>✖️ Zrušit výběr</button>
+          <button style={{ ...S.btn, background: "rgba(255,255,255,.16)", color: "#fff", border: "1px solid rgba(255,255,255,.45)", fontWeight: 650 }}
+            onClick={() => setWizard({ creatives: creatives.filter((c: any) => bulkSel.includes(c.id)), sel: [] })}>🌍 Hromadně lokalizovat ({bulkSel.length})</button>
           <button style={{ ...S.btn, background: "#fff", color: "#7c3aed", border: "none", fontWeight: 700 }}
             onClick={() => setBulkOpen(true)}>🚀 Hromadně do Meta ({bulkSel.length})</button>
         </div>)}
@@ -313,7 +315,11 @@ function LibraryTab({ zoom }: any) {
 
 /* ═══ Lokalizační wizard ═══ */
 function LocalizeWizard({ wizard, onClose }: any) {
-  const a = wizard.creative
+  // single mode: wizard.creative + wizard.sel (vybrané texty)
+  // bulk mode: wizard.creatives[] — vždy všechny texty, indexy se neposílají
+  const cards = wizard.creatives || [wizard.creative]
+  const bulk = cards.length > 1 || !!wizard.creatives
+  const a = cards[0]
   const [targets, setTargets] = useState<string[]>([])
   const [imgModel, setImgModel] = useState("nano-banana-pro")
   const [imgMode, setImgMode] = useState<"swap" | "texts">("swap")
@@ -338,12 +344,12 @@ function LocalizeWizard({ wizard, onClose }: any) {
     mutationFn: () => sdk.client.fetch("/admin/ads-library/localize", {
       method: "POST",
       body: {
-        source_creative_id: a.id, target_projects: targets,
+        source_creative_ids: cards.map((c: any) => c.id), target_projects: targets,
         img_model: imgModel, img_mode: imgMode, img_prompt: imgPrompt, p916,
         img_count: imgCount, formats: [...(f11 ? ["1:1"] : []), ...(f916 ? ["9:16"] : [])],
         txt_model: txtModel, txt_count: txtCount,
-        primary_indexes: wizard.sel.filter((k: string) => k[0] === "P").map((k: string) => +k.slice(1)),
-        headline_indexes: wizard.sel.filter((k: string) => k[0] === "H").map((k: string) => +k.slice(1)),
+        primary_indexes: bulk ? [] : wizard.sel.filter((k: string) => k[0] === "P").map((k: string) => +k.slice(1)),
+        headline_indexes: bulk ? [] : wizard.sel.filter((k: string) => k[0] === "H").map((k: string) => +k.slice(1)),
       },
     }),
     onSuccess: (r: any) => setSent(r),
@@ -362,21 +368,31 @@ function LocalizeWizard({ wizard, onClose }: any) {
       onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div style={{ ...S.card, maxWidth: 700, width: "100%", maxHeight: "90vh", overflow: "auto", background: "var(--bg-base,#fff)" }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid #e5e7eb", display: "flex", position: "sticky", top: 0, background: "var(--bg-base,#fff)", zIndex: 2 }}>
-          <b style={{ fontSize: 15.5 }}>🌍 Lokalizovat — {a.name}</b>
+          <b style={{ fontSize: 15.5 }}>🌍 Lokalizovat — {bulk ? `${cards.length} karet` : a.name}</b>
           <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={onClose}>✕</button>
         </div>
         <div style={{ padding: "16px 18px" }}>
           {sent ? (
             <div style={{ padding: 12 }}>
-              <div style={{ fontSize: 15, fontWeight: 650, marginBottom: 8 }}>🚀 Spuštěno {sent.jobs.length} {sent.jobs.length === 1 ? "job" : "joby"}</div>
+              <div style={{ fontSize: 15, fontWeight: 650, marginBottom: 8 }}>🚀 Spuštěno {sent.jobs.length} {sent.jobs.length === 1 ? "job" : sent.jobs.length < 5 ? "joby" : "jobů"}</div>
+              {sent.skipped?.length > 0 && (
+                <div style={{ fontSize: 12.5, color: "#92400e", background: "#fef3c7", borderRadius: 8, padding: "7px 10px", marginBottom: 8 }}>
+                  ⏭️ Přeskočeno {sent.skipped.length}× (karta už je v cílovém jazyce): {sent.skipped.map((x: any) => `${x.card} → ${x.target}`).join(", ")}</div>)}
               <div style={{ fontSize: 13.5, color: "#6b7280", lineHeight: 1.6 }}>
                 Generování běží na pozadí — průběh sleduj v záložce <b>⚙️ Fronta</b>. Po dokončení se nová jazyková verze objeví
                 pod originálem se všemi variantami. Můžeš toto okno zavřít.</div>
             </div>
           ) : (<>
-            <span style={S.eyebrow}>Cílové projekty</span>
+            {bulk && (
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+                {cards.map((c: any) => (
+                  <span key={c.id} style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--bg-subtle,#f3f4f6)", borderRadius: 8, padding: "4px 9px 4px 4px", fontSize: 12 }}>
+                    {(c.image_1x1_url || c.video_thumb_url) && <img src={c.image_1x1_url || c.video_thumb_url} style={{ width: 26, height: 26, borderRadius: 5, objectFit: "cover" }} />}
+                    {PROJECTS[c.project_id]?.flag} {c.name}</span>))}
+              </div>)}
+            <span style={S.eyebrow}>Cílové projekty{bulk ? " (vlastní jazyk karty se automaticky přeskočí)" : ""}</span>
             <div style={{ display: "flex", gap: 7, flexWrap: "wrap", margin: "8px 0 16px" }}>
-              {Object.entries(PROJECTS).filter(([k]) => k !== a.project_id).map(([k, v]) => (
+              {Object.entries(PROJECTS).filter(([k]) => bulk || k !== a.project_id).map(([k, v]) => (
                 <button key={k} onClick={() => setTargets((t) => t.includes(k) ? t.filter((x) => x !== k) : [...t, k])}
                   style={{ ...S.btn, borderRadius: 999, padding: "6px 12px", fontSize: 13,
                     ...(targets.includes(k) ? { borderColor: "#7c3aed", background: "#ede9fe", color: "#7c3aed", fontWeight: 650 } : {}) }}>
@@ -424,7 +440,7 @@ function LocalizeWizard({ wizard, onClose }: any) {
               <textarea style={S.ptext} value={p916} onChange={(e) => setP916(e.target.value)} />
             </div>)}
 
-            <span style={{ ...S.eyebrow, display: "block", marginTop: 8 }}>✍️ Texty ({wizard.sel.length} vybraných)</span>
+            <span style={{ ...S.eyebrow, display: "block", marginTop: 8 }}>✍️ Texty ({bulk ? "všechny primaries + headliny každé karty" : `${wizard.sel.length} vybraných`})</span>
             <div style={{ display: "flex", gap: 10, alignItems: "center", margin: "7px 0 10px", flexWrap: "wrap" }}>
               <label style={{ fontSize: 12.5, color: "#6b7280", minWidth: 62 }}>Model</label>
               <select style={{ ...S.input, flex: 1, minWidth: 220, width: "auto" }} value={txtModel} onChange={(e) => setTxtModel(e.target.value)}>
@@ -452,7 +468,7 @@ function LocalizeWizard({ wizard, onClose }: any) {
         <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
           <button style={S.btn} onClick={onClose}>Zavřít</button>
           {!sent && <button style={targets.length ? S.btnPri : { ...S.btnPri, opacity: .4 }} disabled={!targets.length || run.isPending}
-            onClick={() => run.mutate()}>{run.isPending ? "Spouštím…" : `🚀 Spustit (${targets.length})`}</button>}
+            onClick={() => run.mutate()}>{run.isPending ? "Spouštím…" : `🚀 Spustit (${bulk ? `${cards.length} × ${targets.length}` : targets.length})`}</button>}
         </div>
       </div>
     </div>)
