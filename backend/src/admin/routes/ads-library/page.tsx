@@ -558,12 +558,26 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
   })
   const job = jobId ? (jobsQ.data?.jobs || []).find((j: any) => j.id === jobId) : null
   const jobFinished = job && (job.status === "done" || job.status === "failed")
+  // step.key = posledních 8 znaků creative id (+ "-vN" u variant) — z toho jde
+  // určit, které karty neprošly, a nabídnout opakování jen pro ně
+  const failedSteps = (job?.steps || []).filter((s: any) => s.status === "failed")
+  const okSteps = (job?.steps || []).filter((s: any) => s.status === "done")
+  const failedCardIds = rows
+    .filter((card: any) => {
+      const vid = versionFor(card).id.slice(-8)
+      return failedSteps.some((s: any) => String(s.key).split("-v")[0] === vid)
+    })
+    .map((c: any) => c.id)
+  // výběr v knihovně se ruší jen při čistém průchodu — po chybě zůstane,
+  // aby šlo hned zkusit znovu bez opětovného zaškrtávání
+  const cleanRun = !!jobFinished && failedSteps.length === 0 && okSteps.length > 0
 
-  const start = async () => {
+  const start = async (onlyCardIds?: string[]) => {
     if (target?.can_advertise === false) return
     setStarting(true)
     try {
-      const items = rows.map((card: any) => {
+      const src = onlyCardIds?.length ? rows.filter((c: any) => onlyCardIds.includes(c.id)) : rows
+      const items = src.map((card: any) => {
         const v = versionFor(card)
         return { creative_id: v.id, variant_urls: vars[v.id] || [] }
       })
@@ -577,11 +591,11 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", zIndex: 60, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "4vh 16px" }}
-      onClick={(e) => e.target === e.currentTarget && onClose(!!jobId)}>
+      onClick={(e) => e.target === e.currentTarget && onClose(cleanRun)}>
       <div style={{ ...S.card, maxWidth: 680, width: "100%", maxHeight: "90vh", overflow: "auto", background: "var(--bg-base,#fff)" }}>
         <div style={{ padding: "14px 18px", borderBottom: "1px solid #e5e7eb", display: "flex", position: "sticky", top: 0, background: "var(--bg-base,#fff)", zIndex: 2 }}>
           <b style={{ fontSize: 15.5 }}>🚀 Hromadné odeslání — {rows.length} {rows.length === 1 ? "karta" : "karet"} → Meta</b>
-          <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={() => onClose(!!jobId)}>✕</button>
+          <button style={{ ...S.btn, border: "none", marginLeft: "auto" }} onClick={() => onClose(cleanRun)}>✕</button>
         </div>
         <div style={{ padding: "16px 18px" }}>
           <div style={{ border: "1.5px solid #7c3aed", borderRadius: 11, padding: "11px 13px", background: "#faf5ff", marginBottom: 14 }}>
@@ -659,17 +673,37 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
                     {s.status === "done" ? "✓" : s.status === "running" ? "⏳" : s.status === "failed" ? "❌" : "·"}</span>
                   <span style={{ overflowWrap: "anywhere" }}>{s.label}{s.detail ? <span style={{ color: "#6b7280" }}> — {s.detail}</span> : ""}</span>
                 </div>))}
-              {jobFinished && <div style={{ fontSize: 13.5, fontWeight: 650, marginTop: 8, color: job.status === "done" ? "#15803d" : "#b91c1c" }}>
-                {job.status === "done" ? "✅ Dávka dokončena — zkontroluj a zapni v Ads Manageru" : `❌ ${job.error || "dávka selhala"}`}</div>}
+              {jobFinished && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 650, color: failedSteps.length ? "#b45309" : okSteps.length ? "#15803d" : "#b91c1c" }}>
+                    {failedSteps.length
+                      ? `⚠️ Hotovo s chybami — ${okSteps.length}× vytvořeno, ${failedSteps.length}× selhalo`
+                      : okSteps.length
+                        ? "✅ Dávka dokončena — zkontroluj a zapni v Ads Manageru"
+                        : `❌ ${job.error || "dávka selhala"}`}</div>
+                  {failedSteps.length > 0 && (
+                    <div style={{ fontSize: 12.5, color: "#6b7280", marginTop: 5, lineHeight: 1.5 }}>
+                      Výběr v knihovně zůstává zaškrtnutý — po opravě příčiny můžeš poslat znovu rovnou odsud,
+                      bez opětovného naklikávání karet.</div>)}
+                </div>)}
             </div>)}
         </div>
         <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
-          <button style={S.btn} onClick={() => onClose(!!jobId)}>Zavřít</button>
+          <button style={S.btn} onClick={() => onClose(cleanRun)}>Zavřít</button>
+          {jobFinished && failedSteps.length > 0 && (
+            <>
+              <button style={S.btn} disabled={starting}
+                onClick={() => { setJobId(null); start() }}>
+                {starting ? "…" : `🔁 Znovu všech ${rows.length}`}</button>
+              <button style={S.btnPri} disabled={starting}
+                onClick={() => { setJobId(null); start(failedCardIds) }}>
+                {starting ? "Spouštím…" : `🔁 Znovu jen neúspěšné (${failedCardIds.length})`}</button>
+            </>)}
           {target && !jobId && (() => {
             const blocked = target.can_advertise === false
             return (
               <button style={blocked ? { ...S.btnPri, opacity: .4, cursor: "not-allowed" } : S.btnPri}
-                disabled={starting || blocked} onClick={start}>
+                disabled={starting || blocked} onClick={() => start()}>
                 {blocked ? "⛔ Účet nemá oprávnění ADVERTISE" : starting ? "Spouštím…" : `🚀 Vytvořit ${totalPlanned} PAUSED reklam`}</button>)
           })()}
         </div>
