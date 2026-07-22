@@ -560,6 +560,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
   const jobFinished = job && (job.status === "done" || job.status === "failed")
 
   const start = async () => {
+    if (target?.can_advertise === false) return
     setStarting(true)
     try {
       const items = rows.map((card: any) => {
@@ -594,6 +595,11 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
             {resolveErr && <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>{resolveErr}</div>}
             {target && <div style={{ fontSize: 12.5, color: "#15803d", fontWeight: 650, marginTop: 7 }}>
               ✓ {target.account_name} → {target.campaign_name} → <b>{target.name}</b></div>}
+            {target?.can_advertise === false && (
+              <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 9, padding: "10px 12px", fontSize: 12.5, color: "#b91c1c", marginTop: 8, lineHeight: 1.55 }}>
+                ⛔ <b>Účet nemá oprávnění vytvářet reklamy.</b> Token má na <b>{target.account_name}</b> jen{" "}
+                {(target.user_tasks || []).join(", ") || "žádné role"} — chybí <b>ADVERTISE</b> (Správa kampaní).
+                Přidej ho v Business Settings → Reklamní účty → {target.account} → Lidé / System users, pak dej znovu Ověřit.</div>)}
             {target && <PagePicker account={target.account} value={pageId} onChange={setPageId} />}
           </div>
 
@@ -659,8 +665,13 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
         </div>
         <div style={{ padding: "12px 18px", borderTop: "1px solid #e5e7eb", display: "flex", gap: 8, justifyContent: "flex-end", position: "sticky", bottom: 0, background: "var(--bg-base,#fff)" }}>
           <button style={S.btn} onClick={() => onClose(!!jobId)}>Zavřít</button>
-          {target && !jobId && <button style={S.btnPri} disabled={starting}
-            onClick={start}>{starting ? "Spouštím…" : `🚀 Vytvořit ${totalPlanned} PAUSED reklam`}</button>}
+          {target && !jobId && (() => {
+            const blocked = target.can_advertise === false
+            return (
+              <button style={blocked ? { ...S.btnPri, opacity: .4, cursor: "not-allowed" } : S.btnPri}
+                disabled={starting || blocked} onClick={start}>
+                {blocked ? "⛔ Účet nemá oprávnění ADVERTISE" : starting ? "Spouštím…" : `🚀 Vytvořit ${totalPlanned} PAUSED reklam`}</button>)
+          })()}
         </div>
       </div>
     </div>)

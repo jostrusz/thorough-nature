@@ -24,6 +24,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   let target: any
   try { target = await resolveAdsetInput(String(b.adset)) }
   catch (e: any) { return fail(400, e.message) }
+  // stop before uploading anything — without ADVERTISE every ad would fail
+  // with Meta's misleading "object not visible" error
+  if (target.can_advertise === false) {
+    return fail(400, `účet ${target.account_name} (${target.account}) nemá pro tento token oprávnění ADVERTISE — reklamy by selhaly. Přidej „Správa kampaní" v Business Settings → Reklamní účty → System users.`)
+  }
 
   // build the flat plan: one entry per future ad
   const plan: any[] = []

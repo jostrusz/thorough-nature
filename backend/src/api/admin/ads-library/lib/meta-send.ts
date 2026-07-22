@@ -20,6 +20,12 @@ export async function graphPost(path: string, body: Record<string, any>) {
   const res = await fetch(`${GRAPH}/${path}`, { method: "POST", body: form })
   const json = await res.json()
   if (!res.ok || json.error) {
+    // 1487194 reads as "object not visible", but on ad/creative creation it
+    // almost always means the token lacks the ADVERTISE task on the account
+    if (json?.error?.error_subcode === 1487194) {
+      const acc = path.split("/")[0]
+      throw new Error(`[Meta ${path}] účtu ${acc} chybí pro tento token oprávnění ADVERTISE (Správa kampaní) — přidej ho v Business Settings → Reklamní účty → Lidé/System users. Meta hlásí: ${json?.error?.error_user_msg || ""}`)
+    }
     throw new Error(`[Meta ${path}] ${json?.error?.error_user_msg || json?.error?.message || res.status}`)
   }
   return json
@@ -71,10 +77,15 @@ export async function resolveAdsetInput(input: string) {
     info = ad.adset
   }
   const account = `act_${info.account_id}`
-  const acc = await graphGet(account, { fields: "name" }).catch(() => null)
+  // user_tasks = what THIS token may do on the account. Without ADVERTISE the
+  // ad/creative POST fails with a misleading "object not visible" (1487194),
+  // so it's surfaced here and checked before a batch starts.
+  const acc = await graphGet(account, { fields: "name,user_tasks" }).catch(() => null)
+  const tasks = acc?.user_tasks || []
   return {
     adset_id: info.id, name: info.name, status: info.status,
     campaign_name: info.campaign?.name, account, account_name: acc?.name || account,
+    can_advertise: tasks.includes("ADVERTISE"), user_tasks: tasks,
   }
 }
 
