@@ -409,10 +409,14 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           // Kočičí bible — samostatný funnel (kocicibible.cz). Single-variant bundle
           // (quantity=N na variantě); Dextrum zná fyzický kód 363682.
           "KOCICI-BIBLE-OFICIAL-PB": { physicalSku: "363682", quantity: 1 },
-      // Lâche prise (FR) bundle varianty — fyzicky N kusů téže knihy LACHE-1
-      "LACHE-2": { physicalSku: "LACHE-1", quantity: 2 },
-      "LACHE-3": { physicalSku: "LACHE-1", quantity: 3 },
-      "LACHE-4": { physicalSku: "LACHE-1", quantity: 4 },
+          // ─── French: Lâche prise sur ce qui te détruit (lache-livre) ───
+          // Dextrum zná knihu pod fyzickým kódem LVREFCE872687224 — medusí SKU
+          // LACHE-{N} tam neexistují (mySTOCK vracel "Invalid entry items.productId"
+          // a FR objednávky visely ve WAITING). Bundle = N kusů téže knihy.
+          "LACHE-1": { physicalSku: "LVREFCE872687224", quantity: 1 },
+          "LACHE-2": { physicalSku: "LVREFCE872687224", quantity: 2 },
+          "LACHE-3": { physicalSku: "LVREFCE872687224", quantity: 3 },
+          "LACHE-4": { physicalSku: "LVREFCE872687224", quantity: 4 },
           // Kočičí bible order bumpy — admin SKU má suffix -2, Dextrum drží rodičovský kód.
           "PTCTN2876287672-2": { physicalSku: "PTCTN2876287672", quantity: 1 },
           "ZJSZ9827982789-2": { physicalSku: "ZJSZ9827982789", quantity: 1 },
