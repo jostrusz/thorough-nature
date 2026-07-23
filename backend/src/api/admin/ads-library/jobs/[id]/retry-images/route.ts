@@ -165,9 +165,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       await setStep("img916", { status: "done", detail: `${n} variant`, cost_usd: round4(stepCost.img916 || 0) })
     }
 
-    // ── final status: done only when NOTHING is left failed (texts etc.) ──
+    // ── final status: done only when EVERY step is done. A step left `queued`
+    //    (e.g. texts that never ran because the original run died on the image
+    //    step) is NOT done — closing the job as done there ships a creative
+    //    with no texts, which bulk-send-to-Meta then rejects. Treat any
+    //    non-done step as incomplete so the job stays failed and the
+    //    "Zkusit texty znovu" button stays visible. ──
     const [fresh] = await svc.listAdLocalizationJobs({ id: job.id })
-    const broken = (fresh.steps || []).filter((s: any) => s.status === "failed")
+    const broken = (fresh.steps || []).filter((s: any) => s.status !== "done")
     const finalCost = round4(Number(p.cost_usd || 0) + addCost)
     await svc.updateAdLocalizationJobs({
       id: job.id,

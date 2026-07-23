@@ -28,7 +28,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   // in the queue. Only the texts step gets its status rewritten below.
   const finalStatus = async () => {
     const [fresh] = await svc.listAdLocalizationJobs({ id: job.id })
-    const broken = (fresh.steps || []).filter((s: any) => s.key !== "texts" && s.status === "failed")
+    const broken = (fresh.steps || []).filter((s: any) => s.key !== "texts" && s.status !== "done")
     return broken.length
       ? { status: "failed", error: `nedokončené kroky: ${broken.map((s: any) => s.label || s.key).join(", ")}` }
       : { status: "done", error: null }
