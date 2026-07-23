@@ -909,6 +909,18 @@ function QueueTab({ zoom }: any) {
     setRetrying(null)
     qc.invalidateQueries({ queryKey: ["ads-jobs"] })
   }
+  const retryImages = async (jobId: string) => {
+    setRetrying(jobId)
+    try {
+      await sdk.client.fetch(`/admin/ads-library/jobs/${jobId}/retry-images`, { method: "POST" })
+      qc.invalidateQueries({ queryKey: ["ads-lib"] })
+      qc.invalidateQueries({ queryKey: ["ads-studio"] })
+    } catch (e: any) {
+      window.alert(`Opakování obrázků selhalo: ${e?.message || e}`)
+    }
+    setRetrying(null)
+    qc.invalidateQueries({ queryKey: ["ads-jobs"] })
+  }
   const jobs = data?.jobs || []
   const stepChip = (s: any) => {
     const bg = s.status === "done" ? "#dcfce7" : s.status === "running" ? "#fef3c7" : s.status === "failed" ? "#fee2e2" : "var(--bg-subtle,#f3f4f6)"
@@ -943,6 +955,11 @@ function QueueTab({ zoom }: any) {
                   disabled={!!retrying}
                   title="Znovu vygeneruje texty stejným promptem a modelem — obrázky zůstanou"
                   onClick={() => retryTexts(j.id)}>{retrying === j.id ? "⏳ generuji texty…" : "↻ Zkusit texty znovu"}</button>)}
+              {j.status === "failed" && j.result_creative_id && (j.steps || []).some((s: any) => (s.key === "img11" || s.key === "img916") && s.status === "failed") && (
+                <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#2563eb", color: "#2563eb", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
+                  disabled={!!retrying}
+                  title="Znovu vygeneruje jen padlé obrázky (9:16 reframe z hotových 1:1) — texty a povedené obrázky zůstanou"
+                  onClick={() => retryImages(j.id)}>{retrying === j.id ? "⏳ generuji obrázky…" : "🖼️ Vygenerovat obrázky znovu"}</button>)}
             </div>
             {openJob === j.id && (
               <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--bg-subtle,#f9fafb)", borderRadius: 9, border: "1px solid var(--border-base,#e5e7eb)" }}>
