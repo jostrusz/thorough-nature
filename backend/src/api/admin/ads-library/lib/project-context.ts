@@ -51,7 +51,7 @@ export const PROJECT_CONTEXT: Record<string, {
   "lache-livre": {
     language: "FR", langName: "francouzština", book: "Lâche prise sur ce qui te détruit",
     author: "Joris de Vries", address: "tykání (tutoiement)", domain: "lacheprise-livre.fr",
-    notes: "36 €, livraison offerte, 2 e-booky bonus (L'Antidote à l'overthinking, L'amour sans foutaises). Épicène — gender-neutrální formulace.",
+    notes: "36 €, 360 stran + cvičení, livraison offerte, 2 e-booky bonus (L'Antidote à l'overthinking, L'amour sans foutaises). Épicène — gender-neutrální formulace.",
   },
   "het-leven": {
     language: "NL", langName: "nizozemština", book: "Het leven dat je verdient",
