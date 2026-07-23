@@ -388,9 +388,11 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           // Order-bump upsell (Życie → Odpuść cross-sell). Admin SKU has -2 suffix;
           // Dextrum holds only the parent barcode OTCCN64787237.
           "OTCCN64787237-2": { physicalSku: "OTCCN64787237", quantity: 1 },
-          // Order-bump upsell (Život → Pusť to cross-sell). Admin SKU has -3 suffix;
-          // Dextrum holds only the parent barcode OTCCN64787237.
-          "OTCCN64787237-3": { physicalSku: "OTCCN64787237", quantity: 1 },
+          // Order-bump upsell (Život → Pusť to cross-sell). Admin SKU zdědilo prefix
+          // polského rodiče (OTCCN…-3), ale jde o ČESKOU knihu — Dextrum ji drží pod
+          // PTCTN2876287672 (sortiment 00506418). Mapování na OTCCN64787237 posílalo
+          // zákazníkům polskou Odpuść (5 objednávek 17.–23. 7. 2026).
+          "OTCCN64787237-3": { physicalSku: "PTCTN2876287672", quantity: 1 },
           // ─── Czech: Život, jaký si zasloužíš (zivot-zaslugy) ───
           // Dextrum zná jediný fyzický kód knihy: ZJSZ9827982789.
           // Varianta "1 kniha" nese rovnou fyzické SKU, bundly 2–4 mají ZKZ-{N}.
