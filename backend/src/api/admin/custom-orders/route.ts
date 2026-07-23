@@ -67,8 +67,12 @@ async function searchOrderIds(
       }
     }
 
-    // Cap candidates: if paymentStatus is a post-filter, pull more for margin
-    const cap = opts.paymentStatus ? 400 : 50
+    // Cap candidates: strop na počet výsledků širokého hledání (řazeno od
+    // nejnovějších). U konkrétního emailu/kódu je shoda jen 1, takže cap nevadí;
+    // projeví se jen u širokých dotazů (příjmení, město, doména) — a tam nechceme,
+    // aby starší objednávky (např. CZ2026-27688 ze 17.7.) vypadly pod hranu.
+    // paymentStatus je JS post-filter, proto větší margin.
+    const cap = opts.paymentStatus ? 800 : 300
 
     const sql = `
       SELECT o.id, MAX(o.created_at) AS created_at
