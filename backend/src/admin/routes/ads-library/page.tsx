@@ -952,14 +952,14 @@ function QueueTab({ zoom }: any) {
                 {openJob === j.id ? "Skrýt zadání ▴" : "📋 Zobrazit zadání (prompty, modely) ▾"}</button>
               {j.status === "failed" && (
                 <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#7c3aed", color: "#7c3aed", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
-                  disabled={!!retrying}
+                  disabled={retrying === j.id}
                   title="Znovu vygeneruje texty stejným promptem a modelem — obrázky zůstanou"
-                  onClick={() => retryTexts(j.id)}>{retrying === j.id ? "⏳ generuji texty…" : "↻ Zkusit texty znovu"}</button>)}
+                  onClick={() => retryTexts(j.id)}>{retrying === j.id ? "⏳ spouštím…" : "↻ Zkusit texty znovu"}</button>)}
               {j.status === "failed" && j.result_creative_id && (j.steps || []).some((s: any) => (s.key === "img11" || s.key === "img916") && s.status === "failed") && (
                 <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#2563eb", color: "#2563eb", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
-                  disabled={!!retrying}
+                  disabled={retrying === j.id}
                   title="Znovu vygeneruje jen padlé obrázky (9:16 reframe z hotových 1:1) — texty a povedené obrázky zůstanou"
-                  onClick={() => retryImages(j.id)}>{retrying === j.id ? "⏳ generuji obrázky…" : "🖼️ Vygenerovat obrázky znovu"}</button>)}
+                  onClick={() => retryImages(j.id)}>{retrying === j.id ? "⏳ spouštím…" : "🖼️ Vygenerovat obrázky znovu"}</button>)}
             </div>
             {openJob === j.id && (
               <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--bg-subtle,#f9fafb)", borderRadius: 9, border: "1px solid var(--border-base,#e5e7eb)" }}>

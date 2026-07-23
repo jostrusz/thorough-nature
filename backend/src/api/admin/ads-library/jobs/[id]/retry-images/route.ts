@@ -15,10 +15,14 @@ import { costUSD, round4 } from "../../../lib/pricing"
  * result creative and its finished 1:1 variants as the reframe source, so a
  * retry never re-does work that succeeded or duplicates the target creative.
  *
+ * Fire-and-forget: the request marks the job running and returns immediately;
+ * image generation (60–150 s per image) runs in the background and the Fronta
+ * polls progress via GET /jobs. Blocking the HTTP request instead would freeze
+ * the retry button for minutes and risk a proxy timeout.
+ *
  * Default: retry whichever of img11 / img916 is currently `failed`.
  * Body: { img_model?, formats?: ['1:1','9:16'] } — formats forces which image
- * steps to redo (e.g. re-run 9:16 even though it isn't marked failed); img_model
- * switches the image model for the retry. Texts and their cost are untouched.
+ * steps to redo; img_model switches the image model. Texts are untouched.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
@@ -72,9 +76,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     if (ids.length) { try { await svc.deleteAdVariants(ids) } catch {} }
   }
 
-  try {
-    await svc.updateAdLocalizationJobs({ id: job.id, status: "running", error: null })
+  // ── flip the retried image step(s) to running up-front so the Fronta shows
+  //    "běží" on the very next poll and the retry buttons hide immediately ──
+  const runningSteps = steps0.map((s: any) =>
+    ((s.key === "img11" && retry11) || (s.key === "img916" && retry916))
+      ? { ...s, status: "running", detail: "opakování" }
+      : s)
+  await svc.updateAdLocalizationJobs({ id: job.id, status: "running", error: null, steps: runningSteps })
 
+  // ── the actual generation runs in the background (see fire-and-forget note) ──
+  const run = async () => {
     // ── 1:1 retry (only if it failed / forced) ──
     if (retry11) {
       if (!src.image_1x1_url) throw new Error("zdrojová kreativa nemá obrázek")
@@ -168,14 +179,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       const [c] = await svc.listAdCreatives({ id: created.id })
       await svc.updateAdCreatives({ id: created.id, metadata: { ...(c?.metadata || {}), generating: false, failed: null } })
     }
-    res.json({ ok: true, retried: { "1:1": retry11, "9:16": retry916 }, cost_usd: finalCost })
-  } catch (e: any) {
-    const [f] = await svc.listAdLocalizationJobs({ id: job.id })
-    const steps = (f.steps || []).map((s: any) => (s.status === "running" ? { ...s, status: "failed", detail: e.message.slice(0, 200) } : s))
-    await svc.updateAdLocalizationJobs({
-      id: job.id, status: "failed", error: e.message.slice(0, 500), steps,
-      params: { ...p, cost_usd: round4(Number(p.cost_usd || 0) + addCost) },
-    })
-    fail(502, e.message)
   }
+
+  run().catch(async (e: any) => {
+    try {
+      const [f] = await svc.listAdLocalizationJobs({ id: job.id })
+      const steps = (f.steps || []).map((s: any) => (s.status === "running" ? { ...s, status: "failed", detail: e.message.slice(0, 200) } : s))
+      await svc.updateAdLocalizationJobs({
+        id: job.id, status: "failed", error: e.message.slice(0, 500), steps,
+        params: { ...p, cost_usd: round4(Number(p.cost_usd || 0) + addCost) },
+      })
+    } catch {}
+    console.error(`[Ads Library] retry-images job ${job.id} FAILED: ${e.message}`)
+  })
+
+  res.json({ ok: true, started: true, retried: { "1:1": retry11, "9:16": retry916 } })
 }
