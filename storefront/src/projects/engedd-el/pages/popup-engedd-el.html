@@ -975,6 +975,14 @@
       border-radius: 22px;                  /* všechny rohy = plovoucí karta */
       transform: translateY(16px) scale(0.98);  /* zavřeno: lehce dole + zmenšeno */
       transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      /* Na malých telefonech je krok 1 (hlavička + formulář) vyšší než 92dvh.
+         Globální overflow:hidden + inline overflow:visible na .options obsah
+         ořízly — tlačítko „Kérem az első feladatot" nebylo vidět ani se k němu
+         nešlo doscrollovat (reálná stížnost z FB: „nem látható a küldés gombja").
+         Scroll celé karty to řeší pro všechny kroky. */
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
     .popup-overlay.open .popup { transform: translateY(0) scale(1); }
     /* žádný grabber — vycentrovaný modal, ne bottom-sheet */
