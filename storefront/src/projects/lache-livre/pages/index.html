@@ -365,13 +365,6 @@
   <!-- CTA + platební ikony -->
   <div class="redenen-cta">
    <a href="checkout.html" class="btn-cta">Recevoir mon exemplaire →</a>
-   <p class="quiz-text-link-row">
-    <span>Tu doutes que ce livre soit fait pour toi ?</span>
-    <button type="button" class="quiz-trigger quiz-text-link" data-source="after_cta_9redenen">
-     Fais le test de 2 minutes
-     <span class="quiz-arrow">→</span>
-    </button>
-   </p>
    <div class="payment-row">
     <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
     <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -733,13 +726,6 @@
   <!-- CTA tlačítko -->
   <div class="verhaal-cta">
    <a href="checkout.html" class="btn-cta">Je veux ce livre →</a>
-   <p class="quiz-text-link-row">
-    <span>Tu doutes que ce livre soit fait pour toi ?</span>
-    <button type="button" class="quiz-trigger quiz-text-link" data-source="after_cta_verhaal">
-     Fais le test de 2 minutes
-     <span class="quiz-arrow">→</span>
-    </button>
-   </p>
    <div class="payment-row">
     <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
     <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -1983,6 +1969,13 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
+  // ⏸️ 2026-07-22: popup dočasně vypnutý na žádost Jaroslava (FR trh zatím
+  // není připravený — flow/e-maily nejsou zprovozněné). Pro znovuzapnutí
+  // přepni na false a vrať do indexu odkazy „Fais le test de 2 minutes"
+  // (viz git historie tohoto souboru).
+  const POPUP_PAUSED = true;
+  if (POPUP_PAUSED) return;
+
   const POPUP_URL  = '/popup-lache-livre.html';
   const COOKIE_KEY = 'lh_popup_seen';
   const COOKIE_DAYS = 3;
