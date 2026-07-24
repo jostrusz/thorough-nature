@@ -1199,7 +1199,7 @@ function $$(sel) { return Array.from(document.querySelectorAll(sel)); }
 // Anonymní session id, aby se stejný návštěvník počítal jen jednou
 // per popup view. Uloženo v localStorage, regenerováno při resetu.
 const POPUP_FORM_SLUG = "popup_quiz_loslatenboek";
-const POPUP_BRAND_SLUG = "loslatenboek";
+const POPUP_BRAND_SLUG = "lache-livre";
 
 function getOrCreatePopupSession() {
   try {
@@ -1522,8 +1522,8 @@ async function submitForm(e) {
   const device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? "mobile" : "desktop";
 
   const payload = {
-    brand_slug: "loslatenboek",
-    form_id: "popup_quiz_loslatenboek",
+    brand_slug: "lache-livre",
+    form_id: "popup_quiz_lache_livre",
     email,
     first_name: firstName,
     properties: {

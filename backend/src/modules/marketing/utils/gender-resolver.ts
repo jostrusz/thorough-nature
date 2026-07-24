@@ -133,12 +133,47 @@ export function ruleFallbackHu(firstNameRaw) {
   return { gender, vocative: name } // nominative address
 }
 
+// Common French male names ending in -e (the vowel heuristic below would
+// misread them as female). Dominique/Camille/Claude are genuinely unisex and
+// stay "unknown" so the copy falls back to the female default variant.
+const FR_MALE_E = new Set([
+  "pierre", "alexandre", "philippe", "maxime", "jérôme", "jerome", "étienne",
+  "etienne", "antoine", "baptiste", "christophe", "stéphane", "stephane",
+  "jean-baptiste", "côme", "come", "auguste", "hippolyte", "timothée",
+  "timothee", "barnabé", "barnabe", "ange", "brice", "blaise", "jules",
+])
+const FR_UNISEX = new Set(["dominique", "camille", "claude", "sacha", "alix", "morgan"])
+
+/** Rule-based fallback for FRENCH. French has no vocative — address by the
+ *  first name unchanged ("Salut Marie") — so vocative = name as-is. Gender
+ *  only picks the m/f copy variant (adjective/participle agreement: prêt/
+ *  prête, seul/seule, désolé/désolée). Heuristic: -e/-a endings lean female
+ *  with a curated male -e list (Pierre, Maxime, Antoine…); unisex names stay
+ *  unknown → female default per pickGenderVariant. */
+export function ruleFallbackFr(firstNameRaw) {
+  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
+  if (!raw) return { gender: "unknown", vocative: "" }
+  const name = cap(raw)
+  const l = name.toLowerCase()
+
+  let gender = "unknown"
+  if (FR_UNISEX.has(l)) gender = "unknown"
+  else if (FR_MALE_E.has(l)) gender = "m"
+  else if (FEM_CONSONANT.has(l)) gender = "f"
+  else if (/(ine|elle|ette|anne|enne|ie|ée|a)$/.test(l)) gender = "f"
+  else if (l.endsWith("e")) gender = "f" // Sophie, Claire, Aline… (males covered above)
+  else gender = "m" // consonant / -o / -i endings → assume male (Hugo, Rémi…)
+
+  return { gender, vocative: name } // no vocative case in French
+}
+
 /** Locale-aware fallback dispatcher. Defaults to Czech. */
 export function ruleFallback(firstNameRaw, locale = "cs") {
   const loc = String(locale || "").toLowerCase()
   if (loc.startsWith("pl")) return ruleFallbackPl(firstNameRaw)
   if (loc.startsWith("sk")) return ruleFallbackSk(firstNameRaw)
   if (loc.startsWith("hu")) return ruleFallbackHu(firstNameRaw)
+  if (loc.startsWith("fr")) return ruleFallbackFr(firstNameRaw)
   return ruleFallbackCs(firstNameRaw)
 }
 
@@ -154,14 +189,22 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
   const isPl = loc.startsWith("pl")
   const isSk = loc.startsWith("sk")
   const isHu = loc.startsWith("hu")
-  const system = isHu
+  const isFr = loc.startsWith("fr")
+  const system = isFr
+    ? "Tu es expert de la langue française. Pour le prénom donné, détermine le genre de la personne qui le porte. Le français n'a pas de vocatif — on s'adresse par le prénom inchangé, donc vocative = le prénom tel quel. Réponds UNIQUEMENT en JSON, rien d'autre."
+    : isHu
     ? "Te a magyar nyelv szakértője vagy. Az adott keresztnévhez határozd meg a viselő nemét. A magyarban nincs megszólító eset — a keresztnév változatlan marad, tehát vocative = a név változatlanul. CSAK JSON-nal válaszolj, semmi mással."
     : isSk
     ? "Si expert na slovenčinu. Pre dané krstné meno urč gramatický rod. Slovenčina nemá vokatív — oslovuje sa nominatívom, takže vocative = meno bez zmeny. Odpovedz IBA JSON, nič viac."
     : isPl
     ? "Jesteś ekspertem od języka polskiego. Dla podanego imienia określ rodzaj gramatyczny i wołacz (5. przypadek). Odpowiedz TYLKO w formacie JSON, nic więcej."
     : "Jsi expert na češtinu. Pro dané křestní jméno urči gramatický rod a 5. pád (vokativ). Odpověz POUZE JSON, nic víc."
-  const userPrompt = isHu
+  const userPrompt = isFr
+    ? `Prénom : "${raw}"\n` +
+      `Retourne exactement : {"gender":"m"|"f"|"unknown","vocative":"<le prénom inchangé>"}\n` +
+      `Règles : "m" prénom masculin, "f" prénom féminin, "unknown" si indéterminable (étranger/épicène comme Dominique, Camille, Claude, Sacha). ` +
+      `vocative = le prénom tel quel (Marie→Marie, Pierre→Pierre, Chloé→Chloé). Aucun autre texte que le JSON.`
+    : isHu
     ? `Keresztnév: "${raw}"\n` +
       `Pontosan ezt add vissza: {"gender":"m"|"f"|"unknown","vocative":"<a név változatlanul>"}\n` +
       `Szabályok: "m" férfinév, "f" női név, "unknown" ha nem eldönthető (külföldi/unisex). ` +
