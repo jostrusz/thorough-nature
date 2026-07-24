@@ -1969,11 +1969,11 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
      ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function () {
-  // ⏸️ 2026-07-22: popup dočasně vypnutý na žádost Jaroslava (FR trh zatím
-  // není připravený — flow/e-maily nejsou zprovozněné). Pro znovuzapnutí
-  // přepni na false a vrať do indexu odkazy „Fais le test de 2 minutes"
-  // (viz git historie tohoto souboru).
-  const POPUP_PAUSED = true;
+  // ▶️ 2026-07-24: popup spuštěn naostro (FR flow live, doména ověřená,
+  // E2E otestováno). Trigger: 7 s po loadu nebo 50 % scroll — stejně jako
+  // ostatní projekty. Textové odkazy „Fais le test de 2 minutes" zůstávají
+  // odebrané (referenční projekty je v těle taky nemají).
+  const POPUP_PAUSED = false;
   if (POPUP_PAUSED) return;
 
   const POPUP_URL  = '/popup-lache-livre.html';
