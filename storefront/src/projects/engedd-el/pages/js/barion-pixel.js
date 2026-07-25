@@ -204,6 +204,14 @@
   window.BarionPixel.rejectConsent = function () { saveConsent('rejected'); };
 
   function showConsentBar() {
+    // DISABLED (2026-07): the consent bar is hidden on request — it overlapped
+    // the hero price/CTA on mobile. The bar is the GDPR opt-in for the Barion/
+    // marketing pixel, so with it gone marketing consent stays un-granted by
+    // default (no marketing cookies fired). To restore the bar, delete this
+    // early return. To instead keep marketing tracking without a bar, replace
+    // it with `saveConsent('granted')` — note this is a compliance decision.
+    return;
+    // eslint-disable-next-line no-unreachable
     if (document.getElementById('barion-consent-bar')) return;
     var bar = document.createElement('div');
     bar.id = 'barion-consent-bar';
