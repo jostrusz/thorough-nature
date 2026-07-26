@@ -6747,9 +6747,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   loadPaymentMethods();
 
   /* ─── MODE DE LIVRAISON — Packeta FR (point relais / domicile) ───
-   * FR utilise les transporteurs externes de Packeta (points relais) → PAS de
-   * filtre vendors dans le widget ; point.carrierId est enregistré dans
-   * cartMeta.packeta_carrier_id (pattern biblia-kotow / odpusc-ksiazka). */
+   * La France n'a pas de points Packeta propres : tout passe par des
+   * transporteurs externes, donc le widget DOIT recevoir un filtre `vendors`
+   * (voir plus bas) — sans lui il n'affiche rien. point.carrierId est enregistré
+   * dans cartMeta.packeta_carrier_id et repart vers mySTOCK comme
+   * externalCarrierCode (pattern biblia-kotow / odpusc-ksiazka). */
   var selectedShipping = 'pickup'; // 'pickup' (point relais) ou 'home' (domicile)
   var selectedPacketaPoint = null; // { id, name, address, zip, city, carrierId }
 
@@ -6861,10 +6863,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'fr',
           country: 'fr',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // FR : points relais via transporteur externe Mondial Relay.
-          // carrierId 12889 = « FR Mondial Relay PP » (feed officiel Packeta
-          // /v5/{key}/carrier/json) — affiche uniquement les points Mondial Relay.
-          vendors: [{ carrierId: 12889 }],
+          // FR : points relais via transporteurs externes de Packeta. Les deux
+          // réseaux disponibles sur notre compte (feed /v5/{key}/carrier/json) :
+          //   12889 = « FR Mondial Relay PP »  (max 15 kg)
+          //    4307 = « FR Colissimo PP »      (max 30 kg, réseau La Poste,
+          //                                     bien plus dense)
+          vendors: [
+            { country: 'fr', carrierId: 12889 },
+            { country: 'fr', carrierId: 4307 },
+          ],
         });
       });
     }
