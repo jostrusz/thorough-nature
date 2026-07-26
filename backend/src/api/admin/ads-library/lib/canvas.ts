@@ -37,6 +37,15 @@ const EDGE_SAMPLE = 24
 const FLAT_TOLERANCE = 12
 /** Flat runs shorter than this are ignored, so speckle doesn't create stripes. */
 const MIN_FLAT_RUN = 16
+/**
+ * A band is filled with edge colours ONLY when nearly the whole width is flat.
+ * Mixing filled columns with grey ones in the same band was a mistake: on
+ * photos with dark vertical structure at the edge (door frames, shelving) it
+ * produced literal barcode stripes, and the model left the grey slivers alone.
+ * All-or-nothing — either the band is a solid colour continuation, or it is
+ * plain grey and the model paints the whole thing.
+ */
+const FLAT_BAND_MIN = 0.92
 /** Alpha ramp (px) where the pasted original meets a generated band. */
 const SEAM_FEATHER = 8
 
@@ -123,20 +132,47 @@ function scanEdge(raw: Buffer, w: number, h: number, ch: number, fromTop: boolea
   return { flat, colour }
 }
 
-/** Build one band: flat columns get their own colour, the rest mid-grey. */
+/**
+ * Build one band. Either the whole thing is a colour continuation of the edge
+ * (only when FLAT_BAND_MIN of the width is genuinely flat — the few non-flat
+ * columns are then interpolated from their flat neighbours so no grey and no
+ * stripe survives), or the whole thing is plain grey for the model to paint.
+ */
 function buildBand(w: number, bandH: number, scan: { flat: boolean[]; colour: Uint8Array }) {
-  const band = Buffer.alloc(w * bandH * 3, 128)
-  let solid = 0
+  const flatCount = scan.flat.reduce((n, f) => n + (f ? 1 : 0), 0)
+  const ratio = w ? flatCount / w : 1
+  if (ratio < FLAT_BAND_MIN) {
+    return { band: Buffer.alloc(w * bandH * 3, 128), solidPct: 0 }
+  }
+
+  // Fill every column: flat ones with their own colour, the rest carried over
+  // from the nearest flat column on each side so the row stays continuous.
+  const col = new Uint8Array(w * 3)
+  let lastFlat = -1
   for (let x = 0; x < w; x++) {
-    if (!scan.flat[x]) continue
-    solid++
-    const r = scan.colour[x * 3], g = scan.colour[x * 3 + 1], b = scan.colour[x * 3 + 2]
-    for (let y = 0; y < bandH; y++) {
-      const i = (y * w + x) * 3
-      band[i] = r; band[i + 1] = g; band[i + 2] = b
+    if (scan.flat[x]) {
+      for (let c = 0; c < 3; c++) col[x * 3 + c] = scan.colour[x * 3 + c]
+      lastFlat = x
+      continue
+    }
+    let nextFlat = -1
+    for (let k = x + 1; k < w; k++) if (scan.flat[k]) { nextFlat = k; break }
+    for (let c = 0; c < 3; c++) {
+      const a = lastFlat >= 0 ? scan.colour[lastFlat * 3 + c] : (nextFlat >= 0 ? scan.colour[nextFlat * 3 + c] : 128)
+      const bv = nextFlat >= 0 ? scan.colour[nextFlat * 3 + c] : a
+      const t = lastFlat >= 0 && nextFlat >= 0 ? (x - lastFlat) / (nextFlat - lastFlat) : 0
+      col[x * 3 + c] = Math.round(a * (1 - t) + bv * t)
     }
   }
-  return { band, solidPct: w ? Math.round((solid / w) * 100) : 100 }
+
+  const band = Buffer.alloc(w * bandH * 3)
+  for (let y = 0; y < bandH; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 3
+      band[i] = col[x * 3]; band[i + 1] = col[x * 3 + 1]; band[i + 2] = col[x * 3 + 2]
+    }
+  }
+  return { band, solidPct: 100 }
 }
 
 /**

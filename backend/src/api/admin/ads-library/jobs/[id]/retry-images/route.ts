@@ -21,9 +21,13 @@ import { costUSD, round4 } from "../../../lib/pricing"
  * polls progress via GET /jobs. Blocking the HTTP request instead would freeze
  * the retry button for minutes and risk a proxy timeout.
  *
- * Default: retry whichever of img11 / img916 is currently `failed`.
- * Body: { img_model?, formats?: ['1:1','9:16'] } — formats forces which image
- * steps to redo; img_model switches the image model. Texts are untouched.
+ * Default: retry whichever of img11 / img916 is currently failed or still
+ * queued (a run killed mid-flight leaves queued steps behind).
+ * Body: { img_model?, steps?: ['img11','img916'] }
+ *   steps   — forces exactly which image steps to redo, so a botched 4:5 can be
+ *             re-rolled without touching (and re-paying for) the 9:16
+ *   formats — legacy alias, ['4:5'|'1:1','9:16']
+ * Texts are never touched here — that is POST .../retry-texts.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const svc = req.scope.resolve(ADS_LIBRARY_MODULE)
@@ -49,10 +53,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const steps0 = job.steps || []
   const has = (k: string) => steps0.some((s: any) => s.key === k)
   const statusOf = (k: string) => steps0.find((s: any) => s.key === k)?.status
-  const forced: string[] | null = Array.isArray(b.formats) && b.formats.length ? b.formats : null
-  // feed step accepts both labels: new jobs ask for "4:5", older ones "1:1"
-  const retry11 = has("img11") && (forced ? (forced.includes("4:5") || forced.includes("1:1")) : statusOf("img11") === "failed")
-  const retry916 = has("img916") && (forced ? forced.includes("9:16") : statusOf("img916") === "failed")
+  // `steps` is the explicit form; `formats` stays supported for older callers
+  const asked: string[] | null =
+    (Array.isArray(b.steps) && b.steps.length ? b.steps : null) ||
+    (Array.isArray(b.formats) && b.formats.length
+      ? b.formats.map((f: string) => (f === "9:16" ? "img916" : "img11"))
+      : null)
+  // a step counts as retryable when it exists on the job; without an explicit
+  // ask we redo whatever is failed — and anything still queued, which is what a
+  // run killed mid-flight leaves behind
+  const wants = (k: string) =>
+    has(k) && (asked ? asked.includes(k) : ["failed", "queued"].includes(String(statusOf(k))))
+  const retry11 = wants("img11")
+  const retry916 = wants("img916")
   if (!retry11 && !retry916) return fail(400, "žádný obrázkový krok k opakování")
 
   const imgCount = Math.min(Number(p.img_count) || 1, 4)
@@ -190,6 +203,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       if (firstOff) await svc.updateAdCreatives({ id: created.id, image_9x16_url: firstOff.url })
       await setStep("img916", { status: "done", detail: `${n} variant`, cost_usd: round4(stepCost.img916 || 0) })
     }
+
 
     // ── final status: done only when EVERY step is done. A step left `queued`
     //    (e.g. texts that never ran because the original run died on the image

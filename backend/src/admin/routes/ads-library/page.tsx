@@ -25,7 +25,7 @@ const RANGES = [["3d", "3 dny"], ["7d", "7 dní"], ["14d", "14 dní"], ["30d", "
 
 const IMG_PROMPTS = {
   swap: "Edit IMAGE 2: the book shown in it must be replaced by the book from IMAGE 1.\n\nThe book in the result must read exactly:\n  Title: \"{BOOK}\"\n  Author: {AUTHOR}\nThe original title must be gone completely. Use the layout, colors and artwork of IMAGE 1, and write all text on the cover in {LANG}.\n\nKeep the person, hands, background, table and whole scene of IMAGE 2 identical. Keep the book's position, angle, size, lighting and shadows. Translate any other text in the image (headlines, captions, badges) into {LANG}, keeping its position, font style, size and color. Do not add prices, badges, stickers, logos or anything not present in IMAGE 2.",
-  texts: "Translate every piece of visible text in this image into {LANG}. Keep each text block in exactly the same position, font style, size, color and orientation as the original. Do not remove any text. Do not add any new text, prices, badges, logos, objects or people. Never add a book or book cover that is not in the original image. Keep the composition, characters, colors and background identical apart from the translated words.",
+  texts: "Translate every piece of visible text in this image into {LANG}.\n\nThe result must be standard, grammatically correct, natural {LANG} as a native speaker would write it — correct declension, correct gender agreement, correct diacritics. Never leave a word in the source language, and never use a word from a closely related language (Czech is not Slovak, Slovak is not Czech, Dutch is not German). Every single character with a diacritic must be the one {LANG} actually uses. Re-read the finished text and fix anything that a native speaker would not write.\n\nKeep each text block in exactly the same position, font style, size, colour and orientation as the original. If the translation is longer than the original, adjust letter spacing or line breaks so it still fits its shape — never let it overflow or get clipped. Do not remove any text. Do not add any new text, prices, badges, logos, objects or people. Never add a book or book cover that is not in the original image. Keep the composition, characters, colours and background identical apart from the translated words.",
 }
 const PROMPT_916 = "Reframe to 9:16 portrait. Extend the environment upward and downward using consistent perspective and atmospheric depth. Preserve all original details and the overall aesthetic."
 
@@ -909,10 +909,14 @@ function QueueTab({ zoom }: any) {
     setRetrying(null)
     qc.invalidateQueries({ queryKey: ["ads-jobs"] })
   }
-  const retryImages = async (jobId: string) => {
+  // `steps` targets one image step at a time, so re-rolling an ugly 4:5 doesn't
+  // regenerate (and re-charge for) the 9:16 that was already fine.
+  const retryImages = async (jobId: string, steps?: string[]) => {
     setRetrying(jobId)
     try {
-      await sdk.client.fetch(`/admin/ads-library/jobs/${jobId}/retry-images`, { method: "POST" })
+      await sdk.client.fetch(`/admin/ads-library/jobs/${jobId}/retry-images`, {
+        method: "POST", body: steps ? { steps } : {},
+      })
       qc.invalidateQueries({ queryKey: ["ads-lib"] })
       qc.invalidateQueries({ queryKey: ["ads-studio"] })
     } catch (e: any) {
@@ -950,16 +954,30 @@ function QueueTab({ zoom }: any) {
               <button style={{ ...S.btn, border: "none", color: "#7c3aed", padding: "3px 0", fontSize: 12.5 }}
                 onClick={() => setOpenJob(openJob === j.id ? null : j.id)}>
                 {openJob === j.id ? "Skrýt zadání ▴" : "📋 Zobrazit zadání (prompty, modely) ▾"}</button>
-              {j.status === "failed" && (
-                <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#7c3aed", color: "#7c3aed", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
-                  disabled={retrying === j.id}
-                  title="Znovu vygeneruje texty stejným promptem a modelem — obrázky zůstanou"
-                  onClick={() => retryTexts(j.id)}>{retrying === j.id ? "⏳ spouštím…" : "↻ Zkusit texty znovu"}</button>)}
-              {j.status === "failed" && j.result_creative_id && (j.steps || []).some((s: any) => (s.key === "img11" || s.key === "img916") && s.status === "failed") && (
-                <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#2563eb", color: "#2563eb", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
-                  disabled={retrying === j.id}
-                  title="Znovu vygeneruje jen padlé obrázky (9:16 reframe z hotových 4:5) — texty a povedené obrázky zůstanou"
-                  onClick={() => retryImages(j.id)}>{retrying === j.id ? "⏳ spouštím…" : "🖼️ Vygenerovat obrázky znovu"}</button>)}
+              {/* Per-step re-rolls. Shown on finished jobs too, not just failed
+                  ones — the usual reason to hit these is an image that "worked"
+                  but came out ugly, and each button costs only its own step. */}
+              {j.result_creative_id && j.status !== "running" && j.status !== "queued" && (() => {
+                const hasStep = (k: string) => (j.steps || []).some((s: any) => s.key === k)
+                const busy = retrying === j.id
+                const btn = (colour: string) => busy
+                  ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 }
+                  : { ...S.btn, borderColor: colour, color: colour, fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }
+                return <>
+                  {hasStep("img11") && (
+                    <button style={btn("#2563eb")} disabled={busy}
+                      title="Přegeneruje jen feedový obrázek 4:5 (lokalizace + dokreslení pruhů). 9:16 a texty zůstanou."
+                      onClick={() => retryImages(j.id, ["img11"])}>{busy ? "⏳ spouštím…" : "🖼️ 4:5 znovu"}</button>)}
+                  {hasStep("img916") && (
+                    <button style={btn("#0891b2")} disabled={busy}
+                      title="Přegeneruje jen 9:16 (reframe z hotového 4:5). 4:5 a texty zůstanou."
+                      onClick={() => retryImages(j.id, ["img916"])}>{busy ? "⏳ spouštím…" : "📐 9:16 znovu"}</button>)}
+                  {hasStep("texts") && (
+                    <button style={btn("#7c3aed")} disabled={busy}
+                      title="Přegeneruje jen texty stejným promptem a modelem. Obrázky zůstanou."
+                      onClick={() => retryTexts(j.id)}>{busy ? "⏳ spouštím…" : "✍️ Texty znovu"}</button>)}
+                </>
+              })()}
             </div>
             {openJob === j.id && (
               <div style={{ marginTop: 6, padding: "10px 12px", background: "var(--bg-subtle,#f9fafb)", borderRadius: 9, border: "1px solid var(--border-base,#e5e7eb)" }}>
