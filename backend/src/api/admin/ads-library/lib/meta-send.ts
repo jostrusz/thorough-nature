@@ -282,9 +282,14 @@ export async function createPausedAd(opts: {
     ]
   }
 
-  const name = `[LIB-${c.id.slice(-8)}] ${c.name}${opts.nameSuffix || ""}`
+  // Název reklamy = čistě název kreativy z knihovny. Ve výpisu reklam v Meta je
+  // sloupec úzký, takže jakýkoli prefix ukousne to podstatné (dřív tu byl
+  // "[LIB-xxxxxxxx] " a názvy se kvůli němu ořezávaly třemi tečkami).
+  // ID kreativy z knihovny drží dál název creative — ten se v seznamu reklam
+  // nezobrazuje, ale zůstává dohledatelný přes Ads Manager i API.
+  const name = `${c.name}${opts.nameSuffix || ""}`
   const creative = await graphPost(`${opts.account}/adcreatives`, {
-    name,
+    name: `${name} [LIB-${c.id.slice(-8)}]`,
     object_story_spec: hash916
       ? opts.spec
       : { ...opts.spec, link_data: { link, image_hash: hash11, call_to_action: { type: c.cta_type || "LEARN_MORE" } } },
