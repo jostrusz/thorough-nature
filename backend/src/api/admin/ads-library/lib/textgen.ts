@@ -138,6 +138,9 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
         messages: [{ role: "user", content: prompt }],
         response_format: { type: "json_object" },
       }),
+      // Same reason as the Anthropic client below: an un-timed-out fetch can
+      // hang forever and leave the job stuck on "running" with no error.
+      signal: AbortSignal.timeout(Number(process.env.ADS_TEXT_TIMEOUT_MS || 180_000)),
     })
     const json = await res.json()
     if (!res.ok) throw new Error(`[OpenAI] ${json?.error?.message || res.status}`)
@@ -154,7 +157,15 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
     }
   }
 
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  // Timeout + retries are essential here: without them a stalled stream never
+  // settles, the await hangs forever and the job row stays "running" with no
+  // error — exactly what stranded 8 engedd-el jobs on 2026-07-26. A normal text
+  // step finishes in well under a minute, so 3 min is a generous ceiling.
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    timeout: Number(process.env.ADS_TEXT_TIMEOUT_MS || 180_000),
+    maxRetries: 2,
+  })
   // streaming, because the SDK refuses non-streaming requests whose max_tokens
   // implies a >10min worst case (Fable's 24k budget trips that check)
   const stream = client.messages.stream({
