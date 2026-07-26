@@ -53,16 +53,33 @@ export async function composeFeedCanvas(srcBuffer: Buffer): Promise<Composed> {
   const padTop = Math.floor(pad / 2)
   const padBottom = pad - padTop
 
-  // Backdrop: the source blown up to fill the taller canvas and heavily blurred.
-  // It only ever shows through in the bands, so the visible result is a soft
-  // colour continuation of the scene — a hint for the model, not final content.
-  const backdrop = await sharp(srcBuffer)
-    .resize(w, targetH, { fit: "cover", position: "center" })
-    .blur(40)
+  // Band seeds: mirror the strip of pixels next to each edge and blur it lightly.
+  // A mirrored strip carries STRUCTURE across the seam — a wall keeps going up,
+  // a horizon stays level, a floor keeps receding — so the model extends the
+  // real scene instead of inventing one. Pure blur (the first attempt) only gave
+  // it colour, which is why bands could drift in style. The light blur on top
+  // stops the mirror from reading as a hard reflection.
+  const seedTop = await sharp(srcBuffer)
+    .extract({ left: 0, top: 0, width: w, height: Math.min(padTop * 2, h) })
+    .flip()                       // vertical mirror
+    .resize(w, padTop, { fit: "fill" })
+    .blur(12)
+    .toBuffer()
+  const seedBottom = await sharp(srcBuffer)
+    .extract({ left: 0, top: Math.max(0, h - Math.min(padBottom * 2, h)), width: w, height: Math.min(padBottom * 2, h) })
+    .flip()
+    .resize(w, padBottom, { fit: "fill" })
+    .blur(12)
     .toBuffer()
 
-  const buffer = await sharp(backdrop)
-    .composite([{ input: srcBuffer, top: padTop, left: 0 }])
+  const buffer = await sharp({
+    create: { width: w, height: targetH, channels: 3, background: { r: 0, g: 0, b: 0 } },
+  })
+    .composite([
+      { input: seedTop, top: 0, left: 0 },
+      { input: srcBuffer, top: padTop, left: 0 },
+      { input: seedBottom, top: padTop + h, left: 0 },
+    ])
     .png()
     .toBuffer()
 
@@ -81,6 +98,14 @@ export function outpaintInstruction(padTop: number, padBottom: number, height: n
 
 CANVAS EXTENSION — READ CAREFULLY:
 This image is a 4:5 canvas. The central ~${100 - topPct - bottomPct}% is the ORIGINAL advertisement and must be preserved EXACTLY: same composition, same framing, same people, same proportions, same faces. Do NOT stretch, zoom, re-crop, re-pose or re-render the central area.
-Only the blurred band across the TOP ~${topPct}% and the blurred band across the BOTTOM ~${bottomPct}% are placeholders. Paint those two bands so they continue the scene naturally — extend the background, walls, sky, floor, furniture and lighting that are already there. No new people, no new products, no text in the bands.
-The seam between the bands and the central area must be invisible.`
+Only the soft band across the TOP ~${topPct}% and the soft band across the BOTTOM ~${bottomPct}% are placeholders. Repaint those two bands as a natural continuation of the scene: carry on the walls, sky, floor, furniture, fabric and shadows that are already running into that edge, following their existing perspective lines and vanishing point.
+
+MATCH THE ORIGINAL'S STYLE EXACTLY in the bands:
+- Medium: if the centre is a photograph, the bands are the same photograph — same lens, same depth of field, same focus falloff. If it is an illustration/3D render/painting, match that rendering style, line weight and shading.
+- Light: same direction, same colour temperature, same softness and contrast of shadows.
+- Colour: same grade, saturation and white balance — no brighter, cleaner or more saturated than the centre.
+- Texture: same film grain / noise / sharpness. Freshly generated areas usually come out too clean — deliberately match the centre's grain so the bands do not look smoother than the original.
+- Vignetting and any colour cast must continue consistently to the new edges.
+
+Add NOTHING new: no extra people, products, objects, logos or text in the bands — only more of what is already there. The seam where each band meets the centre must be completely invisible: no line, no brightness step, no change in sharpness or grain.`
 }
