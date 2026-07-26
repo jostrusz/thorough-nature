@@ -19,6 +19,7 @@ export function textModels() {
   const hasOpenAI = !!(process.env.OPENAI_API_KEY || "").trim()
   const list = [
     { id: "claude-fable-5", label: "Claude Fable 5 — nejsilnější model", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
+    { id: "claude-opus-5", label: "Claude Opus 5 — nejlepší copy (nový)", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
@@ -160,9 +161,10 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
     model: modelId,
     // 5 long primaries + 5 headlines can easily exceed 2500 output tokens —
     // a truncated response has no closing brace and used to surface as the
-    // confusing "AI nevrátila JSON". Fable 5 always thinks, and those tokens
-    // count against max_tokens too, so it gets a bigger budget.
-    max_tokens: modelId === "claude-fable-5" ? 24000 : 8000,
+    // confusing "AI nevrátila JSON". Fable 5 always thinks and Opus 5 thinks
+    // adaptively; those tokens count against max_tokens too, so both get a
+    // bigger budget. max_tokens is only a cap — unused budget costs nothing.
+    max_tokens: modelId === "claude-fable-5" || modelId === "claude-opus-5" ? 24000 : 8000,
     messages: [{ role: "user", content: prompt }],
   })
   const msg = await stream.finalMessage()
