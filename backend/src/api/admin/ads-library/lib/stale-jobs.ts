@@ -5,7 +5,11 @@
  * updated_at on each step, so anything running/queued with no update for
  * 20+ minutes is dead — sweep it to "failed" with a retry hint.
  */
-const STALE_MS = 20 * 60 * 1000
+// Stejný práh jako cron watchdog (ads-library-stuck-jobs.ts) — dřív tu bylo 20
+// min proti 15 min v cronu, takže fronta uklidila o 5 min později, než uživatel
+// čekal podle druhé cesty. Jeden zdroj pravdy, přepsatelný přes env.
+const STALE_MINUTES = Number(process.env.ADS_JOB_STALL_MINUTES || 15)
+const STALE_MS = STALE_MINUTES * 60 * 1000
 
 export async function sweepStaleJobs(svc: any) {
   try {
