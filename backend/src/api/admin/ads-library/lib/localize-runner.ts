@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
 import { generateImage, askImageYesNo } from "./imagegen"
+import { composeFeedCanvas, outpaintInstruction } from "./canvas"
 import { translateTexts } from "./textgen"
 import { uploadBuffer } from "./media"
 import { PROJECT_CONTEXT } from "./project-context"
@@ -100,15 +101,27 @@ export async function runLocalizationJob(container: any, jobId: string) {
       //              model to paint a book into creatives that have none
       // The 9:16 reframe below works purely from the finished 4:5.
       const cover = PROJECT_COVERS[target]
+      // Source ads are square. Rather than let the model redraw the scene into
+      // a taller frame (which stretched people and drifted faces), pre-build the
+      // 4:5 canvas with the original centred and blurred bands top+bottom, then
+      // ask it to paint ONLY those bands. See lib/canvas.ts.
+      const srcRes = await fetch(src.image_1x1_url, { signal: AbortSignal.timeout(30000) })
+      if (!srcRes.ok) throw new Error(`nelze stáhnout zdrojový obrázek — HTTP ${srcRes.status}`)
+      const canvas = await composeFeedCanvas(Buffer.from(await srcRes.arrayBuffer()))
+      const outpaint = canvas.skipped ? "" : outpaintInstruction(canvas.padTop, canvas.padBottom, canvas.height)
+      log(canvas.skipped
+        ? "zdroj už je 4:5 nebo vyšší — outpaint se přeskakuje"
+        : `plátno 4:5 složeno (${canvas.width}×${canvas.height}, pruhy ${canvas.padTop}/${canvas.padBottom} px)`)
+
       const refs: any[] = []
       if (p.img_mode === "swap") {
         if (!cover) throw new Error(`chybí referenční cover pro projekt ${target}`)
         refs.push({ url: cover, label: "IMAGE 1 — the new book cover to use:" })
-        refs.push({ url: src.image_1x1_url, label: "IMAGE 2 — the advertisement to edit:" })
+        refs.push({ buffer: canvas.buffer, mime: canvas.mime, label: "IMAGE 2 — the advertisement to edit (4:5 canvas):" })
       } else {
-        refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
+        refs.push({ buffer: canvas.buffer, mime: canvas.mime, label: "The advertisement to edit (4:5 canvas):" })
       }
-      await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
+      await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt) + outpaint, refs: refs.map((r: any) => r.url).filter(Boolean) })
       let swapFails = 0
       for (let i = 0; i < imgCount; i++) {
         let buffer: any, mime = "image/jpeg", swapOk: boolean | null = null
@@ -121,7 +134,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
             ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
             : ""
           const gen = await generateImage({
-            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "4:5",
+            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + outpaint + addendum, refs, aspectRatio: "4:5",
           })
           buffer = gen.buffer; mime = gen.mime
           vCost += addCost(gen.usage, "img11") || 0

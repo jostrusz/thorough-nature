@@ -95,9 +95,11 @@ async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 3): Pro
 export async function generateImage(opts: {
   modelId: string
   prompt: string
-  /** URL, or {url,label} — the label is sent as a text part right before the
-   *  image so the model can tell the source ad from the target book cover. */
-  refs: Array<string | { url: string; label: string }>
+  /** URL, {url,label}, or an already-loaded {buffer,mime,label} — the label is
+   *  sent as a text part right before the image so the model can tell the
+   *  source ad from the target book cover. The buffer form is used for the
+   *  pre-composed 4:5 outpaint canvas, which never exists as a URL. */
+  refs: Array<string | { url: string; label: string } | { buffer: Buffer; mime: string; label: string }>
   // 4:5 = Meta feed (nové), 1:1 = starší feedové kreativy, 9:16 = Stories/Reels
   aspectRatio: "4:5" | "1:1" | "9:16"
 }): Promise<{ buffer: Buffer; mime: string; usage: { model: string; input: number; output: number } }> {
@@ -107,10 +109,15 @@ export async function generateImage(opts: {
 
   const parts: any[] = []
   for (const ref of opts.refs) {
-    const url = typeof ref === "string" ? ref : ref.url
     const label = typeof ref === "string" ? "" : ref.label
     if (label) parts.push({ text: label })
-    parts.push(await fetchAsInline(url, label || "referenční obrázek"))
+    if (typeof ref !== "string" && (ref as any).buffer) {
+      const r = ref as { buffer: Buffer; mime: string }
+      parts.push({ inline_data: { mime_type: r.mime, data: r.buffer.toString("base64") } })
+    } else {
+      const url = typeof ref === "string" ? ref : (ref as any).url
+      parts.push(await fetchAsInline(url, label || "referenční obrázek"))
+    }
   }
   parts.push({ text: opts.prompt })
 

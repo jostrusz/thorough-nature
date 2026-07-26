@@ -2,6 +2,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ADS_LIBRARY_MODULE } from "../../../../../../modules/ads-library"
 import { generateImage, askImageYesNo } from "../../../lib/imagegen"
+import { composeFeedCanvas, outpaintInstruction } from "../../../lib/canvas"
 import { uploadBuffer } from "../../../lib/media"
 import { PROJECT_CONTEXT } from "../../../lib/project-context"
 import { PROJECT_COVERS } from "../../../lib/project-assets"
@@ -91,15 +92,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     if (retry11) {
       if (!src.image_1x1_url) throw new Error("zdrojová kreativa nemá obrázek")
       const cover = PROJECT_COVERS[target]
+      // same outpaint approach as the main runner: pre-build the 4:5 canvas so
+      // the model extends the scene instead of redrawing (and stretching) it
+      const srcRes = await fetch(src.image_1x1_url, { signal: AbortSignal.timeout(30000) })
+      if (!srcRes.ok) throw new Error(`nelze stáhnout zdrojový obrázek — HTTP ${srcRes.status}`)
+      const canvas = await composeFeedCanvas(Buffer.from(await srcRes.arrayBuffer()))
+      const outpaint = canvas.skipped ? "" : outpaintInstruction(canvas.padTop, canvas.padBottom, canvas.height)
       const refs: any[] = []
       if (p.img_mode === "swap") {
         if (!cover) throw new Error(`chybí referenční cover pro projekt ${target}`)
         refs.push({ url: cover, label: "IMAGE 1 — the new book cover to use:" })
-        refs.push({ url: src.image_1x1_url, label: "IMAGE 2 — the advertisement to edit:" })
+        refs.push({ buffer: canvas.buffer, mime: canvas.mime, label: "IMAGE 2 — the advertisement to edit (4:5 canvas):" })
       } else {
-        refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
+        refs.push({ buffer: canvas.buffer, mime: canvas.mime, label: "The advertisement to edit (4:5 canvas):" })
       }
-      await setStep("img11", { status: "running", detail: "opakování", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
+      await setStep("img11", { status: "running", detail: "opakování", prompt: langPrompt(p.img_prompt) + outpaint, refs: refs.map((r: any) => r.url).filter(Boolean) })
       await wipeVariants("4:5"); await wipeVariants("1:1") // legacy rows
       const v11: any[] = []
       let swapFails = 0
@@ -111,7 +118,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           const addendum = attempt > 1
             ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
             : ""
-          const gen = await generateImage({ modelId: model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "4:5" })
+          const gen = await generateImage({ modelId: model, prompt: langPrompt(p.img_prompt) + outpaint + addendum, refs, aspectRatio: "4:5" })
           buffer = gen.buffer; mime = gen.mime
           vCost += cost(gen.usage, "img11"); vIn += gen.usage?.input || 0; vOut += gen.usage?.output || 0
           if (p.img_mode !== "swap") break
