@@ -29,9 +29,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const result916 = { url, cost_usd: cost != null ? round4(cost) : null }
     const [fresh] = await svc.listAdLocalizationJobs({ id: item.id })
     await svc.updateAdLocalizationJobs({ id: item.id, params: { ...(fresh.params || {}), result916 } })
-    // the auto-saved library card gets the vertical too
+    // Mirror onto the library card when one already exists. When it doesn't
+    // (the usual case — reframe is normally run before approving to the
+    // library), studio/save picks result916 up from the job instead, so the
+    // vertical reaches the card either way round.
     if (fresh.result_creative_id) {
-      try { await svc.updateAdCreatives({ id: fresh.result_creative_id, image_9x16_url: url }) } catch {}
+      try {
+        await svc.updateAdCreatives({ id: fresh.result_creative_id, image_9x16_url: url })
+      } catch (e: any) {
+        // Never swallow this silently — a failed mirror used to leave the card
+        // permanently without its 9:16 and nothing in the logs to say why.
+        req.scope.resolve("logger")?.warn?.(`[Ads Library] studio/reframe: kartu ${fresh.result_creative_id} se nepodařilo doplnit o 9:16: ${e?.message}`)
+      }
     }
     res.json(result916)
   } catch (e: any) {

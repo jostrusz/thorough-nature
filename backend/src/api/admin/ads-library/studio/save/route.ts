@@ -18,6 +18,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (!b.image_1x1_url || !b.primaries?.length || !b.headlines?.length) {
     return res.status(400).json({ error: "chybí obrázek nebo texty", message: "chybí obrázek nebo texty" })
   }
+
+  // The Studio job is the source of truth for the 9:16, not the request body.
+  // The client sends whatever its cached item held, so saving right after a
+  // reframe (before the list refetches) used to persist null and the vertical
+  // never reached the library card — nothing back-fills it later.
+  let item: any = null
+  if (b.job_id) {
+    try {
+      ;[item] = await svc.listAdLocalizationJobs({ id: b.job_id })
+    } catch {}
+  }
+  const image9x16 = b.image_9x16_url || item?.params?.result916?.url || null
+
   const created = await svc.createAdCreatives({
     name: b.name || `studio-${Date.now().toString(36)}`,
     project_id: b.project_id,
@@ -29,18 +42,28 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     link_url: PAGE_CONTEXT[b.project_id]?.url || `https://www.${ctx.domain}/`,
     media_type: "image",
     image_1x1_url: b.image_1x1_url,
-    image_9x16_url: b.image_9x16_url || null,
+    image_9x16_url: image9x16,
     source: "studio",
     metadata: { studio_job_id: b.job_id || null, generating: false },
   })
   if (b.job_id) {
     try {
-      const [item] = await svc.listAdLocalizationJobs({ id: b.job_id })
+      // Re-read: a reframe running concurrently may have written result916
+      // between our first read and now, and params is a read-modify-write.
+      const [fresh] = await svc.listAdLocalizationJobs({ id: b.job_id })
       await svc.updateAdLocalizationJobs({
         id: b.job_id, result_creative_id: created.id,
-        params: { ...(item?.params || {}), saved_name: created.name },
+        params: { ...(fresh?.params || item?.params || {}), saved_name: created.name },
       })
-    } catch {}
+      // …and if that reframe finished after we built the card, pull its 9:16 in.
+      const late = (fresh as any)?.params?.result916?.url
+      if (!image9x16 && late) {
+        await svc.updateAdCreatives({ id: created.id, image_9x16_url: late })
+        ;(created as any).image_9x16_url = late
+      }
+    } catch (e: any) {
+      req.scope.resolve("logger")?.warn?.(`[Ads Library] studio/save: job ${b.job_id} se nepodařilo propojit s kartou ${created.id}: ${e?.message}`)
+    }
   }
   res.json({ creative: created })
 }
