@@ -7,7 +7,7 @@ import { PROJECT_CONTEXT } from "./project-context"
 import { PAGE_CONTEXT } from "./page-context"
 
 /**
- * Studio "Vytvořit reklamy" job: vision-describe the uploaded 1:1, then write
+ * Studio "Vytvořit reklamy" job: vision-describe the uploaded feed image, then write
  * 5 primaries (one per template angle) + 5 viral headlines. The result lands
  * in job.params.result for the UI to review — the library card is created
  * only when the user approves (studio/save route).

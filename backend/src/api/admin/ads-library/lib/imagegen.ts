@@ -98,7 +98,8 @@ export async function generateImage(opts: {
   /** URL, or {url,label} — the label is sent as a text part right before the
    *  image so the model can tell the source ad from the target book cover. */
   refs: Array<string | { url: string; label: string }>
-  aspectRatio: "1:1" | "9:16"
+  // 4:5 = Meta feed (nové), 1:1 = starší feedové kreativy, 9:16 = Stories/Reels
+  aspectRatio: "4:5" | "1:1" | "9:16"
 }): Promise<{ buffer: Buffer; mime: string; usage: { model: string; input: number; output: number } }> {
   const key = (process.env.GEMINI_API_KEY || "").trim()
   if (!key) throw new Error("GEMINI_API_KEY není nastaven — dodej klíč z aistudio.google.com")

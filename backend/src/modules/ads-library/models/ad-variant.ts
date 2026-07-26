@@ -7,7 +7,7 @@ import { model } from "@medusajs/framework/utils"
 const AdVariant = model.define("ad_variant", {
   id: model.id().primaryKey(),
   creative_id: model.text(),
-  format: model.text(), // '1:1' | '9:16'
+  format: model.text(), // '4:5' (feed, nové) | '1:1' (feed, starší) | '9:16' (Stories/Reels)
   variant_no: model.number(),
   url: model.text(), // MinIO public URL
   model_id: model.text().nullable(), // nano-banana-pro, ...

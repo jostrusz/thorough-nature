@@ -10,7 +10,7 @@ const P916 = "Reframe to 9:16 portrait. Extend the environment upward and downwa
 /**
  * POST /admin/ads-library/studio/reframe
  * Body: { item_id, img_model? } — synchronous 9:16 reframe of a Studio item's
- * 1:1 (~20-60 s). The result is persisted on the item (params.result916), so
+ * feed image (~20-60 s). The result is persisted on the item (params.result916), so
  * it survives reloads.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse) {

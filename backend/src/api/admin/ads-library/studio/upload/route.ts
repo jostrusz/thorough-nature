@@ -5,7 +5,7 @@ import { uploadBuffer } from "../../lib/media"
 
 /**
  * POST /admin/ads-library/studio/upload
- * Body: { file_name, content_type, data_b64 } — stores the uploaded 1:1 in
+ * Body: { file_name, content_type, data_b64 } — stores the uploaded feed image in
  * MinIO AND creates a persistent Studio item (a job row with status
  * "uploaded"), so the Studio list survives page reloads and keeps the full
  * generation history. Body size limit raised in middlewares.ts.

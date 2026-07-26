@@ -245,7 +245,7 @@ export async function createPausedAd(opts: {
   const c = opts.creative
   const img11 = opts.image1x1 || c.image_1x1_url
   const img916 = opts.image916 === undefined ? c.image_9x16_url : opts.image916
-  if (!img11) throw new Error("kreativa nemá 1:1 obrázek")
+  if (!img11) throw new Error("kreativa nemá feedový obrázek (4:5 nebo starší 1:1)")
   if (!c.primary_texts?.length || !c.headlines?.length) throw new Error("kreativa potřebuje aspoň 1 primary text a 1 headline")
 
   const hash11 = await uploadImage(opts.account, img11)
@@ -256,7 +256,7 @@ export async function createPausedAd(opts: {
 
   const assetFeed: any = {
     images: hash916
-      ? [{ hash: hash11, adlabels: [{ name: "sq" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
+      ? [{ hash: hash11, adlabels: [{ name: "feed" }] }, { hash: hash916, adlabels: [{ name: "vert" }] }]
       : [{ hash: hash11 }],
     // shared label keeps ALL texts available inside a placement rule
     bodies: bodies.map((t: string) => hash916 ? { text: t, adlabels: [{ name: "allB" }] } : { text: t }),
@@ -269,10 +269,16 @@ export async function createPausedAd(opts: {
   }
   if (hash916) {
     const labels = { body_label: { name: "allB" }, title_label: { name: "allT" }, link_url_label: { name: "allL" } }
+    // Placement mapping (ověřeno v Meta Ads Guide):
+    //   priorita 1 → Stories/Reels dostanou vertikální 9:16
+    //   priorita 2 → catch-all = všechny FEEDY (FB feed, IG stream, explore…)
+    //                dostanou feedový obrázek. Ten je nově 4:5 (Metou
+    //                doporučený poměr pro feed), u starších kreativ 1:1 —
+    //                obojí padne do stejného slotu, pravidla se nemění.
     assetFeed.asset_customization_rules = [
       { customization_spec: { publisher_platforms: ["facebook", "instagram"], facebook_positions: ["story", "facebook_reels"], instagram_positions: ["story", "reels"] },
         image_label: { name: "vert" }, ...labels, priority: 1 },
-      { customization_spec: {}, image_label: { name: "sq" }, ...labels, priority: 2 },
+      { customization_spec: {}, image_label: { name: "feed" }, ...labels, priority: 2 },
     ]
   }
 

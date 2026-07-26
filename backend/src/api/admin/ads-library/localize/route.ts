@@ -9,7 +9,7 @@ import { textModels } from "../lib/textgen"
  * POST /admin/ads-library/localize
  * Body: { source_creative_id | source_creative_ids: [], target_projects: [],
  *         img_model, img_mode, img_prompt, p916, img_count,
- *         formats: ['1:1','9:16'], txt_model, txt_count,
+ *         formats: ['4:5','9:16'], txt_model, txt_count,
  *         primary_indexes?, headline_indexes? }
  * Creates one background job per (card × target project). Bulk callers pass
  * source_creative_ids; a target equal to the card's own project is skipped
@@ -39,9 +39,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(404).json({ error: "některá kreativa nenalezena" })
   }
 
-  const formats = b.formats?.length ? b.formats : ["1:1", "9:16"]
+  // 4:5 is Meta's recommended FEED ratio (fills more of the mobile screen than
+  // a square); 9:16 covers Stories/Reels. "1:1" stays accepted for older
+  // callers — the runner treats it as the same feed slot.
+  const formats = b.formats?.length ? b.formats : ["4:5", "9:16"]
+  const wantsFeed = formats.includes("4:5") || formats.includes("1:1")
   const steps = [
-    ...(formats.includes("1:1") ? [{ key: "img11", label: "Obrázky 1:1", status: "queued" }] : []),
+    // step key stays "img11" so jobs created before the switch still render
+    ...(wantsFeed ? [{ key: "img11", label: "Obrázky 4:5 (feed)", status: "queued" }] : []),
     ...(formats.includes("9:16") ? [{ key: "img916", label: "Obrázky 9:16 (reframe)", status: "queued" }] : []),
     { key: "texts", label: "Texty", status: "queued" },
   ]

@@ -49,7 +49,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const has = (k: string) => steps0.some((s: any) => s.key === k)
   const statusOf = (k: string) => steps0.find((s: any) => s.key === k)?.status
   const forced: string[] | null = Array.isArray(b.formats) && b.formats.length ? b.formats : null
-  const retry11 = has("img11") && (forced ? forced.includes("1:1") : statusOf("img11") === "failed")
+  // feed step accepts both labels: new jobs ask for "4:5", older ones "1:1"
+  const retry11 = has("img11") && (forced ? (forced.includes("4:5") || forced.includes("1:1")) : statusOf("img11") === "failed")
   const retry916 = has("img916") && (forced ? forced.includes("9:16") : statusOf("img916") === "failed")
   if (!retry11 && !retry916) return fail(400, "žádný obrázkový krok k opakování")
 
@@ -99,7 +100,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
       }
       await setStep("img11", { status: "running", detail: "opakování", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url) })
-      await wipeVariants("1:1")
+      await wipeVariants("4:5"); await wipeVariants("1:1") // legacy rows
       const v11: any[] = []
       let swapFails = 0
       for (let i = 0; i < imgCount; i++) {
@@ -110,7 +111,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           const addendum = attempt > 1
             ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
             : ""
-          const gen = await generateImage({ modelId: model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1" })
+          const gen = await generateImage({ modelId: model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "4:5" })
           buffer = gen.buffer; mime = gen.mime
           vCost += cost(gen.usage, "img11"); vIn += gen.usage?.input || 0; vOut += gen.usage?.output || 0
           if (p.img_mode !== "swap") break
@@ -120,9 +121,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         }
         if (swapOk === false) swapFails++
         const ext = mime.includes("png") ? "png" : "jpg"
-        const url = await uploadBuffer(buffer, `ads-library/${created.id}/1x1/v${i + 1}.${ext}`, mime)
+        const url = await uploadBuffer(buffer, `ads-library/${created.id}/4x5/v${i + 1}.${ext}`, mime)
         const row = await svc.createAdVariants({
-          creative_id: created.id, format: "1:1", variant_no: i + 1, url,
+          creative_id: created.id, format: "4:5", variant_no: i + 1, url,
           model_id: model, mode: p.img_mode, prompt: langPrompt(p.img_prompt), is_official: false,
           metadata: { swap_ok: swapOk, cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut },
         })
@@ -138,7 +139,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     // ── 9:16 retry — reframe from the target creative's finished 1:1 variants ──
     if (retry916) {
       await setStep("img916", { status: "running", detail: "opakování" })
-      const v11now = await svc.listAdVariants({ creative_id: created.id, format: "1:1" })
+      // new creatives store the feed image as 4:5; ones made before the switch
+      // still have 1:1 rows — reframe works from either
+      let v11now = await svc.listAdVariants({ creative_id: created.id, format: "4:5" })
+      if (!v11now.length) v11now = await svc.listAdVariants({ creative_id: created.id, format: "1:1" })
       const good = v11now.filter((v: any) => v.metadata?.swap_ok !== false)
       let sources = (good.length ? good : v11now).map((v: any) => v.url)
       if (!sources.length && created.image_1x1_url) sources = [created.image_1x1_url]

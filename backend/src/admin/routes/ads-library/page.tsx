@@ -209,7 +209,7 @@ function LibraryTab({ zoom }: any) {
                     onMouseEnter={(e) => zoom.show(e, v.url, `${v.format} · V${v.variant_no}${v.metadata?.cost_usd != null ? ` · ~$${v.metadata.cost_usd}` : ""}${v.metadata?.swap_ok === false ? " · ⚠️ obálka se nezměnila" : ""}`)}
                     onMouseMove={zoom.move} onMouseLeave={zoom.hide}
                     onClick={() => official.mutate({ id: a.id, variant_id: v.id })}
-                    style={{ width: v.format === "1:1" ? 44 : 26, height: 44, borderRadius: 8, position: "relative", cursor: "pointer", overflow: "hidden",
+                    style={{ width: (v.format === "4:5" || v.format === "1:1") ? 40 : 26, height: 44, borderRadius: 8, position: "relative", cursor: "pointer", overflow: "hidden",
                       border: v.is_official ? "2px solid #15803d" : v.metadata?.swap_ok === false ? "2px solid #f59e0b" : "2px solid var(--border-base,#e5e7eb)",
                       boxShadow: v.is_official ? "0 0 0 2px #dcfce7" : "none" }}>
                     <img src={v.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -217,7 +217,7 @@ function LibraryTab({ zoom }: any) {
                     {!v.is_official && v.metadata?.swap_ok === false && <span style={{ position: "absolute", top: -1, right: 0, fontSize: 9 }}>⚠️</span>}
                   </span>))}
                 <button style={{ ...S.btn, padding: "4px 9px", fontSize: 12 }} disabled={genMore.isPending}
-                  onClick={() => genMore.mutate({ id: a.id, format: "1:1" })}>{genMore.isPending ? "…" : "＋"}</button>
+                  onClick={() => genMore.mutate({ id: a.id, format: "4:5" })}>{genMore.isPending ? "…" : "＋"}</button>
               </div>)}
           </div>
         </div>
@@ -325,7 +325,7 @@ function LocalizeWizard({ wizard, onClose }: any) {
   const [imgMode, setImgMode] = useState<"swap" | "texts">("swap")
   const [imgPrompt, setImgPrompt] = useState(IMG_PROMPTS.swap)
   const [p916, setP916] = useState(PROMPT_916)
-  // 1 variant per format by default — every extra 1:1 also spawns an extra
+  // 1 variant per format by default — every extra 4:5 also spawns an extra
   // 9:16 reframe, so "2" quietly meant 4 images (~$0.56) per job
   const [imgCount, setImgCount] = useState(1)
   const [f11, setF11] = useState(true); const [f916, setF916] = useState(true)
@@ -346,7 +346,7 @@ function LocalizeWizard({ wizard, onClose }: any) {
       body: {
         source_creative_ids: cards.map((c: any) => c.id), target_projects: targets,
         img_model: imgModel, img_mode: imgMode, img_prompt: imgPrompt, p916,
-        img_count: imgCount, formats: [...(f11 ? ["1:1"] : []), ...(f916 ? ["9:16"] : [])],
+        img_count: imgCount, formats: [...(f11 ? ["4:5"] : []), ...(f916 ? ["9:16"] : [])],
         txt_model: txtModel, txt_count: txtCount,
         primary_indexes: bulk ? [] : wizard.sel.filter((k: string) => k[0] === "P").map((k: string) => +k.slice(1)),
         headline_indexes: bulk ? [] : wizard.sel.filter((k: string) => k[0] === "H").map((k: string) => +k.slice(1)),
@@ -429,11 +429,11 @@ function LocalizeWizard({ wizard, onClose }: any) {
             </div>
             <label style={{ display: "flex", gap: 10, padding: "7px 0", fontSize: 14, cursor: "pointer" }}>
               <input type="checkbox" checked={f11} onChange={() => setF11(!f11)} style={{ accentColor: "#7c3aed", marginTop: 3 }} />
-              <span><b>1:1 — feed</b><small style={{ display: "block", color: "#6b7280", fontSize: 12 }}>hlavní generování podle promptu výše</small></span>
+              <span><b>4:5 — feed</b><small style={{ display: "block", color: "#6b7280", fontSize: 12 }}>hlavní generování podle promptu výše</small></span>
             </label>
             <label style={{ display: "flex", gap: 10, padding: "7px 0", fontSize: 14, cursor: "pointer" }}>
               <input type="checkbox" checked={f916} onChange={() => setF916(!f916)} style={{ accentColor: "#7c3aed", marginTop: 3 }} />
-              <span><b>9:16 — Reels / Stories</b><small style={{ display: "block", color: "#6b7280", fontSize: 12 }}>automatický reframe z hotové 1:1 (image-to-image)</small></span>
+              <span><b>9:16 — Reels / Stories</b><small style={{ display: "block", color: "#6b7280", fontSize: 12 }}>automatický reframe z hotové 4:5 (image-to-image)</small></span>
             </label>
             {f916 && (<div style={{ margin: "0 0 6px 26px" }}>
               <span style={S.eyebrow}>Prompt 9:16 reframe</span>
@@ -513,7 +513,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
   const [resolving, setResolving] = useState(false)
   const [resolveErr, setResolveErr] = useState("")
   const [chosen, setChosen] = useState<Record<string, string>>({}) // selectedCardId -> version creative id
-  const [vars, setVars] = useState<Record<string, string[]>>({})   // versionId -> selected 1:1 variant urls
+  const [vars, setVars] = useState<Record<string, string[]>>({})   // versionId -> selected feed (4:5) variant urls
   const [jobId, setJobId] = useState<string | null>(null)
   const [starting, setStarting] = useState(false)
   const [pageId, setPageId] = useState<string>("")
@@ -620,7 +620,7 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
           {target && !jobId && (<>
             {rows.map((card: any) => {
               const v = versionFor(card)
-              const v11 = (v.variants || []).filter((x: any) => x.format === "1:1")
+              const v11 = (v.variants || []).filter((x: any) => x.format === "4:5" || x.format === "1:1")
               const already = v.metadata?.meta_adset_id === target.adset_id
               const mismatch = accLang && v.language && accLang !== v.language
               return (
@@ -649,18 +649,18 @@ function BulkMetaModal({ creatives, selIds, kidsOf, onClose }: any) {
                               {on && <span style={{ position: "absolute", top: -2, right: 0, fontSize: 10 }}>✅</span>}
                             </span>)
                         })}
-                        <span style={{ fontSize: 11, color: "#6b7280" }}>každá vybraná 1:1 = samostatná reklama · nic nevybráno = oficiální</span>
+                        <span style={{ fontSize: 11, color: "#6b7280" }}>každá vybraná 4:5 = samostatná reklama · nic nevybráno = oficiální</span>
                       </div>
                     ) : (
                       <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 4 }}>
-                        1:1 · všech {(v.primary_texts || []).length}P/{(v.headlines || []).length}H</div>)}
+                        4:5 · všech {(v.primary_texts || []).length}P/{(v.headlines || []).length}H</div>)}
                   </div>
                   <span style={{ ...S.mono, fontSize: 11.5, padding: "2px 9px", borderRadius: 999, background: "#ede9fe", color: "#7c3aed", whiteSpace: "nowrap" }}>
                     → {plannedFor(v)} {plannedFor(v) === 1 ? "reklama" : "reklamy"}</span>
                 </div>)
             })}
             <div style={{ background: "var(--bg-subtle,#f9fafb)", borderRadius: 10, padding: "10px 13px", fontSize: 12.5, color: "#6b7280", marginTop: 10 }}>
-              Vytvoří se <b style={{ color: "#111827" }}>{totalPlanned} reklam</b>, všechny <b>⏸ PAUSED</b> — 1:1 + 9:16 podle placementu + <b>všechny primary texty a headliny</b> + vylepšení kreativy.</div>
+              Vytvoří se <b style={{ color: "#111827" }}>{totalPlanned} reklam</b>, všechny <b>⏸ PAUSED</b> — 4:5 + 9:16 podle placementu + <b>všechny primary texty a headliny</b> + vylepšení kreativy.</div>
           </>)}
 
           {job && (
@@ -773,7 +773,7 @@ function MetaModal({ m, onClose }: any) {
               {result.adset_name && <div style={{ fontSize: 13.5, marginBottom: 6 }}>
                 📁 {result.campaign_name ? `${result.campaign_name} → ` : ""}<b>{result.adset_name}</b></div>}
               {result.texts_sent != null && <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 6 }}>
-                🖼️ {result.images_sent === 2 ? "1:1 + 9:16 (placement)" : "1:1"} · ✍️ {result.texts_sent}× primary + headliny</div>}
+                🖼️ {result.images_sent === 2 ? "4:5 + 9:16 (placement)" : "4:5 (feed)"} · ✍️ {result.texts_sent}× primary + headliny</div>}
               <div style={{ ...S.mono, fontSize: 12.5, color: "#6b7280", lineHeight: 1.8 }}>
                 ad_id: {result.ad_id}<br />creative_id: {result.creative_id}<br />adset_id: {result.adset_id}</div>
               <div style={{ fontSize: 13.5, marginTop: 10 }}>Zkontroluj náhled v Ads Manageru a zapni ji tam.</div>
@@ -790,7 +790,7 @@ function MetaModal({ m, onClose }: any) {
                 </div>
               </div>)}
             <div style={{ background: "var(--bg-subtle,#f3f4f6)", borderRadius: 9, padding: "9px 12px", fontSize: 12.5, color: "#6b7280", marginBottom: 12 }}>
-              Posílá se: <b>{a.name}</b> — {a.image_9x16_url ? "1:1 do feedu + 9:16 do Stories/Reels" : "1:1 (9:16 tato verze nemá)"} + <b>všech {(a.primary_texts || []).length}× primary a {(a.headlines || []).length}× headline</b>,
+              Posílá se: <b>{a.name}</b> — {a.image_9x16_url ? "4:5 do feedu + 9:16 do Stories/Reels" : "feed (9:16 tato verze nemá)"} + <b>všech {(a.primary_texts || []).length}× primary a {(a.headlines || []).length}× headline</b>,
               CTA, odkaz s UTM, vylepšení kreativy (rekompozice, animace, retuš, enhance CTA).
               Vytvoří se vždy jako <b>⏸ PAUSED</b> — zapínáš ručně v Ads Manageru.</div>
             {(() => {
@@ -958,7 +958,7 @@ function QueueTab({ zoom }: any) {
               {j.status === "failed" && j.result_creative_id && (j.steps || []).some((s: any) => (s.key === "img11" || s.key === "img916") && s.status === "failed") && (
                 <button style={retrying === j.id ? { ...S.btn, opacity: .5, padding: "3px 10px", fontSize: 12.5 } : { ...S.btn, borderColor: "#2563eb", color: "#2563eb", fontWeight: 650, padding: "3px 10px", fontSize: 12.5 }}
                   disabled={retrying === j.id}
-                  title="Znovu vygeneruje jen padlé obrázky (9:16 reframe z hotových 1:1) — texty a povedené obrázky zůstanou"
+                  title="Znovu vygeneruje jen padlé obrázky (9:16 reframe z hotových 4:5) — texty a povedené obrázky zůstanou"
                   onClick={() => retryImages(j.id)}>{retrying === j.id ? "⏳ spouštím…" : "🖼️ Vygenerovat obrázky znovu"}</button>)}
             </div>
             {openJob === j.id && (
@@ -1105,7 +1105,7 @@ function StudioTab({ zoom }: any) {
           onDrop={(e) => { e.preventDefault(); addFiles(e.dataTransfer.files) }}
           onClick={() => fileRef.current?.click()}
           style={{ border: "2px dashed #7c3aed", borderRadius: 12, background: "#faf5ff", padding: 24, textAlign: "center", color: "#7c3aed", fontWeight: 650, cursor: "pointer" }}>
-          ⬆️ Přetáhni sem 1:1 obrázky nebo klikni pro výběr
+          ⬆️ Přetáhni sem obrázky nebo klikni pro výběr
           <div style={{ fontWeight: 400, color: "#6b7280", fontSize: 12, marginTop: 4 }}>max 5 najednou · JPG/PNG do 15 MB{uploading.length ? ` · ⏳ nahrávám ${uploading.join(", ")}` : ""}</div>
           <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: "none" }}
             onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = "" }} />

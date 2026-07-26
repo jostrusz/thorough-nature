@@ -12,8 +12,10 @@ import { costUSD, round4 } from "./pricing"
  * written to ad_localization_job.steps so the admin UI can poll it.
  *
  * Steps:
- *  1) 1:1 images  — N variants (book swap w/ reference cover, or texts-only)
- *  2) 9:16 images — reframe of each 1:1 variant (image-to-image)
+ *  1) 4:5 images  — N variants (book swap w/ reference cover, or texts-only).
+ *                  4:5 is Meta's recommended FEED ratio; older creatives that
+ *                  are still 1:1 keep working and serve the same feed slot.
+ *  2) 9:16 images — reframe of each 4:5 variant (image-to-image) for Stories/Reels
  *  3) texts       — M independent translations (variant 1 is stored on card)
  *  4) create target creative + variant rows, link family
  */
@@ -75,16 +77,20 @@ export async function runLocalizationJob(container: any, jobId: string) {
     await svc.updateAdLocalizationJobs({ id: jobId, result_creative_id: created.id })
 
     const imgCount = Math.min(Number(p.img_count) || 1, 4)
-    const wants11 = p.formats?.includes("1:1")
+    // Feed images are generated as 4:5 (Meta's recommended feed ratio — fills
+    // more of the mobile screen than a square). "1:1" is still accepted so jobs
+    // queued before the switch keep working; existing 1:1 creatives are left
+    // untouched and still serve the feed slot fine.
+    const wantsFeed = p.formats?.includes("4:5") || p.formats?.includes("1:1")
     const wants916 = p.formats?.includes("9:16")
     const langPrompt = (tpl: string) => String(tpl || "")
       .replaceAll("{LANG}", ctx.langName)
       .replaceAll("{BOOK}", ctx.book)
       .replaceAll("{AUTHOR}", ctx.author)
 
-    // ── 1) 1:1 variants ──
+    // ── 1) feed variants (4:5) ──
     const v11: any[] = []
-    if (wants11) {
+    if (wantsFeed) {
       await setStep("img11", { status: "running" })
       if (!src.image_1x1_url) throw new Error("zdrojová kreativa nemá obrázek")
       // References per mode:
@@ -92,7 +98,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
       //              them up); the cover is what gets painted onto the book
       //  akviziční → ONLY the source ad. No cover — attaching it tempted the
       //              model to paint a book into creatives that have none
-      // The 9:16 reframe below works purely from the finished 1:1.
+      // The 9:16 reframe below works purely from the finished 4:5.
       const cover = PROJECT_COVERS[target]
       const refs: any[] = []
       if (p.img_mode === "swap") {
@@ -115,7 +121,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
             ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
             : ""
           const gen = await generateImage({
-            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1",
+            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "4:5",
           })
           buffer = gen.buffer; mime = gen.mime
           vCost += addCost(gen.usage, "img11") || 0
@@ -128,13 +134,13 @@ export async function runLocalizationJob(container: any, jobId: string) {
           swapOk = verify.answer
           vCost += addCost(verify.usage, "img11") || 0
           if (swapOk !== false) break
-          log(`1:1 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
+          log(`4:5 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
         }
         if (swapOk === false) swapFails++
         const ext = mime.includes("png") ? "png" : "jpg"
-        const url = await uploadBuffer(buffer, `ads-library/${created.id}/1x1/v${i + 1}.${ext}`, mime)
+        const url = await uploadBuffer(buffer, `ads-library/${created.id}/4x5/v${i + 1}.${ext}`, mime)
         const row = await svc.createAdVariants({
-          creative_id: created.id, format: "1:1", variant_no: i + 1, url,
+          creative_id: created.id, format: "4:5", variant_no: i + 1, url,
           model_id: p.img_model, mode: p.img_mode, prompt: langPrompt(p.img_prompt),
           is_official: false,
           metadata: { swap_ok: swapOk, cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut },
@@ -148,10 +154,10 @@ export async function runLocalizationJob(container: any, jobId: string) {
       await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[bestIdx].url })
       const failNote = swapFails ? ` (${swapFails}⚠️ obálka nezměněna)` : ""
       await setStep("img11", { status: "done", detail: `${v11.length} variant${failNote}`, cost_usd: round4(stepCost.img11 || 0) })
-      log(`1:1 done (${v11.length}, swap fails: ${swapFails}, ~$${round4(stepCost.img11 || 0)})`)
+      log(`4:5 done (${v11.length}, swap fails: ${swapFails}, ~$${round4(stepCost.img11 || 0)})`)
     }
 
-    // ── 2) 9:16 reframe from each 1:1 ──
+    // ── 2) 9:16 reframe from each 4:5 ──
     if (wants916) {
       await setStep("img916", { status: "running" })
       const good = v11.filter((v: any) => v.metadata?.swap_ok !== false)

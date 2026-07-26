@@ -20,7 +20,8 @@ const AdCreative = model.define("ad_creative", {
   link_url: model.text().nullable(),
 
   media_type: model.text().default("image"), // image | video
-  image_1x1_url: model.text().nullable(), // MinIO mirror
+  image_1x1_url: model.text().nullable(), // MinIO mirror — FEEDOVÝ obrázek
+  // (historický název; nově se sem ukládá 4:5, starší kreativy mají 1:1)
   image_9x16_url: model.text().nullable(), // MinIO mirror
   video_thumb_url: model.text().nullable(),
 

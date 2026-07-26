@@ -32,14 +32,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
     // official variant becomes the creative's image
     const patch: any = {}
-    if (v.format === "1:1") patch.image_1x1_url = v.url
+    if (v.format === "4:5" || v.format === "1:1") patch.image_1x1_url = v.url // sloupec drží feedový obrázek
     if (v.format === "9:16") patch.image_9x16_url = v.url
     await svc.updateAdCreatives({ id: creativeId, ...patch })
     return res.json({ ok: true })
   }
 
   if (b.action === "generate") {
-    const format = b.format === "9:16" ? "9:16" : "1:1"
+    const format = b.format === "9:16" ? "9:16" : b.format === "1:1" ? "1:1" : "4:5"
     const siblings = await svc.listAdVariants({ creative_id: creativeId, format })
     const template = siblings[siblings.length - 1]
     if (!template) return res.status(400).json({ error: "žádná existující varianta jako vzor (spusť nejdřív lokalizaci)" })
