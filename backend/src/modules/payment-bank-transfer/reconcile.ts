@@ -138,12 +138,48 @@ export function nameKey(name: string): string {
     .split(/\s+/).filter((w) => w.length > 1).sort().join(" ")
 }
 
+/**
+ * Gender-neutral stem of a CZ/SK/PL surname, so a transfer paid by a spouse
+ * still matches the delivery name. Seen live: cart "Renáta Bajuszová", credit
+ * "Payment from Bajusz Marcel" — the husband paid, the bank dropped the
+ * variable symbol, and `bajuszova !== bajusz` sank the match (32 € received,
+ * no order).
+ *
+ * Two regular patterns are folded away (diacritics are already stripped by
+ * nameKey, so everything here is plain ASCII):
+ *   -ova        Bajuszová → bajusz, Nováková → novak, Leeová → lee
+ *   consonant + trailing a/y/i   the adjectival pair, both genders onto one
+ *               stem: Novotná/Novotný → novotn, Kowalska/Kowalski → kowalsk,
+ *               Svoboda/Svobodová → svobod, Procházka/Procházková → prochazk
+ * The stem must keep ≥3 characters, otherwise the original word is used — we
+ * would rather miss a match than pair a payment with the wrong person.
+ */
+export function surnameStem(word: string): string {
+  const w = String(word || "").trim()
+  if (w.length < 4) return w
+  // -ova first, but a stem shorter than 3 chars falls through to the
+  // adjectival rule ("Nová" → "n" is useless, "nov" is the right stem)
+  if (w.endsWith("ova") && w.length - 3 >= 3) return w.slice(0, -3)
+  if (/[bcdfghjklmnprstvwxz][ayi]$/.test(w) && w.length - 1 >= 3) return w.slice(0, -1)
+  return w
+}
+
+/** Do the stems of two surnames match? Handles the male/female pair. */
+export function sameSurname(a: string, b: string): boolean {
+  if (!a || !b) return false
+  if (a === b) return true
+  const sa = surnameStem(a), sb = surnameStem(b)
+  return sa.length >= 3 && sa === sb
+}
+
 /** Do two name keys describe the same person? Requires ≥2 shared tokens
- *  (given + family name), so a lone common first name never matches. */
+ *  (given + family name), so a lone common first name never matches.
+ *  Tokens are compared through surnameStem so "bajuszova" meets "bajusz". */
 function sameName(a: string, b: string): boolean {
   if (!a || !b) return false
   if (a === b) return true
-  const A = new Set(a.split(" ")), B = b.split(" ")
+  const A = new Set(a.split(" ").map(surnameStem))
+  const B = b.split(" ").map(surnameStem)
   return B.filter((w) => A.has(w)).length >= 2
 }
 
@@ -225,7 +261,8 @@ export async function reconcileCart(cart: any, credits: any[], usedTxnIds: Set<s
       const surname = nameKey(cart.last_name || "")
       const byName = eligible.filter((c) => {
         const payer = c.payer || ""
-        const bySurname = surname.length >= 3 && payer.split(" ").includes(surname)
+        const bySurname = surname.length >= 3 &&
+          payer.split(" ").some((w) => sameSurname(w, surname))
         return (bySurname || sameName(cartName, payer)) &&
           Math.abs(c.amount - total) <= AMOUNT_TOLERANCE &&
           c.at >= createdAt - 60_000
