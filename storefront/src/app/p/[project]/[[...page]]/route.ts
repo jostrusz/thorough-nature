@@ -782,6 +782,9 @@ function generateProjectConfigScript(
     mollieProfileId: (config as any).mollieProfileId || null,
     packetaApiKey: (config as any).packetaApiKey || null,
     shippingOptions: (config as any).shippingOptions || null,
+    // Supplément livraison à domicile (lache-livre FR). 0 = doprava domů zdarma.
+    // Musí odpovídat ceně shipping option v Meduse — Medusa účtuje, tohle jen zobrazuje.
+    homeDeliveryFee: Number((config as any).homeDeliveryFee || 0),
     catalogContentIds: (config as any).catalogContentIds || null,
     defaultCountry: (config as any).defaultCountry || null,
     defaultPhonePrefix: (config as any).defaultPhonePrefix || null,
