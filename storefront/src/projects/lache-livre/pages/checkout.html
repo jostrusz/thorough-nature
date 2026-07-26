@@ -2656,7 +2656,7 @@ body {
       <!-- Livraison -->
       <div class="msb-line shipping">
         <span class="msb-line-label">Livraison <span class="msb-gls">Mondial Relay</span></span>
-        <span class="msb-line-val">Offerte</span>
+        <span class="msb-line-val" id="msb-shipping-val">Offerte</span>
       </div>
       <!-- Total -->
       <div class="msb-line total-line">
@@ -3838,8 +3838,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'FR';
     var rate = TAX_RATES[countryCode] || TAX_RATES.FR;
     var total = getCurrentTotal();
-    var subtotal = total / (1 + rate / 100);
-    var tax = total - subtotal;
+    // Le supplément de livraison est affiché sur sa PROPRE ligne du résumé, donc
+    // il doit être exclu de la base HT/TVA — sinon les lignes ne s'additionnent
+    // plus (sous-total + TVA donnerait déjà le total, et "Livraison" semblerait
+    // s'ajouter une deuxième fois).
+    var shippingFee = getHomeDeliveryFee();
+    var goodsTotal = total - shippingFee;
+    var subtotal = goodsTotal / (1 + rate / 100);
+    var tax = goodsTotal - subtotal;
 
     // ─── DESKTOP SUMMARY ───
     var subtotalVal = document.getElementById('subtotal-value');
@@ -3916,7 +3922,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (msbTotal) msbTotal.textContent = formatPrice(total);
 
     // ─── Livraison — offerte en point relais, payante à domicile ───
-    var homeFeeNow = getHomeDeliveryFee();
+    var homeFeeNow = shippingFee;
     var shipValEl = document.getElementById('summary-shipping-value');
     if (shipValEl) {
       if (homeFeeNow > 0) {
@@ -3926,6 +3932,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         shipValEl.textContent = 'Offerte';
         shipValEl.style.color = '#27AE60';
       }
+    }
+    // Même ligne dans la barre récapitulative mobile — sinon sous-total + TVA
+    // n'y égaleraient plus le total.
+    var msbShipVal = document.getElementById('msb-shipping-val');
+    if (msbShipVal) {
+      msbShipVal.textContent = homeFeeNow > 0 ? formatPrice(homeFeeNow) : 'Offerte';
+      msbShipVal.style.color = homeFeeNow > 0 ? 'var(--heading)' : '';
     }
     // Le supplément domicile est écrit à trois endroits du sélecteur (prix à
     // droite, badge à côté du titre, ligne de description). Le markup statique
