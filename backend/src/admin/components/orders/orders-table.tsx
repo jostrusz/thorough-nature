@@ -139,6 +139,13 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
   "pusti-to-sk": "Pusti to, čo ťa ničí",
   "zycie-zaslugy": "Życie na które zasługujesz",
   "engedd-el": "Engedd el, ami tönkretesz",
+  "lache-livre": "Lâche prise sur ce qui te détruit",
+  "slipp-taket": "Slipp taket",
+  "zivot-zaslugy": "Život, jaký si zasloužíš",
+  "biblia-kotow": "Biblia kotów",
+  // Překlepové varianty, které se dostaly do produkčních dat
+  "odpust-ksiazka": "Odpuść",
+  "Slipp taket": "Slipp taket",
 }
 
 function getTag(order: any): string {

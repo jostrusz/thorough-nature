@@ -492,16 +492,20 @@ export const PROJECT_OPTIONS: {
   { id: "het-leven", ids: ["het-leven"], label: "Het Leven Dat Je Verdient", flag: "🇳🇱", color: "#0E7490", bg: "#E0F7FA" },
   { id: "dehondenbijbel", ids: ["dehondenbijbel"], label: "De Hondenbijbel", flag: "🇳🇱", color: "#9A3412", bg: "#FFEDD5" },
   { id: "lass-los", ids: ["lass-los"], label: "Lass los, was dich kaputt macht", flag: "🇩🇪", color: "#A16207", bg: "#FEF9C3" },
-  { id: "odpusc-ksiazka", ids: ["odpusc-ksiazka", "odpusc"], label: "Odpuść to, co cię niszczy", flag: "🇵🇱", color: "#BE123C", bg: "#FCE4EC" },
+  // "odpust-ksiazka" je překlep, který se dostal do 5 objednávek (PLN/PL, 4.–5. 2026).
+  { id: "odpusc-ksiazka", ids: ["odpusc-ksiazka", "odpusc", "odpust-ksiazka"], label: "Odpuść to, co cię niszczy", flag: "🇵🇱", color: "#BE123C", bg: "#FCE4EC" },
   { id: "zycie-zaslugy", ids: ["zycie-zaslugy"], label: "Życie na które zasługujesz", flag: "🇵🇱", color: "#9D174D", bg: "#FCE7F3" },
   { id: "zivot-zaslugy", ids: ["zivot-zaslugy"], label: "Život, jaký si zasloužíš", flag: "🇨🇿", color: "#B45309", bg: "#FEF3C7" },
   { id: "slapp-taget", ids: ["slapp-taget", "slapp"], label: "Släpp taget om det som förstör dig", flag: "🇸🇪", color: "#00695C", bg: "#E0F2F1" },
-  { id: "slipp-taket", ids: ["slipp-taket"], label: "Slipp taket", flag: "🇳🇴", color: "#1D4ED8", bg: "#DBEAFE" },
+  // "Slipp taket" (s mezerou) je název místo slugu — 3 objednávky ze 7. 2026.
+  { id: "slipp-taket", ids: ["slipp-taket", "Slipp taket"], label: "Slipp taket på det som ødelegger deg", flag: "🇳🇴", color: "#1D4ED8", bg: "#DBEAFE" },
   { id: "psi-superzivot", ids: ["psi-superzivot"], label: "Psí superživot", flag: "🇨🇿", color: "#1565C0", bg: "#E3F2FD" },
   { id: "kocici-bible", ids: ["kocici-bible"], label: "Kočičí bible", flag: "🇨🇿", color: "#6D28D9", bg: "#EDE9FE" },
   { id: "odpust-knizka", ids: ["odpust-knizka"], label: "Pusť to, co tě ničí", flag: "🇨🇿", color: "#7C2D12", bg: "#FEF3C7" },
   { id: "pusti-to-sk", ids: ["pusti-to-sk"], label: "Pusti to, čo ťa ničí", flag: "🇸🇰", color: "#9F1239", bg: "#FFE4E6" },
   { id: "engedd-el", ids: ["engedd-el"], label: "Engedd el, ami tönkretesz", flag: "🇭🇺", color: "#15803D", bg: "#DCFCE7" },
+  { id: "lache-livre", ids: ["lache-livre"], label: "Lâche prise sur ce qui te détruit", flag: "🇫🇷", color: "#4338CA", bg: "#E0E7FF" },
+  { id: "biblia-kotow", ids: ["biblia-kotow"], label: "Biblia kotów", flag: "🇵🇱", color: "#0F766E", bg: "#CCFBF1" },
 ]
 
 /** Resolve a project chip's color/label from an order's metadata.project_id. */
