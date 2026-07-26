@@ -40,7 +40,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       { key: "texts", label: "Texty ze vzorů", status: "queued" },
     ],
     params: {
-      ...p, txt_model: b.txt_model || "claude-opus-4-8",
+      ...p, txt_model: b.txt_model || "claude-opus-5",
       mode: b.mode === "remarketing" ? "remarketing" : "acquisition",
       result: null, cost_usd: null, history: history.slice(-5),
     },

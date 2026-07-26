@@ -63,7 +63,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           p916: b.p916 || "",
           img_count: b.img_count || 2,
           formats,
-          txt_model: b.txt_model || "claude-opus-4-8",
+          txt_model: b.txt_model || "claude-opus-5",
           txt_count: b.txt_count || 1,
           primary_indexes: b.primary_indexes || [],
           headline_indexes: b.headline_indexes || [],

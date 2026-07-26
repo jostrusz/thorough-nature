@@ -22,7 +22,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   if (job.status === "running" || job.status === "queued") return fail(409, "job právě běží")
 
   const p = job.params || {}
-  const model = b.txt_model || p.txt_model || "claude-opus-4-8"
+  const model = b.txt_model || p.txt_model || "claude-opus-5"
   // A texts-only retry must not paper over an image step that failed earlier —
   // the job used to end up green with a missing 1:1, which reads as "hotovo"
   // in the queue. Only the texts step gets its status rewritten below.

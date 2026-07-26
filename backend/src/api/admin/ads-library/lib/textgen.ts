@@ -19,8 +19,8 @@ export function textModels() {
   const hasOpenAI = !!(process.env.OPENAI_API_KEY || "").trim()
   const list = [
     { id: "claude-fable-5", label: "Claude Fable 5 — nejsilnější model", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
-    { id: "claude-opus-5", label: "Claude Opus 5 — nejlepší copy (nový)", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
-    { id: "claude-opus-4-8", label: "Claude Opus 4.8 — nejlepší copy", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
+    { id: "claude-opus-5", label: "Claude Opus 5 — nejlepší copy (výchozí)", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
+    { id: "claude-opus-4-8", label: "Claude Opus 4.8 — předchozí generace", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-sonnet-5", label: "Claude Sonnet 5 — rychlý", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 — nejlevnější", provider: "anthropic", available: !!(process.env.ANTHROPIC_API_KEY || "").trim() },
     { id: "gpt-5.6-sol", label: "GPT-5.6 sol — nejsilnější", provider: "openai", available: hasOpenAI },

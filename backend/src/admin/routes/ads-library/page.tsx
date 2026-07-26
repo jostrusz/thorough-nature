@@ -329,7 +329,7 @@ function LocalizeWizard({ wizard, onClose }: any) {
   // 9:16 reframe, so "2" quietly meant 4 images (~$0.56) per job
   const [imgCount, setImgCount] = useState(1)
   const [f11, setF11] = useState(true); const [f916, setF916] = useState(true)
-  const [txtModel, setTxtModel] = useState("claude-opus-4-8")
+  const [txtModel, setTxtModel] = useState("claude-opus-5")
   const [txtCount, setTxtCount] = useState(1)
   const [sent, setSent] = useState<any>(null)
 
@@ -1006,7 +1006,7 @@ function QueueTab({ zoom }: any) {
 function StudioTab({ zoom }: any) {
   const qc = useQueryClient()
   const fileRef = useRef<any>(null)
-  const [txtModel, setTxtModel] = useState("claude-opus-4-8")
+  const [txtModel, setTxtModel] = useState("claude-opus-5")
   const [uploading, setUploading] = useState<string[]>([])
   const [proj, setProj] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<Record<string, string>>({}) // itemId -> "reframe"|"save"
