@@ -62,6 +62,8 @@
       "variantId": "variant_01KX0538JV3HM4FBDH2C4BVDQV"
     }
   ],
+  "_homeDeliveryFeeNote": "Musí odpovídat ceně shipping option 'Packeta - À domicile' (so_01KX053135P5BJNDHR1DV25WFF) v Meduse. Point relais je zdarma.",
+  "homeDeliveryFee": 2,
   "catalogContentIds": [],
   "mollieProfileId": "",
   "paymentProviders": {

@@ -3027,7 +3027,7 @@ body {
                 <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Livraison à domicile</div>
                 <div style="font-size:12px;color:#666;margin-top:1px;">Le transporteur livre directement chez toi</div>
               </div>
-              <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Offerte</span>
+              <span id="shipping-home-price" style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Offerte</span>
             </div>
           </div>
 
@@ -3159,7 +3159,7 @@ body {
           Livraison
           <span style="display:inline-flex;align-items:center;background:#BA1B02;color:#fff;font-size:10px;font-weight:700;letter-spacing:.3px;border-radius:3px;padding:2px 6px;vertical-align:middle;">Mondial Relay</span>
         </span>
-        <span style="color:#27AE60;font-weight:600;">Offerte</span>
+        <span id="summary-shipping-value" style="color:#27AE60;font-weight:600;">Offerte</span>
       </div>
       <div class="summary-line discount" id="summary-discount" style="display:none;">
         <span style="display:flex;align-items:center;gap:6px;">Remise <span id="discount-code-label" style="font-size:11px;background:rgba(39,174,96,0.1);color:#27AE60;padding:1px 6px;border-radius:4px;font-weight:600;"></span></span>
@@ -3433,9 +3433,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var TAX_RATES = { FR: 5.5 };
 
   // Získej aktuální celkovou cenu (bundle + order bump)
+  // Frais de livraison à domicile. Le point relais reste offert ; la livraison à
+  // domicile est facturée en supplément. La valeur DOIT correspondre au prix de
+  // la shipping option "Packeta - À domicile" dans Medusa — c'est Medusa qui
+  // facture réellement, ceci n'est que l'affichage.
+  function getHomeDeliveryFee() {
+    var fee = Number((typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.homeDeliveryFee) || 0);
+    return (fee > 0 && typeof selectedShipping !== 'undefined' && selectedShipping === 'home') ? fee : 0;
+  }
+
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
+    total += getHomeDeliveryFee();
     return total;
   }
 
@@ -3905,6 +3915,30 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbTotal = document.getElementById('msb-total');
     if (msbTotal) msbTotal.textContent = formatPrice(total);
 
+    // ─── Livraison — offerte en point relais, payante à domicile ───
+    var homeFeeNow = getHomeDeliveryFee();
+    var shipValEl = document.getElementById('summary-shipping-value');
+    if (shipValEl) {
+      if (homeFeeNow > 0) {
+        shipValEl.textContent = formatPrice(homeFeeNow);
+        shipValEl.style.color = 'var(--heading)';
+      } else {
+        shipValEl.textContent = 'Offerte';
+        shipValEl.style.color = '#27AE60';
+      }
+    }
+    var shipHomePriceEl = document.getElementById('shipping-home-price');
+    var homeFeeCfg = Number((PROJECT_CONFIG && PROJECT_CONFIG.homeDeliveryFee) || 0);
+    if (shipHomePriceEl) {
+      if (homeFeeCfg > 0) {
+        shipHomePriceEl.textContent = '+ ' + formatPrice(homeFeeCfg);
+        shipHomePriceEl.style.color = 'var(--heading)';
+      } else {
+        shipHomePriceEl.textContent = 'Offerte';
+        shipHomePriceEl.style.color = '#27AE60';
+      }
+    }
+
     // Aktualizuj celkovou proměnnou a tlačítko
     currentTotalPrice = total;
     updateButtonText();
@@ -3938,7 +3972,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
       html += '<span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
-      html += '<span class="bundle-bonus">+ 2 bonus offerts</span>';
+      html += '<span class="bundle-bonus">+ 2 bonus offerts &middot; livraison offerte en point relais</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
@@ -6736,6 +6770,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         homeOpt.querySelector('.shipping-radio div').style.background = 'transparent';
         homeOpt.querySelector('.shipping-radio').style.borderColor = 'var(--border)';
         if (packetaSection) packetaSection.style.display = '';
+        // Point relais = offert → retirer le supplément du total, du bouton et du résumé
+        recalculateOrderSummary();
       });
     }
     if (homeOpt) {
@@ -6756,6 +6792,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Hide packeta error if shown
         var packetaErr = document.getElementById('packeta-error');
         if (packetaErr) packetaErr.style.display = 'none';
+        // Domicile = payant → ajouter le supplément au total, au bouton et au résumé
+        recalculateOrderSummary();
       });
     }
 
