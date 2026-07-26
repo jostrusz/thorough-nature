@@ -745,6 +745,25 @@ body { background: var(--bg); }
 <!-- ══ JS: Data z objednávky, edit formulář, FB Pixel, Confetti, Scroll reveal ══ -->
 <script>
 (function(){
+  // Egységes ár-formázás (ugyanaz, mint a pénztárban). A 'hu-HU' locale alapból
+  // nem csoportosítja a négyjegyű számokat, ezért kell a minimumGroupingDigits
+  // és a kézi fallback — így "9 000 Ft" jelenik meg, nem "9000 Ft".
+  function formatHuf(amount) {
+    var num = parseFloat(amount);
+    if (isNaN(num)) return '0 Ft';
+    var rounded = Math.round(num);
+    var str;
+    try {
+      str = rounded.toLocaleString('hu-HU', { minimumGroupingDigits: 1, maximumFractionDigits: 0 });
+    } catch (e) {
+      str = rounded.toLocaleString('hu-HU');
+    }
+    if (!/[\s ]/.test(str) && Math.abs(rounded) >= 1000) {
+      str = String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+    return str + ' Ft';
+  }
+
   // ────────────────────────────────────────────────────
   // 1. Načtení dat z localStorage
   // ────────────────────────────────────────────────────
@@ -821,7 +840,7 @@ body { background: var(--bg); }
   }
   var totalPriceEl = document.getElementById('ty-total-price');
   if (totalPriceEl) {
-    totalPriceEl.textContent = Math.round(totalPrice).toLocaleString('hu-HU') + ' Ft';
+    totalPriceEl.textContent = formatHuf(totalPrice);
   }
 
   // 2e. Aktualizuj hlavní položku s bundle qty

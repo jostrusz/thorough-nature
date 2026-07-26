@@ -2388,7 +2388,7 @@ body {
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Bónuszkönyv
         </span>
-        <span class="msb-line-val" id="msb-bump-price">3990&nbsp;Ft</span>
+        <span class="msb-line-val" id="msb-bump-price">3&nbsp;990&nbsp;Ft</span>
       </div>
       <!-- Részösszeg -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
@@ -2474,8 +2474,8 @@ body {
               <div class="order-bump-title">Add hozzá a <em id="order-bump-title-name">bónuszkönyvet</em></div>
               <div class="order-bump-prices-inline">
                 <span class="order-bump-old-price" id="order-bump-old-price">10&nbsp;999&nbsp;Ft</span>
-                <span class="order-bump-new-price" id="order-bump-new-price">3990&nbsp;Ft</span>
-                <span class="order-bump-inline-save" id="order-bump-inline-save">1000&nbsp;Ft megtakarítás</span>
+                <span class="order-bump-new-price" id="order-bump-new-price">3&nbsp;990&nbsp;Ft</span>
+                <span class="order-bump-inline-save" id="order-bump-inline-save">1&nbsp;000&nbsp;Ft megtakarítás</span>
               </div>
             </div>
             <button type="button" class="order-bump-expand" id="order-bump-expand-btn" aria-expanded="false" aria-label="További információ">
@@ -2503,8 +2503,8 @@ body {
                   </div>
                   <div class="order-bump-prices">
                     <span class="order-bump-old-price" id="order-bump-detail-old">10&nbsp;999&nbsp;Ft</span>
-                    <span class="order-bump-new-price" id="order-bump-detail-new">3990&nbsp;Ft</span>
-                    <span class="order-bump-save" id="order-bump-detail-save">1000&nbsp;Ft megtakarítás</span>
+                    <span class="order-bump-new-price" id="order-bump-detail-new">3&nbsp;990&nbsp;Ft</span>
+                    <span class="order-bump-save" id="order-bump-detail-save">1&nbsp;000&nbsp;Ft megtakarítás</span>
                   </div>
                 </div>
               </div>
@@ -2919,7 +2919,7 @@ body {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cta)" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           Bónuszkönyv
         </span>
-        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">3990&nbsp;Ft</span>
+        <span id="summary-bump-price" style="font-weight:600;color:var(--cta);">3&nbsp;990&nbsp;Ft</span>
       </div>
 
       <div class="summary-line" id="summary-subtotal">
@@ -3188,10 +3188,27 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   /* ─── FÜGGVÉNYEK A DINAMIKUS ORDER SUMMARYHOZ ─── */
   // Árformázás magyar stílusban (10 999 Ft)
+  // Egységes ár-formázás. A 'hu-HU' locale alapból NEM csoportosítja a négyjegyű
+  // számokat (minimumGroupingDigits: 2), így "9000 Ft" jelent volna meg a
+  // "10 999 Ft" mellett. A minimumGroupingDigits: 1 minden ezresnél kitesz egy
+  // nem törhető szóközt, hogy az árak egységesek legyenek az egész oldalon.
   function formatPrice(amount) {
     if (amount === null || amount === undefined) return '0 Ft';
     var num = parseFloat(amount);
-    return Math.round(num).toLocaleString('hu-HU') + ' Ft';
+    if (isNaN(num)) return '0 Ft';
+    var rounded = Math.round(num);
+    var str;
+    try {
+      str = rounded.toLocaleString('hu-HU', { minimumGroupingDigits: 1, maximumFractionDigits: 0 });
+    } catch (e) {
+      str = rounded.toLocaleString('hu-HU');
+    }
+    // Fallback: ha a böngésző figyelmen kívül hagyja a minimumGroupingDigits-et,
+    // a négyjegyű számokat kézzel csoportosítjuk (nem törhető szóköz).
+    if (!/[\s ]/.test(str) && Math.abs(rounded) >= 1000) {
+      str = String(rounded).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    }
+    return str + ' Ft';
   }
 
   // Adókulcsok országonként (tax-inclusive) — HU: 5% kedvezményes ÁFA a könyvekre; CZ: 0%
@@ -3345,7 +3362,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var productName = PROJECT_CONFIG.mainProduct.name || 'Engedd el, ami tönkretesz';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0); // Alapértelmezett: első (1×)
-      var perUnit = Math.round(opt.price / opt.qty).toLocaleString('hu-HU');
+      var perUnit = formatPrice(opt.price / opt.qty).replace(/\s*Ft$/, '');
       html += '<label class="bundle-option' + (isSelected ? ' selected' : '') + '" data-qty="' + opt.qty + '" data-price="' + opt.price + '">';
       html += '<input type="radio" name="bundle" value="' + opt.qty + '"' + (isSelected ? ' checked' : '') + '>';
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
@@ -3456,7 +3473,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var newPrice = document.getElementById('order-bump-new-price');
     if (newPrice) newPrice.innerHTML = Math.round(Number(up.price)) + ' Ft';
     var inlineSave = document.getElementById('order-bump-inline-save');
-    if (inlineSave) inlineSave.innerHTML = saveAmt.toFixed(0) + ' Ft megtakarítás';
+    if (inlineSave) inlineSave.innerHTML = formatPrice(saveAmt) + ' megtakarítás';
 
     // Detail
     var nameEl = document.getElementById('order-bump-name');
@@ -3466,7 +3483,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var detailNew = document.getElementById('order-bump-detail-new');
     if (detailNew) detailNew.innerHTML = Math.round(Number(up.price)) + ' Ft';
     var detailSave = document.getElementById('order-bump-detail-save');
-    if (detailSave) detailSave.innerHTML = saveAmt.toFixed(0) + ' Ft megtakarítás';
+    if (detailSave) detailSave.innerHTML = formatPrice(saveAmt) + ' megtakarítás';
 
     // Summary + Mobile sticky bar — név és ár frissítése
     var priceStr = Math.round(Number(up.price)) + ' Ft';
