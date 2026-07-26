@@ -4076,7 +4076,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   loadOrderBumpImage();
 
   // ─── Admin toggles: hide order bump if disabled ───
-  if (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.orderBumpEnabled === false) {
+  // Also hide it when there is no upsell product to sell. The FR project has no
+  // upsell book, so the (hardcoded) bump was offering a title that does not exist:
+  // ticking it sent variant_id:"" to /line-items-bundle and the raw 400
+  // "variant_id and quantity are required" surfaced to the customer, killing the
+  // checkout before PayPal opened. Missing product => never show the block.
+  var upsellVariantId = (typeof PROJECT_CONFIG !== 'undefined' && PROJECT_CONFIG.upsellProduct)
+    ? String(PROJECT_CONFIG.upsellProduct.variantId || '').trim()
+    : '';
+  if (typeof PROJECT_CONFIG !== 'undefined' && (PROJECT_CONFIG.orderBumpEnabled === false || !upsellVariantId)) {
     var orderBumpEl = document.getElementById('order-bump');
     if (orderBumpEl) orderBumpEl.style.display = 'none';
     orderBumpActive = false;
@@ -8513,8 +8521,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         w.cartId = res.cart.id;
         return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: variantId, quantity: 1 }) })
           .then(function() {
-            if (bump && PROJECT_CONFIG.upsellProduct) {
-              return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 }) });
+            var warmBumpVariantId = String(((PROJECT_CONFIG.upsellProduct || {}).variantId) || '').trim();
+            if (bump && warmBumpVariantId) {
+              return medusaFetch('/store/carts/' + w.cartId + '/line-items-bundle', { method: 'POST', body: JSON.stringify({ variant_id: warmBumpVariantId, quantity: 1 }) });
             }
           })
           .then(function() { return medusaFetch('/store/shipping-options?cart_id=' + w.cartId, { method: 'GET' }); })
@@ -8795,10 +8804,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           console.error('[Checkout] Failed to add product to cart:', err.message || err);
           throw new Error('Le produit n\'a pas pu être ajouté au panier. Réessaie.');
         }).then(function() {
-          if (checkoutOrderBump) {
+          // Guard: never post an empty variant_id — the backend answers 400
+          // "variant_id and quantity are required" and this branch has no catch,
+          // so the raw API message would reach the customer and block payment.
+          var bumpVariantId = String(((PROJECT_CONFIG.upsellProduct || {}).variantId) || '').trim();
+          if (checkoutOrderBump && bumpVariantId) {
             return medusaFetch('/store/carts/' + cartId + '/line-items-bundle', {
               method: 'POST',
-              body: JSON.stringify({ variant_id: PROJECT_CONFIG.upsellProduct.variantId, quantity: 1 })
+              body: JSON.stringify({ variant_id: bumpVariantId, quantity: 1 })
             });
           }
         });
