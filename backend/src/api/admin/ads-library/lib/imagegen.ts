@@ -160,7 +160,7 @@ export async function generateImage(opts: {
  * objects, any visible text. The description anchors the generated ad copy to
  * what the creative actually shows.
  */
-export async function describeImage(url: string): Promise<{ description: string; usage: any }> {
+export async function describeImage(url: string): Promise<{ description: string; name: string | null; usage: any }> {
   const key = (process.env.GEMINI_API_KEY || "").trim()
   if (!key) throw new Error("GEMINI_API_KEY není nastaven")
   const model = process.env.IMAGE_VERIFY_MODEL || "gemini-3.1-flash-image"
@@ -173,7 +173,7 @@ export async function describeImage(url: string): Promise<{ description: string;
       body: JSON.stringify({
         contents: [{ parts: [
           inline,
-          { text: "Describe this advertising image in 5-7 sentences: the scene and setting, the mood, notable objects, and any visible text. Then, on a separate final line, state explicitly: 'PERSON: none' if no person is visible, or 'PERSON: <apparent gender>, approx. <age range> years, <one short phrase about their look/vibe>' (e.g. 'PERSON: male, approx. 25-30 years, casual student type'). Be concrete and factual." },
+          { text: "Describe this advertising image in 5-7 sentences: the scene and setting, the mood, notable objects, and any visible text. Then, on a separate line, state explicitly: 'PERSON: none' if no person is visible, or 'PERSON: <apparent gender>, approx. <age range> years, <one short phrase about their look/vibe>' (e.g. 'PERSON: male, approx. 25-30 years, casual student type'). Finally, on the very last line, give a short Czech label naming what is in the picture, in the form 'NAME: <3-5 words>' (e.g. 'NAME: žena se zrcadlem v kuchyni'). Lowercase, no quotes, no trailing period. Be concrete and factual." },
         ]}],
         generationConfig: { responseModalities: ["TEXT"] },
       }),
@@ -184,7 +184,25 @@ export async function describeImage(url: string): Promise<{ description: string;
   if (!res.ok) throw new Error(`[Gemini ${model}] ${json?.error?.message || res.status}`)
   const description = json?.candidates?.[0]?.content?.parts?.map((p: any) => p.text || "").join(" ").trim()
   if (!description) throw new Error("vision model nevrátil popis obrázku")
-  return { description, usage: readUsage(json, model) }
+  return { description, name: parseImageName(description), usage: readUsage(json, model) }
+}
+
+/**
+ * Pull the "NAME: …" line out of a vision description and clean it into a
+ * usable creative name. Returns null when the model skipped the line, so the
+ * caller can fall back to whatever it used before — the name is a suggestion,
+ * never a hard requirement.
+ */
+export function parseImageName(description: string): string | null {
+  const m = String(description || "").match(/NAME:\s*(.+?)\s*$/im)
+  if (!m) return null
+  const cleaned = m[1]
+    .replace(/^["'„“]+|["'„“.]+$/g, "")   // uvozovky a tečka na konci
+    .replace(/\s+/g, " ")
+    .trim()
+  if (cleaned.length < 3) return null
+  // Meta ad names get long fast ([LIB-xxxxxxxx] + name + suffix) — keep it short
+  return cleaned.length > 40 ? cleaned.slice(0, 40).replace(/\s+\S*$/, "") : cleaned
 }
 
 /**

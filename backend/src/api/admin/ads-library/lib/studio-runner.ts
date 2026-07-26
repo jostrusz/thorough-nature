@@ -63,7 +63,13 @@ export async function runStudioTextsJob(container: any, jobId: string) {
     let savedName = p.saved_name || null
     let resultCreativeId = job.result_creative_id || null
     if (ctx) {
-      const base = String(p.file_name || "studio").replace(/\.[a-z0-9]+$/i, "")
+      // Prefer the AI name from the vision pass ("žena se zrcadlem v kuchyni")
+      // over the raw upload file name ("IMG_4821") — it is what shows up in the
+      // Meta ad name, where a camera file name tells nobody anything. Falls back
+      // to the file name whenever the model skipped the NAME line.
+      const fileBase = String(p.file_name || "studio").replace(/\.[a-z0-9]+$/i, "")
+      const looksGeneric = /^(img|image|photo|screenshot|dsc|pxl|untitled|studio)[-_ ]?\d*$/i.test(fileBase)
+      const base = desc.name && (looksGeneric || !p.file_name) ? desc.name : fileBase
       if (resultCreativeId) {
         // regeneration → refresh the existing card's texts
         const [existing] = await svc.listAdCreatives({ id: resultCreativeId })
@@ -105,7 +111,9 @@ export async function runStudioTextsJob(container: any, jobId: string) {
       id: jobId, status: "done",
       result_creative_id: resultCreativeId,
       params: {
-        ...p, cost_usd: round4(totalCost), saved_name: savedName,
+        // ai_name je jen NÁVRH — UI ho může předvyplnit do pole s názvem,
+        // uživatel ho přepíše, nikdy nepřepisuje už uložený název
+        ...p, cost_usd: round4(totalCost), saved_name: savedName, ai_name: desc.name || null,
         result: {
           primaries: out.primaries, headlines: out.headlines, formulas: out.formulas || [],
           tells: out.tells, image_description: desc.description,

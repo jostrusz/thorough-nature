@@ -30,6 +30,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
       result916: j.params?.result916 || null,
       history: j.params?.history || [],
       saved_name: j.params?.saved_name || null,
+      ai_name: j.params?.ai_name || null,   // návrh názvu z vision průchodu
       created_at: j.created_at,
     })),
   })

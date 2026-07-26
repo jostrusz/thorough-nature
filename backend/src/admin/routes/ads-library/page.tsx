@@ -1067,7 +1067,11 @@ function StudioTab({ zoom }: any) {
   const save = async (it: any) => {
     setBusy((b) => ({ ...b, [it.id]: "save" }))
     try {
-      const base = String(it.name).replace(/\.[a-z0-9]+$/i, "")
+      // AI návrh ("žena se zrcadlem v kuchyni") místo názvu souboru
+      // ("IMG_4821") — ten v Meta účtu nikomu nic neřekne
+      const fileBase = String(it.name).replace(/\.[a-z0-9]+$/i, "")
+      const generic = /^(img|image|photo|screenshot|dsc|pxl|untitled|studio)[-_ ]?\d*$/i.test(fileBase)
+      const base = it.ai_name && generic ? it.ai_name : fileBase
       await sdk.client.fetch("/admin/ads-library/studio/save", {
         method: "POST",
         body: {
