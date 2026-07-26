@@ -5,33 +5,148 @@
  * Why this exists: handing Gemini a 1:1 reference and asking for a 4:5 output
  * makes it REDRAW the whole scene to fit the taller frame — people get stretched
  * and faces drift. Instead we pre-build the 4:5 canvas ourselves with the
- * original pixels centred and empty bands top and bottom, then ask the model to
- * paint ONLY those bands. The original composition stays exactly as it was.
+ * original pixels centred and empty bands top and bottom, ask the model to paint
+ * ONLY those bands, and then paste the original back over the centre so it is
+ * bit-for-bit untouched.
  *
  *      ┌──────────────┐  ← band to generate
  *      ├──────────────┤
  *      │   original   │  ← untouched (80 % of height)
  *      ├──────────────┤
  *      └──────────────┘  ← band to generate
+ *
+ * Two seeds for the bands were tried and both were worse — do not reintroduce:
+ *   - mirrored edge strips: whatever the model doesn't fully repaint reads as an
+ *     obvious flipped copy of the scene.
+ *   - blurred edge smear: measured centre deviation of 42.9/255 — the model read
+ *     the soft canvas as "this is a rough sketch" and re-generated the WHOLE
+ *     photograph, different composition and all. Flat grey measured 2.5/255.
  */
 
 const sharp = require("sharp")
 
+/** How many rows at the source's edge are inspected to judge "is this flat?". */
+const EDGE_SAMPLE = 24
+/**
+ * Max per-channel spread within a column's edge sample to call it flat (0-255).
+ * Calibrated on real creatives, not guessed: JPEG noise alone puts the median
+ * spread around 8, so a tolerance of 6 found almost nothing (3 % of columns on a
+ * flat-background illustration). 12 gives 79 %/70 % there while still leaving a
+ * textured photo at 23 %/10 % — i.e. aggressive on graphics, hands-off on photos.
+ */
+const FLAT_TOLERANCE = 12
+/** Flat runs shorter than this are ignored, so speckle doesn't create stripes. */
+const MIN_FLAT_RUN = 16
+/** Alpha ramp (px) where the pasted original meets a generated band. */
+const SEAM_FEATHER = 8
+
 export type Composed = {
   buffer: Buffer
   mime: string
+  /** canvas dimensions — the source width, and the 4:5 height */
   width: number
   height: number
   padTop: number
   padBottom: number
   /** true when the source was already 4:5 (or taller) and no bands were added */
   skipped: boolean
+  /** false when both bands were filled deterministically — no model call needed */
+  needsModel: boolean
+  /** how much of each band was solved without the model, for the job log */
+  solidPctTop: number
+  solidPctBottom: number
+}
+
+/**
+ * Per-column verdict on whether the source's edge is a flat colour there, plus
+ * that colour. A column counts as flat when all sampled rows sit within
+ * FLAT_TOLERANCE of each other on every channel — i.e. a solid background, or a
+ * horizontal gradient (which varies across x, not down y). A vertical gradient
+ * or any texture is not flat and goes to the model.
+ */
+function scanEdge(raw: Buffer, w: number, h: number, ch: number, fromTop: boolean) {
+  const flat = new Array<boolean>(w)
+  const colour = new Uint8Array(w * 3)
+  for (let x = 0; x < w; x++) {
+    let ok = true
+    for (let c = 0; c < 3; c++) {
+      let min = 255, max = 0, sum = 0
+      for (let s = 0; s < EDGE_SAMPLE; s++) {
+        const y = fromTop ? s : h - 1 - s
+        const v = raw[(y * w + x) * ch + c]
+        if (v < min) min = v
+        if (v > max) max = v
+        sum += v
+      }
+      if (max - min > FLAT_TOLERANCE) ok = false
+      colour[x * 3 + c] = Math.round(sum / EDGE_SAMPLE)
+    }
+    flat[x] = ok
+  }
+  // Collapse into runs so speckle can be cleaned up in both directions.
+  const runs: Array<{ from: number; to: number; flat: boolean }> = []
+  for (let x = 0; x < w; x++) {
+    const last = runs[runs.length - 1]
+    if (last && last.flat === flat[x]) last.to = x
+    else runs.push({ from: x, to: x, flat: flat[x] })
+  }
+
+  // 1) Drop flat runs too short to be a real background region — a handful of
+  //    accidentally-flat columns inside a textured area would otherwise extend
+  //    as thin coloured stripes into the band.
+  for (const r of runs) {
+    if (r.flat && r.to - r.from + 1 < MIN_FLAT_RUN) {
+      r.flat = false
+      for (let i = r.from; i <= r.to; i++) flat[i] = false
+    }
+  }
+
+  // 2) Close short NON-flat gaps that sit between two flat runs. Without this a
+  //    3 px blip in an otherwise solid background stays grey, the model repaints
+  //    just that sliver slightly off-colour, and the band ends up with a thin
+  //    vertical line through it. The gap's colour is interpolated across it.
+  for (let i = 1; i < runs.length - 1; i++) {
+    const r = runs[i]
+    if (r.flat || r.to - r.from + 1 >= MIN_FLAT_RUN) continue
+    if (!runs[i - 1].flat || !runs[i + 1].flat) continue
+    const left = r.from - 1, right = r.to + 1
+    for (let x = r.from; x <= r.to; x++) {
+      const t = (x - left) / (right - left)
+      for (let c = 0; c < 3; c++) {
+        colour[x * 3 + c] = Math.round(colour[left * 3 + c] * (1 - t) + colour[right * 3 + c] * t)
+      }
+      flat[x] = true
+    }
+    r.flat = true
+  }
+
+  return { flat, colour }
+}
+
+/** Build one band: flat columns get their own colour, the rest mid-grey. */
+function buildBand(w: number, bandH: number, scan: { flat: boolean[]; colour: Uint8Array }) {
+  const band = Buffer.alloc(w * bandH * 3, 128)
+  let solid = 0
+  for (let x = 0; x < w; x++) {
+    if (!scan.flat[x]) continue
+    solid++
+    const r = scan.colour[x * 3], g = scan.colour[x * 3 + 1], b = scan.colour[x * 3 + 2]
+    for (let y = 0; y < bandH; y++) {
+      const i = (y * w + x) * 3
+      band[i] = r; band[i + 1] = g; band[i + 2] = b
+    }
+  }
+  return { band, solidPct: w ? Math.round((solid / w) * 100) : 100 }
 }
 
 /**
  * Place `srcBuffer` centred on a 4:5 canvas, padding equally top and bottom.
- * The bands are filled with flat mid-grey — nothing else. See the note in
- * composeFeedCanvas for why every "smarter" seed we tried made things worse.
+ *
+ * The bands are a hybrid: columns whose source edge is a flat colour are
+ * extended with exactly that colour (deterministic — a solid extended into
+ * itself is neither a smear nor a mirror), everything else is mid-grey for the
+ * model to paint. Grey is unmistakably "empty area to fill", which is what stops
+ * the model regenerating the centre.
  */
 export async function composeFeedCanvas(srcBuffer: Buffer): Promise<Composed> {
   const meta = await sharp(srcBuffer).metadata()
@@ -44,28 +159,86 @@ export async function composeFeedCanvas(srcBuffer: Buffer): Promise<Composed> {
   // a 1856×2304 image is 4:5 for all practical purposes, and padding it by 8 px
   // would spend a generation on bands nobody can see.
   if (h >= targetH * 0.98) {
-    return { buffer: srcBuffer, mime: meta.format === "png" ? "image/png" : "image/jpeg", width: w, height: h, padTop: 0, padBottom: 0, skipped: true }
+    return {
+      buffer: srcBuffer, mime: meta.format === "png" ? "image/png" : "image/jpeg",
+      width: w, height: h, padTop: 0, padBottom: 0,
+      skipped: true, needsModel: false, solidPctTop: 100, solidPctBottom: 100,
+    }
   }
 
   const pad = targetH - h
   const padTop = Math.floor(pad / 2)
   const padBottom = pad - padTop
 
-  // Flat mid-grey bands — nothing clever. Two "smarter" seeds were tried and
-  // both were worse, so don't reintroduce them:
-  //   - mirrored edge strips: whatever the model doesn't fully repaint reads as
-  //     an obvious flipped copy of the scene.
-  //   - blurred edge smear: measured centre deviation of 42.9/255 — the model
-  //     read the soft canvas as "this is a rough sketch" and re-generated the
-  //     WHOLE photograph, different composition and all.
-  // Flat grey measured 2.5/255 (i.e. the centre survives) with an invisible
-  // seam, because grey is unmistakably "empty area to fill", not content.
-  const buffer = await sharp(srcBuffer)
-    .extend({ top: padTop, bottom: padBottom, left: 0, right: 0, background: { r: 128, g: 128, b: 128 } })
+  const { data: raw, info } = await sharp(srcBuffer).raw().toBuffer({ resolveWithObject: true })
+  const ch = info.channels
+  const top = buildBand(w, padTop, scanEdge(raw, w, h, ch, true))
+  const bottom = buildBand(w, padBottom, scanEdge(raw, w, h, ch, false))
+
+  const buffer = await sharp({ create: { width: w, height: targetH, channels: 3, background: { r: 128, g: 128, b: 128 } } })
+    .composite([
+      { input: top.band, raw: { width: w, height: padTop, channels: 3 }, top: 0, left: 0 },
+      { input: srcBuffer, top: padTop, left: 0 },
+      { input: bottom.band, raw: { width: w, height: padBottom, channels: 3 }, top: padTop + h, left: 0 },
+    ])
     .png()
     .toBuffer()
 
-  return { buffer, mime: "image/png", width: w, height: targetH, padTop, padBottom, skipped: false }
+  return {
+    buffer, mime: "image/png", width: w, height: targetH, padTop, padBottom,
+    skipped: false,
+    needsModel: top.solidPct < 100 || bottom.solidPct < 100,
+    solidPctTop: top.solidPct, solidPctBottom: bottom.solidPct,
+  }
+}
+
+/** Canvases are built as PNG; ads ship as JPEG. Saves the caller importing sharp. */
+export async function toJpeg(buffer: Buffer): Promise<Buffer> {
+  return sharp(buffer).jpeg({ quality: 92 }).toBuffer()
+}
+
+/**
+ * Take the model's 4:5 output, keep only its two bands, and put the original
+ * back in the middle.
+ *
+ * The model re-renders the whole canvas even when told not to (measured drift
+ * ~2.5/255 on a photo, but visibly more on flat illustrations with hard lines),
+ * so the centre it returns is never quite the approved image. Pasting the real
+ * pixels back makes "the 1:1 is untouched" a guarantee rather than a hope.
+ *
+ * SEAM_FEATHER px of alpha ramp at each seam absorbs sub-pixel drift between the
+ * model's centre and ours. That is a crossfade between two near-identical
+ * images, not a blur — nothing gets softened.
+ */
+export async function pasteOriginalCentre(modelOutput: Buffer, srcBuffer: Buffer, c: Composed): Promise<Buffer> {
+  const srcMeta = await sharp(srcBuffer).metadata()
+  const w = srcMeta.width || c.width
+  const h = srcMeta.height || 0
+
+  // The model returns its own resolution (e.g. 1856×2304 for a 2048×2560
+  // canvas). Normalise to the canvas grid so the centre lands where we put it.
+  const base = await sharp(modelOutput).resize(c.width, c.height, { fit: "fill" }).toBuffer()
+
+  const feather = Math.min(SEAM_FEATHER, Math.floor(h / 4))
+  let overlay = srcBuffer
+  if (feather > 0) {
+    const alpha = Buffer.alloc(w * h, 255)
+    for (let y = 0; y < feather; y++) {
+      const v = Math.round(((y + 1) / (feather + 1)) * 255)
+      alpha.fill(v, y * w, (y + 1) * w)
+      alpha.fill(v, (h - 1 - y) * w, (h - y) * w)
+    }
+    overlay = await sharp(srcBuffer)
+      .ensureAlpha()
+      .joinChannel(alpha, { raw: { width: w, height: h, channels: 1 } })
+      .png()
+      .toBuffer()
+  }
+
+  return sharp(base)
+    .composite([{ input: overlay, top: c.padTop, left: 0 }])
+    .jpeg({ quality: 92 })
+    .toBuffer()
 }
 
 /**
@@ -74,22 +247,12 @@ export async function composeFeedCanvas(srcBuffer: Buffer): Promise<Composed> {
  * reasons about the frame proportionally.
  */
 export function outpaintInstruction(padTop: number, padBottom: number, height: number): string {
-  const topPct = Math.round((padTop / height) * 100)
-  const bottomPct = Math.round((padBottom / height) * 100)
-  return `
+  const centrePct = 100 - Math.round((padTop / height) * 100) - Math.round((padBottom / height) * 100)
+  return `Extend this image vertically: fill in the empty band across the top and the empty band across the bottom.
 
-CANVAS EXTENSION — FILL IN ONLY THE TWO FLAT GREY BANDS:
-The central ~${100 - topPct - bottomPct}% is a finished image. Reproduce it pixel-for-pixel: same composition, same framing, same people, same objects, same crop, same proportions, same colours. Do NOT re-shoot, re-render, re-frame, zoom, re-pose or restyle it in any way. If anything in the centre changes, the edit is wrong.
+Keep the central ~${centrePct}% exactly as it is in the input — identical composition, framing, subjects, proportions, colours and lettering.
 
-The flat grey band across the TOP ~${topPct}% and the flat grey band across the BOTTOM ~${bottomPct}% are empty placeholders. Paint them as a seamless continuation of the same image: extend the walls, sky, floor, furniture, fabric, surfaces and shadows that already run into those borders, following their existing perspective lines and vanishing point.
+Fill the empty grey areas with more of the background that already touches those borders: the same surfaces, the same colours, the same perspective carrying on. Where part of a band is already a solid colour, that colour is correct — carry it unchanged to the edge of the frame. Match the input's medium, lighting, colour grade, sharpness and grain exactly, so the new areas are indistinguishable from the original: the same photographic look or the same illustration style, the same outline weight, the same texture.
 
-MATCH THE ORIGINAL'S STYLE EXACTLY in the bands:
-- Medium: if the centre is a photograph, the bands are the same photograph — same camera, same lens, same depth of field. If it is an illustration/3D render/painting, match that rendering style, line weight and shading.
-- Focus: fully sharp where the adjacent centre is sharp, out of focus only where the adjacent centre is already out of focus. Never add blur, softness or a smeared transition of your own.
-- Light: same direction, same colour temperature, same softness and contrast of shadows.
-- Colour: same grade, saturation and white balance — no brighter, cleaner or more saturated than the centre.
-- Texture: same film grain / noise / sharpness. Freshly generated areas usually come out too clean — deliberately match the centre's grain so the bands do not look smoother than the original.
-- Vignetting and any colour cast must continue consistently to the new edges.
-
-Add NOTHING new: no extra people, products, objects, logos or text in the bands — only more of what is already there. Do not mirror, flip or duplicate any part of the image. No grey may remain anywhere. The seam where each band meets the centre must be completely invisible: no line, no brightness step, no change in sharpness or grain.`
+The bands are background only; every subject stays in the centre. Do not repeat, mirror or duplicate anything. Leave no grey and no visible seam.`
 }

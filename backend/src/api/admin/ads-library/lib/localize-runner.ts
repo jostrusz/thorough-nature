@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
 import { generateImage, askImageYesNo } from "./imagegen"
-import { composeFeedCanvas, outpaintInstruction } from "./canvas"
+import { composeFeedCanvas, outpaintInstruction, pasteOriginalCentre, toJpeg } from "./canvas"
 import { translateTexts } from "./textgen"
 import { uploadBuffer } from "./media"
 import { PROJECT_CONTEXT } from "./project-context"
@@ -101,27 +101,24 @@ export async function runLocalizationJob(container: any, jobId: string) {
       //              model to paint a book into creatives that have none
       // The 9:16 reframe below works purely from the finished 4:5.
       const cover = PROJECT_COVERS[target]
-      // Source ads are square. Rather than let the model redraw the scene into
-      // a taller frame (which stretched people and drifted faces), pre-build the
-      // 4:5 canvas with the original centred and blurred bands top+bottom, then
-      // ask it to paint ONLY those bands. See lib/canvas.ts.
-      const srcRes = await fetch(src.image_1x1_url, { signal: AbortSignal.timeout(30000) })
-      if (!srcRes.ok) throw new Error(`nelze stáhnout zdrojový obrázek — HTTP ${srcRes.status}`)
-      const canvas = await composeFeedCanvas(Buffer.from(await srcRes.arrayBuffer()))
-      const outpaint = canvas.skipped ? "" : outpaintInstruction(canvas.padTop, canvas.padBottom, canvas.height)
-      log(canvas.skipped
-        ? "zdroj už je 4:5 nebo vyšší — outpaint se přeskakuje"
-        : `plátno 4:5 složeno (${canvas.width}×${canvas.height}, pruhy ${canvas.padTop}/${canvas.padBottom} px)`)
-
+      // Two passes, deliberately. Doing the localisation and the 4:5 extension
+      // in ONE generation made the model redraw the whole canvas — the approved
+      // square came back subtly restyled, which is glaring on flat illustrations
+      // with hard outlines. So:
+      //   A) localise at 1:1 (book swap and/or text translation) — exactly what
+      //      worked before 4:5 existed
+      //   B) one pure outpaint of that finished square, then paste the square
+      //      back over the centre so it is bit-for-bit untouched
+      // Pass B runs once per variant, never with retries or variants of its own.
       const refs: any[] = []
       if (p.img_mode === "swap") {
         if (!cover) throw new Error(`chybí referenční cover pro projekt ${target}`)
         refs.push({ url: cover, label: "IMAGE 1 — the new book cover to use:" })
-        refs.push({ buffer: canvas.buffer, mime: canvas.mime, label: "IMAGE 2 — the advertisement to edit (4:5 canvas):" })
+        refs.push({ url: src.image_1x1_url, label: "IMAGE 2 — the advertisement to edit:" })
       } else {
-        refs.push({ buffer: canvas.buffer, mime: canvas.mime, label: "The advertisement to edit (4:5 canvas):" })
+        refs.push({ url: src.image_1x1_url, label: "The advertisement to edit:" })
       }
-      await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt) + outpaint, refs: refs.map((r: any) => r.url).filter(Boolean) })
+      await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url).filter(Boolean) })
       let swapFails = 0
       for (let i = 0; i < imgCount; i++) {
         let buffer: any, mime = "image/jpeg", swapOk: boolean | null = null
@@ -134,7 +131,7 @@ export async function runLocalizationJob(container: any, jobId: string) {
             ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
             : ""
           const gen = await generateImage({
-            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + outpaint + addendum, refs, aspectRatio: "4:5",
+            modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1",
           })
           buffer = gen.buffer; mime = gen.mime
           vCost += addCost(gen.usage, "img11") || 0
@@ -147,9 +144,33 @@ export async function runLocalizationJob(container: any, jobId: string) {
           swapOk = verify.answer
           vCost += addCost(verify.usage, "img11") || 0
           if (swapOk !== false) break
-          log(`4:5 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
+          log(`1:1 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
         }
         if (swapOk === false) swapFails++
+
+        // ── pass B: 1:1 → 4:5, exactly one generation ──
+        const square = buffer
+        const canvas = await composeFeedCanvas(square)
+        if (canvas.skipped) {
+          log(`v${i + 1}: zdroj už je 4:5 nebo vyšší — outpaint se přeskakuje`)
+        } else if (!canvas.needsModel) {
+          // both edges were flat colour end to end — extended deterministically
+          buffer = await toJpeg(canvas.buffer)
+          mime = "image/jpeg"
+          log(`v${i + 1}: pruhy 4:5 vyplněny jednolitou barvou bez modelu`)
+        } else {
+          const out = await generateImage({
+            modelId: p.img_model,
+            prompt: outpaintInstruction(canvas.padTop, canvas.padBottom, canvas.height),
+            refs: [{ buffer: canvas.buffer, mime: canvas.mime, label: "The image to extend:" }],
+            aspectRatio: "4:5",
+          })
+          vCost += addCost(out.usage, "img11") || 0
+          vIn += out.usage?.input || 0; vOut += out.usage?.output || 0
+          buffer = await pasteOriginalCentre(out.buffer, square, canvas)
+          mime = "image/jpeg"
+          log(`v${i + 1}: outpaint 4:5 (pruhy ${canvas.padTop}/${canvas.padBottom} px, jednolitých ${canvas.solidPctTop}%/${canvas.solidPctBottom}%, střed vrácen 1:1)`)
+        }
         const ext = mime.includes("png") ? "png" : "jpg"
         const url = await uploadBuffer(buffer, `ads-library/${created.id}/4x5/v${i + 1}.${ext}`, mime)
         const row = await svc.createAdVariants({
