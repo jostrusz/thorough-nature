@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { ADS_LIBRARY_MODULE } from "../../../../modules/ads-library"
-import { generateImage, askImageYesNo } from "./imagegen"
+import { generateImage } from "./imagegen"
+import { checkImageLanguage, correctText } from "./language-check"
 import { composeFeedCanvas, outpaintInstruction, pasteOriginalCentre, toJpeg } from "./canvas"
 import { translateTexts } from "./textgen"
 import { uploadBuffer } from "./media"
@@ -120,33 +121,62 @@ export async function runLocalizationJob(container: any, jobId: string) {
       }
       await setStep("img11", { status: "running", prompt: langPrompt(p.img_prompt), refs: refs.map((r: any) => r.url).filter(Boolean) })
       let swapFails = 0
+      let langFails = 0
       for (let i = 0; i < imgCount; i++) {
         let buffer: any, mime = "image/jpeg", swapOk: boolean | null = null
         let vCost = 0, vIn = 0, vOut = 0
-        // book swap gets one automatic retry when the verifier says the cover
-        // did not actually change (the model loves to keep the original title)
-        const maxTries = p.img_mode === "swap" ? 2 : 1
-        for (let attempt = 1; attempt <= maxTries; attempt++) {
-          const addendum = attempt > 1
-            ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
-            : ""
+        let verdict: any = null
+        // Up to three attempts, and each one is TIGHTER than the last —
+        // re-rolling the same prompt is a lottery that can return the same
+        // wrong language again:
+        //   1. the normal prompt
+        //   2. + the concrete errors that were read off the previous attempt
+        //   3. + the finished target text, to be copied character for character
+        //      (the image model stops translating and only typesets)
+        const MAX_TRIES = 3
+        let addendum = ""
+        for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
           const gen = await generateImage({
             modelId: p.img_model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1",
           })
           buffer = gen.buffer; mime = gen.mime
           vCost += addCost(gen.usage, "img11") || 0
           vIn += gen.usage?.input || 0; vOut += gen.usage?.output || 0
-          if (p.img_mode !== "swap") break
-          const verify = await askImageYesNo(
-            buffer.toString("base64"), mime,
-            `Does the book cover in this image show the title "${ctx.book}"?`
-          )
-          swapOk = verify.answer
-          vCost += addCost(verify.usage, "img11") || 0
-          if (swapOk !== false) break
-          log(`1:1 v${i + 1} pokus ${attempt}: obálka se nezměnila${attempt < maxTries ? " → retry" : ""}`)
+
+          // One read-back covers everything: target language, grammar, and —
+          // in swap mode — the book cover. Replaces the old yes/no cover check.
+          verdict = await checkImageLanguage({
+            imageB64: buffer.toString("base64"), mime,
+            lang: ctx.language, langName: ctx.langName,
+            mode: p.img_mode,
+            expect: p.img_mode === "swap" ? [ctx.book, ctx.author] : undefined,
+          })
+          if (verdict.usage) vCost += addCost(verdict.usage, "img11") || 0
+          if (p.img_mode === "swap") swapOk = verdict.ok
+
+          // ok:null = we could not check (no key / transport blip). Shipping is
+          // better than burning two more generations on our own outage.
+          if (verdict.ok !== false) break
+          log(`1:1 v${i + 1} pokus ${attempt}: ${verdict.errors[0] || "jazyk nesouhlasí"}${attempt < MAX_TRIES ? " → retry" : ""}`)
+          if (attempt >= MAX_TRIES) break
+
+          addendum = `\n\nATTENTION — your previous attempt was rejected:\n- ${verdict.errors.join("\n- ")}\nEvery word visible in the image must be correct, standard ${ctx.langName}.`
+          if (p.img_mode === "swap") {
+            addendum += `\nThe book cover must read exactly "${ctx.book}" by ${ctx.author}.`
+          }
+          if (attempt === MAX_TRIES - 1) {
+            // final escalation: stop asking it to translate, give it the words
+            const fixed = await correctText({ text: verdict.text, langName: ctx.langName, errors: verdict.errors })
+            if (fixed) {
+              addendum += `\n\nWrite the text EXACTLY as follows, character for character, keeping the line breaks — do not translate, rephrase or re-spell any of it:\n\n${fixed}`
+            }
+          }
         }
-        if (swapOk === false) swapFails++
+        const textOk = verdict?.ok
+        if (textOk === false) {
+          langFails++
+          log(`1:1 v${i + 1}: ⚠️ po ${MAX_TRIES} pokusech stále vadné — ${verdict.errors.slice(0, 2).join("; ")}`)
+        }
 
         // ── pass B: 1:1 → 4:5, exactly one generation ──
         const square = buffer
@@ -177,18 +207,34 @@ export async function runLocalizationJob(container: any, jobId: string) {
           creative_id: created.id, format: "4:5", variant_no: i + 1, url,
           model_id: p.img_model, mode: p.img_mode, prompt: langPrompt(p.img_prompt),
           is_official: false,
-          metadata: { swap_ok: swapOk, cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut },
+          metadata: {
+            swap_ok: swapOk, text_ok: textOk ?? null,
+            text_read: verdict?.text?.slice(0, 300) || null,
+            text_errors: textOk === false ? verdict.errors.slice(0, 5) : null,
+            cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut,
+          },
         })
         v11.push(row)
         await setStep("img11", { status: "running", detail: `${i + 1}/${imgCount}` })
       }
-      // official = first variant that passed the swap check, else the first one
-      const bestIdx = Math.max(0, v11.findIndex((v: any) => v.metadata?.swap_ok !== false))
-      await svc.updateAdVariants({ id: v11[bestIdx].id, is_official: true })
-      await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[bestIdx].url })
-      const failNote = swapFails ? ` (${swapFails}⚠️ obálka nezměněna)` : ""
-      await setStep("img11", { status: "done", detail: `${v11.length} variant${failNote}`, cost_usd: round4(stepCost.img11 || 0) })
-      log(`4:5 done (${v11.length}, swap fails: ${swapFails}, ~$${round4(stepCost.img11 || 0)})`)
+      // Official = the first variant that passed every check. If NONE passed,
+      // deliberately leave the creative without an official image rather than
+      // promoting a broken one — the old `Math.max(0, -1)` silently picked
+      // variant 0 in exactly that case, so a rejected ad became the shipped ad.
+      const goodIdx = v11.findIndex((v: any) => v.metadata?.swap_ok !== false && v.metadata?.text_ok !== false)
+      if (goodIdx >= 0) {
+        await svc.updateAdVariants({ id: v11[goodIdx].id, is_official: true })
+        await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[goodIdx].url })
+      } else {
+        log(`4:5 ⚠️ žádná varianta neprošla kontrolou — kreativa zůstává bez oficiálního obrázku`)
+      }
+      const notes = [
+        swapFails ? `${swapFails}⚠️ obálka` : "",
+        langFails ? `${langFails}⚠️ jazyk` : "",
+        goodIdx < 0 ? "bez oficiální" : "",
+      ].filter(Boolean).join(", ")
+      await setStep("img11", { status: "done", detail: `${v11.length} variant${notes ? ` (${notes})` : ""}`, cost_usd: round4(stepCost.img11 || 0) })
+      log(`4:5 done (${v11.length}, swap fails: ${swapFails}, lang fails: ${langFails}, ~$${round4(stepCost.img11 || 0)})`)
     }
 
     // ── 2) 9:16 reframe from each 4:5 ──

@@ -1,7 +1,8 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ADS_LIBRARY_MODULE } from "../../../../../../modules/ads-library"
-import { generateImage, askImageYesNo } from "../../../lib/imagegen"
+import { generateImage } from "../../../lib/imagegen"
+import { checkImageLanguage, correctText } from "../../../lib/language-check"
 import { composeFeedCanvas, outpaintInstruction, pasteOriginalCentre, toJpeg } from "../../../lib/canvas"
 import { uploadBuffer } from "../../../lib/media"
 import { PROJECT_CONTEXT } from "../../../lib/project-context"
@@ -122,19 +123,31 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       for (let i = 0; i < imgCount; i++) {
         let buffer: any, mime = "image/jpeg", swapOk: boolean | null = null
         let vCost = 0, vIn = 0, vOut = 0
-        const maxTries = p.img_mode === "swap" ? 2 : 1
-        for (let attempt = 1; attempt <= maxTries; attempt++) {
-          const addendum = attempt > 1
-            ? `\n\nATTENTION: your previous attempt kept the ORIGINAL book title. That is wrong. The cover must show "${ctx.book}" by ${ctx.author} — nothing else.`
-            : ""
+        // identical three-attempt language gate as the main runner —
+        // see lib/localize-runner.ts for why each attempt tightens
+        const MAX_TRIES = 3
+        let addendum = ""
+        let verdict: any = null
+        for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
           const gen = await generateImage({ modelId: model, prompt: langPrompt(p.img_prompt) + addendum, refs, aspectRatio: "1:1" })
           buffer = gen.buffer; mime = gen.mime
           vCost += cost(gen.usage, "img11"); vIn += gen.usage?.input || 0; vOut += gen.usage?.output || 0
-          if (p.img_mode !== "swap") break
-          const verify = await askImageYesNo(buffer.toString("base64"), mime, `Does the book cover in this image show the title "${ctx.book}"?`)
-          swapOk = verify.answer; vCost += cost(verify.usage, "img11")
-          if (swapOk !== false) break
+          verdict = await checkImageLanguage({
+            imageB64: buffer.toString("base64"), mime,
+            lang: ctx.language, langName: ctx.langName, mode: p.img_mode,
+            expect: p.img_mode === "swap" ? [ctx.book, ctx.author] : undefined,
+          })
+          if (verdict.usage) vCost += cost(verdict.usage, "img11")
+          if (p.img_mode === "swap") swapOk = verdict.ok
+          if (verdict.ok !== false || attempt >= MAX_TRIES) break
+          addendum = `\n\nATTENTION — your previous attempt was rejected:\n- ${verdict.errors.join("\n- ")}\nEvery word visible in the image must be correct, standard ${ctx.langName}.`
+          if (p.img_mode === "swap") addendum += `\nThe book cover must read exactly "${ctx.book}" by ${ctx.author}.`
+          if (attempt === MAX_TRIES - 1) {
+            const fixed = await correctText({ text: verdict.text, langName: ctx.langName, errors: verdict.errors })
+            if (fixed) addendum += `\n\nWrite the text EXACTLY as follows, character for character, keeping the line breaks — do not translate, rephrase or re-spell any of it:\n\n${fixed}`
+          }
         }
+        const textOk = verdict?.ok
         if (swapOk === false) swapFails++
 
         // ── pass B: 1:1 → 4:5, exactly one generation ──
@@ -160,14 +173,21 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         const row = await svc.createAdVariants({
           creative_id: created.id, format: "4:5", variant_no: i + 1, url,
           model_id: model, mode: p.img_mode, prompt: langPrompt(p.img_prompt), is_official: false,
-          metadata: { swap_ok: swapOk, cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut },
+          metadata: {
+            swap_ok: swapOk, text_ok: textOk ?? null,
+            text_read: verdict?.text?.slice(0, 300) || null,
+            text_errors: textOk === false ? verdict.errors.slice(0, 5) : null,
+            cost_usd: round4(vCost), tokens_in: vIn, tokens_out: vOut,
+          },
         })
         v11.push(row)
         await setStep("img11", { status: "running", detail: `${i + 1}/${imgCount}` })
       }
-      const bestIdx = Math.max(0, v11.findIndex((v: any) => v.metadata?.swap_ok !== false))
-      await svc.updateAdVariants({ id: v11[bestIdx].id, is_official: true })
-      await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[bestIdx].url })
+      const goodIdx = v11.findIndex((v: any) => v.metadata?.swap_ok !== false && v.metadata?.text_ok !== false)
+      if (goodIdx >= 0) {
+        await svc.updateAdVariants({ id: v11[goodIdx].id, is_official: true })
+        await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[goodIdx].url })
+      }
       await setStep("img11", { status: "done", detail: `${v11.length} variant${swapFails ? ` (${swapFails}⚠️ obálka nezměněna)` : ""}`, cost_usd: round4(stepCost.img11 || 0) })
     }
 
