@@ -4,6 +4,7 @@ import { MyStockApiClient } from "../modules/dextrum/api-client"
 import { BriteApiClient } from "../modules/payment-brite/api-client"
 import { normalizePhone } from "../utils/normalize-phone"
 import { normalizePostalCode } from "../utils/normalize-postal-code"
+import { formatFrStreetForWms } from "../utils/fr-street-format"
 
 // Brite ships-on-CREDIT gate: how long we keep an order queued while waiting
 // for transaction state 5 (CREDIT) before giving up, and how often we re-check.
@@ -551,10 +552,20 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
         if (postalResult.warning) {
           console.log(`[Dextrum Hold] ${orderCode}: ${postalResult.warning}`)
         }
+        // FR only: mySTOCK parses the house number from the END of the street,
+        // French addresses carry it at the FRONT — move it (see the util).
+        // Joined first so the number lands at the very end even with address_2.
+        const streetResult = formatFrStreetForWms(
+          [addr.address_1, addr.address_2].filter(Boolean).join(", "),
+          countryCode
+        )
+        if (streetResult.changed) {
+          console.log(`[Dextrum Hold] ${orderCode}: FR ulice "${[addr.address_1, addr.address_2].filter(Boolean).join(", ")}" → "${streetResult.street}" (${streetResult.status})`)
+        }
         const deliveryAddress: any = {
           firstName: addr.first_name || "",
           lastName: addr.last_name || "",
-          street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
+          street: streetResult.street,
           city: addr.city || "",
           zip: postalResult.normalized,
           country: countryCode,

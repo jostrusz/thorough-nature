@@ -4,6 +4,7 @@ import { DEXTRUM_MODULE } from "../../../../../../modules/dextrum"
 import { MyStockApiClient } from "../../../../../../modules/dextrum/api-client"
 import { normalizePhone } from "../../../../../../utils/normalize-phone"
 import { normalizePostalCode } from "../../../../../../utils/normalize-postal-code"
+import { formatFrStreetForWms } from "../../../../../../utils/fr-street-format"
 
 // POST /admin/dextrum/orders/:id/send — Manually send order to WMS
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
@@ -210,11 +211,20 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     if (postalResult.warning) {
       console.log(`[Dextrum Send] ${medusaOrderId}: ${postalResult.warning}`)
     }
+    // FR only: mySTOCK parses the house number from the END of the street,
+    // French addresses carry it at the FRONT — move it (see the util).
+    const streetResult = formatFrStreetForWms(
+      [addr.address_1, addr.address_2].filter(Boolean).join(", "),
+      addrCountry
+    )
+    if (streetResult.changed) {
+      console.log(`[Dextrum Send] ${medusaOrderId}: FR ulice → "${streetResult.street}" (${streetResult.status})`)
+    }
     const deliveryAddress: any = {
       firstName: addr.first_name || "",
       lastName: addr.last_name || "",
       company: addr.company || undefined,
-      street: [addr.address_1, addr.address_2].filter(Boolean).join(", "),
+      street: streetResult.street,
       city: addr.city || "",
       zip: postalResult.normalized,
       country: addrCountry,
