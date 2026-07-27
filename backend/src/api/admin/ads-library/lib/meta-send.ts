@@ -26,7 +26,10 @@ export async function graphPost(path: string, body: Record<string, any>) {
       const acc = path.split("/")[0]
       throw new Error(`[Meta ${path}] účtu ${acc} chybí pro tento token oprávnění ADVERTISE (Správa kampaní) — přidej ho v Business Settings → Reklamní účty → Lidé/System users. Meta hlásí: ${json?.error?.error_user_msg || ""}`)
     }
-    throw new Error(`[Meta ${path}] ${json?.error?.error_user_msg || json?.error?.message || res.status}`)
+    const err: any = new Error(`[Meta ${path}] ${json?.error?.error_user_msg || json?.error?.message || res.status}`)
+    err.subcode = json?.error?.error_subcode
+    err.code = json?.error?.code
+    throw err
   }
   return json
 }
@@ -308,11 +311,12 @@ export async function createPausedAd(opts: {
   // ID kreativy z knihovny drží dál název creative — ten se v seznamu reklam
   // nezobrazuje, ale zůstává dohledatelný přes Ads Manager i API.
   const name = `${c.name}${opts.nameSuffix || ""}`
-  const creative = await graphPost(`${opts.account}/adcreatives`, {
+
+  const postCreative = (spec: any) => graphPost(`${opts.account}/adcreatives`, {
     name: `${name} [LIB-${c.id.slice(-8)}]`,
     object_story_spec: hash916
-      ? opts.spec
-      : { ...opts.spec, link_data: { link, image_hash: hash11, call_to_action: { type: c.cta_type || "LEARN_MORE" } } },
+      ? spec
+      : { ...spec, link_data: { link, image_hash: hash11, call_to_action: { type: c.cta_type || "LEARN_MORE" } } },
     asset_feed_spec: assetFeed,
     degrees_of_freedom_spec: {
       creative_features_spec: Object.fromEntries(
@@ -321,6 +325,22 @@ export async function createPausedAd(opts: {
     },
     url_tags: "utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&fbadid={{ad.id}}&fbadsetid={{adset.id}}",
   })
+
+  // The IG id we pair with the page comes from an existing ad in the account,
+  // so it is provably an identity the account has advertised under. Meta can
+  // still refuse it (subcode 1815199) when the Instagram asset is assigned to
+  // the business/page but never shared with this particular ad account —
+  // ads created earlier from Ads Manager keep running, new API creatives get
+  // rejected. Dropping instagram_user_id makes Meta fall back to the
+  // page-backed IG identity, which is always allowed.
+  let creative: any
+  try {
+    creative = await postCreative(opts.spec)
+  } catch (e: any) {
+    if (e?.subcode !== 1815199 || !opts.spec?.instagram_user_id) throw e
+    const { instagram_user_id, ...pageOnly } = opts.spec
+    creative = await postCreative(pageOnly)
+  }
   const ad = await graphPost(`${opts.account}/ads`, {
     name, adset_id: opts.adsetId, creative: { creative_id: creative.id }, status: "PAUSED",
   })
