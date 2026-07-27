@@ -2834,7 +2834,7 @@ body {
           <div class="checkout-trust">
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-              <span id="trust-provider-text">Biztonságos fizetés a Comgate-en keresztül</span>
+              <span id="trust-provider-text">Biztonságos fizetés</span>
             </div>
             <div class="checkout-trust-item">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -5562,9 +5562,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return '<span class="pm-icon" style="width:40px;height:28px;border-radius:7px;background:#fff;border:0.5px solid #e3e3e3;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><img src="/icons/barion.svg" alt="Barion" style="height:22px;width:auto" onerror="this.style.display=\'none\'"></span>';
     }
     // For methods with known SVG icons — wrapped in the same 40×28 white chip
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'bank_transfer'];
+    // A Revolut alulvonásos kódokat használ (apple_pay / google_pay), az ikonfájlok
+    // viszont egybeírva léteznek — enélkül 404-et kapnánk és az onerror elrejtené
+    // a logót, helyette a szürke "APPL"/"GOOG" jelvény maradna.
+    var ICON_FILE_MAP = { 'google_pay': 'googlepay', 'apple_pay': 'applepay' };
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'apple_pay', 'google_pay', 'eps', 'swish', 'revolut_pay', 'bank_transfer'];
     if (iconMethods.indexOf(code) !== -1) {
-      return '<span class="pm-icon" style="width:40px;height:28px;border-radius:7px;background:#fff;border:0.5px solid #e3e3e3;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><img src="/icons/' + code + '.svg" alt="' + code + '" style="height:20px;width:auto;object-fit:contain" onerror="this.style.display=\'none\'"></span>';
+      var iconFile = ICON_FILE_MAP[code] || code;
+      return '<span class="pm-icon" style="width:40px;height:28px;border-radius:7px;background:#fff;border:0.5px solid #e3e3e3;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><img src="/icons/' + iconFile + '.svg" alt="' + code + '" style="height:20px;width:auto;object-fit:contain" onerror="this.style.display=\'none\'"></span>';
     }
     // Colored badge fallback
     var badges = {
@@ -6362,11 +6367,19 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var providerName = cardProvider === 'stripe' ? 'Stripe'
         : cardProvider === 'airwallex' ? 'Airwallex'
         : cardProvider === 'paypal' ? 'PayPal'
+        : cardProvider === 'revolut' ? 'Revolut'
         : cardProvider === 'comgate' ? 'Comgate'
         : 'Mollie';
-      subtext.textContent = cardProvider === 'comgate'
+      subtext.textContent = cardProvider === 'revolut'
+        // A Revolut beágyazott — NINCS átirányítás, ezért itt sem ígérhetjük.
+        ? 'A kártyaadatokat itt, az oldalon adod meg — nincs átirányítás.'
+        : cardProvider === 'comgate'
         ? 'Átirányítunk a biztonságos kártyás fizetési oldalra.'
         : 'A kártyaadataidat a(z) ' + providerName + ' biztonságos rendszere dolgozza fel.';
+    } else if (selectedProvider === 'revolut' && (selectedMethod === 'apple_pay' || selectedMethod === 'google_pay')) {
+      subtext.textContent = selectedMethod === 'apple_pay'
+        ? 'Fizetés Apple Pay-jel — egy érintés, átirányítás nélkül.'
+        : 'Fizetés Google Pay-jel — egy érintés, átirányítás nélkül.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
       subtext.textContent = 'Átirányítunk a Klarnához a fizetés befejezéséhez.';
     } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
@@ -6385,6 +6398,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var trustProvider = cardProvider === 'stripe' ? 'Stripe'
           : cardProvider === 'airwallex' ? 'Airwallex'
           : cardProvider === 'paypal' ? 'PayPal'
+          : cardProvider === 'revolut' ? 'Revolut'
           : cardProvider === 'comgate' ? 'Comgate'
           : 'Mollie';
         trustText.textContent = 'Biztonságos fizetés — ' + trustProvider;
@@ -6393,7 +6407,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       } else if (selectedMethod === 'cod') {
         trustText.textContent = 'Fizetés a csomag átvételekor';
       } else {
-        trustText.textContent = 'Biztonságos fizetés — ' + (selectedProvider === 'paypal' ? 'PayPal' : selectedProvider === 'stripe' ? 'Stripe' : 'Comgate');
+        // Magyarországon a Comgate nincs bekötve — a kártyát a Revolut viszi.
+        trustText.textContent = 'Biztonságos fizetés — ' + (selectedProvider === 'paypal' ? 'PayPal'
+          : selectedProvider === 'stripe' ? 'Stripe'
+          : selectedProvider === 'revolut' ? 'Revolut'
+          : 'Revolut');
       }
     }
   }
