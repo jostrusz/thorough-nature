@@ -4323,7 +4323,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (revolutWalletPR && revolutWalletPR.destroy) { try { revolutWalletPR.destroy(); } catch (e) {} }
     revolutWalletPR = null;
     setWalletHint('');
-    if (submitBtn) { submitBtn.style.display = ''; submitBtn.style.opacity = ''; }
+    // A gombot teljesen használhatóvá kell tenni, nem csak láthatóvá: ha a wallet
+    // közben betöltés (loading) állapotban hagyta, a vevő egy pörgő, letiltott
+    // gombot lát és nem tud tovább menni. Ugyanaz a visszaállítás, mint a
+    // restoreSubmitFromRevolutCard()-ban.
+    if (submitBtn) {
+      submitBtn.style.display = '';
+      submitBtn.style.opacity = '';
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
   }
 
   // Replace the submit button with the native Apple/Google Pay button.
@@ -6104,6 +6113,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // Bind click events on newly rendered methods
     bindPaymentMethodEvents();
+
+    // Az Apple Pay csempe elrejtése ott, ahol Apple Pay nem futhat (nem Safari /
+    // nem Apple eszköz). Enélkül a vevő kiválaszthat egy fizetési módot, amit az
+    // eszköze nem támogat, és csak a hibaüzenetig jut el.
+    gateAppleWalletTile();
 
     // Update button text
     updateButtonText();
