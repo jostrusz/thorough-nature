@@ -7,19 +7,43 @@ const NTFY_TOPIC = "medusa-ntfy-obj-2026"
 const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`
 
 // Project display names
+/**
+ * Push-notification labels. Names follow lib/project-context.ts, shortened
+ * where the full book title would not fit a phone notification.
+ *
+ * Every project_id that appears on a real order must be here — an unlisted one
+ * falls through to the raw slug, which is how Norwegian orders were arriving as
+ * "slipp-taket". Six projects were missing, including the two biggest
+ * (loslatenboek, het-leven).
+ *
+ * The last two entries are not slugs but bad data seen in production:
+ * "odpust-ksiazka" is a typo of odpusc-ksiazka (5 orders) and "Slipp taket" is
+ * a display name written into project_id instead of the slug (2 orders). They
+ * are mapped so the notification stays readable; the rows themselves still want
+ * fixing at the source.
+ */
 const PROJECT_NAMES: Record<string, string> = {
+  loslatenboek: "Laat los (NL)",
+  "het-leven": "Het leven dat je verdient (NL)",
+  dehondenbijbel: "De Hondenbijbel (NL)",
   odpusc: "Odpuść (PL)",
   "odpusc-ksiazka": "Odpuść (PL)",
-  dehondenbijbel: "De Hondenbijbel (NL)",
+  "zycie-zaslugy": "Życie, jakiego nigdy… (PL)",
+  "biblia-kotow": "Biblia kotów (PL)",
   slapp: "Släpp taget (SE)",
   "slapp-taget": "Släpp taget (SE)",
-  "psi-superzivot": "Psí superživot (CZ)",
-  "kocici-bible": "Kočičí bible (CZ)",
+  "slipp-taket": "Slipp taket (NO)",
+  "lass-los": "Lass los (DE/AT)",
+  "lache-livre": "Lâche prise (FR)",
+  "engedd-el": "Engedd el (HU)",
   "odpust-knizka": "Pusť to, co tě ničí (CZ)",
   "pusti-to-sk": "Pusti to, čo ťa ničí (SK)",
   "zivot-zaslugy": "Život, jaký si zasloužíš (CZ)",
-  "lass-los": "Lass los (DE/AT)",
-  "engedd-el": "Engedd el (HU)",
+  "psi-superzivot": "Psí superživot (CZ)",
+  "kocici-bible": "Kočičí bible (CZ)",
+  // known bad values on existing orders
+  "odpust-ksiazka": "Odpuść (PL)",
+  "Slipp taket": "Slipp taket (NO)",
 }
 
 // Currency symbols
@@ -27,6 +51,8 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   eur: "€",
   pln: "zł",
   sek: "kr",
+  nok: "kr", // Norwegian krone — was missing, so NO orders showed a bare number
+  dkk: "kr",
   czk: "Kč",
   usd: "$",
   gbp: "£",
