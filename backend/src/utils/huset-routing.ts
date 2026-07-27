@@ -13,10 +13,12 @@
  */
 import { PROFITABILITY_MODULE } from "../modules/profitability"
 import { getHusetConfig } from "../modules/huset/config"
+import { normalizeProjectSlug } from "./project-slug"
 
 export async function resolveProjectSlug(order: any, container: any): Promise<string> {
   const meta = order?.metadata || {}
-  if (meta.project_id) return String(meta.project_id)
+  // normalized: a display name in metadata or config must not break routing
+  if (meta.project_id) return normalizeProjectSlug(meta.project_id)
 
   if (order?.sales_channel_id) {
     try {
@@ -26,7 +28,7 @@ export async function resolveProjectSlug(order: any, container: any): Promise<st
         { take: 1 }
       )
       if (configs?.length > 0 && configs[0].project_slug) {
-        return String(configs[0].project_slug)
+        return normalizeProjectSlug(configs[0].project_slug)
       }
     } catch {
       /* fall through to country heuristic */
@@ -43,10 +45,13 @@ export async function isHusetOrder(order: any, container: any): Promise<boolean>
   const config = getHusetConfig()
   if (!config.enabled) return false
 
+  const enabled = config.projectSlugs.map(normalizeProjectSlug)
   const slug = await resolveProjectSlug(order, container)
-  if (slug) return config.projectSlugs.includes(slug)
+  if (slug && enabled.includes(slug)) return true
 
-  // Fallback for orders without a resolvable project_id: map the destination
+  // Fallback whenever the slug is missing OR unrecognised. It used to return
+  // early on any truthy slug, so one bad config value ("Slipp taket") stopped
+  // Norwegian orders from ever reaching the warehouse. Map the destination
   // country to its project slug, then check it against the enabled list — this
   // keeps SE gated behind HUSET_PROJECT_SLUGS even via the country path.
   // NO is exclusively slipp-taket, SE exclusively slapp-taget.
@@ -56,5 +61,5 @@ export async function isHusetOrder(order: any, container: any): Promise<boolean>
     ""
   ).toUpperCase()
   const countrySlug = cc === "NO" ? "slipp-taket" : cc === "SE" ? "slapp-taget" : ""
-  return countrySlug ? config.projectSlugs.includes(countrySlug) : false
+  return countrySlug ? enabled.includes(countrySlug) : false
 }

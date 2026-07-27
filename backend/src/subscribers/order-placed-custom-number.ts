@@ -1,3 +1,4 @@
+import { normalizeProjectSlug } from "../utils/project-slug"
 import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { PROFITABILITY_MODULE } from "../modules/profitability"
@@ -73,7 +74,7 @@ export default async function orderPlacedCustomNumberHandler({
           { take: 1 }
         )
         if (configs?.length > 0) {
-          projectId = configs[0].project_slug
+          projectId = normalizeProjectSlug(configs[0].project_slug)
           console.log(`[CustomNumber] Resolved project_id from sales_channel: ${projectId}`)
         }
       } catch (e: any) {
