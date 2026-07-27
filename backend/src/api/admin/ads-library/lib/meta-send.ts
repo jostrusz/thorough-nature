@@ -177,47 +177,48 @@ export async function listAccountPages(account: string) {
 }
 
 /**
- * Page + IG identity for new ads. Preference order matches the single-send
- * route: explicit pick → identity of an existing ad in the TARGET ad set →
- * the account's recent creatives. Only token-usable pages qualify, and the IG
- * id is reused only when it came paired with the chosen page (IG identity is
- * mandatory for Stories/Reels).
+ * Page identity for new ads. Preference order matches the single-send route:
+ * explicit pick → page of an existing ad in the TARGET ad set → the account's
+ * recent creatives. Only token-usable pages qualify.
+ *
+ * We deliberately never send instagram_user_id. Ads are meant to run under the
+ * Facebook page, and Meta then uses the page-backed Instagram identity for IG
+ * placements. Pinning a real IG account also broke sends outright: the id we
+ * used to copy from a running ad in the same ad set came back rejected with
+ * subcode 1815199 ("ad account has no access to this Instagram account"),
+ * because the IG asset sits on the business/page but was never shared with the
+ * individual ad account. Neither /instagram_accounts nor
+ * /connected_instagram_accounts returns anything for any of the 19 accounts
+ * under this token, so there is no way to tell up front which id would pass.
  */
 export async function resolveIdentity(account: string, pageId?: string | null, adsetId?: string | null) {
   const mine = await usablePages()
   const usable = new Set(mine.map((p: any) => p.id))
-  let chosen: string | null = null
 
   if (pageId) {
-    chosen = String(pageId)
+    const chosen = String(pageId)
     if (!usable.has(chosen)) {
       throw new Error(`na stránku ${chosen} nemá API token roli inzerenta — přidej system usera k té stránce v Business settings`)
     }
+    return { page_id: chosen }
   }
 
   const pools: any[][] = []
   if (adsetId) {
     const inSet = await graphGet(`${String(adsetId).trim()}/ads`, {
-      fields: "creative{object_story_spec{page_id,instagram_user_id}}", limit: 10,
+      fields: "creative{object_story_spec{page_id}}", limit: 10,
     }).catch(() => ({ data: [] }))
     pools.push((inSet.data || []).map((x: any) => x.creative?.object_story_spec).filter((s: any) => s?.page_id))
   }
   pools.push(await recentSpecs(account))
 
   for (const specs of pools) {
-    if (!chosen) chosen = specs.find((s: any) => usable.has(String(s.page_id)))?.page_id || null
-    if (chosen) {
-      const ig = specs.find((s: any) => String(s.page_id) === String(chosen) && s.instagram_user_id)?.instagram_user_id
-      if (ig) return { page_id: String(chosen), instagram_user_id: ig }
-    }
+    const found = specs.find((s: any) => usable.has(String(s.page_id)))?.page_id
+    if (found) return { page_id: String(found) }
   }
 
-  if (!chosen) {
-    const names = mine.length ? mine.map((p: any) => p.name).join(", ") : "token nevidí žádné stránky"
-    throw new Error(`nenašel jsem stránku použitelnou tímto tokenem (${names}) — vyber ji ručně v poli FB stránka`)
-  }
-  // no IG paired with this page — Meta falls back to the page-backed IG account
-  return { page_id: String(chosen) }
+  const names = mine.length ? mine.map((p: any) => p.name).join(", ") : "token nevidí žádné stránky"
+  throw new Error(`nenašel jsem stránku použitelnou tímto tokenem (${names}) — vyber ji ručně v poli FB stránka`)
 }
 
 /**

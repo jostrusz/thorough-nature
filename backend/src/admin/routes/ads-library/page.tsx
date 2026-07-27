@@ -513,14 +513,14 @@ function PagePicker({ account, value, onChange }: any) {
           {pages.map((p: any) => (
             <option key={p.id} value={p.id}>
               {p.in_use ? "★ " : p.instagram_user_id ? "📷 " : ""}{p.name}
-              {p.in_use ? " — už se v účtu používá" : p.instagram_user_id ? " — má napojený Instagram" : ""}
+              {p.in_use ? " — už se v účtu používá" : p.instagram_user_id ? " — má vlastní Instagram profil" : ""}
             </option>))}
         </select>
         {!value
           ? <div style={{ fontSize: 12, color: "#b45309", marginTop: 4 }}>
               ⚠️ U tohohle účtu nejde spolehlivě určit stránku — vyber ji ručně, ať reklamy nevzniknou pod cizím trhem.</div>
           : <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 4 }}>
-              ★ = stránka, pod kterou účet inzeruje teď · 📷 = má napojený Instagram. Instagram se převezme od stránky.</div>}
+              ★ = stránka, pod kterou účet inzeruje teď · 📷 = má vlastní Instagram profil. Reklamy vzniknou pod stránkou; na Instagramu se zobrazí její identitou.</div>}
       </>)}
     </div>)
 }
