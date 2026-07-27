@@ -4303,7 +4303,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       .then(function () {
         return createExpressPaymentSession(revolutWalletCartId, 'pp_revolut_revolut', {
           method: revolutWalletMethod, amount: getCurrentTotal(),
-          currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'HUF').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
         });
       })
       .then(function (sessionData) {
@@ -4337,12 +4337,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     c.style.cssText = 'min-height:48px;margin-bottom:2px;';
     wrap.insertBefore(c, wrap.firstChild);
     if (submitBtn) submitBtn.style.display = 'none';
-    setWalletHint('Laster ' + (method === 'apple_pay' ? 'Apple Pay' : 'Google Pay') + '…');
+    setWalletHint((method === 'apple_pay' ? 'Apple Pay' : 'Google Pay') + ' betöltése…');
 
     loadRevolutPayments().then(function (rp) {
       var pr = rp.paymentRequest(c, {
         amount: Math.round(getCurrentTotal() * 100),
-        currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(),
+        currency: (PROJECT_CONFIG.mainProduct.currency || 'HUF').toUpperCase(),
         preferredPaymentMethod: method === 'apple_pay' ? 'applePay' : 'googlePay',
         createOrder: revolutWalletCreateOrder,
         onSuccess: onRevolutWalletSuccess,
@@ -4443,7 +4443,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       .then(function () {
         return createExpressPaymentSession(revolutCardCartId, 'pp_revolut_revolut', {
           method: 'card', amount: getCurrentTotal(),
-          currency: (PROJECT_CONFIG.mainProduct.currency || 'NOK').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
+          currency: (PROJECT_CONFIG.mainProduct.currency || 'HUF').toUpperCase(), project_slug: PROJECT_CONFIG.slug || ''
         });
       })
       .then(function (sessionData) {

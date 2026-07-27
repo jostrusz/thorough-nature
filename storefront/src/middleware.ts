@@ -15,6 +15,20 @@ domainMapping.split(",").filter(Boolean).forEach((entry) => {
   if (domain && slug) PROJECT_DOMAINS[domain.trim()] = slug.trim()
 })
 
+// Hosts whose Apple Pay runs through Revolut Merchant and therefore need
+// Revolut's domain-association file instead of the static PayPal one.
+// Compared against the host with any leading "www." already stripped.
+// Extendable via env REVOLUT_APPLE_PAY_HOSTS (comma-separated) without a deploy.
+const REVOLUT_APPLE_PAY_HOSTS: string[] = [
+  "slipptaketboken.no",   // slipp-taket
+  "engeddelkonyv.hu",     // engedd-el
+  "lacheprise-livre.fr",  // lache-livre
+  ...(process.env.REVOLUT_APPLE_PAY_HOSTS || "")
+    .split(",")
+    .map((h) => h.trim().toLowerCase().replace(/^www\./, ""))
+    .filter(Boolean),
+]
+
 // Dynamic domain resolution cache (fetched from backend DB)
 const dynamicDomainCache: Map<string, { slug: string | null; resolvedAt: number }> = new Map()
 const DOMAIN_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
@@ -132,13 +146,16 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // ─── Static / well-known paths ───
-  // Apple Pay domain association is PSP-specific: slipptaketboken.no runs
-  // Apple Pay via Revolut Merchant (needs Revolut's validation file), while
-  // the other domains use PayPal Apple Pay (static file in /public). Serve
-  // the Revolut file for the NO domain via rewrite; everyone else falls
-  // through to the static PayPal file.
+  // Apple Pay domain association is PSP-specific: the domains that run Apple Pay
+  // through Revolut Merchant must serve Revolut's validation file, while the rest
+  // use PayPal Apple Pay (static file in /public). Serve the Revolut file for the
+  // Revolut domains via rewrite; everyone else falls through to the static file.
+  //
+  // Keep this list in sync with the `revolut` rows in gateway_config — a domain
+  // that offers Revolut Apple Pay but serves the PayPal file will fail Apple's
+  // domain verification and the wallet sheet never opens.
   if (pathname === "/.well-known/apple-developer-merchantid-domain-association") {
-    if (cleanHost === "slipptaketboken.no") {
+    if (REVOLUT_APPLE_PAY_HOSTS.includes(cleanHost)) {
       return NextResponse.rewrite(new URL("/api/apple-pay-association", request.url))
     }
     return NextResponse.next()
