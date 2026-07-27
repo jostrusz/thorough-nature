@@ -1255,6 +1255,8 @@ function PerformanceTab({ zoom }: any) {
   // draft = what's being typed, adset = what's actually queried
   const [adsetDraft, setAdsetDraft] = useState("")
   const [adset, setAdset] = useState("")
+  const [sel, setSel] = useState<Set<string>>(new Set())
+  const [bulk, setBulk] = useState<{ total: number; done: number; failed: string[] } | null>(null)
 
   const accountsQ = useQuery({ queryKey: ["ads-accounts"], queryFn: () => sdk.client.fetch("/admin/ads-library/accounts", { method: "GET" }) })
   const accounts = accountsQ.data?.accounts || []
@@ -1268,15 +1270,50 @@ function PerformanceTab({ zoom }: any) {
         : `/admin/ads-library/performance?accounts=${selected.join(",")}&range=${range}&sort=${sort}&limit=40`,
       { method: "GET" }),
   })
+  const importOne = (row: any, projectId: string) => sdk.client.fetch("/admin/ads-library/import", {
+    method: "POST",
+    body: { meta_ad_id: row.ad_id, account_id: row.account_id, project_id: projectId, language: PROJECTS[projectId]?.lang || "NL", range },
+  })
   const doImport = async (row: any, projectId: string) => {
     setImporting(row.ad_id); setImportFor(null)
     try {
-      await sdk.client.fetch("/admin/ads-library/import", {
-        method: "POST",
-        body: { meta_ad_id: row.ad_id, account_id: row.account_id, project_id: projectId, language: PROJECTS[projectId]?.lang || "NL", range },
-      })
+      await importOne(row, projectId)
       qc.invalidateQueries({ queryKey: ["ads-perf"] }); qc.invalidateQueries({ queryKey: ["ads-lib"] })
     } finally { setImporting(null) }
+  }
+
+  // changing the filter swaps the whole row set — keeping ticks from the
+  // previous one would import ads that are no longer on screen
+  useEffect(() => { setSel(new Set()); setBulk(null) }, [adset, selected.join(","), range])
+
+  const rows: any[] = perfQ.data?.rows || []
+  const importable = rows.filter((r: any) => !r.in_library)
+  const picked = importable.filter((r: any) => sel.has(r.ad_id))
+  // one project is applied to the whole batch, so a selection spanning markets
+  // would silently file German ads under a Dutch project
+  const accountsInPick = new Set(picked.map((r: any) => r.account_id))
+
+  /**
+   * Sequential on purpose: every import pulls the creative from Graph and
+   * mirrors the image into MinIO, so firing 40 at once buys a rate limit
+   * instead of speed. Failures are collected per ad rather than aborting the
+   * batch — the endpoint is idempotent, so a re-run costs nothing.
+   */
+  const doBulkImport = async (projectId: string) => {
+    setBulk({ total: picked.length, done: 0, failed: [] })
+    const failed: string[] = []
+    for (let i = 0; i < picked.length; i++) {
+      const row = picked[i]
+      try {
+        await importOne(row, projectId)
+        setSel((s) => { const n = new Set(s); n.delete(row.ad_id); return n })
+      } catch (e: any) {
+        failed.push(`${row.ad_name}: ${e?.message || "selhalo"}`)
+      }
+      setBulk({ total: picked.length, done: i + 1, failed })
+    }
+    qc.invalidateQueries({ queryKey: ["ads-perf"] }); qc.invalidateQueries({ queryKey: ["ads-lib"] })
+    if (!failed.length) setBulk(null)
   }
   return (
     <div>
@@ -1314,11 +1351,41 @@ function PerformanceTab({ zoom }: any) {
         </div>)}
       {perfQ.error && <div style={{ ...S.card, padding: 18, color: "#b91c1c", fontSize: 13 }}>{(perfQ.error as any)?.message || "načtení selhalo"}</div>}
       {perfQ.isFetching && <div style={{ padding: 20, textAlign: "center", color: "#6b7280" }}>Tahám živá data z Meta API…</div>}
+
+      {picked.length > 0 && (
+        <div style={{ ...S.card, padding: "10px 14px", marginBottom: 10, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", borderColor: "#7c3aed", background: "#faf5ff" }}>
+          <b style={{ fontSize: 13.5 }}>📥 {picked.length} označených</b>
+          {bulk
+            ? <>
+                <span style={{ fontSize: 13, color: "#6b7280" }}>Importuji {bulk.done}/{bulk.total}…</span>
+                {bulk.done === bulk.total && bulk.failed.length > 0 && (
+                  <button style={S.btn} onClick={() => setBulk(null)}>✕ zavřít</button>)}
+              </>
+            : <>
+                <select style={{ ...S.input, fontSize: 13, width: "auto" }} defaultValue=""
+                  onChange={(e) => e.target.value && doBulkImport(e.target.value)}>
+                  <option value="" disabled>Importovat do projektu…</option>
+                  {Object.entries(PROJECTS).map(([k, v]: any) => <option key={k} value={k}>{v.flag} {k}</option>)}
+                </select>
+                <button style={S.btn} onClick={() => setSel(new Set())}>✕ odznačit</button>
+              </>}
+          {accountsInPick.size > 1 && !bulk && (
+            <span style={{ fontSize: 12, color: "#b45309" }}>
+              ⚠️ Výběr je z {accountsInPick.size} účtů — projekt se použije pro všechny stejný.</span>)}
+          {bulk?.failed.length > 0 && (
+            <div style={{ width: "100%", fontSize: 12, color: "#b91c1c" }}>
+              {bulk.failed.length} selhalo: {bulk.failed.slice(0, 3).join(" · ")}{bulk.failed.length > 3 ? ` · +${bulk.failed.length - 3} dalších` : ""}</div>)}
+        </div>)}
       {perfQ.data?.rows?.length > 0 && (
         <div style={{ ...S.card, overflow: "hidden" }}>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
               <thead><tr style={{ fontSize: 10.5, textTransform: "uppercase", letterSpacing: ".06em", color: "#6b7280" }}>
+                <th style={{ padding: "9px 0 9px 14px", width: 26 }}>
+                  <input type="checkbox" title="označit vše, co ještě není v knihovně"
+                    disabled={!importable.length || !!bulk}
+                    checked={!!importable.length && picked.length === importable.length}
+                    onChange={(e) => setSel(e.target.checked ? new Set(importable.map((r: any) => r.ad_id)) : new Set())} /></th>
                 <th style={{ textAlign: "left", padding: "9px 14px" }}>Reklama</th>
                 <th style={{ textAlign: "left", padding: "9px 8px" }}>Účet</th>
                 <th style={{ textAlign: "right", padding: "9px 8px" }}>Spend</th>
@@ -1328,8 +1395,16 @@ function PerformanceTab({ zoom }: any) {
                 <th style={{ textAlign: "right", padding: "9px 8px" }}>CTR</th>
                 <th style={{ padding: "9px 14px" }} /></tr></thead>
               <tbody>
-                {perfQ.data.rows.map((r: any) => (
-                  <tr key={r.ad_id} style={{ borderTop: "1px solid #f3f4f6" }}>
+                {rows.map((r: any) => (
+                  <tr key={r.ad_id} style={{ borderTop: "1px solid #f3f4f6", ...(sel.has(r.ad_id) ? { background: "#faf5ff" } : {}) }}>
+                    <td style={{ padding: "8px 0 8px 14px" }}>
+                      <input type="checkbox" disabled={r.in_library || !!bulk} checked={sel.has(r.ad_id)}
+                        title={r.in_library ? "už je v knihovně" : undefined}
+                        onChange={(e) => setSel((s) => {
+                          const n = new Set(s)
+                          e.target.checked ? n.add(r.ad_id) : n.delete(r.ad_id)
+                          return n
+                        })} /></td>
                     <td style={{ padding: "8px 14px", maxWidth: 340 }}>
                       <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                         {r.thumb
