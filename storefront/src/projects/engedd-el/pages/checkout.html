@@ -4240,7 +4240,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
    * ──────────────────────────────────────────────────────────────────────────*/
   function loadRevolutPayments() {
     if (_revolutPaymentsModule) return _revolutPaymentsModule;
-    if (!revolutPublicKey) return Promise.reject(new Error('Revolut public key mangler'));
+    if (!revolutPublicKey) return Promise.reject(new Error('Hiányzik a Revolut nyilvános kulcs'));
     _revolutPaymentsModule = prewarmRevolutSdk().then(function (m) {
       return m.default.payments({ locale: 'auto', publicToken: revolutPublicKey, mode: revolutEnv === 'prod' ? 'prod' : 'sandbox' });
     });
@@ -5630,6 +5630,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       czQrSource = null;
       (data.gateways || []).forEach(function(gw) {
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
+        // A Revolut wallet modul (Apple/Google Pay) a NYILVÁNOS kulcsot igényli.
+        // Enélkül loadRevolutPayments() azonnal elutasít, a .catch visszaállítja
+        // a sima gombot, és a fizetés az általános ágon ÁTIRÁNYÍTÁSSAL végződik.
+        if (gw.provider === 'revolut') {
+          revolutPublicKey = gw.public_key || null;
+          revolutEnv = gw.environment === 'sandbox' ? 'sandbox' : 'prod';
+        }
         (gw.methods || []).forEach(function(m) {
           // COD (utánvét) ideiglenesen ELREJTVE az engedd-el checkouton — a backend (gateway + fee + Dextrum COD) kész és bekötve,
           // csak a UI-ban nem jelenik meg. Aktiváláshoz töröld ezt a sort.
