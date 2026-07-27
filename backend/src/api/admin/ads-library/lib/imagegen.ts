@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { hasRate, rateLabel } from "./pricing"
+import { withImageSlot } from "./limiter"
 /**
  * Image generation via Google Gemini API (Nano Banana models).
  * Requires env GEMINI_API_KEY. Model ids overridable via env in case Google
@@ -70,6 +71,20 @@ async function fetchAsInline(url: string, label: string): Promise<any> {
  */
 const TRANSIENT = /timeout|aborted|ETIMEDOUT|ECONNRESET|ENOTFOUND|EAI_AGAIN|socket hang up|fetch failed|\b(429|500|502|503|504)\b|rate.?limit|overloaded|unavailable|internal error/i
 
+/**
+ * A 429 from Gemini carries the exact wait in its body ("Please retry in
+ * 24.513858961s"). Honouring it beats guessing: the old fixed 4 s / 12 s
+ * backoff gave up while the quota window still had 20 s to run, so every
+ * attempt burned and the card failed anyway.
+ */
+function suggestedWaitMs(message: string): number | null {
+  const m = /retry in ([\d.]+)\s*s/i.exec(message || "")
+  if (!m) return null
+  const s = Number(m[1])
+  // +1 s of slack, capped so a nonsense value can't park a job for minutes
+  return Number.isFinite(s) ? Math.round(Math.min((s + 1) * 1000, 90_000)) : null
+}
+
 async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 3): Promise<T> {
   let last: any
   for (let attempt = 1; attempt <= tries; attempt++) {
@@ -78,9 +93,9 @@ async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 3): Pro
     } catch (e: any) {
       last = e
       if (attempt === tries || !TRANSIENT.test(e?.message || "")) throw e
-      // 4 s, then 12 s — long enough for a rate-limit window to roll over
-      const waitMs = 4000 * Math.pow(3, attempt - 1)
-      console.warn(`[Ads Library] ${label} pokus ${attempt}/${tries} selhal (${e.message}) → čekám ${waitMs / 1000}s`)
+      // server-stated delay when there is one, otherwise 4 s then 12 s
+      const waitMs = suggestedWaitMs(e?.message) ?? 4000 * Math.pow(3, attempt - 1)
+      console.warn(`[Ads Library] ${label} pokus ${attempt}/${tries} selhal (${e.message}) → čekám ${Math.round(waitMs / 1000)}s`)
       await new Promise((r) => setTimeout(r, waitMs))
     }
   }
@@ -121,7 +136,10 @@ export async function generateImage(opts: {
   }
   parts.push({ text: opts.prompt })
 
-  return withRetry(`generateImage ${opts.aspectRatio}`, async () => {
+  // Slot is taken around the retry loop, not inside it: a call that is waiting
+  // out a 429 must keep occupying its slot, otherwise the queue lets another
+  // request in and the burst that caused the 429 just repeats.
+  return withImageSlot(() => withRetry(`generateImage ${opts.aspectRatio}`, async () => {
     let res: Response
     try {
       res = await fetch(
@@ -159,7 +177,7 @@ export async function generateImage(opts: {
     }
     const usage = readUsage(json, model)
     return { buffer: Buffer.from(inline.data, "base64"), mime: inline.mimeType || inline.mime_type || "image/png", usage }
-  })
+  }))
 }
 
 /**
