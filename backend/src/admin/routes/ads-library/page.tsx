@@ -948,7 +948,12 @@ function QueueTab({ zoom }: any) {
   const stepChip = (s: any) => {
     const bg = s.status === "done" ? "#dcfce7" : s.status === "running" ? "#fef3c7" : s.status === "failed" ? "#fee2e2" : "var(--bg-subtle,#f3f4f6)"
     const col = s.status === "done" ? "#15803d" : s.status === "running" ? "#b45309" : s.status === "failed" ? "#b91c1c" : "#6b7280"
-    return <span key={s.key} style={{ ...S.mono, fontSize: 11, padding: "2px 9px", borderRadius: 999, background: bg, color: col }}>
+    // tokens live in the tooltip — the chip row is already dense, but without
+    // them a price jump can't be told apart from a rate change
+    const tok = s.tokens_out
+      ? `${s.calls || 1}× volání · ${Number(s.tokens_in || 0).toLocaleString("cs")} vstup + ${Number(s.tokens_out).toLocaleString("cs")} výstup tokenů`
+      : undefined
+    return <span key={s.key} title={tok} style={{ ...S.mono, fontSize: 11, padding: "2px 9px", borderRadius: 999, background: bg, color: col, cursor: tok ? "help" : undefined }}>
       {s.label}{s.detail ? ` ${s.detail}` : ""}{s.cost_usd ? ` · $${s.cost_usd}` : ""}</span>
   }
   return (

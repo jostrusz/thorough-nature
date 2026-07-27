@@ -34,7 +34,16 @@ export async function runLocalizationJob(container: any, jobId: string) {
   // running USD total across every AI call in this job (images, verify, texts)
   let totalCost = 0
   const stepCost: Record<string, number> = {}
+  // Tokens per step, so a price change can be attributed to the rate or to the
+  // volume without inferring one from the other. Two models can share a rate
+  // and still differ 2× in spend purely by how much they generate — that is
+  // exactly what happened when the text step moved from Opus 4.8 to Opus 5.
+  const stepTok: Record<string, { in: number; out: number; calls: number }> = {}
   const addCost = (usage: any, stepKey: string): number | null => {
+    const t = stepTok[stepKey] || (stepTok[stepKey] = { in: 0, out: 0, calls: 0 })
+    t.in += usage?.input || 0
+    t.out += usage?.output || 0
+    t.calls += 1
     const c = costUSD(usage)
     if (c != null) {
       totalCost += c
@@ -233,7 +242,12 @@ export async function runLocalizationJob(container: any, jobId: string) {
         langFails ? `${langFails}⚠️ jazyk` : "",
         goodIdx < 0 ? "bez oficiální" : "",
       ].filter(Boolean).join(", ")
-      await setStep("img11", { status: "done", detail: `${v11.length} variant${notes ? ` (${notes})` : ""}`, cost_usd: round4(stepCost.img11 || 0) })
+      await setStep("img11", {
+        status: "done", detail: `${v11.length} variant${notes ? ` (${notes})` : ""}`,
+        cost_usd: round4(stepCost.img11 || 0),
+        tokens_in: stepTok.img11?.in || 0, tokens_out: stepTok.img11?.out || 0,
+        calls: stepTok.img11?.calls || 0,
+      })
       log(`4:5 done (${v11.length}, swap fails: ${swapFails}, lang fails: ${langFails}, ~$${round4(stepCost.img11 || 0)})`)
     }
 
@@ -264,7 +278,11 @@ export async function runLocalizationJob(container: any, jobId: string) {
       }
       const [firstOff] = await svc.listAdVariants({ creative_id: created.id, format: "9:16", is_official: true })
       if (firstOff) await svc.updateAdCreatives({ id: created.id, image_9x16_url: firstOff.url })
-      await setStep("img916", { status: "done", detail: `${n} variant`, cost_usd: round4(stepCost.img916 || 0) })
+      await setStep("img916", {
+        status: "done", detail: `${n} variant`, cost_usd: round4(stepCost.img916 || 0),
+        tokens_in: stepTok.img916?.in || 0, tokens_out: stepTok.img916?.out || 0,
+        calls: stepTok.img916?.calls || 0,
+      })
       log(`9:16 done (${n}, ~$${round4(stepCost.img916 || 0)})`)
     }
 
@@ -303,6 +321,8 @@ export async function runLocalizationJob(container: any, jobId: string) {
     await setStep("texts", {
       status: "done", detail: `${txtCount} variant${tellNote}`,
       cost_usd: round4(stepCost.texts || 0), tells: allTells.slice(0, 20),
+      tokens_in: stepTok.texts?.in || 0, tokens_out: stepTok.texts?.out || 0,
+      calls: stepTok.texts?.calls || 0,
     })
 
     // ── 4) finalize ──
