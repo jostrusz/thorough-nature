@@ -2405,11 +2405,6 @@ body {
         <span class="msb-line-label">Szállítás</span>
         <span class="msb-line-val" id="msb-shipping-val">Ingyenes</span>
       </div>
-      <!-- Delivery fee (home delivery +400 Ft) -->
-      <div class="msb-line" id="msb-delivery-fee" style="display:none;">
-        <span class="msb-line-label">Házhozszállítás</span>
-        <span class="msb-line-val">+400&nbsp;Ft</span>
-      </div>
       <!-- Utánvét díj -->
       <div class="msb-line" id="msb-cod-fee" style="display:none;">
         <span class="msb-line-label">Utánvét</span>
@@ -2758,48 +2753,21 @@ body {
             </div>
           </div>
 
-          <!-- ═══ SZÁLLÍTÁSI MÓD ═══ -->
+          <!-- ═══ SZÁLLÍTÁS — csak házhozszállítás, ingyenesen ═══
+               A csomagpontos átvétel meg lett szüntetve (a "Packeta - Csomagpont"
+               shipping option a Medusában is ki van kapcsolva), ezért itt nincs
+               választás: minden rendelés házhoz megy, 0 Ft-ért. Így az sem
+               fordulhat elő, hogy egy házhozszállításos rendelésen bennragad egy
+               csomagpont-kód — a mySTOCK azt visszautasítja. -->
           <div style="margin-top:16px;">
-            <div style="font-weight:700;font-size:14px;color:#1a1a2e;margin-bottom:10px;">Szállítási mód</div>
-
-            <!-- Option 1: Átvétel csomagponton (Pickup) -->
-            <div class="shipping-option selected" id="shipping-pickup" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--accent);border-radius:10px;cursor:pointer;background:rgba(194,123,160,0.03);transition:all 0.15s ease;">
-              <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
-                <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></div>
-              </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <div style="flex:1;min-width:0;">
-                <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Átvétel csomagponton</div>
-                <div style="font-size:12px;color:#666;margin-top:1px;">Packeta — csomagpontok szerte az országban</div>
-              </div>
-              <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Ingyenes</span>
-            </div>
-
-            <!-- Packeta point selection (shown when pickup selected) -->
-            <div id="packeta-point-section" style="margin:8px 0 8px 0;padding-left:28px;">
-              <button type="button" id="packeta-select-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px dashed var(--accent);border-radius:8px;background:rgba(194,123,160,0.04);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s ease;" onmouseover="this.style.background='rgba(194,123,160,0.08)'" onmouseout="this.style.background='rgba(194,123,160,0.04)'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                Csomagpont kiválasztása
-              </button>
-              <div id="packeta-selected-point" style="display:none;margin-top:8px;padding:10px 14px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:8px;">
-                <!-- Filled by Packeta Widget callback -->
-              </div>
-              <div id="packeta-error" style="display:none;margin-top:6px;color:var(--error);font-size:12px;font-weight:500;">
-                Kérjük, válassz egy csomagpontot
-              </div>
-            </div>
-
-            <!-- Option 2: Házhozszállítás (Home delivery) -->
-            <div class="shipping-option" id="shipping-home" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;background:transparent;transition:all 0.15s ease;margin-top:8px;">
-              <div class="shipping-radio" style="width:18px;height:18px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0;">
-                <div style="width:10px;height:10px;border-radius:50%;background:transparent;"></div>
-              </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <div style="font-weight:700;font-size:14px;color:#1a1a2e;margin-bottom:10px;">Szállítás</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--accent);border-radius:10px;background:rgba(194,123,160,0.03);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" width="22" height="22" style="flex-shrink:0;"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               <div style="flex:1;min-width:0;">
                 <div style="font-weight:600;font-size:13px;color:#1a1a2e;">Házhozszállítás</div>
-                <div style="font-size:12px;color:#666;margin-top:1px;">Kézbesítés a megadott címre</div>
+                <div style="font-size:12px;color:#666;margin-top:1px;">Kézbesítés a megadott címre &middot; 3–4 munkanap</div>
               </div>
-              <span style="font-weight:600;font-size:14px;color:#1a1a2e;flex-shrink:0;">+400&nbsp;Ft</span>
+              <span style="font-weight:700;color:#27AE60;font-size:14px;flex-shrink:0;">Ingyenes</span>
             </div>
           </div>
 
@@ -2935,10 +2903,6 @@ body {
           Szállítás
         </span>
         <span style="color:#27AE60;font-weight:600;">Ingyenes</span>
-      </div>
-      <div class="summary-line" id="summary-delivery-fee" style="display:none;padding:4px 0;">
-        <span style="font-size:13px;">Házhozszállítás</span>
-        <span style="font-weight:600;">+400&nbsp;Ft</span>
       </div>
       <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Utánvét</span>
@@ -3204,7 +3168,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
     if (selectedMethod === 'cod') total += 490; // Utánvét díj — 30 CZK ekvivalens HUF-ban (backend: FEE_AMOUNTS.cod_fee.huf)
-    if (selectedShipping === 'home') total += 400; // Házhozszállítás — egyezik a "Packeta - Házhozszállítás" shipping option árával (400 HUF)
+    // A házhozszállítás ingyenes — a "Packeta - Házhozszállítás" shipping option
+    // ára a Medusában is 0 HUF, tehát itt nincs mit hozzáadni.
     return total;
   }
 
@@ -3253,33 +3218,18 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var codFeeMobile = document.getElementById('msb-cod-fee');
     if (codFeeMobile) codFeeMobile.style.display = isCod ? 'flex' : 'none';
 
-    // Delivery fee sor — megjelenítés/elrejtés a szállítási mód alapján
-    var isHome = selectedShipping === 'home';
-    var deliveryFeeDesktop = document.getElementById('summary-delivery-fee');
-    if (deliveryFeeDesktop) deliveryFeeDesktop.style.display = isHome ? 'flex' : 'none';
-    var deliveryFeeMobile = document.getElementById('msb-delivery-fee');
-    if (deliveryFeeMobile) deliveryFeeMobile.style.display = isHome ? 'flex' : 'none';
-
-    // Update desktop + mobile shipping line text based on shipping method
+    // A szállítás mindig ingyenes házhozszállítás — nincs se felár, se választás.
     var shippingLine = document.getElementById('summary-shipping');
     if (shippingLine) {
       var shippingVal = shippingLine.querySelector('span:last-child');
       if (shippingVal) {
-        if (isHome) {
-          shippingVal.style.color = '#1a1a2e';
-          shippingVal.style.fontWeight = '600';
-          shippingVal.textContent = 'Packeta';
-        } else {
-          shippingVal.style.color = '#27AE60';
-          shippingVal.style.fontWeight = '600';
-          shippingVal.textContent = 'Ingyenes';
-        }
+        shippingVal.style.color = '#27AE60';
+        shippingVal.style.fontWeight = '600';
+        shippingVal.textContent = 'Ingyenes';
       }
     }
     var msbShippingVal = document.getElementById('msb-shipping-val');
-    if (msbShippingVal) {
-      msbShippingVal.textContent = isHome ? 'Packeta' : 'Ingyenes';
-    }
+    if (msbShippingVal) msbShippingVal.textContent = 'Ingyenes';
 
     // ─── MOBIL STICKY SUMMARY BAR ───
     // Fő ár
@@ -3954,8 +3904,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   /* ─── SHIPPING METHOD ─── */
-  var selectedShipping = 'pickup'; // 'pickup' or 'home'
-  var selectedPacketaPoint = null; // { id, name, address, zip, city }
+  // Magyarországon már csak házhozszállítás van, ingyenesen — nincs csomagpont.
+  // Ez a két érték szándékosan fix: így a 'pickup' ágak (validáció, Packeta
+  // widget, cartMeta.packeta_*) sehol nem futnak le, és házhozszállításos
+  // rendelésen soha nem maradhat bent csomagpont-kód (a mySTOCK azt elutasítja).
+  var selectedShipping = 'home';
+  var selectedPacketaPoint = null;
+  // Korábbi látogatásból ottragadt csomagpont törlése, hogy ne éledjen újra.
+  try {
+    localStorage.removeItem('checkout_packeta_point');
+    localStorage.setItem('checkout_shipping_method', 'home');
+  } catch (e) {}
 
   /* ─── DYNAMIC PAYMENT METHODS ─── */
   var selectedMethod = '';
