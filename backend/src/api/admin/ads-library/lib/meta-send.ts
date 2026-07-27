@@ -177,30 +177,74 @@ export async function listAccountPages(account: string) {
 }
 
 /**
- * Page identity for new ads. Preference order matches the single-send route:
- * explicit pick → page of an existing ad in the TARGET ad set → the account's
- * recent creatives. Only token-usable pages qualify.
+ * The page's own Instagram identity — its page-backed Instagram account.
  *
- * We deliberately never send instagram_user_id. Ads are meant to run under the
- * Facebook page, and Meta then uses the page-backed Instagram identity for IG
- * placements. Pinning a real IG account also broke sends outright: the id we
- * used to copy from a running ad in the same ad set came back rejected with
- * subcode 1815199 ("ad account has no access to this Instagram account"),
- * because the IG asset sits on the business/page but was never shared with the
- * individual ad account. Neither /instagram_accounts nor
- * /connected_instagram_accounts returns anything for any of the 19 accounts
- * under this token, so there is no way to tell up front which id would pass.
+ * This is the "use the Facebook page" option from Ads Manager's identity
+ * picker: an IG identity owned by the page itself, so every ad account that
+ * can advertise the page can also use it. That solves both halves of the
+ * squeeze we hit live:
+ *
+ *  - sending the brand's real IG account (copied from a running ad in the same
+ *    ad set) is rejected on /adcreatives with subcode 1815199 — the IG asset
+ *    sits on the business but was never shared with the individual ad account,
+ *    and /instagram_accounts is empty on all 19 accounts so it can't be checked
+ *    up front
+ *  - sending no IG at all is rejected on /ads, because the ad set includes
+ *    Instagram placements and this page has no linked IG to fall back on
+ *
+ * The PBIA edge needs a Page access token, which the system-user token can
+ * mint. Meta creates the account on POST when the page has none yet.
+ */
+const pbiaCache = new Map<string, string | null>()
+
+async function pageBackedInstagram(pageId: string): Promise<string | null> {
+  if (pbiaCache.has(pageId)) return pbiaCache.get(pageId)!
+  let id: string | null = null
+  try {
+    const page = await graphGet(pageId, { fields: "access_token" })
+    const pageToken = page?.access_token
+    if (pageToken) {
+      const list = await fetch(
+        `${GRAPH}/${pageId}/page_backed_instagram_accounts?access_token=${encodeURIComponent(pageToken)}`
+      ).then((r) => r.json())
+      id = list?.data?.[0]?.id || null
+      if (!id && !list?.error) {
+        const made = await fetch(`${GRAPH}/${pageId}/page_backed_instagram_accounts`, {
+          method: "POST",
+          body: new URLSearchParams({ access_token: pageToken }),
+        }).then((r) => r.json())
+        id = made?.id || null
+      }
+    }
+  } catch {
+    id = null // page-only identity still works wherever IG isn't required
+  }
+  pbiaCache.set(pageId, id)
+  return id
+}
+
+/**
+ * Identity for new ads. Preference order matches the single-send route:
+ * explicit pick → page of an existing ad in the TARGET ad set → the account's
+ * recent creatives. Only token-usable pages qualify. The IG half is always the
+ * page's own PBIA, never the brand's standalone Instagram account, so ads run
+ * under the Facebook page on both platforms.
  */
 export async function resolveIdentity(account: string, pageId?: string | null, adsetId?: string | null) {
   const mine = await usablePages()
   const usable = new Set(mine.map((p: any) => p.id))
+
+  const withIg = async (page: string) => {
+    const ig = await pageBackedInstagram(page)
+    return ig ? { page_id: page, instagram_user_id: ig } : { page_id: page }
+  }
 
   if (pageId) {
     const chosen = String(pageId)
     if (!usable.has(chosen)) {
       throw new Error(`na stránku ${chosen} nemá API token roli inzerenta — přidej system usera k té stránce v Business settings`)
     }
-    return { page_id: chosen }
+    return await withIg(chosen)
   }
 
   const pools: any[][] = []
@@ -214,7 +258,7 @@ export async function resolveIdentity(account: string, pageId?: string | null, a
 
   for (const specs of pools) {
     const found = specs.find((s: any) => usable.has(String(s.page_id)))?.page_id
-    if (found) return { page_id: String(found) }
+    if (found) return await withIg(String(found))
   }
 
   const names = mine.length ? mine.map((p: any) => p.name).join(", ") : "token nevidí žádné stránky"
