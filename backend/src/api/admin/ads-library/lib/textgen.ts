@@ -189,13 +189,23 @@ async function callLLM(modelId: string, prompt: string): Promise<{ text: string;
 /**
  * Ads must always link as https://www.<domain> — models occasionally emit the
  * bare domain or drop the protocol, so the format is enforced here too, not
- * just in the prompt. Only the project's own domain is touched (advertorial
- * and foreign domains stay as written).
+ * just in the prompt.
+ *
+ * `alts` are retired domains of the SAME project, rewritten to the live one.
+ * Without that step a project that moved house keeps bleeding the old address
+ * into new ads, because the source creative being localized still carries it
+ * and the model copies it through verbatim. Domains belonging to anything else
+ * (advertorials, partners) are never touched.
  */
-export function normalizeProjectUrls(text: string, domain: string): string {
+export function normalizeProjectUrls(text: string, domain: string, alts: string[] = []): string {
   if (!text || !domain) return text
-  const esc = domain.replace(/\./g, "\\.")
-  return text.replace(new RegExp(`(?:https?://)?(?:www\\.)?${esc}`, "gi"), `https://www.${domain}`)
+  let out = text
+  for (const d of [...alts, domain]) {
+    if (!d) continue
+    const esc = d.replace(/\./g, "\\.")
+    out = out.replace(new RegExp(`(?:https?://)?(?:www\\.)?${esc}(?![\\w.-])`, "gi"), `https://www.${domain}`)
+  }
+  return out
 }
 
 const sumUsage = (a: Usage, b: Usage): Usage => ({
@@ -243,8 +253,8 @@ export async function translateTexts(opts: {
     tells = [`humanizer pass selhal: ${String(e.message).slice(0, 120)}`]
   }
 
-  primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain))
-  headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain))
+  primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain, ctx.altDomains))
+  headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain, ctx.altDomains))
   return { primaries, headlines, usage, tells, prompt }
 }
 
@@ -354,7 +364,7 @@ Odpověz POUZE validním JSON. U každého headlinu uveď použitou formuli (how
     if (h.length > HEADLINE_MAX) tells.push(`H${i + 1} má ${h.length} znaků — na mobilu se ořízne`)
   })
 
-  primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain))
-  headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain))
+  primaries = primaries.map((t: string) => normalizeProjectUrls(t, ctx.domain, ctx.altDomains))
+  headlines = headlines.map((t: string) => normalizeProjectUrls(t, ctx.domain, ctx.altDomains))
   return { primaries, headlines, usage, tells, prompt, formulas }
 }

@@ -7,6 +7,12 @@
 export const PROJECT_CONTEXT: Record<string, {
   language: string; langName: string; book: string; author: string;
   address: string; domain: string; notes: string;
+  /**
+   * Other domains the same project has run on. Generated copy is rewritten
+   * from these to `domain`, because the source ad being localized often still
+   * carries an old address and the model happily copies it through.
+   */
+  altDomains?: string[];
 }> = {
   loslatenboek: {
     language: "NL", langName: "nizozemština", book: "Laat los wat je kapotmaakt",
@@ -15,7 +21,8 @@ export const PROJECT_CONTEXT: Record<string, {
   },
   "lass-los": {
     language: "DE", langName: "němčina", book: "Lass los, was dich kaputt macht",
-    author: "Joris de Vries", address: "tykání (du)", domain: "jetztloslassen.de",
+    author: "Joris de Vries", address: "tykání (du)", domain: "lasslosbuch.de",
+    altDomains: ["jetztloslassen.de", "bucherfurdich.de"],
     notes: "Německý trh preferuje o něco věcnější tón než NL, ale du-forma zůstává.",
   },
   "odpusc-ksiazka": {

@@ -17,7 +17,7 @@ export const PAGE_CONTEXT: Record<string, {
     sections: ["stortvloed aan gedachten stoppen", "emoties kalmeren", "innerlijke rust", "bonus e-books"],
   },
   "lass-los": {
-    url: "https://www.jetztloslassen.de/", price: "35 €",
+    url: "https://www.lasslosbuch.de/", price: "35 €",
     claim: "Entdecke die überraschende Methode, die dir hilft, die Lawine deiner Gedanken zu stoppen, deine Emotionen zu beruhigen und innere Ruhe zu finden",
     promise: "Grübeln stoppen, innere Ruhe finden. Buch von Joris de Vries, kostenlose Lieferung.",
     sections: ["Gedankenlawine stoppen", "Emotionen beruhigen", "innere Ruhe", "Bonus-E-Books"],
