@@ -99,17 +99,37 @@ export async function resolveAdsetInput(input: string) {
  * an unusable page.
  */
 async function recentSpecs(account: string) {
-  const fromAds = await graphGet(`${account}/ads`, {
-    fields: "creative{object_story_spec{page_id,instagram_user_id}}", limit: 25,
-  }).catch(() => ({ data: [] }))
-  const specs = (fromAds.data || [])
-    .map((x: any) => x.creative?.object_story_spec)
+  // object_story_spec alone is not enough. Catalog / Advantage+ creatives
+  // (the ones named "{{product.name}} …") come back without it, which is why
+  // long-running accounts looked like they had never advertised under any page
+  // — in_use stayed empty and the picker fell through to alphabetical order,
+  // once offering a French page for a German account.
+  // tracking_specs carries the page id even for those, so both are read.
+  const fromSpec = (list: any[]) => list
+    .map((x: any) => x.creative?.object_story_spec || x.object_story_spec)
     .filter((s: any) => s?.page_id)
+
+  const fromTracking = (list: any[]) => {
+    const out: any[] = []
+    for (const ad of list) {
+      for (const t of ad.tracking_specs || []) {
+        const id = (t.page || t["post.wall"] || [])[0]
+        if (id) out.push({ page_id: String(id), instagram_user_id: null })
+      }
+    }
+    return out
+  }
+
+  const ads = await graphGet(`${account}/ads`, {
+    fields: "creative{object_story_spec{page_id,instagram_user_id}},tracking_specs", limit: 25,
+  }).catch(() => ({ data: [] }))
+  const specs = [...fromSpec(ads.data || []), ...fromTracking(ads.data || [])]
   if (specs.length) return specs
+
   const last = await graphGet(`${account}/adcreatives`, {
     fields: "object_story_spec{page_id,instagram_user_id}", limit: 25,
   }).catch(() => ({ data: [] }))
-  return (last.data || []).map((x: any) => x.object_story_spec).filter((s: any) => s?.page_id)
+  return fromSpec(last.data || [])
 }
 
 /** Pages the API token actually has an advertiser role on — the only ones we

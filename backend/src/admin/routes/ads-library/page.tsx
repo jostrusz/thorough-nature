@@ -483,10 +483,20 @@ function PagePicker({ account, value, onChange }: any) {
     staleTime: 5 * 60 * 1000,
   })
   const pages = q.data?.pages || []
-  // default = stránka, kterou účet už používá (přesně to, co by odesílač zvolil sám)
+  // Auto-pick ONLY on hard evidence: the page this account already advertises
+  // under, then one it may promote, then one with an Instagram identity paired.
+  // Never fall back to pages[0] — that list holds every page the token can use
+  // across all 20 markets, sorted alphabetically, so the "first" one is
+  // arbitrary. It once put the French page under a German account, and the send
+  // failed on the missing Instagram identity.
+  const auto = pages.find((p: any) => p.in_use)
+    || pages.find((p: any) => p.promoted)
+    || pages.find((p: any) => p.instagram_user_id)
+  // depends on the account too: switching ad sets must re-decide, and two
+  // accounts can easily offer the same NUMBER of pages
   useEffect(() => {
-    if (!value && pages.length) onChange(String(pages.find((p: any) => p.in_use)?.id || pages[0].id))
-  }, [pages.length])
+    onChange(auto ? String(auto.id) : "")
+  }, [account, pages.length, auto?.id])
 
   if (!account) return null
   return (
@@ -496,12 +506,21 @@ function PagePicker({ account, value, onChange }: any) {
       : q.error ? <div style={{ fontSize: 12.5, color: "#b91c1c", marginTop: 6 }}>stránky nejdou načíst ({(q.error as any)?.message || "chyba"}) — použije se stránka z posledních reklam účtu</div>
       : !pages.length ? <div style={{ fontSize: 12.5, color: "#92400e", marginTop: 6 }}>účet nenabízí žádnou stránku — použije se ta z posledních reklam</div>
       : (<>
-        <select style={{ ...S.input, marginTop: 6 }} value={value || ""} onChange={(e) => onChange(e.target.value)}>
+        <select style={{ ...S.input, marginTop: 6, ...(value ? {} : { borderColor: "#b45309" }) }}
+          value={value || ""} onChange={(e) => onChange(e.target.value)}>
+          {/* explicit empty option — with no evidence we ask instead of guessing */}
+          <option value="">— vyber stránku —</option>
           {pages.map((p: any) => (
-            <option key={p.id} value={p.id}>{p.in_use ? "★ " : ""}{p.name}{p.in_use ? " — už se v účtu používá" : ""}</option>))}
+            <option key={p.id} value={p.id}>
+              {p.in_use ? "★ " : p.instagram_user_id ? "📷 " : ""}{p.name}
+              {p.in_use ? " — už se v účtu používá" : p.instagram_user_id ? " — má napojený Instagram" : ""}
+            </option>))}
         </select>
-        <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 4 }}>
-          ★ = stránka, pod kterou účet inzeruje teď. Instagram se převezme od ní.</div>
+        {!value
+          ? <div style={{ fontSize: 12, color: "#b45309", marginTop: 4 }}>
+              ⚠️ U tohohle účtu nejde spolehlivě určit stránku — vyber ji ručně, ať reklamy nevzniknou pod cizím trhem.</div>
+          : <div style={{ fontSize: 11.5, color: "#6b7280", marginTop: 4 }}>
+              ★ = stránka, pod kterou účet inzeruje teď · 📷 = má napojený Instagram. Instagram se převezme od stránky.</div>}
       </>)}
     </div>)
 }
