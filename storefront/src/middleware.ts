@@ -15,8 +15,18 @@ domainMapping.split(",").filter(Boolean).forEach((entry) => {
   if (domain && slug) PROJECT_DOMAINS[domain.trim()] = slug.trim()
 })
 
-// Hosts whose Apple Pay runs through Revolut Merchant and therefore need
-// Revolut's domain-association file instead of the static PayPal one.
+// Hosts whose Apple Pay runs through Revolut Merchant, so they serve Revolut's
+// domain-association file instead of the static PayPal one.
+//
+// NOTE — this is hygiene, NOT a prerequisite for the Revolut wallet flow.
+// Revolut renders Apple/Google Pay inside its own hosted iframe, so Apple's
+// merchant validation runs against Revolut's domain, not ours. Proof:
+// lacheprise-livre.fr took 3 Apple Pay + 2 Google Pay payments (latest
+// 2026-07-26) while still serving the PayPal file. The file only matters for a
+// direct ApplePaySession integration on our own page, which we don't do.
+// Kept because serving a PayPal association file from a domain that doesn't use
+// PayPal Apple Pay is simply wrong — none of these hosts expose PayPal Apple Pay.
+//
 // Compared against the host with any leading "www." already stripped.
 // Extendable via env REVOLUT_APPLE_PAY_HOSTS (comma-separated) without a deploy.
 const REVOLUT_APPLE_PAY_HOSTS: string[] = [
