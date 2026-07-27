@@ -1252,13 +1252,21 @@ function PerformanceTab({ zoom }: any) {
   const [sort, setSort] = useState("roas")
   const [importing, setImporting] = useState<string | null>(null)
   const [importFor, setImportFor] = useState<any>(null)
+  // draft = what's being typed, adset = what's actually queried
+  const [adsetDraft, setAdsetDraft] = useState("")
+  const [adset, setAdset] = useState("")
 
   const accountsQ = useQuery({ queryKey: ["ads-accounts"], queryFn: () => sdk.client.fetch("/admin/ads-library/accounts", { method: "GET" }) })
   const accounts = accountsQ.data?.accounts || []
   const perfQ = useQuery({
-    queryKey: ["ads-perf", selected.join(","), range, sort],
-    enabled: selected.length > 0,
-    queryFn: () => sdk.client.fetch(`/admin/ads-library/performance?accounts=${selected.join(",")}&range=${range}&sort=${sort}&limit=40`, { method: "GET" }),
+    queryKey: ["ads-perf", adset || selected.join(","), range, sort],
+    enabled: !!adset || selected.length > 0,
+    queryFn: () => sdk.client.fetch(
+      adset
+        // one ad set is a small, explicit set — no reason to cap it at 40
+        ? `/admin/ads-library/performance?adset=${encodeURIComponent(adset)}&range=${range}&sort=${sort}&limit=200`
+        : `/admin/ads-library/performance?accounts=${selected.join(",")}&range=${range}&sort=${sort}&limit=40`,
+      { method: "GET" }),
   })
   const doImport = async (row: any, projectId: string) => {
     setImporting(row.ad_id); setImportFor(null)
@@ -1272,7 +1280,18 @@ function PerformanceTab({ zoom }: any) {
   }
   return (
     <div>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+      {/* Ad set id is globally unique in Meta, so this needs no account picked —
+          it asks that one ad set directly instead of sweeping all 19 accounts. */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <span style={{ ...S.eyebrow, marginRight: 2 }}>🎯 Reklamní sada</span>
+        <input style={{ ...S.input, width: 330, fontSize: 13 }} placeholder="ID nebo URL z Ads Manageru — napříč všemi účty"
+          value={adsetDraft} onChange={(e) => setAdsetDraft(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && setAdset(adsetDraft.trim())} />
+        <button style={S.btn} onClick={() => setAdset(adsetDraft.trim())} disabled={!adsetDraft.trim()}>Načíst</button>
+        {adset && <button style={S.btn} onClick={() => { setAdset(""); setAdsetDraft("") }}>✕ zrušit filtr</button>}
+      </div>
+
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10, ...(adset ? { opacity: .4, pointerEvents: "none" } : {}) }}>
         {accountsQ.isLoading && <span style={{ fontSize: 13, color: "#6b7280" }}>Načítám účty…</span>}
         {accounts.map((ac: any) => (
           <button key={ac.id} onClick={() => setSelected((s) => s.includes(ac.id) ? s.filter((x) => x !== ac.id) : [...s, ac.id])}
@@ -1286,7 +1305,14 @@ function PerformanceTab({ zoom }: any) {
         {[["roas", "ROAS"], ["sales", "Prodeje"], ["ctr", "CTR"], ["spend", "Spend"]].map(([k, label]) => (
           <button key={k} onClick={() => setSort(k)} style={{ ...S.btn, ...(sort === k ? { borderColor: "#7c3aed", color: "#7c3aed", fontWeight: 650 } : {}) }}>↓ {label}</button>))}
       </div>
-      {!selected.length && <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>☝️ Vyber reklamní účty.</div>}
+      {!selected.length && !adset && <div style={{ ...S.card, padding: 30, textAlign: "center", color: "#6b7280" }}>☝️ Vyber reklamní účty, nebo vlož ID reklamní sady.</div>}
+      {adset && perfQ.data && (
+        <div style={{ fontSize: 12.5, color: "#6b7280", marginBottom: 8 }}>
+          🎯 <b style={{ color: "#111827" }}>{perfQ.data.adset_name || perfQ.data.adset_id}</b>
+          {" · "}{perfQ.data.rows?.length || 0} reklam v sadě
+          {perfQ.data.rows?.some((r: any) => r.no_delivery) && " · ⏸ = zatím bez doručení, čísla přijdou po spuštění"}
+        </div>)}
+      {perfQ.error && <div style={{ ...S.card, padding: 18, color: "#b91c1c", fontSize: 13 }}>{(perfQ.error as any)?.message || "načtení selhalo"}</div>}
       {perfQ.isFetching && <div style={{ padding: 20, textAlign: "center", color: "#6b7280" }}>Tahám živá data z Meta API…</div>}
       {perfQ.data?.rows?.length > 0 && (
         <div style={{ ...S.card, overflow: "hidden" }}>
@@ -1311,7 +1337,9 @@ function PerformanceTab({ zoom }: any) {
                               style={{ width: 38, height: 38, borderRadius: 7, objectFit: "cover", flexShrink: 0, cursor: "zoom-in" }} />
                           : <span style={{ width: 38, height: 38, borderRadius: 7, background: "#f3f4f6", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>🖼️</span>}
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 550 }}>{r.ad_name}</div>
+                          <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 550 }}>
+                            {r.no_delivery && <span title={`${r.effective_status || "bez doručení"} — zatím bez dat`} style={{ marginRight: 5 }}>⏸</span>}
+                            {r.ad_name}</div>
                           <div style={{ fontSize: 11.5, color: "#9ca3af", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.campaign_name}</div>
                         </div></div></td>
                     <td style={{ padding: "8px 8px", fontSize: 12.5, color: "#6b7280", whiteSpace: "nowrap" }}>{r.account_name}</td>
