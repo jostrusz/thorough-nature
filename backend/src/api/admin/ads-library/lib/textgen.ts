@@ -91,27 +91,51 @@ function parseJson(text: string, truncated: boolean) {
   }
 }
 
+/** Characters that may legally follow a backslash inside a JSON string. */
+const VALID_ESCAPE = new Set(['"', "\\", "/", "b", "f", "n", "r", "t", "u"])
+/** What may legally start the next item after a comma in this schema. */
+const ITEM_START = new Set(['"', "{", "["])
+
 /**
- * Models occasionally break JSON in two ways: literal newlines inside strings,
- * and unescaped double quotes inside the text itself (very common with ad copy
- * that quotes a thought or a book title). A quote only really closes a string
- * when the next non-space char is a structural one — otherwise it belongs to
- * the content and gets escaped.
+ * Models break JSON in three ways, all of them seen live on Norwegian copy:
+ *
+ *  - literal newlines and tabs inside strings
+ *  - unescaped double quotes inside the text (constant in ad copy that quotes a
+ *    thought or the book title)
+ *  - invalid escape sequences — a lone backslash before an ordinary letter
+ *
+ * A quote closes a string only when what follows is structural. The comma case
+ * needs a second look: every array item and object value in our schema is a
+ * string or a container, so a comma that genuinely separates items is followed
+ * by one of those. In «Slipp taket", men hvordan…» the comma is followed by a
+ * word, which makes that quote content rather than a boundary — the earlier
+ * version closed the string there and the parse died on the next token.
  */
 function repairJson(raw: string): string {
   let out = "", inStr = false, escaped = false
   for (let i = 0; i < raw.length; i++) {
     const ch = raw[i]
     if (escaped) { out += ch; escaped = false; continue }
-    if (ch === "\\") { out += ch; escaped = inStr; continue }
+    if (ch === "\\") {
+      // an escape the spec doesn't know is a literal backslash in the copy
+      if (inStr && !VALID_ESCAPE.has(raw[i + 1])) { out += "\\\\"; continue }
+      out += ch; escaped = inStr; continue
+    }
     if (ch === '"') {
       if (!inStr) { inStr = true; out += ch; continue }
-      const next = raw.slice(i + 1).match(/^\s*(.)/)?.[1]
-      if (next === undefined || next === "," || next === "]" || next === "}" || next === ":") {
-        inStr = false; out += ch // genuinely closes the string
+      const rest = raw.slice(i + 1)
+      const next = rest.match(/^\s*(.)/)?.[1]
+      let closes: boolean
+      if (next === undefined || next === "]" || next === "}" || next === ":") {
+        closes = true
+      } else if (next === ",") {
+        const after = rest.slice(rest.indexOf(",") + 1).match(/^\s*(.)/)?.[1]
+        closes = after === undefined || ITEM_START.has(after)
       } else {
-        out += '\\"' // quote inside the content
+        closes = false
       }
+      if (closes) { inStr = false; out += ch }
+      else out += '\\"' // quote inside the content
       continue
     }
     if (inStr && ch === "\n") { out += "\\n"; continue }
