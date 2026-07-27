@@ -183,12 +183,29 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         v11.push(row)
         await setStep("img11", { status: "running", detail: `${i + 1}/${imgCount}` })
       }
+      // Official = the first variant that passed every check. If NONE passed,
+      // the creative deliberately stays without an official image — see the
+      // same rule in lib/localize-runner.ts: promoting a rejected variant once
+      // shipped ads carrying the wrong book cover.
+      //
+      // The step must say so out loud, though. It used to report a bare "done"
+      // and the card looked finished while having no feed image at all, which
+      // only surfaced later as "kreativa nemá feedový obrázek" from the Meta
+      // sender — that is how 13 of 19 Norwegian cards ended up stuck.
       const goodIdx = v11.findIndex((v: any) => v.metadata?.swap_ok !== false && v.metadata?.text_ok !== false)
       if (goodIdx >= 0) {
         await svc.updateAdVariants({ id: v11[goodIdx].id, is_official: true })
         await svc.updateAdCreatives({ id: created.id, image_1x1_url: v11[goodIdx].url })
       }
-      await setStep("img11", { status: "done", detail: `${v11.length} variant${swapFails ? ` (${swapFails}⚠️ obálka nezměněna)` : ""}`, cost_usd: round4(stepCost.img11 || 0) })
+      const note = [
+        swapFails ? `${swapFails}⚠️ obálka nezměněna` : "",
+        goodIdx < 0 && v11.length ? "⚠️ bez oficiální — žádná varianta neprošla, vygeneruj znovu" : "",
+      ].filter(Boolean).join(", ")
+      await setStep("img11", {
+        status: goodIdx < 0 && v11.length ? "failed" : "done",
+        detail: `${v11.length} variant${note ? ` (${note})` : ""}`,
+        cost_usd: round4(stepCost.img11 || 0),
+      })
     }
 
     // ── 9:16 retry — reframe from the target creative's finished 1:1 variants ──
