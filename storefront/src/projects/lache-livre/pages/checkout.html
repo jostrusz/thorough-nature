@@ -6863,14 +6863,21 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           language: 'fr',
           country: 'fr',
           appIdentity: PROJECT_CONFIG.domain || 'checkout',
-          // FR : points relais via transporteurs externes de Packeta. Les deux
-          // réseaux disponibles sur notre compte (feed /v5/{key}/carrier/json) :
-          //   12889 = « FR Mondial Relay PP »  (max 15 kg)
-          //    4307 = « FR Colissimo PP »      (max 30 kg, réseau La Poste,
-          //                                     bien plus dense)
+          // FR : points relais via transporteurs externes de Packeta. Notre
+          // compte a deux réseaux (feed /v5/{key}/carrier/json), mais un seul
+          // arrive jusqu'à l'entrepôt :
+          //   12889 = « FR Mondial Relay PP » (max 15 kg) — 6 commandes, 6 livrées
+          //    4307 = « FR Colissimo PP »     (max 30 kg, réseau La Poste, bien
+          //           plus dense) — 8 commandes, 0 livrée. Retiré le 27/07/2026.
+          //           Dextrum refuse ces points de trois façons : code
+          //           transporteur rejeté à l'import, pickupPlaceCode invalide,
+          //           et des points français rattachés à « DE Hermes PP » chez
+          //           eux (ex. 668328 « MOULINS » sur FR2026-31543). Chaque
+          //           commande partait en boucle de retry et finissait corrigée
+          //           à la main. Ne pas remettre sans que Dextrum confirme que
+          //           le réseau Colissimo est routable de leur côté.
           vendors: [
             { country: 'fr', carrierId: 12889 },
-            { country: 'fr', carrierId: 4307 },
           ],
         });
       });
