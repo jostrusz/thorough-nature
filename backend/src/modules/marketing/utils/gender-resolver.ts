@@ -203,36 +203,8 @@ export function ruleFallback(firstNameRaw, locale = "cs") {
   if (loc.startsWith("sk")) return ruleFallbackSk(firstNameRaw)
   if (loc.startsWith("hu")) return ruleFallbackHu(firstNameRaw)
   if (loc.startsWith("fr")) return ruleFallbackFr(firstNameRaw)
+  if (loc.startsWith("de")) return ruleFallbackDe(firstNameRaw)
   return ruleFallbackCs(firstNameRaw)
-}
-
-/** Rule-based fallback for GERMAN names. German has no vocative case, so
- *  vocative = the name unchanged; we only resolve grammatical gender for the
- *  "Liebe/Lieber" salutation and gendered copy variants. ~90% on DE names. */
-const DE_MALE_VOWEL_END = new Set([
-  // Common male names ending in a vowel/-e that the -a/-e heuristic would
-  // otherwise misread as female. (Note: "Andrea" IS female in Germany.)
-  "luca", "luka", "noah", "jonah", "jona", "elia", "josua", "joshua", "mika",
-  "nikita", "ole", "uwe", "arne", "malte", "eike", "fiete", "kalle",
-  "matteo", "mattheo", "timo", "nico", "niko", "leo", "theo", "milo",
-  "arno", "bruno", "hugo", "ivo", "otto", "udo", "ingo", "bodo", "heiko",
-  "guido", "marco", "mirko", "ali",
-])
-export function ruleFallbackDe(firstNameRaw) {
-  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
-  if (!raw) return { gender: "unknown", vocative: "" }
-  const name = cap(raw)
-  const l = name.toLowerCase()
-
-  let gender = "unknown"
-  if (DE_MALE_VOWEL_END.has(l)) gender = "m"
-  else if (/[ae]$/.test(l)) gender = "f" // Anna, Julia, Sabine, Marie, Heike...
-  else if (FEM_CONSONANT.has(l)) gender = "f" // Dagmar, Ingrid, Karin...
-  else if (/(in|id|un|ud|hild|gard|trud|burg)$/.test(l)) gender = "f" // Kerstin, Sigrid...
-  else gender = "m" // consonant ending → assume male (Thomas, Stefan, Jörg...)
-
-  // No vocative case in German — address by the plain first name.
-  return { gender, vocative: name }
 }
 
 /** Primary resolver: Haiku with rule-based fallback. Never throws. */
