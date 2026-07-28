@@ -167,6 +167,35 @@ export function ruleFallbackFr(firstNameRaw) {
   return { gender, vocative: name } // no vocative case in French
 }
 
+/** Rule-based fallback for GERMAN names. German has no vocative case, so
+ *  vocative = the name unchanged; we only resolve grammatical gender for the
+ *  "Liebe/Lieber" salutation and gendered copy variants. ~90% on DE names. */
+const DE_MALE_VOWEL_END = new Set([
+  // Common male names ending in a vowel/-e that the -a/-e heuristic would
+  // otherwise misread as female. (Note: "Andrea" IS female in Germany.)
+  "luca", "luka", "noah", "jonah", "jona", "elia", "josua", "joshua", "mika",
+  "nikita", "ole", "uwe", "arne", "malte", "eike", "fiete", "kalle",
+  "matteo", "mattheo", "timo", "nico", "niko", "leo", "theo", "milo",
+  "arno", "bruno", "hugo", "ivo", "otto", "udo", "ingo", "bodo", "heiko",
+  "guido", "marco", "mirko", "ali",
+])
+export function ruleFallbackDe(firstNameRaw) {
+  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
+  if (!raw) return { gender: "unknown", vocative: "" }
+  const name = cap(raw)
+  const l = name.toLowerCase()
+
+  let gender = "unknown"
+  if (DE_MALE_VOWEL_END.has(l)) gender = "m"
+  else if (/[ae]$/.test(l)) gender = "f" // Anna, Julia, Sabine, Marie, Heike...
+  else if (FEM_CONSONANT.has(l)) gender = "f" // Dagmar, Ingrid, Karin...
+  else if (/(in|id|un|ud|hild|gard|trud|burg)$/.test(l)) gender = "f" // Kerstin, Sigrid...
+  else gender = "m" // consonant ending → assume male (Thomas, Stefan, Jörg...)
+
+  // No vocative case in German — address by the plain first name.
+  return { gender, vocative: name }
+}
+
 /** Locale-aware fallback dispatcher. Defaults to Czech. */
 export function ruleFallback(firstNameRaw, locale = "cs") {
   const loc = String(locale || "").toLowerCase()
@@ -175,6 +204,35 @@ export function ruleFallback(firstNameRaw, locale = "cs") {
   if (loc.startsWith("hu")) return ruleFallbackHu(firstNameRaw)
   if (loc.startsWith("fr")) return ruleFallbackFr(firstNameRaw)
   return ruleFallbackCs(firstNameRaw)
+}
+
+/** Rule-based fallback for GERMAN names. German has no vocative case, so
+ *  vocative = the name unchanged; we only resolve grammatical gender for the
+ *  "Liebe/Lieber" salutation and gendered copy variants. ~90% on DE names. */
+const DE_MALE_VOWEL_END = new Set([
+  // Common male names ending in a vowel/-e that the -a/-e heuristic would
+  // otherwise misread as female. (Note: "Andrea" IS female in Germany.)
+  "luca", "luka", "noah", "jonah", "jona", "elia", "josua", "joshua", "mika",
+  "nikita", "ole", "uwe", "arne", "malte", "eike", "fiete", "kalle",
+  "matteo", "mattheo", "timo", "nico", "niko", "leo", "theo", "milo",
+  "arno", "bruno", "hugo", "ivo", "otto", "udo", "ingo", "bodo", "heiko",
+  "guido", "marco", "mirko", "ali",
+])
+export function ruleFallbackDe(firstNameRaw) {
+  const raw = String(firstNameRaw || "").trim().split(/\s+/)[0] || ""
+  if (!raw) return { gender: "unknown", vocative: "" }
+  const name = cap(raw)
+  const l = name.toLowerCase()
+
+  let gender = "unknown"
+  if (DE_MALE_VOWEL_END.has(l)) gender = "m"
+  else if (/[ae]$/.test(l)) gender = "f" // Anna, Julia, Sabine, Marie, Heike...
+  else if (FEM_CONSONANT.has(l)) gender = "f" // Dagmar, Ingrid, Karin...
+  else if (/(in|id|un|ud|hild|gard|trud|burg)$/.test(l)) gender = "f" // Kerstin, Sigrid...
+  else gender = "m" // consonant ending → assume male (Thomas, Stefan, Jörg...)
+
+  // No vocative case in German — address by the plain first name.
+  return { gender, vocative: name }
 }
 
 /** Primary resolver: Haiku with rule-based fallback. Never throws. */
@@ -197,7 +255,10 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
     : isSk
     ? "Si expert na slovenčinu. Pre dané krstné meno urč gramatický rod. Slovenčina nemá vokatív — oslovuje sa nominatívom, takže vocative = meno bez zmeny. Odpovedz IBA JSON, nič viac."
     : isPl
+  if (loc.startsWith("de")) return ruleFallbackDe(firstNameRaw)
     ? "Jesteś ekspertem od języka polskiego. Dla podanego imienia określ rodzaj gramatyczny i wołacz (5. przypadek). Odpowiedz TYLKO w formacie JSON, nic więcej."
+    : isDe
+    ? "Du bist Experte für deutsche Vornamen. Bestimme für den angegebenen Vornamen das Geschlecht, wie er in Deutschland üblicherweise vergeben wird. Antworte NUR mit JSON, sonst nichts."
     : "Jsi expert na češtinu. Pro dané křestní jméno urči gramatický rod a 5. pád (vokativ). Odpověz POUZE JSON, nic víc."
   const userPrompt = isFr
     ? `Prénom : "${raw}"\n` +
@@ -220,6 +281,13 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
       `Zasady: "m" imię męskie, "f" żeńskie, "unknown" gdy nie można określić (obce/uniseks). ` +
       `vocative = forma w wołaczu (Anna→Anno, Ewa→Ewo, Kasia→Kasiu, Maria→Mario, Jan→Janie, Piotr→Piotrze, Tomasz→Tomaszu, Marek→Marku, Paweł→Pawle, Łukasz→Łukaszu). ` +
       `Dla obcych/nieznanych imion zwróć vocative = imię bez zmian. Żadnego innego tekstu poza JSON.`
+    : isDe
+    ? `Vorname: "${raw}"\n` +
+      `Gib exakt zurück: {"gender":"m"|"f"|"unknown","vocative":"<Vorname unverändert>"}\n` +
+      `Regeln: "m" = männlicher Vorname (Thomas, Stefan, Luca, Noah), "f" = weiblicher Vorname (Anna, Sabine, Andrea, Ingrid), ` +
+      `"unknown" = nicht bestimmbar (Unisex wie Kim, Sascha/ausländisch unklar). ` +
+      `Achtung: In Deutschland ist "Andrea" weiblich. Das Deutsche hat keinen Vokativ — vocative = Vorname unverändert. ` +
+      `Kein anderer Text außer JSON.`
     : `Jméno: "${raw}"\n` +
       `Vrať přesně: {"gender":"m"|"f"|"unknown","vocative":"<jméno v 5. pádě>"}\n` +
       `Pravidla: "m" mužské jméno, "f" ženské, "unknown" když nelze určit (cizí/unisex). ` +
