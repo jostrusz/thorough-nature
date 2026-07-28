@@ -3,7 +3,9 @@
   "advertorialProjectId": "zycie-zaslugy",
   "name": "Życie, jakiego nigdy sobie nie pozwoliłaś",
   "domain": "najpierw-ja.pl",
-  "domainAliases": ["www.najpierw-ja.pl"],
+  "domainAliases": [
+    "www.najpierw-ja.pl"
+  ],
   "locale": "pl",
   "defaultCountry": "PL",
   "defaultPhonePrefix": "48",
@@ -37,17 +39,60 @@
     "thumbnail": "https://bucket-production-b93e.up.railway.app:443/medusa-media/odpusc-ksiazka-thumbnail-01KK8RBZFKFSMZJJDDRR82PJ1D.png"
   },
   "bundleOptions": [
-    { "qty": 1, "price": 129, "save": 0,   "badge": "DLA SIEBIE",                   "variantId": "variant_01KQV9KVNCAMM8902RFHKFV20Q" },
-    { "qty": 2, "price": 199, "save": 59,  "badge": "PODZIEL SIĘ Z PRZYJACIÓŁKĄ",   "variantId": "variant_01KQV9KVNCT4K11RVHTMK1WYNF" },
-    { "qty": 3, "price": 279, "save": 108, "badge": "IDEALNY PREZENT",              "variantId": "variant_01KQV9KVNCTYFY398M4QY0SQXW" },
-    { "qty": 4, "price": 359, "save": 157, "badge": "NAJLEPSZA WARTOŚĆ",            "variantId": "variant_01KQV9KVNCMS6B8FW8NTNAPKMZ" }
+    {
+      "qty": 1,
+      "price": 129,
+      "save": 0,
+      "badge": "DLA SIEBIE",
+      "variantId": "variant_01KQV9KVNCAMM8902RFHKFV20Q"
+    },
+    {
+      "qty": 2,
+      "price": 199,
+      "save": 59,
+      "badge": "PODZIEL SIĘ Z PRZYJACIÓŁKĄ",
+      "variantId": "variant_01KQV9KVNCT4K11RVHTMK1WYNF"
+    },
+    {
+      "qty": 3,
+      "price": 279,
+      "save": 108,
+      "badge": "IDEALNY PREZENT",
+      "variantId": "variant_01KQV9KVNCTYFY398M4QY0SQXW"
+    },
+    {
+      "qty": 4,
+      "price": 359,
+      "save": 157,
+      "badge": "NAJLEPSZA WARTOŚĆ",
+      "variantId": "variant_01KQV9KVNCMS6B8FW8NTNAPKMZ"
+    }
   ],
   "shippingOptions": {
-    "paczkomat": { "price": 0, "label": "Paczkomat InPost", "description": "Odbiór w wybranym Paczkomacie 24/7", "matchName": "Paczkomaty" },
-    "homeDelivery": { "price": 5, "label": "Dostawa do domu (Kurier)", "description": "Kurier dostarczy przesyłkę pod wskazany adres", "matchName": "Dostawa do domu" }
+    "paczkomat": {
+      "price": 0,
+      "label": "Paczkomat InPost",
+      "description": "Odbiór w wybranym Paczkomacie 24/7",
+      "matchName": "Paczkomaty"
+    },
+    "homeDelivery": {
+      "price": 5,
+      "label": "Dostawa do domu (Kurier)",
+      "description": "Kurier dostarczy przesyłkę pod wskazany adres",
+      "matchName": "Dostawa do domu"
+    }
   },
   "packetaApiKey": "cbb760f552ef87b3",
-  "catalogContentIds": ["l329r3bpu8", "zm3qzbyg7m", "18l8573crr", "b79iz5trzj", "4uiu67be80", "kdr2p37yta", "zjuvkfabrh", "hlcvldccsd"],
+  "catalogContentIds": [
+    "l329r3bpu8",
+    "zm3qzbyg7m",
+    "18l8573crr",
+    "b79iz5trzj",
+    "4uiu67be80",
+    "kdr2p37yta",
+    "zjuvkfabrh",
+    "hlcvldccsd"
+  ],
   "mollieProfileId": "",
   "paymentProviders": {
     "paypal": "pp_paypal_paypal",
@@ -61,6 +106,7 @@
     "prywatnosc": "prywatnosc.html",
     "regulamin": "regulamin.html",
     "wysylka": "wysylka.html",
-    "zwroty": "zwroty.html"
+    "zwroty": "zwroty.html",
+    "popup-zycie-zaslugy": "popup-zycie-zaslugy.html"
   }
 }
