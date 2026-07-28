@@ -45,7 +45,8 @@ const PROJECTS: Record<string, {
     recoveryTemplate: "st-payment-recovery", recoverySubject: "Du är nästan klar",
   },
   "lass-los": {
-    checkoutUrl: process.env.LL_CHECKOUT_URL || "https://jetztloslassen.de/checkout",
+    // NOTE: jetztloslassen.de web is dead (www has no A record) — live DE storefront is lasslosbuch.de
+    checkoutUrl: process.env.LL_CHECKOUT_URL || "https://www.lasslosbuch.de/checkout",
     replyTo: "buch@jetztloslassen.de",
     pendingTemplate: "ll-payment-pending", pendingSubject: "wir haben deine bestellung erhalten",
     recoveryTemplate: "ll-payment-recovery", recoverySubject: "du bist fast fertig",
