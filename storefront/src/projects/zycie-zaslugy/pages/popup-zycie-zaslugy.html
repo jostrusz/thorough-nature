@@ -1261,6 +1261,28 @@ function closePopup() {
   } catch (e) {}
 }
 
+// ─── Zavírání: ESC + klik na backdrop ────────────────────────────────
+// Parent index.html má vlastní ESC handler, ale ten se nikdy nespustí —
+// popup běží v iframe přes celý viewport, takže klávesy chytá iframe
+// dokument, ne parent. Proto musí ESC viset i tady uvnitř.
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  // Neruš rozepsanou vlastní odpověď — ESC nejdřív zavře jen ten input.
+  const openCustom = document.querySelector(".option-custom-input.open");
+  if (openCustom) {
+    openCustom.classList.remove("open");
+    const inp = openCustom.querySelector("input");
+    if (inp) inp.value = "";
+    return;
+  }
+  closePopup();
+});
+
+// Klik na ztmavené pozadí (mimo kartu) zavírá — standardní chování modalu.
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "overlay") closePopup();
+});
+
 // Selection handler for all step options.
 // Auto-advance on steps 1–4 after a 500ms delay so the user sees the "selected"
 // pulse before the slide transition. Industry benchmark: +18% completion rate
