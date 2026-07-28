@@ -220,6 +220,7 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
   const isSk = loc.startsWith("sk")
   const isHu = loc.startsWith("hu")
   const isFr = loc.startsWith("fr")
+  const isDe = loc.startsWith("de")
   const system = isFr
     ? "Tu es expert de la langue française. Pour le prénom donné, détermine le genre de la personne qui le porte. Le français n'a pas de vocatif — on s'adresse par le prénom inchangé, donc vocative = le prénom tel quel. Réponds UNIQUEMENT en JSON, rien d'autre."
     : isHu
@@ -227,7 +228,6 @@ export async function resolveGenderVocative(firstNameRaw, locale = "cs") {
     : isSk
     ? "Si expert na slovenčinu. Pre dané krstné meno urč gramatický rod. Slovenčina nemá vokatív — oslovuje sa nominatívom, takže vocative = meno bez zmeny. Odpovedz IBA JSON, nič viac."
     : isPl
-  if (loc.startsWith("de")) return ruleFallbackDe(firstNameRaw)
     ? "Jesteś ekspertem od języka polskiego. Dla podanego imienia określ rodzaj gramatyczny i wołacz (5. przypadek). Odpowiedz TYLKO w formacie JSON, nic więcej."
     : isDe
     ? "Du bist Experte für deutsche Vornamen. Bestimme für den angegebenen Vornamen das Geschlecht, wie er in Deutschland üblicherweise vergeben wird. Antworte NUR mit JSON, sonst nichts."
