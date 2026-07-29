@@ -17,13 +17,16 @@ const font = "'Inter', Arial, sans-serif"
 const headerGradient = 'linear-gradient(135deg, #5A3D6B 0%, #2D1B3D 50%, #1A1028 100%)'
 
 /**
- * Släpp Taget — "Du är nästan klar" (payment recovery).
+ * Släpp Taget — "Det strulade till sig" (payment recovery, Joris's voice).
  * Brite open-banking only: session aborted AND transaction terminally failed (2/3/7),
- * verified NOT paid, 30–60 min after the abort (late-settlement grace).
+ * verified NOT paid, 45+ min after the abort (late-settlement grace).
+ * Copy design (2026-07): blame the tech, kill the double-charge fear first,
+ * alt-payment-method as the real friction solver, reply trigger, 30-day guarantee.
+ * NO discount.
  */
 export const StPaymentRecoveryTemplate: React.FC<StPaymentRecoveryProps> & {
   PreviewProps: StPaymentRecoveryProps
-} = ({ firstName, checkoutUrl, preview = 'Din beställning väntar — slutför den på en minut.' }) => {
+} = ({ firstName, checkoutUrl, preview = 'Inga pengar har dragits. Att slutföra tar en minut.' }) => {
   return (
     <Base preview={preview}>
       <Section>
@@ -33,7 +36,7 @@ export const StPaymentRecoveryTemplate: React.FC<StPaymentRecoveryProps> & {
           </Text>
           <Text style={{ fontSize: '32px', margin: '0 0 6px' }}>🔔</Text>
           <Text style={{ fontFamily: font, fontSize: '22px', fontWeight: 700, color: '#ffffff', margin: 0 }}>
-            Du är nästan klar
+            Det strulade till sig
           </Text>
         </div>
 
@@ -42,10 +45,17 @@ export const StPaymentRecoveryTemplate: React.FC<StPaymentRecoveryProps> & {
             Hej {firstName},
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
-            Det ser ut som att din betalning inte riktigt slutfördes. Inga problem — <strong>inga pengar har dragits</strong>.
+            Du var nästan klar — sen strulade det mellan din skärm och din bank.
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
+            Det viktigaste först: <strong>inga pengar har dragits.</strong> Inte ett öre.
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
+            Det här händer oftare än du tror. Ibland är det Swish, ibland banken, ibland bara en
+            dålig dag för tekniken. Det säger ingenting om dig.
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 20px' }}>
-            Din beställning väntar fortfarande på dig. Du slutför den på en minut:
+            Din bok väntar fortfarande. Det tar en minut att slutföra.
           </Text>
 
           <div style={{ textAlign: 'center' as const, marginBottom: '18px' }}>
@@ -56,16 +66,19 @@ export const StPaymentRecoveryTemplate: React.FC<StPaymentRecoveryProps> & {
 
           <div style={{ backgroundColor: '#FAF5F8', borderRadius: '10px', border: '1px solid #EDD9E5', padding: '14px 18px', textAlign: 'center' as const, marginBottom: '20px' }}>
             <Text style={{ fontFamily: font, fontSize: '13.5px', lineHeight: 1.55, color: '#3F3F46', margin: 0 }}>
-              Vill du hellre betala med Swish eller en annan bank? Det går via samma knapp.
+              Krånglade banken? Välj en <strong>annan betalmetod</strong> den här gången — kort eller Klarna brukar gå smidigast.
             </Text>
           </div>
 
-          <Text style={{ fontFamily: font, fontSize: '14px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 2px' }}>Vänliga hälsningar,</Text>
-          <Text style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: '#1A1028', margin: '0 0 16px' }}>Släpp Taget</Text>
+          <Text style={{ fontFamily: font, fontSize: '14px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 2px' }}>Vänligen,</Text>
+          <Text style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: '#1A1028', margin: '0 0 16px' }}>Joris de Vries</Text>
 
           <div style={{ borderTop: '1px dashed #EDD9E5', paddingTop: '16px' }}>
+            <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: '#71717A', margin: '0 0 10px' }}>
+              <strong style={{ color: '#3F3F46' }}>P.S.</strong> Fastnar du ändå? Svara på det här mejlet, så hjälper jag dig personligen.
+            </Text>
             <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: '#71717A', margin: 0 }}>
-              <strong style={{ color: '#3F3F46' }}>P.S.</strong> Fungerar det inte eller är du osäker? Svara på det här mejlet — så hjälper vi dig vidare.
+              <strong style={{ color: '#3F3F46' }}>P.P.S.</strong> Du tar ingen risk: 30 dagars öppet köp, pengarna tillbaka utan frågor.
             </Text>
           </div>
         </div>

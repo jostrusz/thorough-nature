@@ -29,15 +29,17 @@ const colors = {
 }
 
 /**
- * Het Leven — "Je bent er bijna" (payment recovery).
+ * Het Leven — "Dat ging even mis" (payment recovery, Anna's voice).
  * Sent ONLY for Brite open-banking sessions that aborted AND were verified NOT paid
  * (transaction not in 4/5/6), 45+ min after the abort so a late settlement has had
  * time to land first (never tell a paying customer to "finish" — the Vincent case).
- * Reassures: no money taken, the order is still waiting, one click to finish.
+ * Copy design (2026-07): blame the tech, kill the double-charge fear first, author
+ * self-implication for humanity, alt-payment-method as the real friction solver,
+ * reply trigger, 30-day guarantee as risk reversal. NO discount.
  */
 export const HlPaymentRecoveryTemplate: React.FC<HlPaymentRecoveryProps> & {
   PreviewProps: HlPaymentRecoveryProps
-} = ({ firstName, checkoutUrl, preview = 'Je bestelling staat klaar — afronden duurt 1 minuut.' }) => {
+} = ({ firstName, checkoutUrl, preview = 'Er is niets afgeschreven. Afronden kost je één minuut.' }) => {
   return (
     <Base preview={preview}>
       <Section>
@@ -48,7 +50,7 @@ export const HlPaymentRecoveryTemplate: React.FC<HlPaymentRecoveryProps> & {
           </Text>
           <Text style={{ fontSize: '32px', margin: '0 0 6px' }}>🔔</Text>
           <Text style={{ fontFamily: font, fontSize: '22px', fontWeight: 700, color: '#ffffff', margin: 0 }}>
-            Je bent er bijna
+            Dat ging even mis
           </Text>
         </div>
 
@@ -58,10 +60,18 @@ export const HlPaymentRecoveryTemplate: React.FC<HlPaymentRecoveryProps> & {
             Hoi {firstName},
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: colors.textBody, margin: '0 0 16px' }}>
-            Het lijkt erop dat je betaling net niet is afgerond. Geen zorgen — <strong>er is geen geld afgeschreven</strong>.
+            Je klikte op betalen — en ergens tussen jouw scherm en je bank ging het mis.
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: colors.textBody, margin: '0 0 16px' }}>
+            Eerst het belangrijkste: <strong>er is geen cent afgeschreven.</strong> Echt niet.
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: colors.textBody, margin: '0 0 16px' }}>
+            Dit gebeurt vaker dan je denkt. Banken hebben zo hun momenten. Ik heb zelf ooit drie keer
+            opnieuw moeten beginnen voor een boek dat ik écht wilde — bij de derde poging typte ik
+            mijn eigen naam verkeerd.
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: colors.textBody, margin: '0 0 20px' }}>
-            Je bestelling staat nog voor je klaar. Je kunt hem in één minuut afronden:
+            Je boek ligt nog voor je klaar. Afronden duurt één minuut.
           </Text>
 
           <div style={{ textAlign: 'center' as const, marginBottom: '18px' }}>
@@ -72,16 +82,19 @@ export const HlPaymentRecoveryTemplate: React.FC<HlPaymentRecoveryProps> & {
 
           <div style={{ backgroundColor: colors.accentSoft, borderRadius: '10px', border: `1px solid ${colors.boxBorder}`, padding: '14px 18px', textAlign: 'center' as const, marginBottom: '20px' }}>
             <Text style={{ fontFamily: font, fontSize: '13.5px', lineHeight: 1.55, color: colors.textBody, margin: 0 }}>
-              Liever met iDEAL of een andere bank betalen? Dat kan via dezelfde knop.
+              Deed je bank moeilijk? Kies deze keer gewoon een <strong>andere betaalmethode</strong> — kaart, Klarna, wat voor jou werkt.
             </Text>
           </div>
 
-          <Text style={{ fontFamily: font, fontSize: '14px', lineHeight: 1.6, color: colors.textBody, margin: '0 0 2px' }}>Groet,</Text>
+          <Text style={{ fontFamily: font, fontSize: '14px', lineHeight: 1.6, color: colors.textBody, margin: '0 0 2px' }}>Liefs,</Text>
           <Text style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: colors.textDark, margin: '0 0 16px' }}>Anna de Vries</Text>
 
           <div style={{ borderTop: `1px dashed ${colors.boxBorder}`, paddingTop: '16px' }}>
+            <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: colors.footerText, margin: '0 0 10px' }}>
+              <strong style={{ color: colors.textBody }}>P.S.</strong> Lukt het nog steeds niet? Beantwoord deze mail, dan kijk ik persoonlijk met je mee.
+            </Text>
             <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: colors.footerText, margin: 0 }}>
-              <strong style={{ color: colors.textBody }}>P.S.</strong> Lukt het niet of twijfel je? Beantwoord deze mail — dan help ik je er even doorheen.
+              <strong style={{ color: colors.textBody }}>P.P.S.</strong> Je zit nergens aan vast: 30 dagen bedenktijd, geld terug zonder vragen.
             </Text>
           </div>
         </div>

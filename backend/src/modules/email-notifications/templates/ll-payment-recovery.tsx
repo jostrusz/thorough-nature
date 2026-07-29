@@ -17,13 +17,16 @@ const font = "'Inter', Arial, sans-serif"
 const headerGradient = 'linear-gradient(135deg, #5A3D6B 0%, #2D1B3D 50%, #1A1028 100%)'
 
 /**
- * Lass los, was dich kaputt macht — "Du bist fast fertig" (payment recovery).
+ * Lass los, was dich kaputt macht — "Da hat etwas gehakt" (payment recovery, Joris's voice).
  * Brite open-banking only: session aborted AND transaction terminally failed (2/3/7),
- * verified NOT paid, 30–60 min after the abort (late-settlement grace).
+ * verified NOT paid, 45+ min after the abort (late-settlement grace).
+ * Copy design (2026-07): blame the tech, kill the double-charge fear first,
+ * alt-payment-method as the real friction solver, reply trigger, 30-day guarantee.
+ * NO discount.
  */
 export const LlPaymentRecoveryTemplate: React.FC<LlPaymentRecoveryProps> & {
   PreviewProps: LlPaymentRecoveryProps
-} = ({ firstName, checkoutUrl, preview = 'Deine Bestellung wartet — schließe sie in einer Minute ab.' }) => {
+} = ({ firstName, checkoutUrl, preview = 'Es wurde nichts abgebucht. Der Abschluss dauert eine Minute.' }) => {
   return (
     <Base preview={preview}>
       <Section>
@@ -33,7 +36,7 @@ export const LlPaymentRecoveryTemplate: React.FC<LlPaymentRecoveryProps> & {
           </Text>
           <Text style={{ fontSize: '32px', margin: '0 0 6px' }}>🔔</Text>
           <Text style={{ fontFamily: font, fontSize: '22px', fontWeight: 700, color: '#ffffff', margin: 0 }}>
-            Du bist fast fertig
+            Da hat etwas gehakt
           </Text>
         </div>
 
@@ -42,10 +45,17 @@ export const LlPaymentRecoveryTemplate: React.FC<LlPaymentRecoveryProps> & {
             Hallo {firstName},
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
-            Es sieht so aus, als wäre deine Zahlung nicht ganz abgeschlossen worden. Keine Sorge — <strong>es wurde kein Geld abgebucht</strong>.
+            du warst fast fertig — dann hat es zwischen deinem Bildschirm und deiner Bank gehakt.
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
+            Das Wichtigste zuerst: <strong>es wurde kein Cent abgebucht.</strong>
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
+            So etwas passiert öfter, als du denkst. Banken haben ihre Launen — und das sagt nichts
+            über dich aus.
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 20px' }}>
-            Deine Bestellung wartet noch auf dich. Du kannst sie in einer Minute abschließen:
+            Dein Buch liegt noch für dich bereit. Der Abschluss dauert eine Minute.
           </Text>
 
           <div style={{ textAlign: 'center' as const, marginBottom: '18px' }}>
@@ -56,16 +66,19 @@ export const LlPaymentRecoveryTemplate: React.FC<LlPaymentRecoveryProps> & {
 
           <div style={{ backgroundColor: '#FAF5F8', borderRadius: '10px', border: '1px solid #EDD9E5', padding: '14px 18px', textAlign: 'center' as const, marginBottom: '20px' }}>
             <Text style={{ fontFamily: font, fontSize: '13.5px', lineHeight: 1.55, color: '#3F3F46', margin: 0 }}>
-              Lieber mit einer anderen Bank bezahlen? Das geht über denselben Button.
+              Hat deine Bank Ärger gemacht? Nimm diesmal einfach eine <strong>andere Zahlungsmethode</strong> — Karte oder Klarna funktionieren fast immer.
             </Text>
           </div>
 
-          <Text style={{ fontFamily: font, fontSize: '14px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 2px' }}>Herzliche Grüße,</Text>
-          <Text style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: '#1A1028', margin: '0 0 16px' }}>Lass los, was dich kaputt macht</Text>
+          <Text style={{ fontFamily: font, fontSize: '14px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 2px' }}>Herzlich,</Text>
+          <Text style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: '#1A1028', margin: '0 0 16px' }}>Joris de Vries</Text>
 
           <div style={{ borderTop: '1px dashed #EDD9E5', paddingTop: '16px' }}>
+            <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: '#71717A', margin: '0 0 10px' }}>
+              <strong style={{ color: '#3F3F46' }}>P.S.</strong> Klappt es trotzdem nicht? Antworte auf diese Mail, ich schaue persönlich drauf.
+            </Text>
             <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: '#71717A', margin: 0 }}>
-              <strong style={{ color: '#3F3F46' }}>P.S.</strong> Funktioniert es nicht oder bist du unsicher? Antworte auf diese E-Mail — dann helfen wir dir weiter.
+              <strong style={{ color: '#3F3F46' }}>P.P.S.</strong> Du gehst kein Risiko ein: 30 Tage Geld-zurück-Garantie, ohne Fragen.
             </Text>
           </div>
         </div>

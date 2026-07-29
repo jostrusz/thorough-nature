@@ -16,15 +16,16 @@ export const isDhPaymentRecoveryData = (data: any): data is DhPaymentRecoveryPro
 const font = "'Inter', Arial, sans-serif"
 
 /**
- * De Hondenbijbel — "Je bent er bijna" (payment recovery).
+ * De Hondenbijbel — "Dat ging even mis" (payment recovery, Lars's voice).
  * Sent ONLY for Brite open-banking sessions that aborted AND were verified NOT paid
- * (transaction not in 4/5/6), 30–60 min after the abort so a late settlement has had
- * time to land first (never tell a paying customer to "finish" — the Vincent case).
- * Reassures: no money taken, the order is still waiting, one click to finish.
+ * (transaction not in 4/5/6), 45+ min after the abort (late-settlement grace).
+ * Copy design (2026-07): blame the tech (deadpan dog wink), kill the double-charge
+ * fear first, alt-payment-method as the real friction solver, reply trigger,
+ * 30-day guarantee as risk reversal. NO discount.
  */
 export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
   PreviewProps: DhPaymentRecoveryProps
-} = ({ firstName, checkoutUrl, preview = 'Je bestelling staat klaar — afronden duurt 1 minuut.' }) => {
+} = ({ firstName, checkoutUrl, preview = 'Er is niets afgeschreven — afronden duurt een minuutje.' }) => {
   return (
     <Base preview={preview}>
       <Section>
@@ -35,7 +36,7 @@ export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
           </Text>
           <Text style={{ fontSize: '32px', margin: '0 0 6px' }}>🔔</Text>
           <Text style={{ fontFamily: font, fontSize: '22px', fontWeight: 700, color: '#ffffff', margin: 0 }}>
-            Je bent er bijna
+            Dat ging even mis
           </Text>
         </div>
 
@@ -45,10 +46,17 @@ export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
             Hoi {firstName},
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
-            Het lijkt erop dat je betaling net niet is afgerond. Geen zorgen — <strong>er is geen geld afgeschreven</strong>.
+            Je wilde net afrekenen en toen haakte je bank af. Niet jij — je bank.
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
+            Belangrijkste eerst: <strong>er is niets van je rekening afgeschreven.</strong>
+          </Text>
+          <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 16px' }}>
+            Honden doen precies wat je vraagt zodra ze snappen wat je bedoelt. Banken helaas niet.
+            Daar helpt geen beloning tegen.
           </Text>
           <Text style={{ fontFamily: font, fontSize: '15px', lineHeight: 1.6, color: '#3F3F46', margin: '0 0 20px' }}>
-            Je bestelling staat nog voor je klaar. Je kunt hem in één minuut afronden:
+            Je bestelling staat nog klaar. Eén klik en het boek is onderweg.
           </Text>
 
           <div style={{ textAlign: 'center' as const, marginBottom: '18px' }}>
@@ -59,7 +67,7 @@ export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
 
           <div style={{ backgroundColor: '#FFF7ED', borderRadius: '10px', border: '1px solid #FED7AA', padding: '14px 18px', textAlign: 'center' as const, marginBottom: '20px' }}>
             <Text style={{ fontFamily: font, fontSize: '13.5px', lineHeight: 1.55, color: '#3F3F46', margin: 0 }}>
-              Liever met iDEAL of een andere bank betalen? Dat kan via dezelfde knop.
+              Werkte je bank tegen? Pak gewoon een <strong>andere betaalmethode</strong> — kaart of Klarna doet het altijd.
             </Text>
           </div>
 
@@ -67,8 +75,11 @@ export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
           <Text style={{ fontFamily: font, fontSize: '14px', fontWeight: 700, color: '#18181B', margin: '0 0 16px' }}>Lars Vermeulen</Text>
 
           <div style={{ borderTop: '1px dashed #E4E4E7', paddingTop: '16px' }}>
+            <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: '#A1A1AA', margin: '0 0 10px' }}>
+              <strong style={{ color: '#3F3F46' }}>P.S.</strong> Loop je ergens vast? Beantwoord deze mail — ik lees alles zelf.
+            </Text>
             <Text style={{ fontFamily: font, fontSize: '13px', lineHeight: 1.6, color: '#A1A1AA', margin: 0 }}>
-              <strong style={{ color: '#3F3F46' }}>P.S.</strong> Lukt het niet of twijfel je? Beantwoord deze mail — dan help ik je er even doorheen.
+              <strong style={{ color: '#3F3F46' }}>P.P.S.</strong> 30 dagen niet tevreden = geld terug. Zonder gedoe.
             </Text>
           </div>
         </div>
@@ -86,4 +97,4 @@ export const DhPaymentRecoveryTemplate: React.FC<DhPaymentRecoveryProps> & {
   )
 }
 
-DhPaymentRecoveryTemplate.PreviewProps = { firstName: 'Sophie', checkoutUrl: 'https://dehondenbijbel.nl/checkout' }
+DhPaymentRecoveryTemplate.PreviewProps = { firstName: 'Sophie', checkoutUrl: 'https://www.dehondenbijbel.nl/checkout' }

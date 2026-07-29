@@ -43,26 +43,26 @@ const PROJECTS: Record<string, {
     checkoutUrl: process.env.ST_CHECKOUT_URL || "https://slapptagetboken.se/checkout",
     replyTo: "hej@slapptagetboken.se",
     pendingTemplate: "st-payment-pending", pendingSubject: "Vi har tagit emot din beställning",
-    recoveryTemplate: "st-payment-recovery", recoverySubject: "Du är nästan klar",
+    recoveryTemplate: "st-payment-recovery", recoverySubject: "din betalning gick inte igenom",
   },
   "lass-los": {
     // NOTE: jetztloslassen.de web is dead (www has no A record) — live DE storefront is lasslosbuch.de
     checkoutUrl: process.env.LL_CHECKOUT_URL || "https://www.lasslosbuch.de/checkout",
     replyTo: "buch@jetztloslassen.de",
     pendingTemplate: "ll-payment-pending", pendingSubject: "wir haben deine bestellung erhalten",
-    recoveryTemplate: "ll-payment-recovery", recoverySubject: "du bist fast fertig",
+    recoveryTemplate: "ll-payment-recovery", recoverySubject: "deine zahlung ist nicht durchgegangen",
   },
   dehondenbijbel: {
     checkoutUrl: process.env.DH_CHECKOUT_URL || "https://www.dehondenbijbel.nl/checkout",
     replyTo: "support@dehondenbijbel.nl",
     pendingTemplate: "dh-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
-    recoveryTemplate: "dh-payment-recovery", recoverySubject: "je bent er bijna",
+    recoveryTemplate: "dh-payment-recovery", recoverySubject: "je betaling ging niet door",
   },
   "het-leven": {
     checkoutUrl: process.env.HL_CHECKOUT_URL || "https://pakjeleventerug.nl/checkout",
     replyTo: "annadevries@pakjeleventerug.nl",
     pendingTemplate: "hl-payment-pending", pendingSubject: "we hebben je bestelling ontvangen",
-    recoveryTemplate: "hl-payment-recovery", recoverySubject: "je bent er bijna",
+    recoveryTemplate: "hl-payment-recovery", recoverySubject: "dat ging even mis (niet jouw schuld)",
   },
 }
 const PROJECT_SLUGS = Object.keys(PROJECTS)
