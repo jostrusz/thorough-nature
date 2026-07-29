@@ -10220,10 +10220,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     (function renderBriteAltMethods(){
       [].forEach.call(container.querySelectorAll('.brite-alt-method'), function(el){ el.remove(); });
       var afterEl = briteCard;
-      function addAlt(method, label, desc, iconFile, badgeBg){
+      function addAlt(method, label, desc, iconFile, badgeBg, countries){
         var row = document.createElement('div');
         row.className = 'brite-alt-method';
         row.setAttribute('data-brite-method', method);
+        row.setAttribute('data-brite-countries', (countries || []).join(','));
         row.innerHTML =
           '<div class="pm-radio"><div class="pm-radio-dot"></div></div>' +
           '<img src="/icons/' + iconFile + '" alt="' + label + '" class="pm-icon" onerror="this.outerHTML=&apos;<span class=&quot;pm-icon&quot; style=&quot;background:' + badgeBg + ';color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:none;&quot;>' + label + '</span>&apos;">' +
@@ -10264,7 +10265,27 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         ideal: { label: 'iDEAL', desc: 'Paie directement via ta banque · via Brite', icon: 'ideal.svg', bg: '#CC0066' },
         swish: { label: 'Swish', desc: 'Paie avec Swish · via Brite', icon: 'swish.svg', bg: '#EB4B97' },
       };
-      var ALT_COUNTRY = 'nl';
+      // Country-aware visibility: the row filter used to compare against a HARDCODED
+      // country, so e.g. Belgian customers saw iDEAL (NL-only — its Brite Client
+      // then 400s on locale; Brite integration review 2026-07). Rows now render for
+      // every configured method and this toggles them by the LIVE country select.
+      function applyBriteAltCountryVisibility(){
+        var sel = document.getElementById('country');
+        var cc = (((sel && sel.value) || 'fr') + '').toLowerCase();
+        [].forEach.call(document.querySelectorAll('.brite-alt-method'), function(r){
+          var list = (r.getAttribute('data-brite-countries') || '').split(',').filter(Boolean);
+          var show = !list.length || list.indexOf(cc) !== -1;
+          r.style.display = show ? '' : 'none';
+          if (!show && r.classList.contains('selected')) {
+            r.classList.remove('selected');
+            if (window.__briteClearSelection) window.__briteClearSelection();
+          }
+        });
+      }
+      (function(){
+        var sel = document.getElementById('country');
+        if (sel && !sel.__briteAltHooked) { sel.__briteAltHooked = true; sel.addEventListener('change', applyBriteAltCountryVisibility); }
+      })();
       var altBase = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
       var altKey = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
       var altSlug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || 'lache-livre';
@@ -10275,9 +10296,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var brite = ((data && data.gateways) || []).filter(function(g){ return g.provider === 'brite'; })[0];
           ((brite && brite.methods) || [])
             .filter(function(m){ return m.code !== 'pay_by_bank' && ALT_DEFS[m.code]; })
-            .filter(function(m){ var cc = m.available_countries || []; return !cc.length || cc.indexOf(ALT_COUNTRY) !== -1; })
             .sort(function(a, b){ return (a.sort_order || 0) - (b.sort_order || 0); })
-            .forEach(function(m){ var d = ALT_DEFS[m.code]; addAlt(m.code, d.label, d.desc, d.icon, d.bg); });
+            .forEach(function(m){ var d = ALT_DEFS[m.code]; addAlt(m.code, d.label, d.desc, d.icon, d.bg, m.available_countries || []); });
+          applyBriteAltCountryVisibility();
         })
         .catch(function(){ /* config unavailable → bank picker only */ });
     })();

@@ -143,6 +143,29 @@ function briteIdKind(id: string): "transaction" | "session" | null {
   return null
 }
 
+/**
+ * Normalize which Brite id lands in which metadata field. The callback id may be
+ * a SESSION or a TRANSACTION id — historically we stamped whatever arrived into
+ * `briteSessionId`, so orders completed from a transaction callback carried a
+ * TRANSACTION id there. The Dextrum CREDIT-gate poll then called session.get
+ * with it → 400 at Brite every re-check (integration review, 2026-07-21).
+ * Route by id kind + the enriched txData so each id lands in the right field.
+ */
+function resolveBriteStampIds(
+  callbackId: string,
+  txData: any
+): { sessionId: string; transactionId: string | null } {
+  const kind = briteIdKind(String(callbackId))
+  const sessionId =
+    (kind === "session" ? String(callbackId) : null) ||
+    (txData?.session_id ? String(txData.session_id) : null) ||
+    String(callbackId) // last resort: legacy behaviour (better than nothing)
+  const transactionId =
+    (kind === "transaction" ? String(callbackId) : null) ||
+    (txData?.transaction_id ? String(txData.transaction_id) : null)
+  return { sessionId, transactionId }
+}
+
 async function resolveBriteMatchKeys(callbackId: string, txData: any, logger: any): Promise<string[]> {
   const keys = new Set<string>([String(callbackId)])
   if (txData?.merchant_reference) keys.add(String(txData.merchant_reference))
@@ -371,8 +394,9 @@ async function safetyNetCompleteCart(
       const faPool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
       try {
         const { forceAuthorizeBriteCartSession } = await import("../../../modules/payment-brite/utils/force-authorize")
+        const faIds = resolveBriteStampIds(briteSessionId, txData)
         const n = await forceAuthorizeBriteCartSession(
-          faPool, targetCart.id, briteSessionId, txData?.transaction_id || null
+          faPool, targetCart.id, faIds.sessionId, faIds.transactionId
         )
         logger.info(`[Brite Webhook] Safety net: force-authorized ${n} Brite session(s) for cart ${targetCart.id} (settled tx ${txData?.transaction_id || "—"})`)
       } finally { await faPool.end().catch(() => {}) }
@@ -410,9 +434,11 @@ async function safetyNetCompleteCart(
         )
         // JSONB MERGE (||) — never full-replace: a full replace races with the
         // order-placed subscribers and wipes their fields (custom_display_id, etc.).
+        const stampIds = resolveBriteStampIds(briteSessionId, txData)
         const mergeMeta = {
-          briteSessionId,
-          brite_session_id: briteSessionId,
+          briteSessionId: stampIds.sessionId,
+          brite_session_id: stampIds.sessionId,
+          ...(stampIds.transactionId && { briteTransactionId: stampIds.transactionId }),
           briteStatus: txData?.state || txData?.status || "COMPLETED",
           payment_captured: true,
           payment_captured_at: new Date().toISOString(),
@@ -690,8 +716,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     // Brite payment row) — never stamp them from a failure callback that
     // loose-matched an order paid via another provider.
     if (isSuccess || orderHasBritePayment) {
-      mergeMetadata.briteSessionId = briteSessionId
-      mergeMetadata.brite_session_id = briteSessionId
+      const stampIds = resolveBriteStampIds(briteSessionId, txData)
+      mergeMetadata.briteSessionId = stampIds.sessionId
+      mergeMetadata.brite_session_id = stampIds.sessionId
+      if (stampIds.transactionId) mergeMetadata.briteTransactionId = stampIds.transactionId
       mergeMetadata.briteStatus = state
       mergeMetadata.payment_provider = "brite"
       mergeMetadata.payment_method = briteMethod

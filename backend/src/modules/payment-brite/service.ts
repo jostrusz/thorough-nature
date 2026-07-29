@@ -16,6 +16,22 @@ type Options = {
   baseUrl?: string
 }
 
+// Brite `locale` is a LANGUAGE code, not a country. We used to fall back to the raw
+// cart country, which renders the hosted Brite Client with e.g. locale "be" → 400
+// for Belgian customers on iDEAL (the api-client forces country_id "nl"; only the
+// locale was wrong — flagged in the Brite integration review, 2026-07). Map shop
+// countries to their language, pass through known languages, and fall back to
+// English rather than erroring.
+const BRITE_LOCALE_BY_COUNTRY: Record<string, string> = {
+  nl: "nl", be: "nl", de: "de", at: "de", lu: "de", se: "sv",
+}
+const BRITE_KNOWN_LANGS = new Set(["nl", "de", "sv", "en"])
+function briteLocale(explicitLocale: any, countryId: any): string | undefined {
+  const raw = String(explicitLocale || countryId || "").toLowerCase().slice(0, 2)
+  if (!raw) return undefined
+  return BRITE_LOCALE_BY_COUNTRY[raw] || (BRITE_KNOWN_LANGS.has(raw) ? raw : "en")
+}
+
 type InjectedDependencies = {
   logger: any
   gatewayConfig?: any
@@ -366,7 +382,7 @@ class BritePaymentProviderService extends AbstractPaymentProvider<Options> {
         country_id: countryId || undefined,
         brand_name: data?.product_name || data?.brand_name || "Order",
         merchant_reference: merchantReference,
-        locale: data?.locale || (countryId || undefined),
+        locale: briteLocale(data?.locale, countryId),
         // Redirect flow (replaces the embedded Web SDK iframe, which suffered mobile OS
         // throttling after the bank app-switch and lost ~50% of thank-you redirects).
         // Brite redirects the customer to redirect_uri once the session reaches a final

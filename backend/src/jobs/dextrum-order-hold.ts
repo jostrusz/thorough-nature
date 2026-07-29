@@ -2,6 +2,7 @@ import { MedusaContainer } from "@medusajs/framework/types"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { MyStockApiClient } from "../modules/dextrum/api-client"
 import { BriteApiClient } from "../modules/payment-brite/api-client"
+import { briteIdKind } from "../modules/payment-brite/utils/id-kind"
 import { normalizePhone } from "../utils/normalize-phone"
 import { normalizePostalCode } from "../utils/normalize-postal-code"
 import { formatFrStreetForWms } from "../utils/fr-street-format"
@@ -20,7 +21,8 @@ const BRITE_CREDIT_RECHECK_MINUTES = 15
  */
 async function pollBriteTransactionState(orderMeta: any): Promise<number | null> {
   const sessionId = orderMeta?.briteSessionId || orderMeta?.brite_session_id
-  if (!sessionId) return null
+  const stampedTxId = orderMeta?.briteTransactionId || orderMeta?.brite_transaction_id
+  if (!sessionId && !stampedTxId) return null
 
   const { Pool } = require("pg")
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 })
@@ -45,8 +47,19 @@ async function pollBriteTransactionState(orderMeta: any): Promise<number | null>
 
   const client = new BriteApiClient(keys.api_key, keys.secret_key, !isLive, console as any, baseUrl)
   await client.authenticate()
-  const session = await client.getSession(String(sessionId))
-  const txId = session?.transaction_id || session?.session?.transaction_id
+  // Resolve the TRANSACTION id. Orders completed by the webhook safety-net from a
+  // transaction callback historically carry the TRANSACTION id in briteSessionId —
+  // calling session.get with it 400s at Brite (integration review, 2026-07-21).
+  // Route by id kind instead of assuming the stamp is a session id.
+  let txId: any = stampedTxId || null
+  if (!txId && sessionId) {
+    if (briteIdKind(String(sessionId)) === "transaction") {
+      txId = sessionId
+    } else {
+      const session = await client.getSession(String(sessionId))
+      txId = session?.transaction_id || session?.session?.transaction_id
+    }
+  }
   if (!txId) return null
   const tx: any = await client.getTransaction(String(txId))
   const state = tx?.state ?? tx?.transaction?.state
