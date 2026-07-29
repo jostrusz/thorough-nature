@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ehrliche Rezension des Buches „Lass los, was dich kaputt macht" von Joris de Vries.">
+    <title>Rezension: Lass los, was dich kaputt macht</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:Georgia,'Times New Roman',serif;line-height:1.8;color:#333;background:#fff;padding:20px}
+        .container{max-width:680px;margin:0 auto;background:#fff;padding:40px 20px}
+        h1{font-family:Georgia,serif;font-size:42px;font-weight:700;line-height:1.2;margin-bottom:20px;color:#121212;letter-spacing:-.5px}
+        h2{font-family:Georgia,serif;font-size:28px;font-weight:700;line-height:1.3;margin-top:40px;margin-bottom:20px;color:#121212;border-top:1px solid #e5e5e5;padding-top:30px}
+        h3{font-family:Georgia,serif;font-size:22px;font-weight:600;line-height:1.4;margin-top:30px;margin-bottom:15px;color:#121212}
+        p{font-size:18px;margin-bottom:20px;color:#333}
+        strong{font-weight:700;color:#000}
+        em{font-style:italic;color:#555}
+        u{text-decoration:underline;text-decoration-color:#2196F3;text-decoration-thickness:2px;text-underline-offset:3px}
+        .highlight{background-color:#fff59d;padding:2px 4px;border-radius:2px}
+        ul,ol{margin-left:30px;margin-bottom:25px}
+        ul li,ol li{font-size:18px;margin-bottom:12px;line-height:1.7}
+        a{color:#2196F3;text-decoration:none;font-weight:600;border-bottom:2px solid #2196F3;transition:all .3s ease}
+        a:hover{background-color:#2196F3;color:#fff;padding:2px 5px}
+        .rating-box{background-color:#f0f8ff;border-left:4px solid #2196F3;padding:25px;margin:40px 0;border-radius:3px;text-align:center}
+        .rating-box .stars{font-size:32px;color:#ffc107;margin-bottom:10px}
+        .rating-box p{margin-bottom:10px;font-size:19px}
+        .pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:30px 0}
+        .pros,.cons{padding:20px;border-radius:5px}
+        .pros{background-color:#e8f5e9;border-left:4px solid #4caf50}
+        .cons{background-color:#ffebee;border-left:4px solid #f44336}
+        .pros h3,.cons h3{margin-top:0;font-size:20px}
+        .pros ul,.cons ul{margin-left:20px}
+        .cta-box{background-color:#f8f8f8;border-left:4px solid #2196F3;padding:25px;margin:40px 0;border-radius:3px}
+        .cta-box p{margin-bottom:10px}
+        hr{border:none;border-top:1px solid #e5e5e5;margin:50px 0}
+        .checkmark{color:#5cb85c;font-size:20px;margin-right:5px}
+        .article-meta{font-family:Arial,sans-serif;font-size:14px;color:#666;margin-bottom:30px;padding-bottom:20px;border-bottom:1px solid #e5e5e5}
+        .featured-image,.content-image{width:100%;height:auto;border-radius:5px}
+        .featured-image{margin-bottom:30px}
+        .content-image{margin:35px 0}
+        .pull-quote{font-size:24px;font-style:italic;color:#555;border-left:3px solid #2196F3;padding-left:20px;margin:35px 0;line-height:1.5}
+        .info-box{background-color:#f0f8ff;border-left:4px solid #2196F3;padding:20px;margin:30px 0;border-radius:3px}
+        .info-box p{margin-bottom:10px;font-size:17px}
+        .book-cta-section{text-align:center;margin:50px 0;padding:40px;background:linear-gradient(135deg,#f8f8f8 0%,#fff 100%);border-radius:10px;border:2px solid #e5e5e5}
+        .book-image-centered{margin-bottom:30px}
+        .book-image-centered img{width:300px;max-width:100%;height:auto;box-shadow:0 10px 30px rgba(0,0,0,.15);border-radius:5px;transition:transform .3s ease}
+        .book-image-centered img:hover{transform:scale(1.05)}
+        .review-box{background-color:#fafafa;border-left:3px solid #2196F3;padding:20px;margin:25px 0;border-radius:5px}
+        .review-box .reviewer{font-weight:700;color:#2196F3;margin-bottom:5px}
+        .review-box .stars{color:#ffc107;margin-bottom:10px}
+        .subtle-cta{background-color:#f9f9f9;border-left:3px solid #2196F3;padding:25px;margin:40px 0;text-align:center;border-radius:5px}
+        .subtle-cta p{font-size:19px;margin-bottom:20px;color:#444}
+        .subtle-cta-button{display:inline-block;padding:12px 30px;background-color:#2196F3;color:#fff!important;border:none;border-radius:5px;text-decoration:none;border-bottom:none!important;font-size:17px;transition:all .3s ease}
+        .subtle-cta-button:hover{background-color:#1976D2;transform:translateY(-1px);box-shadow:0 4px 12px rgba(33,150,243,.3)}
+        .cta-button{text-align:center;margin:20px 0}
+        .cta-button a{font-size:20px;padding:18px 40px;display:inline-block;background-color:#2196F3;color:#fff!important;border:none;border-radius:5px;text-decoration:none;border-bottom:none;transition:all .3s ease;box-shadow:0 4px 15px rgba(33,150,243,.3)}
+        .cta-button a:hover{background-color:#1976D2;transform:translateY(-2px);box-shadow:0 6px 20px rgba(33,150,243,.4)}
+        .verdict-box{background:linear-gradient(135deg,#e3f2fd 0%,#f5f5f5 100%);border:2px solid #2196F3;padding:30px;margin:40px 0;border-radius:10px;text-align:center}
+        .verdict-box h3{color:#1976D2;margin-bottom:15px}
+        @media (max-width:768px){
+            h1{font-size:32px}
+            h2{font-size:24px}
+            h3{font-size:20px}
+            p,ul li,ol li{font-size:17px}
+            .container{padding:20px 15px}
+            .book-cta-section{padding:20px 15px}
+            .book-image-centered img{width:100%;max-width:280px}
+            .cta-button a{font-size:18px;padding:15px 25px}
+            .pros-cons{grid-template-columns:1fr}
+        }
+    </style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wegqs4rt9r");
+</script>
+</head>
+<body>
+<div class="container">
+    <article>
+        <h1>Wir haben „Lass los, was dich kaputt macht" gelesen, damit Sie es nicht müssen — aber ehrlich? Jetzt wollen Sie es doch.</h1>
+        <div class="article-meta">
+            Unabhängige Rezension • 25. Januar 2026 • Lesezeit: 9 Minuten
+        </div>
+        <img decoding="async" loading="eager" height="453" width="680" class="featured-image" alt="Rezension: Lass los, was dich kaputt macht" src="https://everchapter.eu/lass-los-was-dich-pichi.jpg">
+
+        <p>Ich sage es gleich vorweg: <strong>Ich lese normalerweise keine Selbsthilfebücher.</strong></p>
+
+        <p>Das war noch nie mein Ding. Ich hatte immer das Gefühl, dass mir jemand einreden will, mein Leben sei nicht gut genug — nur um mir dann mit Wörtern wie „Manifestation" und „Universum" eine vage Antwort zu geben.</p>
+
+        <p>Aber in den letzten Monaten bekam ich so viele Nachrichten von Lesern, die fragten: <em>„Haben Sie ‚Lass los, was dich kaputt macht' schon gelesen? Was halten Sie davon?"</em> — dass ich dachte: Na gut, ich lese es. Dann brauchen Sie nicht länger zu raten, was ich davon halte.</p>
+
+        <p>Und jetzt sitze ich hier. Das Buch liegt neben mir. Voller Eselsohren. Mit Bleistiftstrichen am Rand. Und ich muss etwas zugeben, das ich nicht erwartet hätte:</p>
+
+        <p><span class="highlight"><strong>Dies ist eines der besten Bücher, die ich seit Langem gelesen habe.</strong></span></p>
+
+        <div class="rating-box">
+            <div class="stars">⭐⭐⭐⭐⭐ (5/5)</div>
+            <p><strong>Überraschend ehrlich, erschreckend treffend und verblüffend praktisch</strong></p>
+            <p>Das Buch, das ich nicht lesen wollte — und jetzt jedem empfehle</p>
+        </div>
+
+        <h2>Warum ich dieses Buch letztendlich doch aufgeschlagen habe</h2>
+
+        <p>Ich will ehrlich sein, was meine Erwartungen angeht. Ich dachte: Es wird wieder so ein Buch. „Denken Sie positiv." „Lassen Sie los." „Alles wird gut." Diese Sätze, die auf einem Instagram-Bild schön aussehen, einen aber keinen einzigen Schritt weiterbringen.</p>
+
+        <p>Was mich letztlich doch neugierig gemacht hat, war die Nachricht einer Leserin: <em>„Ich war drei Jahre in Therapie. Dieses Buch hat mir in zwei Kapiteln erklärt, was mein Therapeut in drei Jahren nicht erklären konnte."</em></p>
+
+        <p>Das ist eine ziemliche Ansage. Also wollte ich es selbst überprüfen.</p>
+
+        <h2>Wer ist Joris De Vries eigentlich?</h2>
+
+        <p><strong>Joris De Vries</strong> ist kein Instagram-Guru. Kein Motivationsredner, der „Ihr bestes Leben" verspricht. Er ist Therapeut. Ein ganz normaler Therapeut, der seit über zwölf Jahren Menschen durch emotionales Chaos begleitet — Trauer, Verlust, Schuldgefühle, Wut, Einsamkeit.</p>
+
+        <img decoding="async" loading="lazy" height="453" width="680" class="content-image" alt="Joris de Vries – Autor von Lass los, was dich kaputt macht" src="https://everchapter.eu/bba0ad3b-5e10-40d8-a496-e54e92f287eb.jpg">
+
+        <p>Und das merkt man. Ab der ersten Seite spürt man, dass dieses Buch nicht von jemandem geschrieben wurde, der sich sein Wissen aus dem Internet zusammengesucht hat — sondern von jemandem, der <u>echten Menschen gegenübergesessen hat</u>, die echten Schmerz empfunden haben. Diese Art zu schreiben lässt sich nicht vortäuschen.</p>
+
+        <p>Seine Motivation, das Buch zu schreiben, ist eigentlich ganz logisch: Er bemerkte, dass seine Klienten — Hunderte von Menschen, über Jahre hinweg — immer wieder mit denselben Fragen kamen:</p>
+
+        <ul>
+            <li>Warum kann ich das nicht loslassen, obwohl ich weiß, dass es mich kaputt macht?</li>
+            <li>Warum bestrafe ich mich noch immer für Fehler von vor Jahren?</li>
+            <li>Warum kann mein Kopf nachts nicht einfach mal still sein?</li>
+        </ul>
+
+        <p>Statt diese Fragen immer und immer wieder zu beantworten, hat er alles, was er weiß, in 290 Seiten gepackt. Und ehrlich? Es fühlt sich an wie eine private Therapiesitzung — nur für 35 € statt 120 € pro Stunde.</p>
+
+        <h2>Gut, aber was steht da nun drin?</h2>
+
+        <p>Das Buch folgt einem logischen Aufbau, der im Grunde ganz einfach ist — den aber kaum jemand so klar auf den Punkt bringt wie Joris:</p>
+
+        <ol>
+            <li><strong>Erkennen</strong> — Was genau hält Sie fest? Welche Überzeugungen und Muster sitzen so tief, dass Sie sie gar nicht mehr bemerken?</li>
+            <li><strong>Verstehen</strong> — Warum tun Sie das? Woher kommen diese Muster? (Spoiler: Die Antwort lautet häufiger „Ihre Kindheit", als Ihnen lieb wäre.)</li>
+            <li><strong>Transformieren</strong> — Wie durchbrechen Sie es? Nicht mit vagen Ratschlägen, sondern mit konkreten Übungen, die Sie noch heute anwenden können.</li>
+        </ol>
+
+        <p>Klingt vielleicht simpel. Aber was Joris anders macht — und genau das zeichnet dieses Buch aus — er macht es <strong>spürbar</strong>. Sie lesen ein Beispiel und denken: <em>Moment mal, das bin ja ich.</em> Mir ist das beim Lesen mindestens fünfmal passiert.</p>
+
+        <div class="pull-quote">
+            „Es ist nicht der Schmerz, der uns kaputt macht, sondern die Art, wie wir mit ihm umgehen."
+        </div>
+
+        <p>Als ich diesen Satz gelesen habe, musste ich das Buch kurz weglegen. Nicht weil er melodramatisch war — sondern weil er so einfach und so wahr ist, dass es fast wehtut.</p>
+
+        <h2>Was mich am meisten überrascht hat</h2>
+
+        <p>Ich hatte ein Buch erwartet, das mir erzählt, was ich ohnehin schon weiß. „Lassen Sie los." „Vergeben Sie sich selbst." „Leben Sie im Hier und Jetzt." So in der Art.</p>
+
+        <p>Aber dieses Buch macht etwas anderes.</p>
+
+        <p>Es erklärt, <strong>warum</strong> Sie nicht loslassen können. Warum Ihr Kopf nachts nicht aufhört. Warum Sie sich schuldig fühlen wegen Dingen, die zehn Jahre zurückliegen. Warum Ihre Beziehungen immer demselben Muster folgen.</p>
+
+        <p>Und dann — und das ist der beste Teil — gibt es Ihnen eine <u>konkrete Methode</u>, es anders zu machen. Basierend auf bewährten Therapiemethoden (ACT, Achtsamkeit, kognitive Verhaltenstherapie), aber so erklärt, als säßen Sie mit einem guten Freund zusammen, der zufällig auch Therapeut ist.</p>
+
+        <h3>📖 Teil 1: Erkennen, was Sie kaputt macht</h3>
+
+        <p>Die ersten drei Kapitel gehen unter die Haut. Nicht auf eine aggressive Art — sondern auf eine Art, bei der Sie denken: <em>Oh. Also das ist es, was ich tue.</em> Es geht darum, wie emotionaler Schmerz entsteht, warum Grübeln regelrecht süchtig macht und wie Schuldgefühle einen wie ein Schatten verfolgen.</p>
+
+        <h3>🧠 Teil 2: Verstehen, warum Sie feststecken</h3>
+
+        <p>Dieser Teil war für mich der stärkste. Joris erklärt, wie Ihre Vergangenheit — oft Ihre Kindheit — Muster geschaffen hat, die Sie bis heute wiederholen. Nicht nach dem Motto „Die Eltern sind schuld", sondern mit einer Empathie, die man in Büchern selten findet. Sie verstehen, warum Sie tun, was Sie tun. Und allein dieses Verständnis fühlt sich an wie eine Erleichterung.</p>
+
+        <h3>🛠️ Teil 3: Ihr Leben transformieren</h3>
+
+        <p>Die praktischen Werkzeuge. Übungen, die Sie wirklich umsetzen können. Keine vagen Meditationsanleitungen, sondern konkrete Schritte: Wenn Sie das fühlen, tun Sie dies. Wenn Ihre Gedanken das machen, probieren Sie das. Das Arbeitsheft am Ende des Buches macht es noch praktischer — Sie können es ausfüllen, zurückblättern und Ihren eigenen Fortschritt verfolgen.</p>
+
+        <img decoding="async" loading="lazy" height="680" width="680" class="content-image" alt="Inhalt des Buches" src="https://cdn.shopify.com/s/files/1/0905/8120/5370/files/Lass-los_-was-dich-kaputt-macht-2-1-1-1.jpg?v=1757420520&amp;width=2048">
+
+        <h2>Die ehrlichen Vor- und Nachteile</h2>
+
+        <p>Da dies eine ehrliche Rezension ist, will ich auch die Schwächen nicht verschweigen. Denn kein Buch ist perfekt — und das muss es auch nicht sein.</p>
+
+        <div class="pros-cons">
+            <div class="pros">
+                <h3>✅ Was dieses Buch besonders macht:</h3>
+                <ul>
+                    <li><strong>Erschreckend treffend</strong> — Sie erkennen sich auf fast jeder Seite wieder. Das geht unter die Haut — und befreit zugleich</li>
+                    <li><strong>Geschrieben von einem echten Therapeuten</strong> — Man spürt an allem, dass es aus der Praxis kommt, nicht aus dem Internet</li>
+                    <li><strong>Konkret und praktisch</strong> — Mehr als 40 Übungen, die Sie sofort anwenden können</li>
+                    <li><strong>Keine Esoterik</strong> — Keine Mantras, kein „Universum"-Gerede, kein „Denken Sie positiv"</li>
+                    <li><strong>Empathischer Ton</strong> — Sie fühlen sich verstanden, nicht beurteilt</li>
+                    <li><strong>Das Arbeitsheft</strong> — Macht aus „Lesen" ein „Tun". Und genau das macht den Unterschied</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <h3>⚠️ Kleine Anmerkungen:</h3>
+                <ul>
+                    <li><strong>Es ist viel</strong> — 290 Seiten plus Arbeitsheft. Nehmen Sie sich Zeit, lesen Sie es nicht an einem Wochenende</li>
+                    <li><strong>Es ersetzt keine Therapie</strong> — Bei schweren Traumata oder Krisen ist professionelle Hilfe immer der erste Schritt</li>
+                    <li><strong>Man muss es wollen</strong> — Dieses Buch funktioniert nur, wenn Sie bereit sind, ehrlich hinzuschauen</li>
+                </ul>
+            </div>
+        </div>
+
+        <p>Aber eines sei klar gesagt: Die Pluspunkte überwiegen hier deutlicher als bei jedem anderen Buch, das ich in den letzten Jahren gelesen habe. Die Anmerkungen sind eher praktische Hinweise als echte Kritikpunkte.</p>
+
+        <h2>Was sagen andere Leser?</h2>
+
+        <p>Ich wollte wissen, ob meine Erfahrung ein Einzelfall war. Also habe ich nachgelesen, was andere Leser darüber schreiben. Und ehrlich? Einige Reaktionen haben mich ziemlich berührt.</p>
+
+        <div class="review-box">
+            <div class="reviewer">Katharina, 34 Jahre</div>
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p><em>„Ich habe dieses Buch in zwei Nächten durchgelesen. Nicht weil es kurz ist — sondern weil ich es nicht weglegen konnte. Zum ersten Mal seit Jahren habe ich mich verstanden gefühlt. Nicht von einer Freundin, nicht von einem Therapeuten — von einem Buch. Das klingt seltsam. Aber es ist wahr."</em></p>
+        </div>
+
+        <div class="review-box">
+            <div class="reviewer">Stefan, 42 Jahre</div>
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p><em>„Nach meiner Scheidung fühlte ich mich verloren. Drei Jahre Therapie halfen ein bisschen. Dieses Buch hat mir in zwei Kapiteln erklärt, was ich in drei Jahren nicht verstanden habe. Ich habe es inzwischen drei Freunden geschenkt."</em></p>
+        </div>
+
+        <div class="review-box">
+            <div class="reviewer">Sandra, 29 Jahre</div>
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p><em>„Ich habe es für meine Mutter gekauft. Sie hat mich weinend angerufen, um sich zu bedanken. Sie sagte: ‚Das ist das erste Buch, das mir nicht sagt, was ich tun soll, sondern mir hilft zu verstehen, warum ich tue, was ich tue.' Danach habe ich mir selbst auch ein Exemplar bestellt."</em></p>
+        </div>
+
+        <div class="review-box">
+            <div class="reviewer">Markus, 38 Jahre</div>
+            <div class="stars">⭐⭐⭐⭐⭐</div>
+            <p><em>„Ich bin ein Mann. Ich rede nicht über Gefühle. Aber dieses Buch habe ich heimlich im Bett gelesen, während meine Freundin schlief. Das Kapitel über Wut und Kontrolle hat mich so tief getroffen, dass ich zum ersten Mal seit Jahren geweint habe. Auf eine gute Art."</em></p>
+        </div>
+
+        <p>Was mir an all diesen Bewertungen auffällt: Das sind keine oberflächlichen „Nettes Buch!"-Reaktionen. Das sind Menschen, die beim Lesen wirklich etwas gespürt haben. Und das sagt mehr als jede Sternebewertung.</p>
+
+        <div class="subtle-cta">
+            <p><em>Neugierig, was dieses Buch für Sie bedeuten könnte?</em></p>
+            <a class="subtle-cta-button" href="https://www.lasslosbuch.de">Zum Buch →</a>
+        </div>
+
+        <h2>Für wen ist dieses Buch wirklich gedacht?</h2>
+
+        <p>Darüber habe ich nach dem Lesen lange nachgedacht. Denn nicht jedes Buch ist für jeden. Aber dieses Buch spricht eine überraschend breite Zielgruppe an. Es passt zu Ihnen, wenn Sie:</p>
+
+        <ul>
+            <li>🧠 Nachts wach liegen, weil Ihr Kopf nicht aufhört zu grübeln</li>
+            <li>💔 Im Schmerz einer Trennung, eines Verlustes oder eines Vertrauensbruchs feststecken</li>
+            <li>😔 Sich immer noch die Schuld geben für etwas, das vor Jahren passiert ist</li>
+            <li>😰 Das Gefühl haben, dass Sie funktionieren, aber nicht wirklich leben</li>
+            <li>🔄 Immer wieder dieselben Muster in Beziehungen oder im Verhalten wiederholen</li>
+            <li>😶 So tun, als wäre alles in Ordnung, während es innerlich ein Chaos ist</li>
+        </ul>
+
+        <p>Weniger geeignet ist das Buch, wenn Sie eine schnelle Lösung oder ein Wohlfühl-Erlebnis suchen. Dieses Buch fordert etwas von Ihnen — nämlich den Mut, ehrlich hinzuschauen. Aber wenn Sie sich darauf einlassen? Dann ist die Belohnung größer, als Sie denken.</p>
+
+        <h2>Was macht es anders als alle anderen Selbsthilfebücher?</h2>
+
+        <p>Diese Frage habe ich mir selbst gestellt. Denn es gibt Tausende von Büchern übers Loslassen, über emotionale Heilung, über persönliches Wachstum. Was macht ausgerechnet dieses eine Buch so besonders?</p>
+
+        <p>Und ich glaube, die Antwort liegt in drei Dingen:</p>
+
+        <p><strong>Erstens:</strong> Joris schreibt nicht aus der Theorie heraus, sondern aus der Praxis. Man spürt den Unterschied. Er kennt die Sätze, die Sie sich um drei Uhr nachts selbst sagen. Er kennt die Scham, die Sie empfinden, wenn Sie zum x-ten Mal in dasselbe Muster verfallen. Er kennt das alles, weil er Hunderten von Menschen gegenübergesessen hat, die genau das gefühlt haben.</p>
+
+        <p><strong>Zweitens:</strong> Es ist kein Buch, das Ihnen sagt, was Sie tun sollen. Es ist ein Buch, das Ihnen hilft zu verstehen, warum Sie tun, was Sie tun. Und dieses Verständnis — diese Einsicht — ist kraftvoller als jeder Ratschlag.</p>
+
+        <p><strong>Drittens:</strong> Das Arbeitsheft und die Übungen. Die meisten Selbsthilfebücher enden mit „Und jetzt setzen Sie es um!" — ohne zu erklären, wie. Dieses Buch gibt Ihnen mehr als 40 konkrete Übungen. Nicht vage („schreiben Sie Ihre Gefühle auf"), sondern spezifisch und anwendbar.</p>
+
+        <div class="pull-quote">
+            „Jeder sagt ‚Lass los'. Dies ist das erste Buch, das mir zeigt, wie."
+        </div>
+
+        <h2>Ist es den Preis wert?</h2>
+
+        <p>Kurze Antwort: <strong>Absolut.</strong></p>
+
+        <p>Das Buch kostet 35 €. Dafür bekommen Sie 290 Seiten, ein komplettes Arbeitsheft und zwei Bonus-E-Books, die Sie sofort digital erhalten.</p>
+
+        <p>Zum Vergleich: Eine Sitzung bei einem Therapeuten kostet 100–150 €. Ein Online-Kurs über emotionales Wohlbefinden kostet 50–500 €. Ein Coaching-Programm kostet 500–2.000 €.</p>
+
+        <p>Für 35 € bekommen Sie die Essenz jahrelanger therapeutischer Erfahrung in einem Buch, das Sie in Ihrem eigenen Tempo lesen, erneut lesen und anwenden können. Wenn Ihnen das auch nur ein bisschen hilft — und den Tausenden positiven Bewertungen zufolge hilft es den meisten Menschen deutlich mehr als nur „ein bisschen" — dann ist es die beste Investition, die Sie dieses Jahr tätigen können.</p>
+
+        <img decoding="async" loading="lazy" height="453" width="680" class="content-image" alt="Bonus-E-Books" src="https://everchapter.eu/7af3a5fc-5b2f-473f-bf2d-f5547a374397.jpg">
+
+        <h2>Mein Fazit</h2>
+
+        <div class="verdict-box">
+            <h3>⭐⭐⭐⭐⭐ Meine Bewertung: 5 von 5 Sternen</h3>
+            <p><strong>„Lass los, was dich kaputt macht"</strong> ist das Buch, das ich nicht lesen wollte — und jetzt jedem empfehle. Es ist ehrlich, praktisch, schonungslos und überraschend tröstlich. <span class="highlight">Eines der besten Bücher, die ich seit Langem gelesen habe.</span></p>
+        </div>
+
+        <p>Ich hätte nicht gedacht, dass ich das einmal schreiben würde. Ich hatte mit einer mittelmäßigen Rezension über ein mittelmäßiges Selbsthilfebuch gerechnet. Aber dieses Buch ist alles andere als mittelmäßig.</p>
+
+        <p>Es ist die Art von Buch, bei dem man denkt: <em>Hätte ich das doch zehn Jahre früher gehabt.</em></p>
+
+        <p>Es ist die Art von Buch, das man zuschlägt und sofort jemandem geben möchte, der es braucht — Ihrer Schwester, Ihrer Mutter, Ihrem besten Freund oder einfach sich selbst.</p>
+
+        <p>Und es ist die Art von Buch, von dem Sie wissen: Es wird etwas verändern. Nicht morgen. Vielleicht nicht nächste Woche. Aber der Samen ist gepflanzt. Und das ist genug.</p>
+
+        <h2>Wo können Sie es bestellen?</h2>
+
+        <p>Das Buch ist über die offizielle Website erhältlich. Zurzeit gibt es <strong>kostenlosen Versand</strong> dazu — der normalerweise 6 € kostet — plus zwei zusätzliche E-Books, die das Buch noch vollständiger machen:</p>
+
+        <div class="cta-box">
+            <p><span class="checkmark">✅</span> <strong>„Lass los, was dich kaputt macht"</strong> — 290 Seiten + Arbeitsheft</p>
+            <p><span class="checkmark">✅</span> <strong>GRATIS E-Book: „Die Lösung für Überdenker"</strong> — Für alle, deren Kopf nicht aufhören will zu grübeln</p>
+            <p><span class="checkmark">✅</span> <strong>GRATIS E-Book: „Liebe ohne Unsinn"</strong> — Über Grenzen setzen und aufhören, es allen recht zu machen</p>
+            <p><span class="checkmark">✅</span> <strong>Kostenloser Versand</strong> nach Deutschland, Österreich und Luxemburg</p>
+            <p><span class="checkmark">✅</span> <strong>30 Tage Geld-zurück-Garantie</strong> — keine Fragen, kein Risiko</p>
+        </div>
+
+        <p>Die beiden Bonus-E-Books sind übrigens überraschend gut. „Die Lösung für Überdenker" passt perfekt, wenn Sie vor allem unter Grübeln leiden, und „Liebe ohne Unsinn" ist ideal, wenn es Ihnen schwerfällt, Grenzen zu setzen. Zusammen mit dem Hauptbuch bilden sie ein vollständiges Paket.</p>
+
+        <div class="book-cta-section">
+            <div class="book-image-centered">
+                <img decoding="async" loading="lazy" height="360" width="240" alt="Buch: Lass los, was dich kaputt macht" src="https://cdn.shopify.com/s/files/1/0905/8120/5370/files/Lass-los_-was-dich-kaputt-macht-4-1.jpg?v=1757420073">
+            </div>
+            <p style="font-size:20px;margin-bottom:10px"><strong>Lass los, was dich kaputt macht</strong></p>
+            <p style="font-size:17px;margin-bottom:5px;color:#555">290 Seiten + Arbeitsheft + 2 gratis E-Books</p>
+            <p style="font-size:17px;margin-bottom:20px;color:#555">35 € mit kostenlosem Versand • 30 Tage Garantie</p>
+            <div class="cta-button">
+                <a href="https://www.lasslosbuch.de">Buch mit kostenlosem Versand bestellen →</a>
+            </div>
+        </div>
+
+        <hr>
+
+        <p>Wenn Sie bis hierher gelesen haben, hat dieser Artikel offenbar etwas in Ihnen angesprochen. Vielleicht erkennen Sie sich in den Beschreibungen wieder. Vielleicht denken Sie an jemanden, der das braucht. Oder vielleicht spüren Sie einfach, dass es Zeit für eine Veränderung ist.</p>
+
+        <p>Was auch immer es ist — hören Sie auf dieses Gefühl. Es ist nicht ohne Grund da.</p>
+
+        <p>Und mit der 30-Tage-Geld-zurück-Garantie gehen Sie keinerlei Risiko ein. Das einzige Risiko ist, dass Sie in einem Jahr zurückblicken und sich wünschen, Sie hätten früher angefangen.</p>
+
+        <hr>
+
+        <div class="info-box">
+            <p><strong>📚 Buchdetails:</strong></p>
+            <p><strong>Titel:</strong> Lass los, was dich kaputt macht</p>
+            <p><strong>Autor:</strong> Joris De Vries (Therapeut, 12+ Jahre Erfahrung)</p>
+            <p><strong>Umfang:</strong> 290 Seiten + Arbeitsheft</p>
+            <p><strong>Preis:</strong> 35 € (inkl. kostenlosem Versand)</p>
+            <p><strong>Extras:</strong> 2 gratis E-Books (Die Lösung für Überdenker + Liebe ohne Unsinn)</p>
+            <p><strong>Garantie:</strong> 30 Tage Geld-zurück-Garantie</p>
+            <p><strong>Bestellen:</strong> <a href="https://www.lasslosbuch.de">www.lasslosbuch.de</a></p>
+        </div>
+
+        <p style="font-size:14px;color:#666;font-style:italic;margin-top:40px"><em>Diese Rezension basiert auf eigener Leseerfahrung, Leserrezensionen und einer Analyse des Buchinhalts. Dies ist eine unabhängige Bewertung.</em></p>
+    </article>
+</div>
+</body>
+</html>
