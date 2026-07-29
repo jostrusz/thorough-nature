@@ -2408,7 +2408,7 @@ body {
       <!-- Utánvét díj -->
       <div class="msb-line" id="msb-cod-fee" style="display:none;">
         <span class="msb-line-label">Utánvét</span>
-        <span class="msb-line-val">+490&nbsp;Ft</span>
+        <span class="msb-line-val">+400&nbsp;Ft</span>
       </div>
       <!-- Összesen -->
       <div class="msb-line total-line">
@@ -2931,7 +2931,7 @@ body {
       </div>
       <div class="summary-line" id="summary-cod-fee" style="display:none;padding:4px 0;">
         <span style="font-size:13px;">Utánvét</span>
-        <span style="font-weight:600;">+490&nbsp;Ft</span>
+        <span style="font-weight:600;">+400&nbsp;Ft</span>
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Összesen</span>
@@ -3192,7 +3192,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function getCurrentTotal() {
     var total = selectedBundlePrice;
     if (orderBumpActive) total += PROJECT_CONFIG.upsellProduct.price;
-    if (selectedMethod === 'cod') total += 490; // Utánvét díj — 30 CZK ekvivalens HUF-ban (backend: FEE_AMOUNTS.cod_fee.huf)
+    if (selectedMethod === 'cod') total += 400; // Utánvét díj (backend: FEE_AMOUNTS.cod_fee.huf)
     // A házhozszállítás ingyenes — a "Packeta - Házhozszállítás" shipping option
     // ára a Medusában is 0 HUF, tehát itt nincs mit hozzáadni.
     return total;
@@ -5529,7 +5529,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     kbc: 'Fizetés a KBC/CBC-n keresztül',
     riverty: 'Fizetés kézbesítés után',
     trustly: 'Online banki fizetés',
-    cod: 'Fizetés átvételkor (+0 Ft)',
+    cod: 'Fizetés átvételkor (+400 Ft)',
     applepay: 'Fizetés Apple Pay-jel',
     googlepay: 'Fizetés Google Pay-jel',
     bank_transfer: 'Online átutalás a bankodon keresztül',
@@ -5672,9 +5672,6 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           revolutEnv = gw.environment === 'sandbox' ? 'sandbox' : 'prod';
         }
         (gw.methods || []).forEach(function(m) {
-          // COD (utánvét) ideiglenesen ELREJTVE az engedd-el checkouton — a backend (gateway + fee + Dextrum COD) kész és bekötve,
-          // csak a UI-ban nem jelenik meg. Aktiváláshoz töröld ezt a sort.
-          if (m.code === 'cod') return;
           // CZ bank buttons (Comgate/PayU) render inside the bank group — collect & skip standalone tiles
           if (collectCzBankMethod(m, gw.provider, m.provider_id || providerIdFull)) return;
           var CZ_NAMES = {
@@ -6432,7 +6429,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var bankName = BANK_METHODS[selectedMethod] ? BANK_METHODS[selectedMethod].label : 'Banki átutalás';
       subtext.textContent = bankName + ' — átirányítunk a bank biztonságos fizetési oldalára.';
     } else if (selectedMethod === 'cod') {
-      subtext.textContent = 'Fizetés átvételkor. Díj: +0 Ft.';
+      subtext.textContent = 'Fizetés átvételkor a futárnak. Utánvét díj: +400 Ft.';
     } else {
       subtext.textContent = 'Átirányítunk a biztonságos fizetési oldalra.';
     }

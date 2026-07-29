@@ -51,9 +51,9 @@ export async function POST(
     const variantId = products[0].variants[0].id
 
     // Currency-specific fee override. Currencies NOT listed here fall back to
-    // BUNDLE_PRICING (CZK COD fee stays 30 Kč — unchanged). HUF = 30 CZK equivalent (≈490 Ft).
+    // BUNDLE_PRICING (CZK COD fee stays 30 Kč — unchanged).
     const FEE_AMOUNTS: Record<string, Record<string, number>> = {
-      cod_fee: { huf: 490 },
+      cod_fee: { huf: 400 },
     }
     let unitPrice: number | undefined
     try {
