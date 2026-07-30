@@ -5166,6 +5166,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (iconMethods.indexOf(code) !== -1) {
       return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
+    // Official brand marks only available as raster (Bizum ships PNG, no public SVG)
+    var pngIcons = { bizum: 'bizum.png' };
+    if (pngIcons[code]) {
+      return '<img src="/icons/' + pngIcons[code] + '" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
+    }
     // Colored badge fallback
     var badges = {
       przelewy24: { bg: '#D13239', text: '#FFF', label: 'P24' },
@@ -5228,6 +5233,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           var NL_NAMES = {
             'creditcard': 'Tarjeta de crédito o débito',
             'card': 'Tarjeta de crédito o débito',
+            'bizum': 'Bizum',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
