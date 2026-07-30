@@ -88,8 +88,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
 }
 .nav-logo img {
  height: 40px;
- width: 150px;
- aspect-ratio: 600 / 160;
+ width: auto;
+ aspect-ratio: 500 / 132;
 }
 .nav-logo-text {
  font-family: 'Recoleta', serif;
@@ -1723,8 +1723,8 @@ h2 { font-size: 38px; }
 }
 .footer-logo {
  height: 56px;
- width: 210px;
- aspect-ratio: 600 / 160;
+ width: auto;
+ aspect-ratio: 500 / 132;
 }
 .footer-brand-text {
  font-family: 'Recoleta', serif;
