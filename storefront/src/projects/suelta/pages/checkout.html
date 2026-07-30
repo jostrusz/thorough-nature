@@ -2738,8 +2738,7 @@ body {
           <!-- País (první — Shopify styl) -->
           <div class="float-field form-group has-value">
             <select id="country" name="country" required autocomplete="country">
-              <option value="NL" selected>🇪🇸 España</option>
-              <option value="BE"></option>
+              <option value="ES" selected>🇪🇸 España</option>
             </select>
             <label for="country">País</label>
           </div>
@@ -2862,8 +2861,7 @@ body {
             </div>
             <div class="float-field form-group has-value">
               <select id="billing_country" name="billing_country" autocomplete="billing country">
-                <option value="NL" selected>🇪🇸 España</option>
-                <option value="BE"></option>
+                <option value="ES" selected>🇪🇸 España</option>
               </select>
               <label for="billing_country">País</label>
             </div>
@@ -3290,7 +3288,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
   function recalculateOrderSummary() {
-    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'NL';
+    var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'ES';
     var rate = TAX_RATES[countryCode] || TAX_RATES.NL;
     var total = getCurrentTotal();
     var subtotal = total / (1 + rate / 100);
@@ -4581,7 +4579,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   address_1: address.address_line_1 || '',
                   city: address.admin_area_2 || '',
                   postal_code: address.postal_code || '',
-                  country_code: (address.country_code || 'NL').toLowerCase(),
+                  country_code: (address.country_code || 'ES').toLowerCase(),
                   phone: (payer.phone && payer.phone.phone_number && payer.phone.phone_number.national_number) || '',
                 }
               };
@@ -4868,7 +4866,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                     address_1: contact.address1 || '',
                     city: contact.locality || '',
                     postal_code: contact.postalCode || '',
-                    country_code: (contact.countryCode || 'NL').toLowerCase(),
+                    country_code: (contact.countryCode || 'ES').toLowerCase(),
                     phone: contact.phoneNumber || '',
                   }
                 };
@@ -4985,7 +4983,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
           // Create Apple Pay payment request
           var paymentRequest = {
-            countryCode: applepayConfig.countryCode || 'NL',
+            countryCode: applepayConfig.countryCode || 'ES',
             merchantCapabilities: applepayConfig.merchantCapabilities || ['supports3DS'],
             supportedNetworks: applepayConfig.supportedNetworks || ['visa', 'masterCard', 'amex'],
             currencyCode: 'EUR',
@@ -5051,7 +5049,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   address_1: (shipping.addressLines || [])[0] || '',
                   city: shipping.locality || '',
                   postal_code: shipping.postalCode || '',
-                  country_code: (shipping.countryCode || 'NL').toLowerCase(),
+                  country_code: (shipping.countryCode || 'ES').toLowerCase(),
                   phone: shipping.phoneNumber || '',
                 }
               };
@@ -5299,7 +5297,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
       // Render for current country
       var countrySelect = document.getElementById('country');
-      var country = countrySelect ? countrySelect.value : 'NL';
+      var country = countrySelect ? countrySelect.value : 'ES';
       renderPaymentMethods(country);
       initExpressCheckout();
     })
@@ -5318,7 +5316,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
    */
   function renderPaymentMethods(countryCode) {
     var container = document.getElementById('payment-methods');
-    var country = (countryCode || 'NL').toLowerCase();
+    var country = (countryCode || 'ES').toLowerCase();
 
     // Filter methods by country availability
     var methods = allPaymentOptions.filter(function(m) {
@@ -5848,7 +5846,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var phonePreview = document.getElementById('phone-preview');
   var countrySelect = document.getElementById('country');
   var COUNTRY_PHONE_PREFIX = { NL: '+31', BE: '+32' };
-  var PHONE_PREFIX_TO_COUNTRY = { '+31': 'NL', '+32': 'BE', '+49': 'DE', '+352': 'LU' };
+  var PHONE_PREFIX_TO_COUNTRY = { '+34': 'ES' };
 
   // Detecteer land uit telefoonnummer (bijv. +32... → BE)
   function detectCountryFromPhone(val) {
@@ -5900,7 +5898,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       if (!raw) { phonePreview.style.display = 'none'; return; }
       // Sync country van prefix
       syncCountryFromPhone(raw);
-      var country = countrySelect ? countrySelect.value : 'NL';
+      var country = countrySelect ? countrySelect.value : 'ES';
       var formatted = formatPhoneNumber(raw, country);
       phoneField.value = formatted;
       if (formatted !== raw) {
@@ -5936,7 +5934,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         document.getElementById('billing_address').value = '';
         document.getElementById('billing_city').value = '';
         document.getElementById('billing_postal_code').value = '';
-        document.getElementById('billing_country').value = 'NL';
+        document.getElementById('billing_country').value = 'ES';
       }
     });
   }
@@ -6038,7 +6036,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     function foxentryFetch(endpoint, body) {
       // Foxentry API v2: alles zit in "request" object, inclusief client
       body.client = {
-        country: (document.getElementById('country') || {}).value || 'NL'
+        country: (document.getElementById('country') || {}).value || 'ES'
       };
       return fetch(API_BASE + endpoint, {
         method: 'POST',
@@ -6539,7 +6537,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
         // Voeg landprefix toe als die ontbreekt (bijv. 0612345678 → +31612345678)
         var countryEl = document.getElementById('country');
-        var cc = countryEl ? countryEl.value : 'NL';
+        var cc = countryEl ? countryEl.value : 'ES';
         var prefixMap = { NL: '+31', BE: '+32' };
         var cleaned = val.replace(/[\s\-\(\)\.]/g, '');
         if (!cleaned.startsWith('+') && !cleaned.startsWith('00')) {
@@ -7990,7 +7988,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               street_address: billingAddr.address_1 || '',
               postal_code: billingAddr.postal_code || '',
               city: billingAddr.city || '',
-              country: (billingAddr.country_code || 'NL').toUpperCase(),
+              country: (billingAddr.country_code || 'ES').toUpperCase(),
             };
 
             var category = klarnaSelectedCategory || 'pay_later';
@@ -8127,7 +8125,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 intent_id: providerData.intentId,
                 client_secret: providerData.clientSecret,
                 currency: (PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase(),
-                country_code: (countrySelect.value || 'NL').toUpperCase(),
+                country_code: (countrySelect.value || 'ES').toUpperCase(),
                 autoCapture: true,
                 withBilling: false,
               };
@@ -8452,7 +8450,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // /store/banks?country=XX → mock per-country bank list
     if (/\/store\/banks/.test(url)) {
       var qs = url.split('?')[1] || '';
-      var country = (new URLSearchParams(qs).get('country') || 'NL').toUpperCase();
+      var country = (new URLSearchParams(qs).get('country') || 'ES').toUpperCase();
       var banks = BANKS[country] || [];
       var payload = {
         country: country,
@@ -8890,9 +8888,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       });
     });
 
-    // Render banks for default country (NL or from address form)
+    // Render banks for default country (ES or from address form)
     var countrySelect = document.querySelector('[name="country"], #country, select[id*="country" i]');
-    var country = 'NL';
+    var country = 'ES';
     if (countrySelect && countrySelect.value) {
       var v = (countrySelect.value || '').toUpperCase();
       if (BANKS[v]) country = v;
