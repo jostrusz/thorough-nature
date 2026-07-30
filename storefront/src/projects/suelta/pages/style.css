@@ -2129,3 +2129,26 @@ h2 { font-size: 38px; }
   .czr-arrow { width: 34px; height: 34px; }
   .czr-arrow svg { width: 17px; height: 17px; }
 }
+
+
+/* ═══ Mobilní čitelnost (ES) — delší španělské texty potřebují vzduch ═══ */
+@media (max-width: 768px) {
+ /* Základní text: 17px se na mobilu s dlouhými španělskými souvětími čte hůř,
+    16px + vyšší řádkování drží řádky na 55–65 znacích. */
+ .body-text, .verhaal p, .offer-text { font-size: 16px; line-height: 1.7; }
+ .verhaal p { margin-bottom: 14px; }
+ .verhaal .lead { font-size: 18px; }
+ /* Dlouhé nadpisy sekcí — mírně menší, těsnější řádkování */
+ h2 { font-size: 26px; line-height: 1.2; }
+ .redenen-list li, .waarom-usp-list li { font-size: 15px; line-height: 1.65; margin-bottom: 12px; }
+ .verhaal-pijnpunten li { font-size: 15px; line-height: 1.65; }
+ /* FAQ otázky se španělskými delšími větami */
+ .faq-question h3 { font-size: 15.5px; line-height: 1.4; padding-right: 8px; }
+ .faq-answer p { font-size: 15px; line-height: 1.65; }
+ /* Sekce hustěji za sebou — kratší stránka, míň scrollování */
+ .redenen, .offer-section, .book-preview, .verhaal, .bonuses, .waarom { padding-top: 44px; padding-bottom: 44px; }
+ /* CTA tlačítka: plná šířka = větší dotyková plocha */
+ .btn-cta { display: block; width: 100%; box-sizing: border-box; text-align: center; font-size: 17px; padding: 16px 20px; }
+ /* Recenzní slider — karta nesmí přetéct */
+ .czr-card { word-break: break-word; }
+}
