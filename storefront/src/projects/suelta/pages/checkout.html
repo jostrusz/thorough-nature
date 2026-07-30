@@ -3338,7 +3338,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     // Subtitle — popis co je v košíku
     var msbSubtitle = document.getElementById('msb-subtitle');
     if (msbSubtitle) {
-      var parts = ['Paperback · ' + selectedBundleQty + '× boek'];
+      var parts = ['Tapa blanda · ' + selectedBundleQty + '× libro'];
       if (orderBumpActive) parts.push('+ bump');
       msbSubtitle.textContent = parts.join(' ');
     }
@@ -3347,7 +3347,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var msbItemsLabel = document.getElementById('msb-items-label');
     if (msbItemsLabel) {
       var itemCount = orderBumpActive ? 2 : 1;
-      msbItemsLabel.textContent = itemCount === 1 ? 'Totaal' : itemCount + ' items';
+      msbItemsLabel.textContent = itemCount === 1 ? 'Total' : itemCount + ' artículos';
     }
 
     // Produkt v rozevřeném panelu
@@ -3403,7 +3403,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       html += '<div class="bundle-radio"><div class="bundle-radio-dot"></div></div>';
       html += '<div class="bundle-info">';
       html += '<span class="bundle-label">' + opt.qty + '× ' + productName + '</span>';
-      html += '<span class="bundle-bonus">+ 2 bonussen</span>';
+      html += '<span class="bundle-bonus">+ 2 e-books de regalo</span>';
       html += '</div>';
       html += '<div class="bundle-pricing">';
       if (opt.badge) html += '<span class="bundle-badge">' + opt.badge + '</span>';
@@ -4583,7 +4583,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
               // ─── Add project metadata (same as regular checkout) ───
-              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
+              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'suelta' };
               if (window.AnalyticsTracker) {
                 customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
                 customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -4870,7 +4870,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
                 // ─── Add project metadata (same as regular checkout) ───
-                customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
+                customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'suelta' };
                 if (window.AnalyticsTracker) {
                   customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
                   customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -5001,7 +5001,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             console.log('[Express Apple Pay] Validating merchant:', event.validationURL);
             applepay.validateMerchant({
               validationUrl: event.validationURL,
-              displayName: PROJECT_CONFIG.name || 'Loslatenboek',
+              displayName: PROJECT_CONFIG.name || 'Suelta lo que te destruye',
             }).then(function(result) {
               session.completeMerchantValidation(result.merchantSession);
             }).catch(function(err) {
@@ -5053,7 +5053,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
               // ─── Add project metadata (same as regular checkout) ───
-              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'loslatenboek' };
+              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'suelta' };
               if (window.AnalyticsTracker) {
                 customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
                 customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -6927,7 +6927,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             abandoned_checkout: true,
             abandoned_at: new Date().toISOString(),
             checkout_url: window.location.href.split('?')[0],
-            project_id: PROJECT_CONFIG.projectId || 'loslatenboek'
+            project_id: PROJECT_CONFIG.projectId || 'suelta'
           }
         })
       });
@@ -8544,11 +8544,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '</div>' +
       '<div class="brite-card-body">' +
         '<div class="brite-instant-hero">' +
-          '<div class="ih-headline">⚡ Direct geboekt via je bank-app</div>' +
+          '<div class="ih-headline">⚡ Pago directo desde la app de tu banco</div>' +
           '<div class="ih-sub">Geen kaartgegevens · geen account aanmaken · <strong>klaar in 30 seconden</strong></div>' +
         '</div>' +
         '<div class="brite-trust-strip">' +
-          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Direct geboekt</span>' +
+          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Pago inmediato</span>' +
           '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Geen kaartgegevens</span>' +
           '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> &lt; 30 seconden</span>' +
         '</div>' +
@@ -8807,7 +8807,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       })();
       var altBase = (window.PROJECT_CONFIG && PROJECT_CONFIG.medusaUrl) || '';
       var altKey = (window.PROJECT_CONFIG && PROJECT_CONFIG.publishableApiKey) || '';
-      var altSlug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || 'loslatenboek';
+      var altSlug = (window.PROJECT_CONFIG && (PROJECT_CONFIG.slug || PROJECT_CONFIG.projectId)) || 'suelta';
       originalFetch(altBase + '/store/payment-options?project_slug=' + altSlug + '&currency=EUR', {
         headers: altKey ? { 'x-publishable-api-key': altKey } : {}
       }).then(function(r){ return r.json(); })
