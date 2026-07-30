@@ -2149,6 +2149,41 @@ h2 { font-size: 38px; }
  .redenen, .offer-section, .book-preview, .verhaal, .bonuses, .waarom { padding-top: 44px; padding-bottom: 44px; }
  /* CTA tlačítka: plná šířka = větší dotyková plocha */
  .btn-cta { display: block; width: 100%; box-sizing: border-box; text-align: center; font-size: 17px; padding: 16px 20px; }
- /* Recenzní slider — karta nesmí přetéct */
- .czr-card { word-break: break-word; }
+ /* Recenzní slider — dlouhá slova (URL apod.) lámat jen v textu recenze */
+ .czr-cz, .czr-orig-text { overflow-wrap: break-word; }
+}
+
+
+/* ═══ Mobil: slider recenzí — šipky přes okraj, plná šířka karty ═══ */
+@media (max-width: 600px) {
+ /* Šipky vedle viewportu ukrajovaly ~90px šířky a jméno se pak lámalo po
+    písmenech. Překryjeme je přes okraje karty a viewport dostane celou šířku. */
+ .czr-slider { position: relative; gap: 0; }
+ .czr-arrow {
+  position: absolute; top: 38%; z-index: 3;
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 2px 10px rgba(45,27,61,0.18);
+ }
+ .czr-prev { left: -4px; }
+ .czr-next { right: -4px; }
+ .czr-viewport { width: 100%; }
+ .czr-card { padding: 18px 16px; }
+ /* Hlavička karty: jméno se nesmí lámat po znacích; hvězdy případně spadnou
+    na vlastní řádek místo mačkání jména. */
+ .czr-head { flex-wrap: wrap; row-gap: 4px; }
+ .czr-meta { flex: 1 1 150px; min-width: 150px; }
+ .czr-name { overflow-wrap: normal; word-break: normal; }
+ .czr-src { white-space: nowrap; }
+}
+
+/* ═══ Mobil: platební ikony vždy na jednom řádku ═══ */
+@media (max-width: 600px) {
+ .payment-row {
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 5px;
+ }
+ .payment-row .pay-icon { height: 21px; border-radius: 4px; }
+ .payment-row .pay-icon-wide { height: 21px; max-width: 48px; padding: 2px 3px; }
 }

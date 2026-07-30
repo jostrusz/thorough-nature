@@ -3026,7 +3026,7 @@ body {
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
         <div class="title">Garantía de devolución del 100%</div>
-        <div class="desc">¿No estás satisfecho? Te devolvemos el importe íntegro en 30 días. Sin preguntas, sin complicaciones.</div>
+        <div class="desc">¿No te convence? Te devolvemos todo el importe, hasta 30 días después. Sin preguntas y sin letra pequeña.</div>
       </div>
 
       <!-- Shipping & Delivery info -->
@@ -3647,10 +3647,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     if (btnText) {
       var labels = {
         creditcard: 'Pagar con tarjeta',
+        card: 'Pagar con tarjeta',
         klarna: 'Pagar con Klarna',
         paypal: 'Pagar con PayPal',
         applepay: 'Pagar con Apple Pay',
+        apple_pay: 'Pagar con Apple Pay',
         googlepay: 'Pagar con Google Pay',
+        google_pay: 'Pagar con Google Pay',
         revolut_pay: 'Pagar con Revolut'
       };
       btnText.textContent = (labels[selectedMethod] || 'Finalizar pedido') + ' — ' + formatPrice(total);
@@ -5125,7 +5128,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     riverty: 'Paga después de recibir',
     trustly: 'Pago bancario online',
     applepay: 'Paga con Apple Pay',
+    apple_pay: 'Paga con Apple Pay',
     googlepay: 'Paga con Google Pay',
+    google_pay: 'Paga con Google Pay',
+    card: 'Visa, Mastercard, American Express',
     bank_transfer: 'Paga por transferencia bancaria',
     sepa_debit: 'Domiciliación SEPA',
     swish: 'Paga con Swish (Suecia)',
@@ -5148,6 +5154,10 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // SVG icons for common methods (fallback when no /icons/xxx.svg exists)
   function getMethodIconHTML(code) {
+    // Revolut posílá kódy s podtržítkem (card / apple_pay / google_pay) —
+    // normalizace na názvy, pod kterými existují oficiální ikony v /icons/.
+    var ICON_ALIASES = { card: 'creditcard', apple_pay: 'applepay', google_pay: 'googlepay' };
+    code = ICON_ALIASES[code] || code;
     if (code === 'creditcard') {
       return '<svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/><rect x="2" y="5" width="28" height="4" fill="#2D3748"/><rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/><rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/><rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/><rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/></svg>';
     }
@@ -5216,23 +5226,26 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         var providerIdFull = 'pp_' + gw.provider + '_' + gw.provider;
         (gw.methods || []).forEach(function(m) {
           var NL_NAMES = {
-            'creditcard': 'Creditcard',
+            'creditcard': 'Tarjeta de crédito o débito',
+            'card': 'Tarjeta de crédito o débito',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',
             'klarna': 'Klarna',
-            'klarna_later': 'Klarna — achteraf betalen',
-            'klarna_slice': 'Klarna — in termijnen',
+            'klarna_later': 'Klarna — paga después',
+            'klarna_slice': 'Klarna — a plazos',
             'eps': 'EPS',
-            'in3': 'in3 — 3 termijnen',
+            'in3': 'in3 — 3 plazos',
             'belfius': 'Belfius',
             'kbc': 'KBC/CBC',
             'riverty': 'Riverty',
             'trustly': 'Trustly',
             'applepay': 'Apple Pay',
+            'apple_pay': 'Apple Pay',
             'googlepay': 'Google Pay',
-            'bank_transfer': 'Bankoverschrijving',
-            'sepa_debit': 'SEPA automatische incasso',
+            'google_pay': 'Google Pay',
+            'bank_transfer': 'Transferencia bancaria',
+            'sepa_debit': 'Domiciliación SEPA',
             'swish': 'Swish',
             'revolut_pay': 'Revolut Pay',
           };
@@ -5384,7 +5397,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           '<img src="/icons/klarna.svg" alt="Klarna" class="pm-icon" onerror="this.style.display=\'none\'">' +
           '<div class="pm-info">' +
             '<div class="pm-name">Klarna</div>' +
-            '<div class="pm-desc">Betaal direct, later of in termijnen</div>' +
+            '<div class="pm-desc">Paga ahora, después o a plazos</div>' +
           '</div>' +
           '<svg class="klarna-chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -5701,7 +5714,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       var opt = allPaymentOptions.find(function(m) { return m.code === selectedMethod; });
       methodName = opt ? opt.display_name : selectedMethod;
     }
-    btnText.textContent = 'Betalen met ' + methodName + ' — ' + formatPrice(currentTotalPrice);
+    btnText.textContent = 'Pagar con ' + methodName + ' — ' + formatPrice(currentTotalPrice);
   }
 
   // Load payment methods on page init
@@ -8490,7 +8503,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function briteButtonLabel() {
     var name = window.__briteBankName || 'je bank';
     var price = briteCurrentPrice();
-    return 'Betalen met ' + name + (price ? ' — ' + price : '');
+    return 'Pagar con ' + name + (price ? ' — ' + price : '');
   }
   function applyBriteButton() {
     var bt = document.querySelector('.btn-text');
@@ -8783,7 +8796,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // the REAL /store/payment-options via originalFetch (the demo mock never
       // intercepts this call). Brite must also enable the scheme account-side.
       var ALT_DEFS = {
-        ideal: { label: 'iDEAL', desc: 'Betaal direct via je eigen bank · via Brite', icon: 'ideal.svg', bg: '#CC0066' },
+        ideal: { label: 'iDEAL', desc: 'Paga directamente desde tu banco · vía Brite', icon: 'ideal.svg', bg: '#CC0066' },
         swish: { label: 'Swish', desc: 'Betaal met Swish · via Brite', icon: 'swish.svg', bg: '#EB4B97' },
       };
       // Country-aware visibility: the row filter used to compare against a HARDCODED
