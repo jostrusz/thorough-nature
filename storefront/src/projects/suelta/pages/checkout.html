@@ -3610,7 +3610,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var shipEl = document.getElementById('summary-shipping');
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Verzending <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Envío <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjMDAzMzk5Ii8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZEQzAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTUiIGZvbnQtd2VpZ2h0PSI3MDAiPkdMUzwvdGV4dD48L3N2Zz4=" alt="GLS" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
     }
 
     // Korting (discount) — toon als promo kód is toegepast
@@ -3804,7 +3804,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // For name field: replace Mollie cardHolder component with plain text input
       var holderDiv = document.getElementById('card-holder');
       if (holderDiv) {
-        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        holderDiv.innerHTML = '<input type="text" id="aw-card-name" placeholder="Nombre en la tarjeta" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
       }
 
       // Error handling
@@ -3885,7 +3885,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // For name field: replace with plain text input (same as Airwallex)
       var holderDiv = document.getElementById('card-holder');
       if (holderDiv) {
-        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Naam op kaart" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
+        holderDiv.innerHTML = '<input type="text" id="stripe-card-name" placeholder="Nombre en la tarjeta" style="width:100%;height:100%;border:none;outline:none;font-size:14px;background:transparent;font-family:inherit;" />';
       }
 
       // Error handling
@@ -4219,7 +4219,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       method: 'GET'
     }).then(function(shipRes) {
       var options = shipRes.shipping_options || [];
-      if (options.length === 0) throw new Error('Geen verzendopties beschikbaar');
+      if (options.length === 0) throw new Error('No hay opciones de envío disponibles');
       return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
         method: 'POST',
         body: JSON.stringify({ option_id: options[0].id })
@@ -4686,7 +4686,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           if (redirectUrl) {
             window.location.href = redirectUrl;
           } else {
-            throw new Error('Geen redirect URL ontvangen van betaalprovider');
+            throw new Error('No se ha recibido la URL de pago del proveedor');
           }
         })
         .catch(function(err) {
@@ -5285,7 +5285,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         // Log empty methods to backend
         try { fetch(MEDUSA_URL + '/checkout-log', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-publishable-api-key': PROJECT_CONFIG.publishableApiKey }, body: JSON.stringify({ project_slug: PROJECT_CONFIG.slug, payment_method: '_NO_METHODS', email: 'system' }) }).catch(function(){}); } catch(e) {}
         if (errorEl) {
-          errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar.</p>';
+          errorEl.innerHTML = '<p>No hay métodos de pago disponibles.</p>';
           errorEl.style.display = 'block';
         }
         return;
@@ -5361,7 +5361,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     if (totalVisible === 0) {
       if (errorEl) {
-        errorEl.innerHTML = '<p>Geen betaalmethoden beschikbaar voor dit land.</p>';
+        errorEl.innerHTML = '<p>No hay métodos de pago disponibles para este país.</p>';
         errorEl.style.display = 'block';
       }
       return;
@@ -5808,7 +5808,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Probeer typo suggestie te geven
           var tldSuggestion = checkEmailTypo(val);
           if (tldSuggestion) {
-            emailSuggestion.innerHTML = 'Bedoelde je <strong>' + tldSuggestion + '</strong>? Klik om te corrigeren.';
+            emailSuggestion.innerHTML = '¿Querías decir <strong>' + tldSuggestion + '</strong>? Haz clic para corregir.';
             emailSuggestion.style.display = 'block';
             emailSuggestion.onclick = function() {
               emailField.value = tldSuggestion;
@@ -5824,7 +5824,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // 2. Typo check (gmail.co → gmail.com, hotmal.com → hotmail.com etc.)
       var suggestion = checkEmailTypo(val);
       if (suggestion) {
-        emailSuggestion.innerHTML = 'Bedoelde je <strong>' + suggestion + '</strong>? Klik om te corrigeren.';
+        emailSuggestion.innerHTML = '¿Querías decir <strong>' + suggestion + '</strong>? Haz clic para corregir.';
         emailSuggestion.style.display = 'block';
         emailSuggestion.onclick = function() {
           emailField.value = suggestion;
@@ -6343,7 +6343,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning(); return;
             }
             var _typoFix = checkEmailTypo(val);
-            if (_typoFix) showEmailWarning('Bedoelde je <strong data-email-fix="' + _typoFix + '">' + _typoFix + '</strong>? Klik om te corrigeren.');
+            if (_typoFix) showEmailWarning('¿Querías decir <strong data-email-fix="' + _typoFix + '">' + _typoFix + '</strong>? Haz clic para corregir.');
             else showEmailWarning('⚠ El dominio «' + _preParts[1] + '» no parece válido. Comprueba que sea correcto.');
             return;
           }
@@ -6385,7 +6385,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               if (alreadyConfirmed) {
                 foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
               } else if (correctedEmail && correctedEmail !== val) {
-                showEmailWarning('Bedoelde je <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Klik om te corrigeren.');
+                showEmailWarning('¿Querías decir <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Haz clic para corregir.');
               } else {
                 showEmailWarning('⚠ Este correo no parece válido. Comprueba que sea correcto.');
               }
@@ -6395,17 +6395,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               if (alreadyConfirmed) {
                 foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid'); hideEmailWarning();
               } else if (suggestions.length > 0) {
-                var sugHtml = 'Bedoelde je: ';
+                var sugHtml = '¿Querías decir: ';
                 suggestions.forEach(function(s, idx) {
                   var sEmail = (s.data && s.data.email) || '';
                   if (!sEmail) return;
                   if (idx > 0) sugHtml += ' of ';
                   sugHtml += '<strong data-email-fix="' + sEmail + '">' + sEmail + '</strong>';
                 });
-                sugHtml += '? Klik om te corrigeren.';
+                sugHtml += '? Haz clic para corregir.';
                 showEmailWarning(sugHtml);
               } else if (correctedEmail && correctedEmail !== val) {
-                showEmailWarning('Bedoelde je <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Klik om te corrigeren.');
+                showEmailWarning('¿Querías decir <strong data-email-fix="' + correctedEmail + '">' + correctedEmail + '</strong>? Haz clic para corregir.');
               } else {
                 showEmailWarning('⚠ Este correo no parece válido. Comprueba que sea correcto.');
               }
@@ -6417,7 +6417,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               hideEmailWarning();
               var betterEmail = correctedEmail || (suggestions[0] && suggestions[0].data && suggestions[0].data.email) || null;
               if (betterEmail && betterEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Bedoelde je misschien <strong>' + betterEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = '¿Quizá querías decir <strong>' + betterEmail + '</strong>? Haz clic para corregir.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = betterEmail;
@@ -6431,7 +6431,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
               hideEmailWarning();
               if (correctedEmail && correctedEmail !== val && foxEmailSuggestion) {
-                foxEmailSuggestion.innerHTML = 'Bedoelde je misschien <strong>' + correctedEmail + '</strong>? Klik om te corrigeren.';
+                foxEmailSuggestion.innerHTML = '¿Quizá querías decir <strong>' + correctedEmail + '</strong>? Haz clic para corregir.';
                 foxEmailSuggestion.style.display = 'block';
                 foxEmailSuggestion.onclick = function() {
                   foxEmailField.value = correctedEmail;
@@ -6463,7 +6463,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             foxEmailField.classList.add('valid'); foxEmailField.classList.remove('invalid');
             hideEmailWarning();
           } else if (localSuggestion) {
-            showEmailWarning('Bedoelde je <strong data-email-fix="' + localSuggestion + '">' + localSuggestion + '</strong>? Klik om te corrigeren.');
+            showEmailWarning('¿Querías decir <strong data-email-fix="' + localSuggestion + '">' + localSuggestion + '</strong>? Haz clic para corregir.');
           } else {
             showEmailWarning('⚠ Este correo no parece válido. Comprueba que sea correcto.');
           }
@@ -6508,7 +6508,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         }
         if (foxPhonePreview) {
           foxPhonePreview.style.color = '';
-          foxPhonePreview.textContent = '\u2713 Telefoonnummer bevestigd';
+          foxPhonePreview.textContent = '\u2713 Número de teléfono confirmado';
           foxPhonePreview.style.display = 'block';
         }
       });
@@ -6706,13 +6706,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Field label lookup for error messages
   var fieldLabels = {
-    email: 'E-mailadres',
-    phone: 'Telefoonnummer',
-    first_name: 'Voornaam',
-    last_name: 'Achternaam',
-    address: 'Straatnaam en huisnummer',
-    city: 'Stad',
-    postal_code: 'Postcode'
+    email: 'Correo electrónico',
+    phone: 'Número de teléfono',
+    first_name: 'Nombre',
+    last_name: 'Apellidos',
+    address: 'Calle y número',
+    city: 'Ciudad',
+    postal_code: 'Código postal'
   };
 
   fields.forEach(function(field) {
@@ -7275,7 +7275,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     promoApplyBtn.addEventListener('click', function() {
       var code = promoInput.value.trim().toUpperCase();
       if (!code) {
-        promoMessage.textContent = 'Voer een kortingscode in.';
+        promoMessage.textContent = 'Introduce un código de descuento.';
         promoMessage.className = 'promo-message error';
         return;
       }
@@ -7730,7 +7730,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       }).then(function(shipRes) {
         var options = shipRes.shipping_options || [];
         if (options.length === 0) {
-          throw new Error('Geen verzendopties beschikbaar');
+          throw new Error('No hay opciones de envío disponibles');
         }
         return medusaFetch('/store/carts/' + cartId + '/shipping-methods', {
           method: 'POST',
@@ -8174,7 +8174,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               dropIn.on('error', function(event) {
                 var error = event.detail && event.detail.error ? event.detail.error : event.detail || {};
                 submitBtn.style.display = '';
-                reject(new Error(error.message || 'Airwallex betaling mislukt.'));
+                reject(new Error(error.message || 'El pago con Airwallex no se ha completado.'));
               });
 
               dropIn.on('ready', function() {
@@ -8216,7 +8216,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           // Airwallex without intentId — payment session not created properly
           throw new Error('La sesión de pago no se ha creado correctamente. Inténtalo de nuevo.');
         } else {
-          throw new Error('Geen redirect URL ontvangen van betaalprovider');
+          throw new Error('No se ha recibido la URL de pago del proveedor');
         }
       }
     })
@@ -8564,11 +8564,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       '<div class="brite-card-body">' +
         '<div class="brite-instant-hero">' +
           '<div class="ih-headline">⚡ Pago directo desde la app de tu banco</div>' +
-          '<div class="ih-sub">Geen kaartgegevens · geen account aanmaken · <strong>klaar in 30 seconden</strong></div>' +
+          '<div class="ih-sub">Sin datos de tarjeta · sin crear cuenta · <strong>listo en 30 segundos</strong></div>' +
         '</div>' +
         '<div class="brite-trust-strip">' +
           '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Pago inmediato</span>' +
-          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Geen kaartgegevens</span>' +
+          '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Sin datos de tarjeta</span>' +
           '<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> &lt; 30 seconden</span>' +
         '</div>' +
         '<div class="brite-bank-grid" id="brite-bank-grid"></div>' +
@@ -8801,7 +8801,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // intercepts this call). Brite must also enable the scheme account-side.
       var ALT_DEFS = {
         ideal: { label: 'iDEAL', desc: 'Paga directamente desde tu banco · vía Brite', icon: 'ideal.svg', bg: '#CC0066' },
-        swish: { label: 'Swish', desc: 'Betaal met Swish · via Brite', icon: 'swish.svg', bg: '#EB4B97' },
+        swish: { label: 'Swish', desc: 'Paga con Swish · vía Brite', icon: 'swish.svg', bg: '#EB4B97' },
       };
       // Country-aware visibility: the row filter used to compare against a HARDCODED
       // country, so e.g. Belgian customers saw iDEAL (NL-only — its Brite Client
