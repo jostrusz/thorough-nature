@@ -215,6 +215,21 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "4.1 MB",
     },
   ],
+  // Suelta lo que te destruye (ES) — 2 bonusové e-booky
+  suelta: [
+    {
+      key: "e-books/El-antidoto-contra-darle-vueltas-a-todo.pdf",
+      title: "El antídoto contra darle vueltas a todo",
+      description: "E-book (PDF)",
+      size: "3.2 MB",
+    },
+    {
+      key: "e-books/Amor-sin-tonterias.pdf",
+      title: "Amor sin tonterías",
+      description: "E-book (PDF)",
+      size: "2.8 MB",
+    },
+  ],
   // Lâche prise sur ce qui te détruit (FR) — 2 bonusové e-booky
   'lache-livre': [
     {
@@ -266,6 +281,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
   'kocici-bible': process.env.KB_STOREFRONT_URL || "https://www.kocicibible.cz",
   'lache-livre': process.env.FR_STOREFRONT_URL || "https://www.lacheprise-livre.fr",
+  suelta: process.env.ES_STOREFRONT_URL || "https://www.sueltaloquetedestruye.es",
 }
 
 // Localized email subjects per project
@@ -285,6 +301,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
   'kocici-bible': 'Tvoje 3 bonusové e-booky jsou připravené! 📖',
   'lache-livre': 'Tes e-books sont prêts ! 📖',
+  suelta: '¡Tus e-books están listos! 📖',
 }
 
 // Localized fallback first names
@@ -304,6 +321,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',
   'lache-livre': 'toi',
+  suelta: 'hola',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

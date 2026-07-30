@@ -33,6 +33,7 @@ const REVOLUT_APPLE_PAY_HOSTS: string[] = [
   "slipptaketboken.no",   // slipp-taket
   "engeddelkonyv.hu",     // engedd-el
   "lacheprise-livre.fr",  // lache-livre
+  "sueltaloquetedestruye.es", // suelta (Revolut cards + wallets)
   ...(process.env.REVOLUT_APPLE_PAY_HOSTS || "")
     .split(",")
     .map((h) => h.trim().toLowerCase().replace(/^www\./, ""))

@@ -35,6 +35,7 @@ export const REGION_IDS = {
   huf: "reg_01KWG6W2W6Z2YR8GVBRM3CEVHX", // Hungary (Engedd El)
   eur_sk: "reg_01KWVAZVNATPX01HH77MYWKG3M", // Slovakia (Pusti To SK) — own EUR region
   eur_fr: "reg_01KX052MRE4BSM059VN4SH2AY0", // France (Lache Livre) — own EUR region
+  eur_es: "reg_01KYSB3HP83W7D8JDA8D28YVY6", // Spain (Suelta) — own EUR region
 } as const
 
 // ── Shipping option IDs (verified) ──
@@ -59,6 +60,7 @@ const SO = {
   ZAS_PICKUP_ZIVOT: "so_01KX5YH9DWAP797Y0QC5J6FKJ9",  // Zásilkovna - Na výdejní místo (Zivot Zaslugy pickup)
   ZAS_HOME_LACHE: "so_01KX053135P5BJNDHR1DV25WFF",      // Packeta - À domicile (Lache Livre FR home)
   ZAS_PICKUP_LACHE: "so_01KX053135Q3B19W0ZTC7WA6QH",    // Packeta - Point relais (Lache Livre FR pickup)
+  HOME_SUELTA: "so_01KYSB3WJVD56VS665ESPWZ3JF",         // Envío a domicilio (Suelta ES home — no pickup points)
 } as const
 
 /**
@@ -187,6 +189,15 @@ export const PROJECT_CONFIG = {
     pickupShippingOptionId: SO.ZAS_PICKUP_LACHE,
     pickupShippingOptionName: "Packeta - Point relais",
   },
+  // Spain has no pickup-point network wired yet — home delivery only.
+  suelta: {
+    name: "suelta",
+    sales_channel_id: "sc_01KYSB3FDS4NH0P3YXXRJJZWBP",
+    homeShippingOptionId: SO.HOME_SUELTA,
+    homeShippingOptionName: "Envío a domicilio",
+    pickupShippingOptionId: null,
+    pickupShippingOptionName: null,
+  },
 } as const
 
 /**
@@ -305,6 +316,16 @@ export const COUNTRY_CONFIG = {
     codAllowed: false,
     projectSlugs: ["lache-livre"],
     bookVatRate: 5.5,
+  },
+  es: {
+    label: "🇪🇸 Spain",
+    currency: "eur",
+    region_id: REGION_IDS.eur_es,
+    allowedPaymentMethods: ["creditcard", "paypal", "klarna"],
+    defaultPaymentMethod: "creditcard",
+    codAllowed: false,
+    projectSlugs: ["suelta"],
+    bookVatRate: 4,
   },
   hu: {
     label: "🇭🇺 Hungary",

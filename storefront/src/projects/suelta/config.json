@@ -1,0 +1,94 @@
+{
+  "slug": "suelta",
+  "name": "Suelta lo que te destruye",
+  "domain": "sueltaloquetedestruye.es",
+  "locale": "es",
+  "orderPrefix": "ES2026",
+  "defaultCountry": "ES",
+  "defaultPhonePrefix": "34",
+  "phonePrefixByCountry": {
+    "ES": "34"
+  },
+  "salesChannelName": "suelta",
+  "medusaUrl": "",
+  "publishableApiKey": "pk_6e22e48e3eaa6f6baf7710466c50d0e70d9586857faacb34f0499e777b67ffd3",
+  "facebookPixelId": "",
+  "regions": {
+    "ES": "reg_01KYSB3HP83W7D8JDA8D28YVY6"
+  },
+  "mainProduct": {
+    "name": "Suelta lo que te destruye",
+    "handle": "suelta-lo-que-te-destruye",
+    "variantId": "variant_01KYSB42VVMHC0XQKTZ2667MA5",
+    "price": 36,
+    "currency": "EUR",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "EUR"
+  },
+  "bundleOptions": [
+    {
+      "qty": 1,
+      "price": 36,
+      "save": 0,
+      "badge": "PARA TI",
+      "variantId": "variant_01KYSB42VVMHC0XQKTZ2667MA5"
+    },
+    {
+      "qty": 2,
+      "price": 61,
+      "save": 11,
+      "badge": "COMPÁRTELO CON ALGUIEN",
+      "variantId": "variant_01KYSB42VVRK1S9N61Q7M6XCAX"
+    },
+    {
+      "qty": 3,
+      "price": 82,
+      "save": 26,
+      "badge": "PERFECTO COMO REGALO",
+      "variantId": "variant_01KYSB42VWR85P240VQ4731FN1"
+    },
+    {
+      "qty": 4,
+      "price": 102,
+      "save": 42,
+      "badge": "MEJOR PRECIO",
+      "variantId": "variant_01KYSB42VWNMDRV76S58E2NYH0"
+    }
+  ],
+  "_homeDeliveryFeeNote": "Spain ships home-delivery only (so_01KYSB3WJVD56VS665ESPWZ3JF, 0 EUR). No pickup-point network wired — keep this at 0.",
+  "homeDeliveryFee": 0,
+  "catalogContentIds": [],
+  "mollieProfileId": "",
+  "paymentProviders": {
+    "revolut": "pp_revolut_revolut",
+    "paypal": "pp_paypal_paypal",
+    "klarna": "pp_klarna_klarna"
+  },
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "upsell": "upsell.html",
+    "thank-you": "thank-you.html",
+    "contacto": "contacto.html",
+    "privacidad": "privacidad.html",
+    "terminos": "terminos.html",
+    "envio": "envio.html",
+    "devoluciones": "devoluciones.html",
+    "popup-suelta": "popup-suelta.html"
+  },
+  "redirects": {
+    "contact": "contacto",
+    "privacy": "privacidad",
+    "voorwaarden": "terminos",
+    "verzending": "envio",
+    "retourbeleid": "devoluciones"
+  },
+  "packetaApiKey": ""
+}

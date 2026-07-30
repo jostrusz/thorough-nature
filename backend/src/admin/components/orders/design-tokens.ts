@@ -506,6 +506,7 @@ export const PROJECT_OPTIONS: {
   { id: "engedd-el", ids: ["engedd-el"], label: "Engedd el, ami tönkretesz", flag: "🇭🇺", color: "#15803D", bg: "#DCFCE7" },
   { id: "lache-livre", ids: ["lache-livre"], label: "Lâche prise sur ce qui te détruit", flag: "🇫🇷", color: "#4338CA", bg: "#E0E7FF" },
   { id: "biblia-kotow", ids: ["biblia-kotow"], label: "Biblia kotów", flag: "🇵🇱", color: "#0F766E", bg: "#CCFBF1" },
+  { id: "suelta", ids: ["suelta"], label: "Suelta lo que te destruye", flag: "🇪🇸", color: "#B45309", bg: "#FEF3C7" },
 ]
 
 /** Resolve a project chip's color/label from an order's metadata.project_id. */

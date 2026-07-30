@@ -111,6 +111,14 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'fr',
     smsDispatchTemplate: 'Lache prise sur ce qui te detruit : Ta commande est en route. Suivi : {url} joris@lacheprise-livre.fr',
   },
+  suelta: {
+    replyTo: 'hola@sueltaloquetedestruye.es',
+    fromName: 'Suelta lo que te destruye',
+    fromEmail: 'Suelta lo que te destruye <hola@sueltaloquetedestruye.es>',
+    project: 'suelta',
+    locale: 'es',
+    smsDispatchTemplate: 'Suelta lo que te destruye: tu pedido esta en camino. Seguimiento: {url} hola@sueltaloquetedestruye.es',
+  },
   loslatenboek: {
     replyTo: 'boek@loslatenboek.nl',
     fromName: 'Laat Los Wat Je Kapotmaakt',

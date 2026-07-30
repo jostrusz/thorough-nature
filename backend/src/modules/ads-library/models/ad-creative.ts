@@ -9,7 +9,7 @@ const AdCreative = model.define("ad_creative", {
   id: model.id().primaryKey(),
   name: model.text(),
   project_id: model.text(), // loslatenboek, lache-livre, ...
-  language: model.text(), // NL, DE, PL, SE, NO, CZ, SK, HU, FR
+  language: model.text(), // NL, DE, PL, SE, NO, CZ, SK, HU, FR, ES
   tag: model.text().default("test"), // winner | test | paused | evergreen
   notes: model.text().nullable(),
 

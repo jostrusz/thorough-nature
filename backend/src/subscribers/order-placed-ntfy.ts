@@ -92,6 +92,7 @@ const PROJECT_NAMES: Record<string, string> = {
   "slipp-taket": "Slipp taket (NO)",
   "lass-los": "Lass los (DE/AT)",
   "lache-livre": "Lâche prise (FR)",
+  suelta: "Suelta lo que te destruye (ES)",
   "engedd-el": "Engedd el (HU)",
   "odpust-knizka": "Pusť to, co tě ničí (CZ)",
   "pusti-to-sk": "Pusti to, čo ťa ničí (SK)",

@@ -140,6 +140,7 @@ const PROJECT_TAG_NAMES: Record<string, string> = {
   "zycie-zaslugy": "Życie na które zasługujesz",
   "engedd-el": "Engedd el, ami tönkretesz",
   "lache-livre": "Lâche prise sur ce qui te détruit",
+  suelta: "Suelta lo que te destruye",
   "slipp-taket": "Slipp taket",
   "zivot-zaslugy": "Život, jaký si zasloužíš",
   "biblia-kotow": "Biblia kotów",

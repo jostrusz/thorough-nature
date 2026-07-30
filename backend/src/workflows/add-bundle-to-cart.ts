@@ -146,6 +146,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 82,    // 82 € TTC (save 26 €)
     4: 102,   // 102 € TTC (save 42 €)
   },
+  // Suelta lo que te destruye — edición ES (suelta), EUR
+  "suelta-lo-que-te-destruye": {
+    1: 36,    // 36 € IVA incl. (4% superreducido)
+    2: 61,    // 61 € (ahorras 11 €)
+    3: 82,    // 82 € (ahorras 26 €)
+    4: 102,   // 102 € (ahorras 42 €)
+  },
 }
 
 type AddBundleToCartInput = {
@@ -171,6 +178,7 @@ const BUNDLE_SKU_PATTERNS: RegExp[] = [
   /^HLDV-(\d+)$/,    // het-leven: HLDV-2, HLDV-3, HLDV-4 (1-boek uses official barcode below)
   /^LACHE-(\d+)$/,   // lache-livre FR: LACHE-1, LACHE-2, LACHE-3, LACHE-4
   /^ZKZ-(\d+)$/,     // zivot-zaslugy CZ: ZKZ-1, ZKZ-2, ZKZ-3, ZKZ-4
+  /^SUELTA-(\d+)$/,  // suelta ES: SUELTA-1, SUELTA-2, SUELTA-3, SUELTA-4
 ]
 
 // Explicit SKU → bundle qty for non-pattern SKUs (official barcodes / EAN-style).
