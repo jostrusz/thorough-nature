@@ -380,6 +380,13 @@ h2 { font-size: 38px; }
  height: 32px; width: auto; transition: all 0.2s ease; border-radius: 6px;
  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
+/* Bizum je široký wordmark (240:72) — bez omezení by při výšce 32px zabral
+   107px a přebil ostatní karetní ikony. Bílá podkladová karta ho srovná
+   do stejné vizuální váhy jako zbytek řady. */
+.pay-icon-wide {
+ height: 32px; width: auto; max-width: 72px;
+ object-fit: contain; background: #fff; padding: 4px 6px; box-sizing: border-box;
+}
 .pay-icon:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
 
 /* ═══ TRUST BAR (pruh pod hero) ═══ */
