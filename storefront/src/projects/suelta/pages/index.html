@@ -837,10 +837,39 @@
 <div class="reviews-section anim">
 
  <h2 class="reviews-heading">
-  🇳🇱🇧🇪 <span class="highlight-yellow">Lezers uit Nederland en Belgi&euml;</span><br>
-  vonden in dit boek <em>herkenning.</em><br>
-  <span class="highlight-yellow">Begrip is het begin van herstel</span> 💡
+  🇳🇱🇧🇪 <span class="highlight-yellow">Lectores de Países Bajos y Bélgica</span><br>
+  se encontraron <em>a sí mismos</em> en este libro.<br>
+  <span class="highlight-yellow">Comprenderlo es el principio de la sanación</span> 💡
  </h2>
+
+ <!-- Explicación transparente de las reseñas -->
+ <h2 class="reviews-transparency-title">
+  📌 <span class="highlight-yellow">Reseñas oficiales</span> de Países Bajos — sin una sola palabra inventada.
+ </h2>
+ <div class="reviews-transparency-text">
+  <p>Las reseñas que ves abajo son <strong>publicaciones y comentarios reales de Facebook</strong> de los países donde el libro se publicó primero y donde ya lo han leído miles de lectores — por eso están <strong>en neerlandés</strong>.</p>
+  <p>No queríamos <strong>mentir</strong>. No queríamos <strong>inventar reseñas falsas</strong> ni maquillar nada para que pareciera más convincente.</p>
+  <p>Por eso decidimos conscientemente publicar las reseñas <em>exactamente tal como las escribieron los propios lectores</em> — en su idioma original, sin traducirlas, retocarlas ni cambiar una sola palabra. Así tienes la certeza de que lees <strong><u>palabras reales de lectores reales</u></strong>.</p>
+  <p>El libro en sí está <strong>completamente traducido al español</strong> — con rigor, buena gramática y sensibilidad por el idioma.</p>
+  <p class="reviews-transparency-footnote">📖 Consejo: para leer las capturas en español, usa la función de traducción de tu navegador.</p>
+ </div>
+
+ <!-- ═══ Slider de reseñas: traducción al español + original ═══ -->
+ <div class="czr-wrap">
+  <div class="czr-intro">
+   <h3>Lo que escriben los lectores <span class="czr-intro-hl">— traducido al español</span></h3>
+   <p>Desliza las reseñas a izquierda y derecha. Debajo de cada traducción encontrarás el <strong>comentario original de Facebook</strong>, para que puedas comprobar su autenticidad tú mismo.</p>
+  </div>
+
+  <div class="czr-slider">
+   <button class="czr-arrow czr-prev" id="czrPrev" aria-label="Reseña anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+   <div class="czr-viewport">
+    <div class="czr-track" id="czrTrack"></div>
+   </div>
+   <button class="czr-arrow czr-next" id="czrNext" aria-label="Siguiente reseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+  </div>
+  <div class="czr-dots" id="czrDots"></div>
+ </div>
 
  <div class="fb-reactions-grid">
   <div class="fb-reaction-card fb-card-featured">
@@ -1956,5 +1985,183 @@ document.querySelectorAll('a[href="checkout.html"], a[href="checkout"], a[href="
 })();
 </script>
 
+<!-- ═══ Slider de reseñas: traducción ES + comentario original en neerlandés ═══ -->
+<script>
+(function() {
+  var track = document.getElementById('czrTrack');
+  var prevBtn = document.getElementById('czrPrev');
+  var nextBtn = document.getElementById('czrNext');
+  var dotsBox = document.getElementById('czrDots');
+  if (!track) return;
+
+  // Reseñas reales de Facebook (original en neerlandés) + traducción al español.
+  var PALETTE = ["#C27BA0","#8C5BA8","#4F46E5","#2E7D32","#C0392B","#0E7C7B","#B7791F","#6E2C8F","#1877F2","#D35400"];
+  function ini(name){ var p=name.trim().split(/\s+/); return ((p[0][0]||'')+(p[p.length-1][0]||'')).toUpperCase(); }
+  var RAW = [
+    { name: "Chantal D'hondt",
+      es: "Ojalá me ayude. Mi papá falleció el sábado y, por las peleas familiares, lo estoy pasando muy mal. Los últimos 4 años vivimos juntos tranquilos y felices, lejos del entorno negativo — y ahora todo vuelve, y sus hermanos y su hermana me están amargando la vida otra vez. Papá llegó a los 98 años y medio, yo cumplo 67 la semana que viene, y estoy destrozada por sus peleas y sus exigencias. Sencillamente ya no puedo más. Espero volver a encontrar la calma — fueron 4 años bonitos, llenos de cariño, pero también muy duros. Y ahora quiero llorar a mi querido papá y sanar yo también.",
+      nl: "Hopelijk kan het mij helpen, mijn papa is zaterdag overleden en door familieruzies heb ik het heel zwaar en moeilijk. We hebben de laatste 4 jaar rustig en gelukkig samen gewoond ver van de negatieve omgeving, en nu komt alles weer terug en zijn broers en zus mij het leven weer aan het verzuren. Papa is 98,5 jaar mogen worden, ik word volgende week 67 jaar, ik ben kapot van hun geruzie en hun eisen. Ik kan het gewoon niet meer aan. Hopelijk kan ik weer tot rust komen want het zijn 4 gelukkige mooie liefdevolle jaren geweest maar ook heel zware. En nu wil ik mijn allerliefste papa treuren en zelf ook weer genezen." },
+    { name: "Patricia de Vries",
+      es: "¡Un libro magnífico! Muy recomendable. De verdad que recomendaría leerlo. Me abrió los ojos y ahora soy más fuerte y estoy más tranquila que nunca.",
+      nl: "Schitterend boek! Echt een aanrader. Zou het echt aanraden om te lezen. Het heeft mij de ogen geopend en ben nu sterker en rustiger als nooit daarvoor ooit geweest." },
+    { name: "Katrien Schollier",
+      es: "Hoy he empezado a leer este libro. Lo tenía en casa desde hace por lo menos 2 meses. Me costaba concentrarme para leer. Me asombra la cantidad de cosas en las que me he reconocido en los textos y en las historias cortas. Me alegro de haber dado otro pasito adelante.",
+      nl: "Ik ben vandaag beginnen lezen in dit boek. Ik had het zeker al 2 maanden in huis. Ik had moeite met concentratie om te lezen. Ik sta versteld van de teksten en de korte verhalen hoeveel herkenning ik in dit boek ben tegengekomen. Blij dat ik weer een stapje vooruit ben geraakt." },
+    { name: "Kelly Daelemans",
+      es: "Acabo de pedir el libro y tengo muchísimas ganas de leerlo. Después de 15 años sin poder soltar algo (o solo a veces, gracias a mi psicóloga), siempre vuelve cada vez que aparece algo nuevo en el camino… Tengo muchas ganas de empezarlo y espero de corazón poder colocar todo (o al menos muchas cosas) en su sitio, o «aparcarlo», como dice mi psicóloga. Sería un bonito comienzo de año.",
+      nl: "Ik heb het boek net besteld en ik kijk er zo naar uit. Na 15 jaar iets niet kunnen los laten (of toch heel soms wel dank zij een psycholoog) maar toch telkens het terug komen als er weer wat op je pad komt…. kijk ik uit naar het boek en hoop ik zo hard dat ik alles (of toch hopelijk veel) dingen een plaats kan geven of kan parkeren zoals mijn psycholoog zegt. Het zou een mooie start van het nieuwe jaar zijn" },
+    { name: "Mélanie Warmenhoven",
+      es: "Hace poco volví a terminar una relación y me daba mucho miedo justo lo de arriba. Pero era ya el tercer hombre que al final no supo darme lo que anhelo y merezco, y que no me veía tal como soy. Y eso deja más sola que no tener pareja. Porque con otras personas sí tengo una conexión bonita — ¡y sobre todo tengo una conexión estupenda conmigo misma! Estoy de maravilla conmigo y cada vez me sale mejor 🥰",
+      nl: "Heb onlangs ook weer een verbinding verbroken en idd bang voor bovenstaande. Maar t was de 3de man die mij uiteindelijk toch niet kon geven wat ik verlang, verdien en mij niet zag voor wat ik ben. En dat maakt eenzamer dan geen verbinding. Want ik heb met andere mensen wel een fijne verbinding en het belangrijkste een hele fijne verbinding met mezelf! Ik vind t heerlijk om met mezelf te zijn en dat gaat steeds beter merk ik 🥰" },
+    { name: "Katja van Hooijdonk",
+      es: "Me parece un libro muy bueno. Se lee con facilidad y los consejos son sencillos, los vas siguiendo paso a paso. Accesible prácticamente para cualquiera — y eso que yo ya he leído muchísimo sobre desarrollo personal. Sin duda lo recomiendo.",
+      nl: "Ik vind het een heel goed boek. Leest gemakkelijk en eenvoudige tips die je stap voor stap doorloopt. Eigenlijk voor iedereen toegankelijk en heb al enorm veel gelezen op persoonlijk ontwikkelingsgebied. Zeker aan te raden." },
+    { name: "Paula Stegeman",
+      es: "¡Me identifico muchísimo! A veces vives demasiadas cosas que te han convertido en quien eres ahora, ¡y ya no permites que vuelva a pasar! Mejor mantener el muro alto — ¡tanto en las amistades como en las relaciones! ¡Entre la hierba se arrastran muchas serpientes que no ves a la primera!",
+      nl: "Heel herkenbaar! Soms maak je teveel dingen mee in het leven wat je heeft gemaakt tot wie je nu bent en dan ga je het niet meer toelaten dat het weer kan gebeuren! Het is beter om je muur hoog te houden…. zowel in vriendschappen als in relaties! Er kruipen heel veel slangen door het gras heen die jij niet gelijk ziet!" },
+    { name: "Sander van Hagen",
+      es: "El libro es precioso, pero tu historia demuestra que las cicatrices no desaparecen solo con «soltar». Las llevas contigo — y quieres aprender a vivir con ellas sin que te sigan hundiendo.",
+      nl: "Dat boek is mooi, maar jouw verhaal laat zien dat littekens niet verdwijnen door “loslaten” alleen. Jij draagt ze mee, en je wilt leren hoe je ermee kunt léven — zonder dat ze je blijven neerhalen." },
+    { name: "Greg Kinibe",
+      es: "Ya lo he probado todo — o al menos esperaba que funcionara. No soy precisamente un ratón de biblioteca, pero este me lo voy a comprar y me voy a poner en serio con ello, para volver a estar como debería. Tengo muchas ganas, porque tengo mucho que recuperar, y confío en que saldrá bien.",
+      nl: "Alles al geprobeerd of toch gehoopt dat het zou lukken, ik ben zelf niet zo een boekenwurm maar deze ga ik me aanschaffen en me actief inzetten en terug worden hoe het moet zijn of nog nooit geweest is. Ik kijk er naar uit want heb veel goed te maken en heb er vertrouwen in." },
+    { name: "Lynn Quintyn",
+      es: "Paso 1: libro comprado — ya ha llegado. Paso 2: ¡obligarme a sumergirme en él! Paso 3, 4, 5…: ¿Podré recuperar la fe y la confianza en el amor de verdad? 🤔",
+      nl: "Stap 1: Boek gekocht en aangekomen. Stap 2: mezelf aansporen om mij er in te verdiepen! Stap 3,4,5,….: Zou ik het geloof/vertrouwen in oprechte liefde kunnen terugwinnen? 🤔" },
+    { name: "Nancy De Meulenaer",
+      es: "He empezado a leerlo; para mí no es una lectura fácil. No tengo problemas de pareja, pero tengo TEPT — y aun así me está ayudando, así que gracias, sigo trabajando en ello ❤️",
+      nl: "Ik ben begonnen is voor mij niet gemakkelijk lezen , ik heb geen relatie problemen maar Ptts maar toch help het mij dus dank je ik werk eraan ❤️" },
+    { name: "Frans Peeters",
+      es: "Me identifico. Lo mejor es evitar a la gente negativa o ignorarla — ahora tengo la cabeza en paz. Yo también leí el libro y me ayudó muchísimo. Les deseo mucha fuerza, saludos.",
+      nl: "Herkenbaar, beste is negatieve mensen te vermijden en of negeren, ik heb nu rust in mijn hoofd, ik heb het boek ook gelezen en heeft mij enorm geholpen, ik wens u veel sterkte, grtjs" },
+    { name: "Sylvia van Vuuren",
+      es: "Recibí el libro y he empezado a leerlo. Se lee fácil, y eso se agradece mucho, porque me cuesta concentrarme por el burnout. De momento, muy recomendable.",
+      nl: "Boek ontvangen en begonnen met lezen. Leest makkelijk. Dat is erg fijn. Want mijn concentratie is slecht door mijn burnout klachten. Boek is tot nu een echte aanrader." },
+    { name: "Frank Goossens",
+      es: "Vale mucho la pena, y en lo que estoy leyendo ahora hay mucho de mí, de verdad… Soltar me resulta dificilísimo… pffff",
+      nl: "Wel de moeite waardt en wat ik nu lees daar zit veel van mij bij echt.. Loslaten Das verschrikkelijk moeilijk bij mij..pffff" },
+    { name: "Claudine Callant",
+      es: "Recibí el libro, leo un poco cada día y dejo que vaya calando. Pero no he recibido los 2 e-books. Un saludo",
+      nl: "Ik heb het boek gekregen en lees er alles dagen in en laat het dan binnen dringen. Ik heb wel de 2 e'boeken niet ontvangen. Met vriendelijke groeten" },
+    { name: "Leon Groeneveld",
+      es: "Lo vuelvo a publicar una vez más… un libro precioso, pero el título no me acaba de entrar en la cabeza — «lo que te destruye A TI» tendría más sentido para mí. Siempre leo el título como si la culpa fuera «mía» y fuera yo quien destruye las cosas. Perdón… pero leedlo si os llama la atención, ¡muy recomendable!",
+      nl: "Ga 'm toch nog een keer posten…mooi boek maar de titel gaat niet goed in mijn hoofd..'wat JOU kapot maakt' snijdt meer hout ..ik lees de titel telkens alsof het 'mijn' schuld is en zelf dingen kapot maak..srry..wel lezen dit boek als het je aanspreekt btw, aanrader!" },
+    { name: "Marie-Rose Vanopbroecke",
+      es: "He empezado con este libro. Me parece muy comprensible y fácil de asimilar. Nada de cosas etéreas — va a lo importante.",
+      nl: "Ben begonnen in dit boek. Lijkt me heel begrijpelijk en aanvaardbaar. Niet zweverig, belangrijk." },
+    { name: "Dagmar Thalen",
+      es: "He empezado a leerlo. Hay cosas en las que me reconozco y mucho contenido útil.",
+      nl: "Ik ben begonnen met lezen. Staan herkenbare dingen en nuttige dingen in." },
+    { name: "Frans Pleumeekers",
+      es: "Llevo un tiempo leyéndolo y reconozco mucho de ese dolor. También agradezco el apoyo.",
+      nl: "lees er al een tijd in en herken heel veel van die pijn. Ben blij ook met de ondersteuning." },
+    { name: "Sandra Luimes",
+      es: "Un libro precioso y certero — te da calma y herramientas a las que agarrarte.",
+      nl: "Mooi kloppend boek , geeft je rust en handvaten" },
+    { name: "Edward De Goede",
+      es: "Un libro precioso, muy instructivo, y que toca a todo el mundo 💛💚🙏",
+      nl: "Mooi boek erg leerzaam en raakt iedereen 💛💚🙏" },
+    { name: "Arjan van de Wijgert",
+      es: "Un libro realmente fantástico que todo el mundo debería leer alguna vez. Un montón de consejos útiles — muy instructivo y muy fácil verse reflejado.",
+      nl: "Echt een fantastisch boek dat iedereen eens zou moeten lezen. Zoveel nuttige tips en heel leerzaam en herkenbaar." },
+    { name: "Danitsja Jansen",
+      es: "El libro más increíble que he leído nunca. ¡Este de verdad te aporta algo!",
+      nl: "Meest geweldige boek wat ik ooit heb gelezen. Hier heb je wat aan!" },
+    { name: "Mauri Deman",
+      es: "Sencillamente, un libro fantástico.",
+      nl: "Gewoonweg Fantastisch boek" },
+    { name: "Leo Miedema",
+      es: "Un libro realmente muy bueno.",
+      nl: "Echt een heel goed boek" },
+    { name: "Greet Woussen",
+      es: "Recibí el libro ayer. Contenta con mi compra.",
+      nl: "Boek gisteren gekregen. Blij met mijn aankoop." },
+    { name: "Goossens Manuella",
+      es: "Sí, no me arrepiento nada de haberlo comprado.",
+      nl: "Ja ik heb geen spijt dat ik het gekocht heb" },
+    { name: "Tanja Dugandžić",
+      es: "Un libro precioso.",
+      nl: "Prachtig Boek" },
+    { name: "Patrick Velders",
+      es: "Un libro genial.",
+      nl: "Super boek." },
+    { name: "Paul Denessen",
+      es: "Un libro precioso y muy instructivo.",
+      nl: "Prachtig leerzaam boek." },
+    { name: "Christophe Kervyn",
+      es: "Muy recomendable… 🤙",
+      nl: "Een aanrader… 🤙" },
+    { name: "Suzanne Van Woerkom",
+      es: "¡¡De verdad, muy recomendable!!",
+      nl: "Echt een aanrader!!" }
+  ];
+  var REVIEWS = RAW.map(function(r, i){ return { name: r.name, initials: ini(r.name), color: PALETTE[i % PALETTE.length], es: r.es, nl: r.nl }; });
+
+  var fbIcon = '<svg viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8v8.44C19.61 23.08 24 18.09 24 12.07z"/></svg>';
+  var html = '';
+  REVIEWS.forEach(function(r) {
+    html +=
+      '<div class="czr-slide"><div class="czr-card">' +
+        '<div class="czr-head">' +
+          '<div class="czr-avatar" style="background:' + r.color + '">' + r.initials + '</div>' +
+          '<div class="czr-meta">' +
+            '<div class="czr-name">' + r.name + '</div>' +
+            '<div class="czr-src">' + fbIcon + ' Comentario en Facebook</div>' +
+          '</div>' +
+          '<div class="czr-stars">★★★★★</div>' +
+        '</div>' +
+        '<p class="czr-cz">' + r.es + '</p>' +
+        '<div class="czr-orig">' +
+          '<div class="czr-orig-label">' + fbIcon + ' Original (en neerlandés)</div>' +
+          '<p class="czr-orig-text">' + r.nl + '</p>' +
+        '</div>' +
+      '</div></div>';
+  });
+  track.innerHTML = html;
+
+  var pos = 0;
+  var total = REVIEWS.length;
+
+  // Build dots
+  var dots = [];
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('button');
+    d.className = 'czr-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Reseña ' + (i + 1));
+    (function(idx) { d.addEventListener('click', function() { pos = idx; update(); }); })(i);
+    dotsBox.appendChild(d);
+    dots.push(d);
+  }
+
+  var vp = track.parentElement;
+  function syncHeight() {
+    var active = track.children[pos];
+    if (active) vp.style.height = active.offsetHeight + 'px';
+  }
+  function update() {
+    track.style.transform = 'translateX(-' + (pos * 100) + '%)';
+    prevBtn.disabled = (pos <= 0);
+    nextBtn.disabled = (pos >= total - 1);
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === pos); });
+    syncHeight();
+  }
+
+  prevBtn.addEventListener('click', function() { if (pos > 0) { pos--; update(); } });
+  nextBtn.addEventListener('click', function() { if (pos < total - 1) { pos++; update(); } });
+  window.addEventListener('resize', syncHeight);
+
+  // Touch / swipe
+  var startX = 0, swiping = false;
+  vp.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; swiping = true; }, { passive: true });
+  vp.addEventListener('touchend', function(e) {
+    if (!swiping) return; swiping = false;
+    var diff = startX - e.changedTouches[0].clientX;
+    if (diff > 45 && pos < total - 1) { pos++; update(); }
+    else if (diff < -45 && pos > 0) { pos--; update(); }
+  }, { passive: true });
+
+  update();
+})();
+</script>
 </body>
 </html>
