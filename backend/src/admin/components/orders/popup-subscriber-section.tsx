@@ -50,14 +50,12 @@ const PALETTE = [
 
 const DAYS_OPTIONS = [7, 30, 90]
 // Bumped to v2 → resets everyone to collapsed (section hidden by default)
-const STORAGE_KEY = "hq_popup_subs_open_v2"
-
 // Domain per project slug — shown in the leaderboard subtitle
 const PROJECT_DOMAIN: Record<string, string> = {
   loslatenboek: "loslatenboek.nl",
   "het-leven": "pakjeleventerug.nl",
   dehondenbijbel: "dehondenbijbel.nl",
-  "lass-los": "jetztloslassen.de",
+  "lass-los": "lasslosbuch.de",
   "odpusc-ksiazka": "odpusc-ksiazka.pl",
   "slapp-taget": "slapptagetboken.se",
   "slipp-taket": "slipptaketboken.no",
@@ -65,6 +63,11 @@ const PROJECT_DOMAIN: Record<string, string> = {
   "odpust-knizka": "pusttocotenici.cz",
   "pusti-to-sk": "pustitocotanici.sk",
   "engedd-el": "engeddelkonyv.hu",
+  "zivot-zaslugy": "nejdriv-ja.cz",
+  "zycie-zaslugy": "najpierw-ja.pl",
+  "lache-livre": "lacheprise-livre.fr",
+  "biblia-kotow": "biblia-kotow.pl",
+  suelta: "sueltaloquetedestruye.es",
 }
 
 // Projects that run an index-page popup — always shown in the chart with their
@@ -78,6 +81,11 @@ const POPUP_PROJECTS: Record<string, string> = {
   "slapp-taget": "Joris de Vries - Släpp taget",
   "slipp-taket": "Joris de Vries - Slipp taket",
   "engedd-el": "Joris de Vries - Engedd el, ami tönkretesz",
+  "lass-los": "Joris de Vries - Lass los, was dich kaputt macht",
+  "zivot-zaslugy": "Anna de Vries - Život, jaký si zasloužíš",
+  "zycie-zaslugy": "Anna de Vries - Życie, jakiego nigdy sobie nie pozwoliłaś",
+  "lache-livre": "Joris de Vries - Lâche prise sur ce qui te détruit",
+  suelta: "Joris de Vries - Suelta lo que te destruye",
 }
 
 // ═══════════════════════════════════════════
@@ -94,18 +102,6 @@ function useIsMobile(breakpoint = 640): boolean {
     return () => window.removeEventListener("resize", onResize)
   }, [breakpoint])
   return mobile
-}
-
-// ═══════════════════════════════════════════
-// SSR-safe localStorage read for the collapsed/expanded state
-// ═══════════════════════════════════════════
-function readOpenState(): boolean {
-  if (typeof window === "undefined") return false
-  try {
-    return window.localStorage.getItem(STORAGE_KEY) === "1"
-  } catch {
-    return false
-  }
 }
 
 // ═══════════════════════════════════════════
@@ -694,23 +690,16 @@ function ProjectAvatar({ name, color }: { name: string; color: string }) {
 // MAIN — collapsible "Popup subscribers" section
 // ═══════════════════════════════════════════
 export function PopupSubscriberSection() {
-  const [open, setOpen] = useState<boolean>(() => readOpenState())
+  // Vždy zavřeno po načtení stránky. Dřív se stav obnovoval z localStorage, takže
+  // kdo si sekci jednou rozbalil, měl ji rozbalenou napořád a rozhodil si tím
+  // pohled na objednávky. Rozbalení je teď vědomé rozhodnutí při každé návštěvě.
+  const [open, setOpen] = useState<boolean>(false)
   const [days, setDays] = useState<number>(30)
   const isMobile = useIsMobile()
   // Leaderboard column template — mobile drops Trend / 7d / sparkline to fit ~360px
   const lbCols = isMobile
     ? "minmax(0,1fr) 50px 54px 52px"
     : "minmax(0,1fr) 84px 62px 66px 62px 62px 76px"
-
-  // Persist collapsed/expanded state
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      window.localStorage.setItem(STORAGE_KEY, open ? "1" : "0")
-    } catch {
-      /* ignore */
-    }
-  }, [open])
 
   // Data — refetches whenever `days` changes (it's part of the query key)
   const { data, isLoading } = useQuery({

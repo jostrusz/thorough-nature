@@ -361,29 +361,39 @@ export function StatusBadge({ status }: { status?: string }) {
 // ═══════════════════════════════════════════
 // Deterministic color per project slug — gives admins fast visual identification
 // of which brand a contact belongs to in cross-brand views.
-const PROJECT_COLORS: Record<string, { bg: string; fg: string; label: string }> = {
-  loslatenboek:   { bg: "#DCFCE7", fg: "#166534", label: "Loslatenboek" },
-  "het-leven":    { bg: "#E0F2FE", fg: "#075985", label: "Het Leven" },
-  dehondenbijbel: { bg: "#FFEDD5", fg: "#9A3412", label: "De Hondenbijbel" },
-  "lass-los":     { bg: "#FEF9C3", fg: "#854D0E", label: "Lass los" },
-  "odpusc-ksiazka": { bg: "#FCE7F3", fg: "#9D174D", label: "Odpuść" },
-  "slapp-taget":  { bg: "#E0E7FF", fg: "#3730A3", label: "Släpp taget" },
-  "psi-superzivot": { bg: "#F3E8FF", fg: "#6B21A8", label: "Psí superživot" },
-  "kocici-bible": { bg: "#FCE7F3", fg: "#831843", label: "Kočičí bible" },
-  "odpust-knizka": { bg: "#EDE9FE", fg: "#5B21B6", label: "Pusť to, co tě ničí" },
-  "pusti-to-sk": { bg: "#FFE4E6", fg: "#9F1239", label: "Pusti to, čo ťa ničí" },
-  "engedd-el": { bg: "#D1FAE5", fg: "#065F46", label: "Engedd el" },
+// `label` = název knihy/projektu, `country` = trh, na kterém běží. Badge je
+// vykresluje jako "Název (Země)", ať je na první pohled jasné, o který trh jde
+// — dřív se u části projektů zobrazoval jen holý slug (slipp-taket, lache-livre…).
+const PROJECT_COLORS: Record<string, { bg: string; fg: string; label: string; country?: string }> = {
+  loslatenboek:   { bg: "#DCFCE7", fg: "#166534", label: "Laat los wat je kapotmaakt", country: "Nizozemsko" },
+  "het-leven":    { bg: "#E0F2FE", fg: "#075985", label: "Het Leven Dat Je Verdient", country: "Nizozemsko" },
+  dehondenbijbel: { bg: "#FFEDD5", fg: "#9A3412", label: "De Hondenbijbel", country: "Nizozemsko" },
+  "lass-los":     { bg: "#FEF9C3", fg: "#854D0E", label: "Lass los, was dich kaputt macht", country: "Německo" },
+  "odpusc-ksiazka": { bg: "#FCE7F3", fg: "#9D174D", label: "Odpuść to, co cię niszczy", country: "Polsko" },
+  "zycie-zaslugy": { bg: "#FFEDD5", fg: "#9A3412", label: "Życie, jakiego nigdy sobie nie pozwoliłaś", country: "Polsko" },
+  "biblia-kotow": { bg: "#CCFBF1", fg: "#0F766E", label: "Biblia kotów", country: "Polsko" },
+  "slapp-taget":  { bg: "#E0E7FF", fg: "#3730A3", label: "Släpp taget", country: "Švédsko" },
+  "slipp-taket":  { bg: "#F3E8FF", fg: "#6B21A8", label: "Slipp taket", country: "Norsko" },
+  "psi-superzivot": { bg: "#F3E8FF", fg: "#6B21A8", label: "Psí superživot", country: "Česko" },
+  "kocici-bible": { bg: "#FCE7F3", fg: "#831843", label: "Kočičí bible", country: "Česko" },
+  "odpust-knizka": { bg: "#EDE9FE", fg: "#5B21B6", label: "Pusť to, co tě ničí", country: "Česko" },
+  "zivot-zaslugy": { bg: "#FEE2E2", fg: "#991B1B", label: "Život, jaký si zasloužíš", country: "Česko" },
+  "pusti-to-sk": { bg: "#FFE4E6", fg: "#9F1239", label: "Pusti to, čo ťa ničí", country: "Slovensko" },
+  "engedd-el": { bg: "#D1FAE5", fg: "#065F46", label: "Engedd el, ami tönkretesz", country: "Maďarsko" },
+  "lache-livre": { bg: "#E0E7FF", fg: "#4338CA", label: "Lâche prise sur ce qui te détruit", country: "Francie" },
+  suelta: { bg: "#FEF3C7", fg: "#B45309", label: "Suelta lo que te destruye", country: "Španělsko" },
 }
 
 export function ProjectBadge({ slug, fallbackLabel }: { slug?: string | null; fallbackLabel?: string | null }) {
   if (!slug && !fallbackLabel) return <span style={{ color: tokens.fgMuted }}>—</span>
-  const colors = (slug && PROJECT_COLORS[slug]) || { bg: tokens.borderSubtle, fg: tokens.fgSecondary, label: slug || fallbackLabel || "—" }
+  const colors = (slug && PROJECT_COLORS[slug]) || { bg: tokens.borderSubtle, fg: tokens.fgSecondary, label: fallbackLabel || slug || "—" }
+  const text = colors.country ? `${colors.label} (${colors.country})` : colors.label
   return (
     <span
       className="mkt-badge"
       style={{ background: colors.bg, color: colors.fg, fontWeight: 500, whiteSpace: "nowrap" }}
     >
-      {colors.label}
+      {text}
     </span>
   )
 }
