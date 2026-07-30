@@ -3087,7 +3087,7 @@ body {
     <p style="font-size:11px;color:#999;line-height:1.4;margin:2px 0 0 0;text-align:center;">Al pagar con tarjeta, aceptas que PayPal trate tus datos conforme a su Política de privacidad, disponible en <a href="https://www.paypal.com/legalhub/privacy-full" target="_blank" rel="noopener" style="color:#999;text-decoration:underline;">PayPal.com</a>.</p>
   </div>
   <div class="checkout-footer-company">
-    Pagos protegidos por <strong>PayPal</strong> en <strong>Stripe</strong>.
+    Pagos protegidos por <strong>PayPal</strong> y <strong>Klarna</strong>.
   </div>
   <div class="checkout-footer-links">
     &copy; 2026 Suelta lo que te destruye · Joris de Vries<br>
@@ -3646,12 +3646,14 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var btnText = document.querySelector('.btn-text');
     if (btnText) {
       var labels = {
-        ideal: 'Betalen met iDEAL',
-        bancontact: 'Betalen met Bancontact',
-        klarna: 'Betalen met Klarna',
-        paypal: 'Betalen met PayPal'
+        creditcard: 'Pagar con tarjeta',
+        klarna: 'Pagar con Klarna',
+        paypal: 'Pagar con PayPal',
+        applepay: 'Pagar con Apple Pay',
+        googlepay: 'Pagar con Google Pay',
+        revolut_pay: 'Pagar con Revolut'
       };
-      btnText.textContent = (labels[selectedMethod] || 'Bestelling afronden') + ' — ' + formatPrice(total);
+      btnText.textContent = (labels[selectedMethod] || 'Finalizar pedido') + ' — ' + formatPrice(total);
     }
   }
 
@@ -5105,36 +5107,36 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   }
 
-  // Method descriptions (Dutch)
+  // Method descriptions (ES)
   var METHOD_DESCRIPTIONS = {
-    ideal: 'Betaal direct via je eigen bank',
-    bancontact: 'Belgisch betaalsysteem',
-    klarna: 'Betaal direct via Klarna',
-    klarna_later: 'Ontvang eerst, betaal later',
-    klarna_slice: 'Betaal in termijnen',
+    ideal: 'Paga directamente desde tu banco',
+    bancontact: 'Sistema de pago belga',
+    klarna: 'Paga al momento con Klarna',
+    klarna_later: 'Recibe primero, paga después',
+    klarna_slice: 'Paga a plazos',
     creditcard: 'Visa, Mastercard, American Express',
     paypal: 'Paga con tu cuenta de PayPal',
-    eps: 'Betaal via je Oostenrijkse bank',
-    przelewy24: 'Polski system platnosci',
-    blik: 'Szybka platnosc mobilna',
-    in3: 'Betaal in 3 termijnen',
-    belfius: 'Betaal via Belfius',
-    kbc: 'Betaal via KBC/CBC',
-    riverty: 'Achteraf betalen',
-    trustly: 'Online bankbetaling',
-    applepay: 'Betaal met Apple Pay',
-    googlepay: 'Betaal met Google Pay',
-    bank_transfer: 'Betaal via bankoverschrijving',
-    sepa_debit: 'SEPA automatische incasso',
-    swish: 'Betaal met Swish (Zweden)',
-    revolut_pay: 'Betaal met Revolut',
+    eps: 'Paga desde tu banco austriaco',
+    przelewy24: 'Sistema de pago polaco',
+    blik: 'Pago móvil rápido',
+    in3: 'Paga en 3 plazos',
+    belfius: 'Paga con Belfius',
+    kbc: 'Paga con KBC/CBC',
+    riverty: 'Paga después de recibir',
+    trustly: 'Pago bancario online',
+    applepay: 'Paga con Apple Pay',
+    googlepay: 'Paga con Google Pay',
+    bank_transfer: 'Paga por transferencia bancaria',
+    sepa_debit: 'Domiciliación SEPA',
+    swish: 'Paga con Swish (Suecia)',
+    revolut_pay: 'Paga con Revolut',
   };
 
   // Klarna sub-method config: code → SDK payment_method_category + Dutch labels
   var KLARNA_METHODS = {
-    klarna:       { category: 'pay_now',       label: 'Betaal direct',        desc: 'Betaal nu via Klarna' },
-    klarna_later: { category: 'pay_later',     label: 'Achteraf betalen',     desc: 'Ontvang eerst, betaal later' },
-    klarna_slice: { category: 'pay_over_time', label: 'Gespreid betalen',     desc: 'Betaal in termijnen' },
+    klarna:       { category: 'pay_now',       label: 'Paga ahora',           desc: 'Paga al momento con Klarna' },
+    klarna_later: { category: 'pay_later',     label: 'Paga después',         desc: 'Recibe primero, paga después' },
+    klarna_slice: { category: 'pay_over_time', label: 'Paga a plazos',        desc: 'Divide el pago en plazos' },
   };
   var KLARNA_CODES = Object.keys(KLARNA_METHODS);
 
