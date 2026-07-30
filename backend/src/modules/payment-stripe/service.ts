@@ -6,6 +6,7 @@ import {
 } from "@medusajs/framework/utils"
 import Stripe from "stripe"
 import { Pool } from "pg"
+import { logPaymentEvent } from "../payment-debug/utils/log"
 
 type Options = {
   secretKey?: string
@@ -34,12 +35,24 @@ const METHOD_MAP: Record<string, string> = {
   googlepay: "card",
   revolut_pay: "revolut_pay",
   sepa_debit: "sepa_debit",
+  // EU methods per docs.stripe.com/payments/payment-methods/overview
+  // (2026-07). Exposure per project is still governed by
+  // payment_method_config rows — mapping alone shows nothing to customers.
+  // Sofort and Giropay are discontinued by Stripe and intentionally absent.
+  bizum: "bizum",           // ES — has a dedicated docs page; CZ merchants eligible
+  twint: "twint",           // CH
+  mobilepay: "mobilepay",   // DK/FI
+  multibanco: "multibanco", // PT (voucher — async completion)
+  satispay: "satispay",     // IT
 }
 
 /**
  * Redirect-based methods that require server-side confirm
  */
-const REDIRECT_METHODS = ["ideal", "bancontact", "klarna", "eps", "p24", "revolut_pay"]
+const REDIRECT_METHODS = [
+  "ideal", "bancontact", "klarna", "eps", "p24", "revolut_pay",
+  "bizum", "twint", "mobilepay", "multibanco", "satispay",
+]
 
 /**
  * Inline methods — created without confirm, finished by client-side stripe.confirmXxxPayment.
@@ -281,6 +294,20 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
           `[Stripe] Checkout Session created: ${session.id}, payment_intent: ${session.payment_intent}, url: ${session.url ? "yes" : "no"}`
         )
 
+        logPaymentEvent({
+          intent_id: (session.payment_intent as string) || session.id,
+          email: customerEmail || null,
+          project_slug: projectSlug,
+          event_type: "stripe_checkout_session_created",
+          event_data: {
+            checkout_session_id: session.id,
+            status: session.status,
+            amount,
+            currency: currency_code,
+            method,
+          },
+        })
+
         // Structured initiation log
         this.logger_.info(JSON.stringify({
           _tag: "PAYMENT_INITIATED",
@@ -401,6 +428,20 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
         `[Stripe] PaymentIntent created: ${paymentIntent.id}, status: ${paymentIntent.status}, redirect: ${checkoutUrl ? "yes" : "no"}`
       )
 
+      logPaymentEvent({
+        intent_id: paymentIntent.id,
+        email: customerEmail || null,
+        project_slug: projectSlug,
+        event_type: "stripe_intent_created",
+        event_data: {
+          status: paymentIntent.status,
+          amount,
+          currency: currency_code,
+          method,
+          redirect: !!checkoutUrl,
+        },
+      })
+
       // Structured initiation log
       this.logger_.info(JSON.stringify({
         _tag: "PAYMENT_INITIATED",
@@ -432,6 +473,13 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
       }
     } catch (error: any) {
       this.logger_.error(`[Stripe] Payment initiation failed: ${error.message}`)
+      logPaymentEvent({
+        email: data?.email || null,
+        project_slug: data?.project_slug || null,
+        event_type: "stripe_initiation_failed",
+        event_data: { method: data?.method || null, amount, currency: currency_code },
+        error_code: error?.code || error?.type || "initiation_failed",
+      })
       throw new MedusaError(
         MedusaError.Types.UNEXPECTED_STATE,
         error.message || "Failed to initiate Stripe payment"

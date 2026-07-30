@@ -3,6 +3,7 @@ import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import Stripe from "stripe"
 import { emitPaymentLog } from "../../../utils/payment-logger"
+import { logPaymentEvent } from "../../../modules/payment-debug/utils/log"
 
 /**
  * Helper: find order by Stripe payment intent ID via direct DB query
@@ -21,6 +22,93 @@ async function findOrderByStripeIntentId(paymentIntentId: string, logger: any): 
     return rows[0] || null
   } catch (dbErr: any) {
     logger.warn(`[Stripe Webhook] DB query failed: ${dbErr.message}`)
+    return null
+  }
+}
+
+/**
+ * Stamp Stripe payment info onto an order's metadata (merge, not overwrite).
+ * Used by the webhook main path and by the safety net — including the branch
+ * where the order appears while the safety net is waiting, which previously
+ * returned without writing anything and left the order unmarked forever.
+ */
+async function stampOrderPaymentMetadata(
+  orderId: string,
+  paymentIntentId: string,
+  paymentIntent: any,
+  logger: any,
+  extra: Record<string, any> = {}
+): Promise<void> {
+  try {
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    try {
+      const { rows } = await pool.query(
+        `SELECT metadata FROM "order" WHERE id = $1 LIMIT 1`,
+        [orderId]
+      )
+      const existing = rows[0]?.metadata || {}
+      const updated = {
+        ...existing,
+        stripePaymentIntentId: paymentIntentId,
+        stripeStatus: "payment_intent.succeeded",
+        payment_captured: true,
+        payment_captured_at: existing.payment_captured_at || new Date().toISOString(),
+        payment_method:
+          existing.payment_method || paymentIntent?.payment_method_types?.[0] || "card",
+        payment_provider: existing.payment_provider || "stripe",
+        ...extra,
+      }
+      await pool.query(
+        `UPDATE "order" SET metadata = $1::jsonb, updated_at = NOW() WHERE id = $2`,
+        [JSON.stringify(updated), orderId]
+      )
+      logger.info(`[Stripe Webhook] Stamped payment metadata onto order ${orderId}`)
+    } finally {
+      await pool.end().catch(() => {})
+    }
+  } catch (e: any) {
+    logger.warn(`[Stripe Webhook] Metadata stamp failed for ${orderId}: ${e.message}`)
+  }
+}
+
+/**
+ * Find an uncompleted cart whose payment session references the given Stripe
+ * intent or checkout session id. Targeted SQL — the previous approach loaded
+ * the newest 80 carts and filtered in JS, so under load the right cart could
+ * simply fall outside the window.
+ */
+async function findCartByStripeIntentId(
+  paymentIntentId: string,
+  logger: any
+): Promise<{ id: string; email: string | null } | null> {
+  try {
+    const { Pool } = require("pg")
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+    try {
+      const { rows } = await pool.query(
+        `SELECT c.id, c.email
+         FROM payment_session ps
+         JOIN cart_payment_collection cpc ON cpc.payment_collection_id = ps.payment_collection_id
+         JOIN cart c ON c.id = cpc.cart_id
+         WHERE c.completed_at IS NULL
+           AND (
+             ps.data->>'stripePaymentIntentId' = $1
+             OR ps.data->>'stripeCheckoutSessionId' = $1
+             OR ps.data->>'payment_intent' = $1
+             OR ps.data->>'intentId' = $1
+             OR ps.data->>'id' = $1
+           )
+         ORDER BY c.created_at DESC
+         LIMIT 1`,
+        [paymentIntentId]
+      )
+      return rows[0] || null
+    } finally {
+      await pool.end().catch(() => {})
+    }
+  } catch (e: any) {
+    logger.warn(`[Stripe Webhook] Cart lookup failed: ${e.message}`)
     return null
   }
 }
@@ -51,12 +139,15 @@ async function safetyNetCompleteCart(
 
   await new Promise((resolve) => setTimeout(resolve, DELAY_MS))
 
-  // Re-check: did the order get created during the delay?
+  // Re-check: did the order get created during the delay? The webhook already
+  // failed to find it once, so the metadata stamp from the main path never
+  // happened — do it here or the order stays unmarked forever.
   const orderAfterDelay = await findOrderByStripeIntentId(paymentIntentId, logger)
   if (orderAfterDelay) {
     logger.info(
-      `[Stripe Webhook] Safety net: order ${orderAfterDelay.id} was created during delay — no action needed`
+      `[Stripe Webhook] Safety net: order ${orderAfterDelay.id} was created during delay — stamping metadata`
     )
+    await stampOrderPaymentMetadata(orderAfterDelay.id, paymentIntentId, paymentIntent, logger)
     return
   }
 
@@ -65,44 +156,45 @@ async function safetyNetCompleteCart(
   )
 
   try {
-    const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-
-    // Search recent uncompleted carts for one with this Stripe intent ID
-    const { data: carts } = await query.graph({
-      entity: "cart",
-      fields: [
-        "id",
-        "completed_at",
-        "email",
-        "shipping_address.*",
-        "payment_collection.*",
-        "payment_collection.payment_sessions.*",
-      ],
-      filters: {},
-      pagination: { order: { created_at: "DESC" }, skip: 0, take: 80 },
-    })
-
-    let targetCart: any = null
-    for (const cart of carts || []) {
-      if (cart.completed_at) continue // skip already completed carts
-      const sessions = cart.payment_collection?.payment_sessions || []
-      for (const session of sessions) {
-        if (
-          session.data?.payment_intent === paymentIntentId ||
-          session.data?.stripePaymentIntentId === paymentIntentId ||
-          session.data?.intentId === paymentIntentId ||
-          session.data?.id === paymentIntentId
-        ) {
-          targetCart = cart
-          break
-        }
-      }
-      if (targetCart) break
-    }
+    const targetCart = await findCartByStripeIntentId(paymentIntentId, logger)
 
     if (!targetCart) {
+      // No UNcompleted cart. The cart may have completed normally while the
+      // order's metadata was never stamped (metadata subscriber race) — in
+      // that case the order is reachable through the cart link even though
+      // the intent-id lookup found nothing. Stamp it so future webhooks and
+      // support tooling can see it.
+      try {
+        const { Pool } = require("pg")
+        const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 })
+        try {
+          const { rows } = await pool.query(
+            `SELECT oc.order_id
+             FROM payment_session ps
+             JOIN cart_payment_collection cpc ON cpc.payment_collection_id = ps.payment_collection_id
+             JOIN order_cart oc ON oc.cart_id = cpc.cart_id
+             WHERE ps.data->>'stripePaymentIntentId' = $1
+                OR ps.data->>'stripeCheckoutSessionId' = $1
+                OR ps.data->>'payment_intent' = $1
+             LIMIT 1`,
+            [paymentIntentId]
+          )
+          if (rows[0]?.order_id) {
+            logger.info(
+              `[Stripe Webhook] Safety net: cart already completed → order ${rows[0].order_id} found via cart link — stamping metadata`
+            )
+            await stampOrderPaymentMetadata(rows[0].order_id, paymentIntentId, paymentIntent, logger)
+            return
+          }
+        } finally {
+          await pool.end().catch(() => {})
+        }
+      } catch (e: any) {
+        logger.warn(`[Stripe Webhook] Safety net: completed-cart lookup failed: ${e.message}`)
+      }
+
       logger.warn(
-        `[Stripe Webhook] Safety net: no uncompleted cart found for intent ${paymentIntentId}`
+        `[Stripe Webhook] Safety net: no cart found for intent ${paymentIntentId}`
       )
       return
     }
@@ -316,6 +408,28 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
     logger.info(`[Stripe Webhook] Received event: ${event.type}, id: ${event.id}`)
 
+    // Payment Journey Debugger — mirrors airwallex_webhook_received so
+    // payment_forensics sees Stripe payments too (fire-and-forget, never throws)
+    {
+      const obj = event.data?.object as any
+      logPaymentEvent({
+        intent_id: (event.type === "checkout.session.completed"
+          ? (obj?.payment_intent as string)
+          : obj?.id) || null,
+        email: obj?.metadata?.customer_email || obj?.receipt_email || obj?.customer_email || null,
+        event_type: "stripe_webhook_received",
+        event_data: {
+          event_name: event.type,
+          status: obj?.status || null,
+          amount: typeof obj?.amount === "number" ? obj.amount / 100 : obj?.amount_total ? obj.amount_total / 100 : null,
+          currency: obj?.currency || null,
+          failure_code: obj?.last_payment_error?.code || null,
+          failure_reason: obj?.last_payment_error?.message || null,
+        },
+        error_code: obj?.last_payment_error?.decline_code || obj?.last_payment_error?.code || null,
+      })
+    }
+
     // For checkout.session.completed, resolve PaymentIntent from session
     let paymentIntentId: string | null = null
 
@@ -336,26 +450,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       return res.status(200).json({ received: true })
     }
 
-    // Find the order with this Stripe payment intent ID via query.graph
-    const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
-    let order = null
-
-    try {
-      const { data: orders } = await query.graph({
-        entity: "order",
-        fields: ["id", "metadata"],
-        filters: {},
-        pagination: { order: { created_at: "DESC" }, skip: 0, take: 100 },
-      })
-      for (const o of orders || []) {
-        if ((o as any).metadata?.stripePaymentIntentId === paymentIntentId) {
-          order = o
-          break
-        }
-      }
-    } catch (e: any) {
-      logger.warn(`[Stripe Webhook] Order search failed: ${e.message}`)
-    }
+    // Find the order with this Stripe payment intent ID.
+    // Targeted SQL — the previous query.graph scan covered only the newest 100
+    // orders (~7 hours at current volume), so any webhook arriving later than
+    // that could never find its order.
+    const order = await findOrderByStripeIntentId(paymentIntentId, logger)
 
     if (!order) {
       logger.warn(
@@ -475,7 +574,9 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   } catch (error: any) {
     const logger = req.scope.resolve("logger")
     logger.error(`[Stripe Webhook] Error: ${error.message}`)
-    return res.status(200).json({ error: error.message })
+    // 500 so Stripe retries the event with backoff — the previous 200 made
+    // Stripe consider the event delivered and any transient failure final.
+    return res.status(500).json({ error: error.message })
   }
 }
 
