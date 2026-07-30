@@ -1447,7 +1447,7 @@ body {
   border: 1px solid var(--border);
   transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.msb-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.msb-thumb img { width: 100%; height: 100%; object-fit: contain; }
 /* Info blok — název + detail */
 .msb-info {
   flex: 1;
@@ -3555,12 +3555,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
     // --- Obrázek produktu ---
     if (item && item.thumbnail) {
-      var imgHtml = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+      var imgHtml = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">';
       var desktopImg = document.getElementById('desktop-product-img');
       if (desktopImg) desktopImg.innerHTML = imgHtml;
       // Mobile sticky bar thumb
       var msbThumb = document.getElementById('msb-thumb');
-      if (msbThumb) msbThumb.innerHTML = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+      if (msbThumb) msbThumb.innerHTML = '<img src="' + item.thumbnail + '" alt="' + (item.product_title || '') + '" style="width:100%;height:100%;object-fit:contain;border-radius:5px;">';
     }
 
     // --- Název produktu ---
@@ -7230,12 +7230,12 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   /* ─── OBRÁZEK PRODUKTU ─── */
   if (PROJECT_CONFIG.mainProduct.thumbnail) {
     var thumbUrl = PROJECT_CONFIG.mainProduct.thumbnail.indexOf('http') === 0 ? PROJECT_CONFIG.mainProduct.thumbnail : MEDUSA_URL + PROJECT_CONFIG.mainProduct.thumbnail;
-    var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">';
+    var imgHtml = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">';
     var desktopImg = document.getElementById('desktop-product-img');
     if (desktopImg) desktopImg.innerHTML = imgHtml;
     // Obrázek v mobilním sticky baru
     var msbThumb = document.getElementById('msb-thumb');
-    if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:cover;border-radius:5px;">';
+    if (msbThumb) msbThumb.innerHTML = '<img src="' + thumbUrl + '" alt="' + PROJECT_CONFIG.mainProduct.name + '" style="width:100%;height:100%;object-fit:contain;border-radius:5px;">';
   }
 
   /* ─── PROMO KÓDY — toggle + apply + remove ─── */
