@@ -215,21 +215,13 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "4.1 MB",
     },
   ],
-  // Suelta lo que te destruye (ES) — 2 bonusové e-booky
-  suelta: [
-    {
-      key: "e-books/El-antidoto-contra-darle-vueltas-a-todo.pdf",
-      title: "El antídoto contra darle vueltas a todo",
-      description: "E-book (PDF)",
-      size: "3.2 MB",
-    },
-    {
-      key: "e-books/Amor-sin-tonterias.pdf",
-      title: "Amor sin tonterías",
-      description: "E-book (PDF)",
-      size: "2.8 MB",
-    },
-  ],
+  // Suelta lo que te destruye (ES) — VYPNUTO, dokud nebudou PDF na MinIO.
+  // Prázdné pole = subscriber projekt přeskočí a NEoznačí objednávku ebook_sent,
+  // takže po nahrání souborů půjdou e-booky doposlat přes resend_ebooks.
+  // Až budou hotové, odkomentovat a ověřit, že klíče sedí s tím, co je v bucketu:
+  //   e-books/El-antidoto-contra-darle-vueltas.pdf   → "El antídoto contra darle vueltas"
+  //   e-books/Amor-sin-censura.pdf                   → "Amor sin censura"
+  suelta: [],
   // Lâche prise sur ce qui te détruit (FR) — 2 bonusové e-booky
   'lache-livre': [
     {
@@ -340,6 +332,22 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
       return
     }
 
+    // Project-specific config
+    const projectConfig = getProjectEmailConfig(order)
+    const projectId = projectConfig.project
+
+    // Get e-book files for this project — NO cross-language fallback
+    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId]
+
+    // Skip if no e-book files configured for this project yet.
+    // POZOR: tahle kontrola musí být PŘED optimistic lockem. Kdyby běžela až za
+    // ním, objednávky projektu bez e-booků by se označily ebook_sent = true,
+    // ačkoli se nic neposlalo — a po doplnění souborů by je nikdo nedostal.
+    if (!ebookFiles || !ebookFiles.length) {
+      console.log(`[digital-download] No e-book files configured for project "${projectId}", skipping for order ${order.id}`)
+      return
+    }
+
     // Optimistic lock: set ebook_sent flag BEFORE sending to prevent race condition
     // between payment.captured and order.placed-fallback subscribers
     try {
@@ -356,19 +364,6 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
       }
     } catch (lockErr: any) {
       console.warn(`[digital-download] Could not acquire lock for order ${order.id}: ${lockErr.message}, proceeding anyway`)
-    }
-
-    // Project-specific config
-    const projectConfig = getProjectEmailConfig(order)
-    const projectId = projectConfig.project
-
-    // Get e-book files for this project — NO cross-language fallback
-    const ebookFiles = EBOOK_FILES_BY_PROJECT[projectId]
-
-    // Skip if no e-book files configured for this project yet
-    if (!ebookFiles || !ebookFiles.length) {
-      console.log(`[digital-download] No e-book files configured for project "${projectId}", skipping for order ${order.id}`)
-      return
     }
 
     // Generate unique token
