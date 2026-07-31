@@ -266,54 +266,6 @@
  </div>
 </div>
 
-<style>
- .quiz-text-link-row { text-align: center; margin: 14px auto 0; font-size: 14px; color: #6b5560; font-family: Georgia, 'Times New Roman', serif; line-height: 1.5; max-width: 540px; }
- .quiz-text-link-row > span { opacity: 0.8; }
- .quiz-text-link {
-  background: none;
-  border: none;
-  padding: 0 0 2px 0;
-  margin-left: 6px;
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  color: #8C2E54;
-  cursor: pointer;
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-bottom: 1px solid rgba(140, 46, 84, 0.35);
-  transition: color 0.2s ease, border-color 0.2s ease;
-  overflow: hidden;
- }
- .quiz-text-link:hover { color: #6B2240; border-bottom-color: #6B2240; }
- .quiz-text-link .quiz-arrow {
-  display: inline-block;
-  transition: transform 0.3s ease;
-  animation: quiz-arrow-nudge 2.8s ease-in-out infinite;
- }
- .quiz-text-link:hover .quiz-arrow { transform: translateX(4px); animation: none; }
- @keyframes quiz-arrow-nudge {
-  0%, 70%, 100% { transform: translateX(0); }
-  80% { transform: translateX(5px); }
-  90% { transform: translateX(2px); }
- }
- .quiz-text-link::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(140, 46, 84, 0.14) 50%, transparent 100%);
-  transform: translateX(-100%);
-  animation: quiz-shimmer 5s ease-in-out infinite;
-  pointer-events: none;
- }
- @keyframes quiz-shimmer {
-  0%, 55% { transform: translateX(-100%); }
-  75% { transform: translateX(100%); }
-  100% { transform: translateX(100%); }
- }
-</style>
 
 <!-- ═══════════════════════════════════════════
  SEKCE 3: 9 RAZONES
@@ -375,13 +327,6 @@
   <!-- CTA + platební ikony -->
   <div class="redenen-cta">
    <a href="checkout.html" class="btn-cta">Consigue tu ejemplar →</a>
-   <p class="quiz-text-link-row">
-    <span>¿No tienes claro si este libro es para ti?</span>
-    <button type="button" class="quiz-trigger quiz-text-link" data-source="after_cta_9redenen">
-     Haz el test de 2 minutos
-     <span class="quiz-arrow">→</span>
-    </button>
-   </p>
    <div class="payment-row">
      <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
      <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
@@ -741,13 +686,6 @@
   <!-- CTA tlačítko -->
   <div class="verhaal-cta">
    <a href="checkout.html" class="btn-cta">Quiero mi ejemplar →</a>
-   <p class="quiz-text-link-row">
-    <span>¿No tienes claro si este libro es para ti?</span>
-    <button type="button" class="quiz-trigger quiz-text-link" data-source="after_cta_verhaal">
-     Haz el test de 2 minutos
-     <span class="quiz-arrow">→</span>
-    </button>
-   </p>
    <div class="payment-row">
      <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="40" height="32">
      <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="40" height="32">
