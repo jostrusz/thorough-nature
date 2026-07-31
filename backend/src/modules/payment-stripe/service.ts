@@ -394,12 +394,24 @@ class StripePaymentProviderService extends AbstractPaymentProvider<Options> {
           billingAddress.last_name || shippingAddress.last_name || "",
         ].filter(Boolean).join(" ") || customerEmail || "Customer"
 
+        // Bizum navíc vyžaduje billing_details.phone — bez něj Stripe confirm
+        // spadne na "Missing required param: billing_details[phone]".
+        const billingPhone =
+          billingAddress.phone || shippingAddress.phone || data?.phone || undefined
+
         piParams.payment_method_data = {
           type: stripeMethodType as any,
           billing_details: {
             name: billingName,
             email: customerEmail || undefined,
+            ...(billingPhone ? { phone: billingPhone } : {}),
           },
+        }
+
+        if (stripeMethodType === "bizum" && !billingPhone) {
+          throw new Error(
+            "Bizum requires a phone number — the checkout must send billing_address.phone or shipping_address.phone"
+          )
         }
 
         // P24-specific: Stripe requires tos_shown_and_accepted=true (regulatory consent).
