@@ -2933,7 +2933,7 @@ body {
         <div class="checkout-btn-wrap animate-in animate-in-delay-3">
           <button type="submit" class="checkout-btn" id="submit-btn">
             <span class="spinner"></span>
-            <span class="btn-text">Finalizar pedido — 36,00 €</span>
+            <span class="btn-text">Comprar y pagar — 36,00 €</span>
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
           <p class="btn-subtext">Te redirigiremos a una página de pago segura.</p>
@@ -3658,7 +3658,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         google_pay: 'Pagar con Google Pay',
         revolut_pay: 'Pagar con Revolut'
       };
-      btnText.textContent = (labels[selectedMethod] || 'Finalizar pedido') + ' — ' + formatPrice(total);
+      btnText.textContent = (labels[selectedMethod] || 'Comprar y pagar') + ' — ' + formatPrice(total);
     }
   }
 
@@ -6098,7 +6098,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function updateButtonText() {
     var btnText = document.querySelector('.btn-text');
     if (!selectedMethod) {
-      btnText.textContent = 'Finalizar pedido — ' + formatPrice(currentTotalPrice);
+      btnText.textContent = 'Comprar y pagar — ' + formatPrice(currentTotalPrice);
       return;
     }
     // For Klarna sub-methods, show "Klarna" as the name
@@ -9301,7 +9301,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var bt = document.querySelector('.btn-text');
     if (!bt) return;
     var price = briteCurrentPrice();
-    bt.textContent = 'Finalizar pedido' + (price ? ' — ' + price : '');
+    bt.textContent = 'Comprar y pagar' + (price ? ' — ' + price : '');
   }
 
   // ─── Brite embedded Web SDK launcher: REMOVED ──────────────────────────────
