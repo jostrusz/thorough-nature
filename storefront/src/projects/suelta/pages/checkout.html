@@ -5677,14 +5677,31 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
 
     // Apple Pay: only show if device supports it
+    // Apple Pay only exists in Safari (macOS/iOS) with a card in the wallet —
+    // ApplePaySession is undefined in Chrome/Firefox, so the tile would be a dead
+    // end there. Covers both spellings: 'applepay' (Mollie) and 'apple_pay' (Revolut).
+    function applePayAvailable() {
+      try { return !!(window.ApplePaySession && window.ApplePaySession.canMakePayments()); }
+      catch (e) { return false; }
+    }
     methods = methods.filter(function(m) {
-      if (m.code === 'applepay') {
-        return window.ApplePaySession && ApplePaySession.canMakePayments();
-      }
-      if (m.code === 'googlepay') {
-        return false;
-      }
+      if (m.code === 'applepay' || m.code === 'apple_pay') return applePayAvailable();
+      if (m.code === 'googlepay') return false;   // Mollie's wallet — not wired here
       return true;
+    });
+
+    // Explicit tile order for Spain (beats whatever sort_order the gateway rows carry):
+    // card → Bizum → PayPal → Google Pay → Klarna → Apple Pay last.
+    var DISPLAY_ORDER = {
+      creditcard: 1, card: 1,
+      bizum: 2,
+      paypal: 3,
+      google_pay: 4, googlepay: 4,
+      klarna: 5, klarna_later: 6, klarna_slice: 7,
+      apple_pay: 8, applepay: 8
+    };
+    methods.forEach(function(m) {
+      if (DISPLAY_ORDER[m.code] !== undefined) m.sort_order = DISPLAY_ORDER[m.code];
     });
 
     // Sort by sort_order
@@ -7841,11 +7858,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         body: JSON.stringify({
           project_slug: PROJECT_CONFIG.slug,
           email: (document.getElementById('email').value || '').trim(),
-          first_name: (document.getElementById('firstName').value || '').trim(),
-          last_name: (document.getElementById('lastName').value || '').trim(),
+          first_name: (document.getElementById('first_name').value || '').trim(),
+          last_name: (document.getElementById('last_name').value || '').trim(),
           phone: (document.getElementById('phone').value || '').trim(),
           city: (document.getElementById('city').value || '').trim(),
-          postal_code: (document.getElementById('postcode').value || '').trim(),
+          postal_code: (document.getElementById('postal_code').value || '').trim(),
           country_code: document.getElementById('country') ? document.getElementById('country').value : '',
           payment_method: selectedMethod || 'none',
           payment_provider: selectedProvider || '',
@@ -8646,8 +8663,8 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var currency = String(providerData.currency || providerData.currency_code || PROJECT_CONFIG.mainProduct.currency || 'EUR').toUpperCase();
     var amtLabel = formatPrice(amtMajor);
     var custEmail = (document.getElementById('email') || {}).value || '';
-    var custName  = (((document.getElementById('firstName') || {}).value || '') + ' ' +
-                     ((document.getElementById('lastName') || {}).value || '')).trim() || 'Cliente';
+    var custName  = (((document.getElementById('first_name') || {}).value || '') + ' ' +
+                     ((document.getElementById('last_name') || {}).value || '')).trim() || 'Cliente';
 
     var ov = document.createElement('div');
     ov.id = 'revolut-overlay';
