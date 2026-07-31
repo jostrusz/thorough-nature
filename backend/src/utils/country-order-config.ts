@@ -194,7 +194,7 @@ export const PROJECT_CONFIG = {
     name: "suelta",
     sales_channel_id: "sc_01KYSB3FDS4NH0P3YXXRJJZWBP",
     homeShippingOptionId: SO.HOME_SUELTA,
-    homeShippingOptionName: "Envío a domicilio",
+    homeShippingOptionName: "SEUR — Envío gratuito",
     pickupShippingOptionId: null,
     pickupShippingOptionName: null,
   },

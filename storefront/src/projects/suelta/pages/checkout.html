@@ -1586,15 +1586,10 @@ body {
 /* Malý badge dopravce v baru */
 .msb-gls {
   display: inline-block;
-  background: #E1251B;
-  color: #FFDC00;
-  font-size: 8px;
-  font-weight: 700;
-  padding: 1px 5px;
-  border-radius: 2px;
+  height: 10px;
+  width: auto;
   vertical-align: middle;
-  margin-left: 3px;
-  letter-spacing: 0.5px;
+  margin-left: 4px;
 }
 
 /* ─── RESPONSIVE ─── */
@@ -2649,7 +2644,7 @@ body {
       </div>
       <!-- Envío -->
       <div class="msb-line shipping">
-        <span class="msb-line-label">Envío <span class="msb-gls">SEUR</span></span>
+        <span class="msb-line-label">Envío <img class="msb-gls" src="/icons/seur.svg" alt="SEUR" width="70" height="10"></span>
         <span class="msb-line-val">Gratis</span>
       </div>
       <!-- Total -->
@@ -2869,7 +2864,7 @@ body {
 
           <!-- Envío gratuito — badge dopravce -->
           <div id="shipping-info" style="display:flex;align-items:center;gap:10px;margin-top:16px;padding:12px 16px;background:#f0faf4;border:1px solid #b8e6c8;border-radius:10px;">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjUwIiBoZWlnaHQ9IjE1Ij48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjRTEyNTFCIi8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGxldHRlci1zcGFjaW5nPSIwLjUiPlNFVVI8L3RleHQ+PC9zdmc+" alt="SEUR" style="flex-shrink:0;">
+            <img src="/icons/seur.svg" alt="SEUR" width="112" height="16" style="flex-shrink:0;height:16px;width:auto;">
             <div style="flex:1;">
               <span style="font-weight:600;color:#1a1a2e;font-size:14px;">Envío gratuito</span>
               <span style="color:#27AE60;font-weight:700;font-size:14px;margin-left:6px;">€0,00</span>
@@ -3004,7 +2999,7 @@ body {
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
           Envío
-          <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjRTEyNTFCIi8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGxldHRlci1zcGFjaW5nPSIwLjUiPlNFVVI8L3RleHQ+PC9zdmc+" alt="SEUR" style="vertical-align:middle;border-radius:2px;">
+          <img src="/icons/seur.svg" alt="SEUR" width="91" height="13" style="vertical-align:middle;height:13px;width:auto;">
         </span>
         <span style="color:#27AE60;font-weight:600;">Gratis</span>
       </div>
@@ -3614,7 +3609,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var shipEl = document.getElementById('summary-shipping');
     if (shipEl) {
       var shippingLabel = shippingTotal > 0 ? formatPrice(shippingTotal) : '<span style="color:#27AE60;font-weight:600;">Gratis</span>';
-      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Envío <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCAyNCIgd2lkdGg9IjQ0IiBoZWlnaHQ9IjEzIj48cmVjdCB3aWR0aD0iODAiIGhlaWdodD0iMjQiIHJ4PSIzIiBmaWxsPSIjRTEyNTFCIi8+PHRleHQgeD0iNDAiIHk9IjE3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjRkZGRkZGIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSI3MDAiIGxldHRlci1zcGFjaW5nPSIwLjUiPlNFVVI8L3RleHQ+PC9zdmc+" alt="SEUR" style="vertical-align:middle;border-radius:2px;"></span><span>' + shippingLabel + '</span>';
+      shipEl.innerHTML = '<span style="display:flex;align-items:center;gap:6px;">Envío <img src="/icons/seur.svg" alt="SEUR" width="91" height="13" style="vertical-align:middle;height:13px;width:auto;"></span><span>' + shippingLabel + '</span>';
     }
 
     // Korting (discount) — toon als promo kód is toegepast
