@@ -13,6 +13,7 @@ import {
 } from "../modules/quickbooks/api-client"
 import { resolveInvoicingSystem } from "../utils/resolve-invoicing-system"
 import { shouldSkipDuplicate } from "../utils/idempotency-guard"
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 /**
  * QuickBooks Invoice Subscriber
@@ -333,13 +334,11 @@ export default async function orderPlacedQuickBooksHandler({
     // ── Update order metadata ──
     try {
       // Only pass new fields — Medusa merges metadata (spreading existingMeta causes race conditions with other subscribers)
-      await (orderService as any).updateOrders(order.id, {
-        metadata: {
-          quickbooks_invoice_id: invoice.Id,
-          quickbooks_invoice_number: invoice.DocNumber || invoice.Id,
-          quickbooks_invoice_url: invoiceLink || "",
-        },
-      })
+      await mergeOrderMetadata(order.id, {
+        quickbooks_invoice_id: invoice.Id,
+        quickbooks_invoice_number: invoice.DocNumber || invoice.Id,
+        quickbooks_invoice_url: invoiceLink || "",
+      }, "QuickBooks")
     } catch (metaError: any) {
       console.warn(
         "[QuickBooks] Could not update order metadata:",

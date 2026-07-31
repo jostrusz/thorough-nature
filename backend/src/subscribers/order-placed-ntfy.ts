@@ -2,6 +2,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { IOrderModuleService } from "@medusajs/framework/types"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { shouldSkipDuplicate } from "../utils/idempotency-guard"
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 const NTFY_TOPIC = process.env.NTFY_TOPIC || "medusa-ntfy-obj-2026"
 const NTFY_URL = `https://ntfy.sh/${NTFY_TOPIC}`
@@ -185,9 +186,7 @@ export default async function orderPlacedNtfyHandler({
     // would otherwise be remembered as done and never retried. Clear it so a
     // redelivered order.placed can have another go once the quota resets.
     if (!delivered) {
-      await orderService.updateOrders(data.id, {
-        metadata: { ntfy_notification_sent: false },
-      })
+      await mergeOrderMetadata(data.id, { ntfy_notification_sent: false }, "ntfy")
     }
   } catch (error: any) {
     // Never let notification errors crash the order flow

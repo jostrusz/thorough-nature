@@ -2,6 +2,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { DEXTRUM_MODULE } from "../modules/dextrum"
 import { isHusetOrder } from "../utils/huset-routing"
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 /**
  * When an order is placed, create a Dextrum order map entry
@@ -81,13 +82,11 @@ export default async function orderPlacedDextrumHandler({
 
     // 7. Update order metadata — pass ONLY new fields, Medusa merges at DB level.
     // Spreading existing meta snapshot races with other order.placed subscribers.
-    await orderModuleService.updateOrders(data.id, {
-      metadata: {
-        dextrum_status: "WAITING",
-        dextrum_order_code: orderCode,
-        dextrum_hold_until: holdUntil,
-      },
-    })
+    await mergeOrderMetadata(data.id, {
+      dextrum_status: "WAITING",
+      dextrum_order_code: orderCode,
+      dextrum_hold_until: holdUntil,
+    }, "Dextrum Hold")
 
     console.log(`[Dextrum] Order ${orderCode} queued (hold until ${holdUntil})`)
   } catch (error: any) {

@@ -2,6 +2,7 @@ import { normalizeProjectSlug } from "../utils/project-slug"
 import { Modules } from "@medusajs/framework/utils"
 import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { PROFITABILITY_MODULE } from "../modules/profitability"
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 // Project display names for order tags
 const PROJECT_TAG_NAMES: Record<string, string> = {
@@ -90,13 +91,11 @@ export default async function orderPlacedCustomNumberHandler({
     // Pass ONLY new fields — Medusa merges metadata at DB level.
     // Spreading existingMeta snapshot races with other order.placed subscribers
     // (payment-metadata, dextrum) and overwrites their concurrently-written fields.
-    await orderModuleService.updateOrders(data.id, {
-      metadata: {
-        custom_order_number: customOrderNumber,
-        ...(projectId && !existingMeta.project_id ? { project_id: projectId } : {}),
-        ...(projectTag && !existingMeta.tags ? { tags: projectTag } : {}),
-      },
-    })
+    await mergeOrderMetadata(data.id, {
+      custom_order_number: customOrderNumber,
+      ...(projectId && !existingMeta.project_id ? { project_id: projectId } : {}),
+      ...(projectTag && !existingMeta.tags ? { tags: projectTag } : {}),
+    }, "CustomNumber")
 
     console.log(`[CustomNumber] Order ${data.id} → ${customOrderNumber}${projectTag ? ` | tag: ${projectTag}` : ""}`)
   } catch (error: any) {

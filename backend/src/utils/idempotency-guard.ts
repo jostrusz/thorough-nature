@@ -10,6 +10,8 @@
  *
  * @returns true if the subscriber should SKIP (already processed)
  */
+
+import { mergeOrderMetadata } from "./merge-order-metadata"
 export async function shouldSkipDuplicate(
   orderModuleService: any,
   orderId: string,
@@ -34,11 +36,7 @@ export async function shouldSkipDuplicate(
     // individual subscribers, but the guard itself was missed). Empty result on
     // re-read means the flag got wiped, which is what allowed the same Meta
     // Purchase event to be sent twice for the same order in rare cases.
-    await orderModuleService.updateOrders(orderId, {
-      metadata: {
-        [flagName]: true,
-      },
-    })
+    await mergeOrderMetadata(orderId, { [flagName]: true }, subscriberLabel)
 
     return false
   } catch (err: any) {

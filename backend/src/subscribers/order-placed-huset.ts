@@ -4,6 +4,7 @@ import { SubscriberArgs, SubscriberConfig } from "@medusajs/medusa"
 import { HUSET_MODULE } from "../modules/huset"
 import { getHusetConfig } from "../modules/huset/config"
 import { isHusetOrder } from "../utils/huset-routing"
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 /**
  * When an order is placed for the Huset-fulfilled project (slipp-taket / NO),
@@ -72,16 +73,14 @@ export default async function orderPlacedHusetHandler({
 
     // 7. Update order metadata — pass ONLY new fields, Medusa merges at DB level.
     // dextrum_status mirror keeps the existing admin UI rendering these orders.
-    await orderModuleService.updateOrders(data.id, {
-      metadata: {
-        fulfillment_provider: "huset",
-        huset_status: "WAITING",
-        huset_order_ref: orderRef,
-        huset_hold_until: holdUntil,
-        dextrum_status: "WAITING",
-        dextrum_order_code: orderRef,
-      },
-    })
+    await mergeOrderMetadata(data.id, {
+      fulfillment_provider: "huset",
+      huset_status: "WAITING",
+      huset_order_ref: orderRef,
+      huset_hold_until: holdUntil,
+      dextrum_status: "WAITING",
+      dextrum_order_code: orderRef,
+    }, "Huset")
 
     console.log(`[Huset] Order ${orderRef} queued for Huset WMS (hold until ${holdUntil})`)
   } catch (error: any) {

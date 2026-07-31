@@ -15,6 +15,7 @@ import {
 } from "../modules/fakturoid/api-client"
 import { resolveInvoicingSystem } from "../utils/resolve-invoicing-system"
 import { shouldSkipDuplicate } from "../utils/idempotency-guard"
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 /**
  * Fakturoid Invoice Subscriber
@@ -345,14 +346,12 @@ export default async function orderPlacedFakturoidHandler({
     // fakturoid_internal_id = numeric Fakturoid ID (for API operations)
     try {
       // Only pass new fields — Medusa merges metadata (spreading existingMeta causes race conditions with other subscribers)
-      await (orderService as any).updateOrders(order.id, {
-        metadata: {
-          fakturoid_invoice_id: invoice.number,
-          fakturoid_internal_id: invoice.id.toString(),
-          fakturoid_invoice_number: invoice.number,
-          fakturoid_invoice_url: invoice.public_html_url,
-        },
-      })
+      await mergeOrderMetadata(order.id, {
+        fakturoid_invoice_id: invoice.number,
+        fakturoid_internal_id: invoice.id.toString(),
+        fakturoid_invoice_number: invoice.number,
+        fakturoid_invoice_url: invoice.public_html_url,
+      }, "Fakturoid")
     } catch (metaError: any) {
       console.warn(
         "[Fakturoid] Could not update order metadata:",

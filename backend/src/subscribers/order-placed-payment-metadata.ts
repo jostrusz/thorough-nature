@@ -2,6 +2,7 @@
 import { Modules, ContainerRegistrationKeys } from '@medusajs/framework/utils'
 import { IOrderModuleService } from '@medusajs/framework/types'
 import { SubscriberArgs, SubscriberConfig } from '@medusajs/medusa'
+import { mergeOrderMetadata } from "../utils/merge-order-metadata"
 
 /**
  * Subscriber: Copy payment provider IDs from payment session data → order metadata
@@ -20,11 +21,12 @@ export default async function orderPlacedPaymentMetadataHandler({
     const query = container.resolve(ContainerRegistrationKeys.QUERY)
     const orderModuleService: IOrderModuleService = container.resolve(Modules.ORDER)
 
-    // The order↔payment_collection link is committed a beat after order.placed
-    // fires, so a single immediate read sees zero payments for ~70 % of orders
-    // (measured May–July 2026: link present on 1568/1569 of the affected orders
-    // when re-read later). Retry with growing delays until payments appear.
-    const RETRY_DELAYS_MS = [0, 5_000, 15_000, 30_000]
+    // Defensive retry for the rare case where the order↔payment_collection link
+    // is not visible yet. NOTE: this is NOT what caused the long-running
+    // "missing payment_provider" problem — measurement on 2026-07-30 showed the
+    // payments and their data are already there on the first read. That was a
+    // lost update on the metadata write; see utils/merge-order-metadata.ts.
+    const RETRY_DELAYS_MS = [0, 2_000, 5_000]
     let order: any = null
     let payments: any[] = []
 
@@ -281,9 +283,7 @@ export default async function orderPlacedPaymentMetadataHandler({
     // Pass ONLY new fields — Medusa merges metadata at DB level.
     // Spreading existingMetadata snapshot races with other order.placed subscribers
     // (custom-number, dextrum, etc.) and overwrites their concurrently-written fields.
-    await orderModuleService.updateOrders(data.id, {
-      metadata: newMetadata,
-    })
+    await mergeOrderMetadata(data.id, newMetadata, "Payment Metadata")
 
     const provider = newMetadata.payment_method || "unknown"
     const id =
