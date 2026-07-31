@@ -261,8 +261,8 @@
 
   <!-- Navigace -->
   <div class="carousel-nav">
-   <button class="carousel-btn" id="carouselPrev" aria-label="Vorige">‹</button>
-   <button class="carousel-btn" id="carouselNext" aria-label="Volgende">›</button>
+   <button class="carousel-btn" id="carouselPrev" aria-label="Anterior">‹</button>
+   <button class="carousel-btn" id="carouselNext" aria-label="Siguiente">›</button>
   </div>
  </div>
 </div>
@@ -554,27 +554,36 @@
 
   <div class="pages-carousel">
    <!-- Navigační šipky -->
-   <button class="pages-arrow prev" id="pagesArrowPrev" aria-label="Vorige pagina">‹</button>
-   <button class="pages-arrow next" id="pagesArrowNext" aria-label="Volgende pagina">›</button>
+   <button class="pages-arrow prev" id="pagesArrowPrev" aria-label="Página anterior">‹</button>
+   <button class="pages-arrow next" id="pagesArrowNext" aria-label="Página siguiente">›</button>
 
    <div class="pages-track" id="pagesTrack">
     <div class="pages-slide">
-     <img src="/images/book-preview-1.webp" alt="Suelta lo que te destruye — inhoudsopgave en eerste hoofdstukken" width="637" height="824">
+     <img src="/images/book-preview-es-1.webp" alt="Suelta lo que te destruye — «Aquí termina la teoría. Y empieza el cambio», página 16" width="1000" height="1336" loading="lazy" decoding="async">
     </div>
     <div class="pages-slide">
-     <img src="/images/book-preview-2.webp" alt="Suelta lo que te destruye — methode voor loslaten en vergeven" width="637" height="824">
+     <img src="/images/book-preview-es-2.webp" alt="Suelta lo que te destruye — «¿Y si esa culpa no va de los demás, sino de ti?», página 58" width="1000" height="1321" loading="lazy" decoding="async">
     </div>
     <div class="pages-slide">
-     <img src="/images/book-preview-3.webp" alt="Suelta lo que te destruye — ejercicios prácticos y cuaderno de trabajo" width="637" height="824">
+     <img src="/images/book-preview-es-3.webp" alt="Suelta lo que te destruye — Capítulo 6: cuando temes que vuelvan a abandonarte, página 104" width="1000" height="1358" loading="lazy" decoding="async">
     </div>
     <div class="pages-slide">
-     <img src="/images/book-preview-4.webp" alt="Suelta lo que te destruye — technieken voor emotionele vrijheid" width="637" height="824">
+     <img src="/images/book-preview-es-4.webp" alt="Suelta lo que te destruye — «Cómo volver de la supervivencia a la vida», página 141" width="1000" height="1310" loading="lazy" decoding="async">
     </div>
     <div class="pages-slide">
-     <img src="/images/book-preview-5.webp" alt="Suelta lo que te destruye — paz interior en zelfvertrouwen" width="637" height="824">
+     <img src="/images/book-preview-es-5.webp" alt="Suelta lo que te destruye — Capítulo 11: cuando vuelve, página 174" width="1000" height="1284" loading="lazy" decoding="async">
     </div>
     <div class="pages-slide">
-     <img src="/images/book-preview-6.webp" alt="Suelta lo que te destruye — programa de recuperación paso a paso" width="637" height="824">
+     <img src="/images/book-preview-es-6.webp" alt="Suelta lo que te destruye — «Qué hacer cuando nadie te entiende», página 205" width="1000" height="1317" loading="lazy" decoding="async">
+    </div>
+    <div class="pages-slide">
+     <img src="/images/book-preview-es-7.webp" alt="Suelta lo que te destruye — Capítulo 15: soltar a alguien que todavía está aquí, página 249" width="1000" height="1268" loading="lazy" decoding="async">
+    </div>
+    <div class="pages-slide">
+     <img src="/images/book-preview-es-8.webp" alt="Suelta lo que te destruye — programa de 30 días, Semana 1: observar, página 283" width="1000" height="1293" loading="lazy" decoding="async">
+    </div>
+    <div class="pages-slide">
+     <img src="/images/book-preview-es-9.webp" alt="Suelta lo que te destruye — cuaderno de trabajo, Capítulo 1: ¿qué estás sujetando en realidad?, página 298" width="1000" height="1292" loading="lazy" decoding="async">
     </div>
    </div>
   </div>
@@ -1669,7 +1678,7 @@ window.addEventListener('load', function() {
   for (var i = 0; i < total; i++) {
    var dot = document.createElement('button');
    dot.className = 'pages-dot' + (i === currentPage ? ' active' : '');
-   dot.setAttribute('aria-label', 'Pagina ' + (i + 1));
+   dot.setAttribute('aria-label', 'Página ' + (i + 1));
    dot.dataset.idx = i;
    dot.addEventListener('click', function() {
     currentPage = parseInt(this.dataset.idx);
