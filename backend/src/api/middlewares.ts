@@ -92,6 +92,26 @@ function stampClientIpOnPaymentSession(req: any, _res: any, next: any) {
 export default defineMiddlewares({
   routes: [
     {
+      // /checkout-log sedí mimo /store i /public, takže na něj nesáhne ani
+      // STORE_CORS, ani publicCors níže — prohlížeč preflight zabil a submit log
+      // se nikdy nezapsal (fetch je fire-and-forget, takže si toho nikdo nevšiml).
+      method: ["POST", "OPTIONS"],
+      matcher: "/checkout-log",
+      middlewares: [
+        function checkoutLogCors(req: any, res: any, next: any) {
+          res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*")
+          res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS")
+          res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-publishable-api-key")
+          res.setHeader("Access-Control-Allow-Credentials", "true")
+          if (req.method === "OPTIONS") {
+            res.status(204).end()
+            return
+          }
+          next()
+        },
+      ],
+    },
+    {
       method: ["GET", "POST", "OPTIONS"],
       matcher: "/public/*",
       middlewares: [

@@ -5281,11 +5281,9 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
 
   // Attach customer data + the shipping method to the Revolut cart.
   function applyShippingToRevolutCart(cartId, customerData) {
-    // Force the correct region BEFORE attaching the ES address. A cart cached from a
-    // previous session may still sit on another region, which rejects an ES address
-    // with "Country es is not within region X". Setting region_id heals it in place.
-    var body = currentRegionId ? Object.assign({ region_id: currentRegionId }, customerData) : customerData;
-    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(body) })
+    // Bez region_id — cart sem chodí čerstvý z createExpressCart (už má správný
+    // region) a přepnutí regionu by přecenilo košík a smazalo bundle položky.
+    return medusaFetch('/store/carts/' + cartId, { method: 'POST', body: JSON.stringify(customerData) })
       .then(function () { return medusaFetch('/store/shipping-options?cart_id=' + cartId, { method: 'GET' }); })
       .then(function (shipRes) {
         var options = shipRes.shipping_options || [];
@@ -8012,6 +8010,15 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       cartStep = medusaFetch('/store/carts/' + reuseCartId, { method: 'GET' })
         .then(function(cartRes) {
           var cart = cartRes.cart;
+          // Košík z jiného regionu se NEDÁ bezpečně převést — přepnutí regionu
+          // přecení košík a smaže bundle položky s vlastní cenou. Zákazník má
+          // takový košík v localStorage z doby, kdy checkout ještě padal na
+          // "Country es is not within region Europe". Prostě ho zahodíme.
+          if (currentRegionId && cart.region_id && cart.region_id !== currentRegionId) {
+            console.warn('[Checkout] Reused cart is on region ' + cart.region_id +
+                         ' but we need ' + currentRegionId + ' — discarding it');
+            throw new Error('stale-region-cart');
+          }
           // Verwijder alle bestaande line items
           var deletePromises = (cart.items || []).map(function(item) {
             return medusaFetch('/store/carts/' + reuseCartId + '/line-items/' + item.id, { method: 'DELETE' });
@@ -8019,10 +8026,11 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           return Promise.all(deletePromises).then(function() { return reuseCartId; });
         })
         .catch(function() {
-          // Cart ophalen mislukt — maak een nieuwe aan
+          // Cart ophalen mislukt of zat op een ander region — maak een nieuwe aan
           reuseCartId = null;
           backgroundCartId = null;
           promoCartId = null;
+          try { localStorage.removeItem('background_cart_id'); } catch (e) {}
           return medusaFetch('/store/carts', {
             method: 'POST',
             body: JSON.stringify({ region_id: currentRegionId })
@@ -8074,17 +8082,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     })
     .then(function(cartId) {
       // Stap 3: Cart updaten met klantgegevens (must complete before shipping)
-      // Force the region alongside the address. A reused cart (background/promo cart
-      // from localStorage) may still sit on the region it was created with — a cart
-      // built before the ES default was fixed lives on "Europe" and rejects an ES
-      // address with "Country es is not within region Europe". Sending region_id
-      // heals it in place instead of dead-ending the customer.
-      var cartUpdate = currentRegionId
-        ? Object.assign({ region_id: currentRegionId }, customerData)
-        : customerData;
+      // NIKDY sem neposílat region_id. Změna regionu spustí v Meduse přecenění
+      // košíku a položky přidané přes /line-items-bundle (mají vlastní unit_price)
+      // se přitom smažou — košík spadne na 0 € a brána platbu odmítne. Stalé
+      // košíky z jiného regionu se místo toho zahazují už při načtení (viz níže).
       return medusaFetch('/store/carts/' + cartId, {
         method: 'POST',
-        body: JSON.stringify(cartUpdate)
+        body: JSON.stringify(customerData)
       }).then(function() { return cartId; });
     })
     .then(function(cartId) {
