@@ -3395,7 +3395,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var container = document.getElementById('bundle-options');
     if (!container) return;
     var unitPrice = PROJECT_CONFIG.mainProduct.price || 36;
-    var productName = PROJECT_CONFIG.mainProduct.name || 'Boek';
+    var productName = PROJECT_CONFIG.mainProduct.name || 'Libro';
     var html = '';
     PROJECT_CONFIG.bundleOptions.forEach(function(opt, idx) {
       var isSelected = (idx === 0);
@@ -5010,7 +5010,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             requiredShippingContactFields: ['name', 'email', 'postalAddress'],
             requiredBillingContactFields: ['postalAddress'],
             total: {
-              label: PROJECT_CONFIG.name || 'Bestelling',
+              label: PROJECT_CONFIG.name || 'Pedido',
               type: 'final',
               amount: String(selectedBundlePrice || 35),
             }
@@ -6093,7 +6093,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   function updateButtonText() {
     var btnText = document.querySelector('.btn-text');
     if (!selectedMethod) {
-      btnText.textContent = 'Bestelling afronden — ' + formatPrice(currentTotalPrice);
+      btnText.textContent = 'Finalizar pedido — ' + formatPrice(currentTotalPrice);
       return;
     }
     // For Klarna sub-methods, show "Klarna" as the name
@@ -7420,7 +7420,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var done = false, attempts = 0;
     var MAX_ATTEMPTS = 10, POLL_MS = 2000;   // 1st immediately, then ~2s × 10 ≈ 20s
 
-    var bookName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Laat los wat je kapotmaakt';
+    var bookName = (PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Suelta lo que te destruye';
 
     var overlay = document.createElement('div');
     overlay.className = 'brite-verify-overlay';
@@ -7715,7 +7715,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       .catch(function(err) {
         // Fout — code is ongeldig
         console.warn('Promo code geweigerd:', err.message || err);
-        promoMessage.textContent = 'Ongeldige kortingscode';
+        promoMessage.textContent = 'Código de descuento no válido';
         promoMessage.className = 'promo-message error';
         savedPromoCode = '';
         promoAppliedToCart = false;
@@ -8111,7 +8111,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           promoAppliedToCart = false;
           // Toon foutmelding
           if (promoMessage) {
-            promoMessage.textContent = 'Ongeldige kortingscode';
+            promoMessage.textContent = 'Código de descuento no válido';
             promoMessage.className = 'promo-message error';
           }
           // Verberg badge, toon toggle weer
@@ -9296,7 +9296,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     var bt = document.querySelector('.btn-text');
     if (!bt) return;
     var price = briteCurrentPrice();
-    bt.textContent = 'Bestelling afronden' + (price ? ' — ' + price : '');
+    bt.textContent = 'Finalizar pedido' + (price ? ' — ' + price : '');
   }
 
   // ─── Brite embedded Web SDK launcher: REMOVED ──────────────────────────────
