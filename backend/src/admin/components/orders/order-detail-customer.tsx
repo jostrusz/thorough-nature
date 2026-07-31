@@ -3,6 +3,7 @@ import { toast } from "@medusajs/ui"
 import { useUpdateOrderDetails } from "../../hooks/use-order-actions"
 import { formatCurrency } from "../../lib/format-currency"
 import { colors, shadows, radii, cardStyle, fontStack, btnOutline, btnPrimary } from "./design-tokens"
+import { SUPPORTED_COUNTRIES } from "../../../utils/country-order-config"
 
 interface OrderDetailCustomerProps {
   order: any
@@ -24,6 +25,8 @@ const FLAGS: Record<string, string> = {
   DK: "\u{1F1E9}\u{1F1F0}",
   EE: "\u{1F1EA}\u{1F1EA}",
   NO: "\u{1F1F3}\u{1F1F4}",
+  FR: "\u{1F1EB}\u{1F1F7}",
+  ES: "\u{1F1EA}\u{1F1F8}",
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
@@ -40,10 +43,19 @@ const COUNTRY_NAMES: Record<string, string> = {
   DK: "Denmark",
   EE: "Estonia",
   NO: "Norway",
+  FR: "France",
+  ES: "Spain",
 }
 
-const COUNTRY_OPTIONS = Object.entries(COUNTRY_NAMES)
-  .map(([code, name]) => ({ code: code.toLowerCase(), name }))
+// The dropdown must offer every country we actually sell to. SUPPORTED_COUNTRIES
+// is the single source of truth (country-order-config) — deriving from it means a
+// new market shows up here automatically instead of silently missing, which is how
+// France and Spain went unlisted while French and Spanish orders were coming in.
+// DK/EE stay available because older orders carry those addresses.
+const COUNTRY_OPTIONS = Array.from(
+  new Set([...SUPPORTED_COUNTRIES.map((c: string) => c.toUpperCase()), ...Object.keys(COUNTRY_NAMES)])
+)
+  .map((code) => ({ code: code.toLowerCase(), name: COUNTRY_NAMES[code] || code }))
   .sort((a, b) => a.name.localeCompare(b.name))
 
 function buildMapUrl(addr: any): string {
