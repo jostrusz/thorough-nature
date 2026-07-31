@@ -3063,7 +3063,6 @@ body {
       <div class="summary-payments">
         <img src="/icons/visa.svg" alt="Visa" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
         <img src="/icons/mastercard.svg" alt="Mastercard" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
-        <img src="/icons/bizum.png" alt="Bizum" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);object-fit:contain;background:#fff;">
         <img src="/icons/paypal.svg" alt="PayPal" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
         <img src="/icons/klarna.svg" alt="Klarna" width="40" height="26" style="border-radius:4px;border:1px solid rgba(194,123,160,0.12);">
       </div>
@@ -5682,7 +5681,13 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       try { return !!(window.ApplePaySession && window.ApplePaySession.canMakePayments()); }
       catch (e) { return false; }
     }
+    // Methods that stay switched off until the official launch. The Bizum flow
+    // (overlay, polling, Stripe wiring) is fully built and stays in place — flip
+    // this to an empty array to turn it back on.
+    var HIDDEN_METHODS = ['bizum'];
+
     methods = methods.filter(function(m) {
+      if (HIDDEN_METHODS.indexOf(m.code) !== -1) return false;
       if (m.code === 'applepay' || m.code === 'apple_pay') return applePayAvailable();
       if (m.code === 'googlepay') return false;   // Mollie's wallet — not wired here
       return true;

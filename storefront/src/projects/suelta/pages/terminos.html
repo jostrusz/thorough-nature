@@ -407,6 +407,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
  text-decoration: none;
 }
 .footer-contact a:hover { color: var(--white); }
+.footer-payments { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.footer-payments .pay-icon { height: 28px; width: auto; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.15); }
 .footer-bottom {
  max-width: 960px;
  margin: 32px auto 0;
@@ -489,7 +491,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
    <li>El libro cuesta 36 €, IVA y envío incluidos</li>
    <li>Enviamos solo dentro de España, y el envío es gratis</li>
    <li>Tienes 30 días para devolverlo — la ley te da 14</li>
-   <li>Pagas con tarjeta, Bizum, PayPal, Klarna, Google Pay o Apple Pay</li>
+   <li>Pagas con tarjeta, PayPal, Klarna, Google Pay o Apple Pay</li>
    <li>Los e-books, al descargarlos, ya no se pueden devolver</li>
   </ul>
  </div>
@@ -554,7 +556,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   <p>Puedes pagar con:</p>
   <ul>
    <li>Tarjeta de crédito o débito (Visa, Mastercard)</li>
-   <li>Bizum</li>
    <li>PayPal</li>
    <li>Klarna — al momento, más tarde o a plazos</li>
    <li>Google Pay</li>
@@ -639,6 +640,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--b
   </div>
   <div class="footer-contact">
    <a href="mailto:hola@sueltaloquetedestruye.es">📧 hola@sueltaloquetedestruye.es</a>  </div>
+  <div class="footer-payments">
+   <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/revolut_pay.svg" alt="Revolut Pay" class="pay-icon" width="35" height="28" style="height:28px;">
+  </div>
  </div>
  <div class="footer-bottom">
   <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praga • IČO: 06259928 • DIČ: CZ06259928</span>
