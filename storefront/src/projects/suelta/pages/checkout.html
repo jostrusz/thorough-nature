@@ -7042,7 +7042,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             var city = (addr && addr.city) || '';
             items.push({
               html: '<strong>' + name + '</strong>' +
-                    (regNo ? '<small>KVK: ' + regNo + '</small>' : '') +
+                    (regNo ? '<small>NIF/CIF: ' + regNo + '</small>' : '') +
                     (city ? '<small>' + city + '</small>' : ''),
               data: { name: name, regNo: regNo, vatNo: vatNo, city: city }
             });

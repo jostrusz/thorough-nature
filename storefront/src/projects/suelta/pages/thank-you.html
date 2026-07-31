@@ -556,7 +556,7 @@ body { background: var(--bg); }
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field full">
           <input type="text" id="edit-address" placeholder=" ">
-          <label for="edit-address">Straat + huisnummer</label>
+          <label for="edit-address">Calle y número</label>
         </div>
       </div>
       <div class="ty-form-row">
@@ -581,19 +581,19 @@ body { background: var(--bg); }
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-kvk" placeholder=" ">
-            <label for="edit-kvk">KVK / Ondernemingsnr.</label>
+            <label for="edit-kvk">NIF / CIF</label>
           </div>
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-vat" placeholder=" ">
-            <label for="edit-vat">BTW-nummer</label>
+            <label for="edit-vat">NIF-IVA</label>
           </div>
         </div>
       </div>
       <div class="ty-form-actions">
         <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
-          Opslaan
+          Guardar cambios
         </button>
-        <button class="ty-form-cancel" onclick="toggleEditForm()">Annuleren</button>
+        <button class="ty-form-cancel" onclick="toggleEditForm()">Cancelar</button>
       </div>
     </div>
   </div>
@@ -710,7 +710,7 @@ body { background: var(--bg); }
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
     <div class="ty-share-title">¿Conoces a alguien que también lo necesita?</div>
-    <div class="ty-share-desc">Comparte esta página con una amiga y ayúdala a empezar de nuevo.</div>
+    <div class="ty-share-desc">Comparte esta página con quien lo necesite y ayúdale a dar el primer paso.</div>
     <div class="ty-share-buttons">
       <a href="https://wa.me/?text=Acabo%20de%20pedir%20Suelta%20lo%20que%20te%20destruye%20y%20creo%20que%20t%C3%BA%20tambi%C3%A9n%20lo%20necesitas%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
@@ -995,7 +995,7 @@ body { background: var(--bg); }
       if (companyRow && companyVal) {
         companyRow.style.display = '';
         var cParts = [companyData.company_name];
-        if (companyData.kvk_number) cParts.push('KVK: ' + companyData.kvk_number);
+        if (companyData.kvk_number) cParts.push('NIF/CIF: ' + companyData.kvk_number);
         if (companyData.vat_number) cParts.push('BTW: ' + companyData.vat_number);
         companyVal.innerHTML = cParts.join('<br>');
       }
@@ -1097,7 +1097,7 @@ body { background: var(--bg); }
 
     // Loading stav
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span> Opslaan...';
+    btn.innerHTML = '<span class="btn-spinner"></span> Guardando...';
 
     // Aktualizuj lokální data ihned (pro lepší UX)
     customer = {
@@ -1189,7 +1189,7 @@ body { background: var(--bg); }
   function finishSave(success, customMessage) {
     var btn = document.getElementById('ty-save-btn');
     btn.disabled = false;
-    btn.innerHTML = 'Opslaan';
+    btn.innerHTML = 'Guardar cambios';
 
     // Zavři formulář, ukaž kartu
     document.getElementById('ty-edit-form').classList.remove('is-open');
