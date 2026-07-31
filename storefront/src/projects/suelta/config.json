@@ -74,7 +74,6 @@
   "pages": {
     "": "index.html",
     "checkout": "checkout.html",
-    "upsell": "upsell.html",
     "thank-you": "thank-you.html",
     "contacto": "contacto.html",
     "privacidad": "privacidad.html",
@@ -90,5 +89,6 @@
     "verzending": "envio",
     "retourbeleid": "devoluciones"
   },
-  "packetaApiKey": ""
+  "packetaApiKey": "",
+  "_upsellNote": "Upsell vypnutý pro ES — upsell.html je nizozemský klon nabízející 'Het Leven Dat Je Verdient', kterou do Španělska neprodáváme, a upsellProduct je prázdný. Bez klíče 'upsell' v pages route.ts posílá zákazníka rovnou na thank-you. Až bude španělský upsell produkt, vrátit klíč a přeložit stránku."
 }
