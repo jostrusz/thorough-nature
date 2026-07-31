@@ -2645,7 +2645,7 @@ body {
       <!-- BTW -->
       <div class="msb-line" id="msb-tax-line">
         <span class="msb-line-label" id="msb-tax-label">IVA (4%)</span>
-        <span class="msb-line-val" id="msb-tax-val">&euro;2,89</span>
+        <span class="msb-line-val" id="msb-tax-val">&euro;1,38</span>
       </div>
       <!-- Envío -->
       <div class="msb-line shipping">
@@ -2999,7 +2999,7 @@ body {
       </div>
       <div class="summary-line" id="summary-tax">
         <span id="tax-label">IVA (4%)</span>
-        <span id="tax-value">&euro;2,89</span>
+        <span id="tax-value">&euro;1,38</span>
       </div>
       <div class="summary-line shipping" id="summary-shipping">
         <span style="display:flex;align-items:center;gap:6px;">
@@ -3277,7 +3277,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   // Daňové sazby per země (tax-inclusive)
-  var TAX_RATES = { NL: 9, BE: 6 };
+  var TAX_RATES = { ES: 4 };   // tipo superreducido para libros
 
   // Získej aktuální celkovou cenu (bundle + order bump)
   function getCurrentTotal() {
@@ -3289,7 +3289,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // Přepočítej a zobraz CELÝ order summary (bundle, order bump, daně, totál)
   function recalculateOrderSummary() {
     var countryCode = document.getElementById('country') ? document.getElementById('country').value : 'ES';
-    var rate = TAX_RATES[countryCode] || TAX_RATES.NL;
+    var rate = TAX_RATES[countryCode] || TAX_RATES.ES;
     var total = getCurrentTotal();
     var subtotal = total / (1 + rate / 100);
     var tax = total - subtotal;
