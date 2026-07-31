@@ -5113,7 +5113,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       return '<svg class="pm-icon" width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0.5" y="0.5" width="31" height="23" rx="3.5" fill="#fff" stroke="#D9D9D9"/><rect x="2" y="5" width="28" height="4" fill="#2D3748"/><rect x="4" y="13" width="8" height="2" rx="1" fill="#CBD5E0"/><rect x="4" y="17" width="5" height="2" rx="1" fill="#CBD5E0"/><rect x="22" y="15" width="6" height="4" rx="2" fill="#ED8936"/><rect x="19" y="15" width="6" height="4" rx="2" fill="#E53E3E" opacity="0.8"/></svg>';
     }
     // For methods with known SVG icons
-    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay'];
+    var iconMethods = ['ideal', 'bancontact', 'klarna', 'paypal', 'applepay', 'googlepay', 'eps', 'swish', 'revolut_pay', 'wero'];
     if (iconMethods.indexOf(code) !== -1) {
       return '<img src="/icons/' + code + '.svg" alt="' + code + '" class="pm-icon" onerror="this.style.display=\'none\'">';
     }
@@ -5177,6 +5177,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         (gw.methods || []).forEach(function(m) {
           var DE_NAMES = {
             'creditcard': 'Kreditkarte',
+            'wero': 'Wero',
             'ideal': 'iDEAL',
             'bancontact': 'Bancontact',
             'paypal': 'PayPal',

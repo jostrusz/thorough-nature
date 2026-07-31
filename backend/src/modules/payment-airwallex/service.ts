@@ -345,7 +345,12 @@ class AirwallexPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       // Redirect-based methods: confirm intent server-side → get redirect URL
       // Credit cards use Drop-in element (inline form) — Airwallex hosted page doesn't work (CSP blocks)
-      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice"]
+      // NOTE on "wero" (EPI wallet, DE/BE/FR): unlike every other redirect
+      // method here it takes NO sub-object — the API echoes back plain
+      // {"type":"wero"}. Verified against the live lass-los account
+      // 2026-07-31: both payload shapes return 200 + a redirect next_action,
+      // so it is deliberately kept out of METHODS_WITH_SUB_OBJECT below.
+      const REDIRECT_METHODS = ["ideal", "bancontact", "eps", "blik", "przelewy24", "p24", "payu", "paypal", "klarna", "klarna_later", "klarna_slice", "wero"]
       let checkoutUrl: string | null = null
 
       if (method && REDIRECT_METHODS.includes(method) && returnUrl) {
