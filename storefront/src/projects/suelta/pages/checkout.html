@@ -8620,6 +8620,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
           });
         }
 
+        // ─── BIZUM (Stripe) — žádná redirect stránka ───
+        // Stripe potvrdí PaymentIntent na serveru a nechá ho na requires_action
+        // s next_action.type = "await_authorization" — zákazník platbu schválí
+        // v bankovní appce. Není kam přesměrovat, takže ukážeme čekací obrazovku
+        // a dotazujeme se Stripe na stav.
+        if (selectedMethod === 'bizum' && !redirectUrl &&
+            selectedProviderId && selectedProviderId.indexOf('stripe') !== -1) {
+          return handleBizumAwait(result.cartId, providerData);
+        }
+
         // ─── REVOLUT INLINE — embedded widget, NO redirect ───
         // Backend returns an order token (+ public key + method); the Revolut Web SDK
         // renders the chosen method inline against it. Must run BEFORE the generic
@@ -8651,6 +8661,100 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     });
   });
 
+
+
+  /* ─── BIZUM — čekání na schválení v bankovní appce ─────────────────────────
+   * Bizum nemá hostovanou platební stránku. Stripe drží PaymentIntent na
+   * requires_action / await_authorization, dokud zákazník neťukne na potvrzení
+   * v appce své banky. Ukážeme mu, co má udělat, a každé 3 s se ptáme backendu
+   * (/store/stripe-payment-status), jestli platba dorazila. Košík dokončujeme
+   * VÝHRADNĚ na status "succeeded" — nikdy na nic slabšího. */
+  function handleBizumAwait(cartId, providerData) {
+    var amtLabel = formatPrice(Number(providerData.amount || getCurrentTotal()));
+    var phone = (document.getElementById('phone') || {}).value || '';
+
+    var ov = document.createElement('div');
+    ov.id = 'bizum-overlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(45,27,61,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:DM Sans,system-ui,sans-serif;';
+    ov.innerHTML =
+      '<div style="background:#fff;max-width:420px;width:100%;border-radius:16px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center;">'
+      + '<div style="font-size:34px;margin-bottom:10px;">📲</div>'
+      + '<div style="font-size:18px;font-weight:700;color:#2D1B3D;margin-bottom:6px;">Confirma el pago en tu app</div>'
+      + '<div style="font-size:14px;color:#5A3D6B;line-height:1.6;margin-bottom:18px;">Te hemos enviado una solicitud de Bizum de <strong>' + amtLabel + '</strong>'
+      + (phone ? ' al <strong>' + phone + '</strong>' : '')
+      + '.<br>Abre la app de tu banco y acepta el pago.</div>'
+      + '<div style="display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:14px;">'
+      +   '<span class="spinner" style="display:inline-block;width:16px;height:16px;border:2px solid #EDD9E5;border-top-color:#C27BA0;border-radius:50%;animation:bizumSpin .8s linear infinite;"></span>'
+      +   '<span id="bizum-status" style="font-size:13px;color:#9B7AAD;">Esperando tu confirmación…</span>'
+      + '</div>'
+      + '<button id="bizum-cancel" type="button" style="width:100%;background:none;border:none;color:#9B7AAD;font-size:13px;cursor:pointer;padding:8px;">Cancelar y elegir otro método</button>'
+      + '</div>';
+    document.body.appendChild(ov);
+
+    if (!document.getElementById('bizum-spin-style')) {
+      var st = document.createElement('style');
+      st.id = 'bizum-spin-style';
+      st.textContent = '@keyframes bizumSpin{to{transform:rotate(360deg);}}';
+      document.head.appendChild(st);
+    }
+
+    var statusEl = ov.querySelector('#bizum-status');
+    var stopped = false;
+    function setStatus(m, err) { if (statusEl) { statusEl.textContent = m; statusEl.style.color = err ? '#C0392B' : '#9B7AAD'; } }
+    function closeOverlay() {
+      stopped = true;
+      if (ov.parentNode) ov.parentNode.removeChild(ov);
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+    }
+    ov.querySelector('#bizum-cancel').onclick = closeOverlay;
+
+    function finish() {
+      setStatus('Pago recibido — preparando tu pedido…');
+      return medusaFetch('/store/carts/' + cartId + '/complete', { method: 'POST' })
+        .then(function (res) {
+          var order = window.__extractOrderOrThrow(res);
+          localStorage.setItem('medusa_order_id', order.id || '');
+          localStorage.setItem('medusa_order_display_id', order.display_id || '');
+          localStorage.removeItem('checkout_draft');
+          localStorage.removeItem('background_cart_id');
+          if (PROJECT_CONFIG.upsellEnabled === false || orderBumpActive) {
+            if (orderBumpActive) localStorage.setItem('medusa_upsell_purchased', 'true');
+            window.location.href = PROJECT_CONFIG.thankYouUrl;
+          } else {
+            window.location.href = PROJECT_CONFIG.upsellUrl;
+          }
+        })
+        .catch(function () {
+          setStatus('El pago se ha hecho, pero no hemos podido cerrar el pedido. Escríbenos a ' + (PROJECT_CONFIG.supportEmail || 'hola@sueltaloquetedestruye.es') + '.', true);
+        });
+    }
+
+    // 3 s interval, strop 5 minut — potom to Bizum stejně nechá vypršet.
+    var tries = 0, MAX = 100;
+    (function poll() {
+      if (stopped) return;
+      if (++tries > MAX) {
+        setStatus('Se ha agotado el tiempo. Si has confirmado el pago, escríbenos antes de volver a pagar.', true);
+        return;
+      }
+      medusaFetch('/store/stripe-payment-status?cart_id=' + encodeURIComponent(cartId), { method: 'GET' })
+        .then(function (r) {
+          if (stopped) return;
+          if (r && r.paid === true) { stopped = true; return finish(); }
+          if (r && r.failed === true) {
+            setStatus('El pago no se ha completado. Prueba otra vez o elige otro método.', true);
+            stopped = true;
+            setTimeout(closeOverlay, 3500);
+            return;
+          }
+          setTimeout(poll, 3000);
+        })
+        .catch(function () { setTimeout(poll, 3000); });  // výpadek sítě polling nezabije
+    })();
+
+    return Promise.resolve();
+  }
 
   /* ─── REVOLUT INLINE (generic-flow fallback) — embedded widget, NO redirect ───
    * Used when the payment session was created via the generic flow (e.g. a
