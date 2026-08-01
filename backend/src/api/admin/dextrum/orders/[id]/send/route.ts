@@ -150,10 +150,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       // (quantity=N na variantě); Dextrum zná fyzický kód 363682 (stejná kniha
       // jako psi-superzivot upsell variant 363682).
       "KOCICI-BIBLE-OFICIAL-PB": { physicalSku: "363682", quantity: 1 },
-      // Lâche prise (FR) bundle varianty — fyzicky N kusů téže knihy LACHE-1
-      "LACHE-2": { physicalSku: "LACHE-1", quantity: 2 },
-      "LACHE-3": { physicalSku: "LACHE-1", quantity: 3 },
-      "LACHE-4": { physicalSku: "LACHE-1", quantity: 4 },
+      // ─── French: Lâche prise sur ce qui te détruit (lache-livre) ───
+      // Dextrum zná knihu pod fyzickým kódem LVREFCE872687224. Medusí SKU
+      // LACHE-{N} tam neexistují, takže mySTOCK vrací
+      // "Invalid entry / items.productId" a FR objednávky visí ve WAITING.
+      // Commit 115a8050 to opravil v jobs/dextrum-order-hold.ts, ale tuhle
+      // routu minul: mapa tu dál mířila na "LACHE-1" (medusí SKU) a LACHE-1
+      // samotné chybělo úplně, takže ruční odeslání z adminu i send_to_wms
+      // selhávalo na KAŽDÉ francouzské objednávce. Drž shodné s cronem.
+      "LACHE-1": { physicalSku: "LVREFCE872687224", quantity: 1 },
+      "LACHE-2": { physicalSku: "LVREFCE872687224", quantity: 2 },
+      "LACHE-3": { physicalSku: "LVREFCE872687224", quantity: 3 },
+      "LACHE-4": { physicalSku: "LVREFCE872687224", quantity: 4 },
       // Kočičí bible order bumpy — admin SKU má suffix -2, Dextrum drží rodičovský kód.
       "PTCTN2876287672-2": { physicalSku: "PTCTN2876287672", quantity: 1 },
       "ZJSZ9827982789-2": { physicalSku: "ZJSZ9827982789", quantity: 1 },
