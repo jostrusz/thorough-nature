@@ -18,53 +18,7 @@
  * Extract the primary payment/transaction ID from ORDER METADATA
  * (set by the order-placed-payment-metadata subscriber).
  */
-export function extractPaymentId(meta: any): string | null {
-  return (
-    meta?.payment_id_override ||
-    meta?.molliePaymentId ||
-    meta?.stripePaymentIntentId ||
-    meta?.paypalOrderId ||
-    meta?.comgateTransId ||
-    meta?.p24SessionId ||
-    meta?.airwallexPaymentIntentId ||
-    meta?.klarnaOrderId ||
-    meta?.novalnetTid ||
-    // Newer gateways
-    meta?.payuOrderId || meta?.payu_order_id ||
-    meta?.briteSessionId || meta?.brite_session_id || meta?.payment_brite_session_id ||
-    meta?.barionPaymentId ||
-    meta?.revolutOrderId || meta?.payment_revolut_order_id || meta?.revolut_transaction_id ||
-    meta?.payment_id ||
-    null
-  )
-}
-
-/**
- * Fallback: extract a payment ID from a payment_collections payment.data blob,
- * for orders whose metadata lacks the ID (older orders / edge cases).
- */
-export function extractPaymentIdFromPaymentData(data: any): string | null {
-  if (!data) return null
-  return (
-    data.stripePaymentIntentId ||
-    data.stripeCheckoutSessionId ||
-    data.captureId ||               // PayPal capture reference
-    data.payuOrderId ||             // PayU
-    data.briteSessionId ||          // Brite
-    data.barionPaymentId ||         // Barion
-    data.revolutOrderId ||          // Revolut
-    data.intentId ||                // Airwallex / Barion intent
-    data.airwallexPaymentIntentId ||
-    data.klarnaOrderId ||
-    data.paypalOrderId ||
-    data.comgateTransId ||
-    data.molliePaymentId ||
-    data.novalnetTid || data.tid ||
-    data.id ||
-    data.payment_intent ||
-    null
-  )
-}
+export { extractPaymentId, extractPaymentIdFromPaymentData } from "../../../../utils/payment-id"
 
 /** COD detection (metadata + payment_collections provider_id). */
 export function isCodOrder(order: any): boolean {

@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { extractPaymentId, extractPaymentIdFromPaymentData } from "../../../utils/payment-id"
 import { toast } from "@medusajs/ui"
 import { BookSentToggle } from "./book-sent-toggle"
 import { DeliveryBadge } from "./order-badges"
@@ -250,32 +251,12 @@ export function OrderDetailMetadata({ order }: OrderDetailMetadataProps) {
   )
   const payment = payments[0]
 
-  // Payment ID — manual override takes priority, then each gateway stores it differently
+  // Payment ID — manual override first, then payment.data, then order metadata.
+  // Key list lives in utils/payment-id.ts (shared with the payment matcher).
   const gatewayPaymentId =
     metadata.payment_id_override ||
-    // Direct from payment data
-    payment?.data?.molliePaymentId ||
-    payment?.data?.mollieOrderId ||
-    payment?.data?.stripePaymentIntentId ||
-    payment?.data?.payment_intent ||
-    payment?.data?.captureId ||
-    payment?.data?.intentId ||
-    payment?.data?.klarnaOrderId ||
-    payment?.data?.paypalOrderId ||
-    payment?.data?.comgateTransId ||
-    payment?.data?.id ||
-    payment?.data?.payment_id ||
-    payment?.data?.transaction_id ||
-    // From order metadata (set by order-placed-payment-metadata subscriber)
-    metadata.stripePaymentIntentId ||
-    metadata.molliePaymentId ||
-    metadata.mollieOrderId ||
-    metadata.paypalOrderId ||
-    metadata.klarnaOrderId ||
-    metadata.comgateTransId ||
-    metadata.p24SessionId ||
-    metadata.airwallexPaymentIntentId ||
-    metadata.payment_id ||
+    extractPaymentIdFromPaymentData(payment?.data) ||
+    extractPaymentId(metadata) ||
     ""
 
   // Payment Gateway name (e.g. "Mollie", "PayPal")
