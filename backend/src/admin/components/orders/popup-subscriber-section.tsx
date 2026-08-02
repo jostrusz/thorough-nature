@@ -696,10 +696,9 @@ export function PopupSubscriberSection() {
   const [open, setOpen] = useState<boolean>(false)
   const [days, setDays] = useState<number>(30)
   const isMobile = useIsMobile()
-  // Leaderboard column template — mobile drops Trend / 7d / sparkline to fit ~360px
-  const lbCols = isMobile
-    ? "minmax(0,1fr) 50px 54px 52px"
-    : "minmax(0,1fr) 84px 62px 66px 62px 62px 76px"
+  // Leaderboard column template. Desktop only — on mobile each project is a card,
+  // because no column split leaves the name enough room at ~360px.
+  const lbCols = "minmax(0,1fr) 84px 62px 66px 62px 62px 76px"
 
   // Data — refetches whenever `days` changes (it's part of the query key)
   const { data, isLoading } = useQuery({
@@ -983,10 +982,10 @@ export function PopupSubscriberSection() {
                   </div>
                 ) : (
                   <div>
-                    {/* Column header row */}
+                    {/* Column header row — desktop only; the mobile cards label themselves */}
                     <div
                       style={{
-                        display: "grid",
+                        display: isMobile ? "none" : "grid",
                         gridTemplateColumns: lbCols,
                         gap: "8px",
                         alignItems: "center",
@@ -1012,6 +1011,109 @@ export function PopupSubscriberSection() {
                     {leaderboard.map((p) => {
                       const color = colorBySlug[p.brand_slug] || PALETTE[0]
                       const domain = PROJECT_DOMAIN[p.brand_slug]
+
+                      // ── Mobile: a card per project ────────────────────────
+                      // The old 4-column grid gave the name ~180px on a 360px
+                      // screen. Names like "Laat los wat je kapotmaakt
+                      // (Nizozemsko)" don't fit, and the ProjectBadge pill has
+                      // no truncation, so it ran straight under the numbers.
+                      // Name gets the full width, the figures sit underneath
+                      // as labelled chips.
+                      if (isMobile) {
+                        return (
+                          <div
+                            key={p.brand_slug}
+                            style={{
+                              padding: "14px 14px 12px",
+                              borderBottom: `1px solid ${tokens.borderSubtle}`,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "10px",
+                            }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+                              <ProjectAvatar name={p.brand_name || p.brand_slug} color={color} />
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div
+                                  style={{
+                                    fontSize: "13.5px",
+                                    fontWeight: 600,
+                                    color: tokens.fg,
+                                    lineHeight: 1.3,
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  <ProjectBadge slug={p.brand_slug} fallbackLabel={p.brand_name} />
+                                </div>
+                                {domain && (
+                                  <div
+                                    style={{
+                                      fontSize: "11px",
+                                      color: tokens.fgMuted,
+                                      marginTop: "2px",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {domain}
+                                  </div>
+                                )}
+                              </div>
+                              <TrendPill pct={p.trend_pct} />
+                            </div>
+
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              {[
+                                { label: "Today", value: p.today, strong: true },
+                                { label: "Yest.", value: p.yesterday, strong: false },
+                                { label: "7d", value: p.d7, strong: false },
+                                { label: "30d", value: p.d30, strong: true },
+                              ].map((c) => (
+                                <div
+                                  key={c.label}
+                                  style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    background: tokens.bg,
+                                    border: `1px solid ${tokens.borderSubtle}`,
+                                    borderRadius: "8px",
+                                    padding: "6px 4px",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      fontSize: "10px",
+                                      color: tokens.fgMuted,
+                                      textTransform: "uppercase",
+                                      letterSpacing: "0.04em",
+                                      lineHeight: 1.2,
+                                    }}
+                                  >
+                                    {c.label}
+                                  </div>
+                                  <div
+                                    style={{
+                                      fontSize: "15px",
+                                      fontWeight: c.strong ? 700 : 500,
+                                      color: c.strong ? tokens.fg : tokens.fgSecondary,
+                                      fontVariantNumeric: "tabular-nums",
+                                      lineHeight: 1.35,
+                                    }}
+                                  >
+                                    {fmt(c.value)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      }
+
+                      // ── Desktop: unchanged table row ──────────────────────
                       return (
                         <div
                           key={p.brand_slug}
@@ -1020,7 +1122,7 @@ export function PopupSubscriberSection() {
                             gridTemplateColumns: lbCols,
                             gap: "8px",
                             alignItems: "center",
-                            padding: isMobile ? "12px 14px" : "12px 20px",
+                            padding: "12px 20px",
                             borderBottom: `1px solid ${tokens.borderSubtle}`,
                           }}
                         >
@@ -1028,7 +1130,17 @@ export function PopupSubscriberSection() {
                           <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
                             <ProjectAvatar name={p.brand_name || p.brand_slug} color={color} />
                             <div style={{ minWidth: 0 }}>
-                              <div style={{ fontSize: "13px", fontWeight: 600, color: tokens.fg, lineHeight: 1.3 }}>
+                              <div
+                                style={{
+                                  fontSize: "13px",
+                                  fontWeight: 600,
+                                  color: tokens.fg,
+                                  lineHeight: 1.3,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
                                 <ProjectBadge slug={p.brand_slug} fallbackLabel={p.brand_name} />
                               </div>
                               {domain && (
@@ -1048,25 +1160,19 @@ export function PopupSubscriberSection() {
                             </div>
                           </div>
 
-                          {/* Trend (desktop only) */}
-                          {!isMobile && (
-                            <div style={{ display: "flex", justifyContent: "center" }}>
-                              <TrendPill pct={p.trend_pct} />
-                            </div>
-                          )}
+                          <div style={{ display: "flex", justifyContent: "center" }}>
+                            <TrendPill pct={p.trend_pct} />
+                          </div>
 
-                          {/* Today / Yesterday / 7d / 30d */}
                           <span style={{ textAlign: "right", fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
                             {fmt(p.today)}
                           </span>
                           <span style={{ textAlign: "right", fontSize: "13px", color: tokens.fgSecondary, fontVariantNumeric: "tabular-nums" }}>
                             {fmt(p.yesterday)}
                           </span>
-                          {!isMobile && (
-                            <span style={{ textAlign: "right", fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
-                              {fmt(p.d7)}
-                            </span>
-                          )}
+                          <span style={{ textAlign: "right", fontSize: "13px", fontVariantNumeric: "tabular-nums" }}>
+                            {fmt(p.d7)}
+                          </span>
                           <span
                             style={{
                               textAlign: "right",
@@ -1078,17 +1184,14 @@ export function PopupSubscriberSection() {
                             {fmt(p.d30)}
                           </span>
 
-                          {/* Mini sparkline (desktop only) */}
-                          {!isMobile && (
-                            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                              <Sparkline
-                                values={sparkBySlug[p.brand_slug] || []}
-                                color={color}
-                                width={72}
-                                height={26}
-                              />
-                            </div>
-                          )}
+                          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                            <Sparkline
+                              values={sparkBySlug[p.brand_slug] || []}
+                              color={color}
+                              width={72}
+                              height={26}
+                            />
+                          </div>
                         </div>
                       )
                     })}
