@@ -21,8 +21,7 @@ import { getProjectEmailConfig, getEmailSubject } from "../utils/project-email-c
  */
 
 const TARGETS = [
-  { label: "Pepernoot", orderId: "order_01KYNTAYKS4MGZ28YM3J802E4A", paymentMethod: "Bankoverschrijving" },
-  { label: "Kuppens", orderId: "order_01KYNTB3DY8PH6N4B0KGZP7EXS", paymentMethod: "Bankoverschrijving" },
+  { label: "Dršata", orderId: "order_01KZ03NZNQVZAQ9AEW6B8FVR5J", paymentMethod: "Bankovní převod" },
 ]
 
 export default async function sendConfirmationsBankTransfer20260729({ container }: ExecArgs) {

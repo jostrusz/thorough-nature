@@ -52,7 +52,10 @@ export default async function orderPlacedFakturoidHandler({
 
     // ── Retrieve order with relations ──
     const order = await orderService.retrieveOrder(data.id, {
-      relations: ["items", "summary", "shipping_address", "billing_address"],
+      // shipping_methods is required: order.shipping_total is only populated when
+      // the methods are loaded. Without it every invoice silently lost its
+      // "Doprava" line (658 July invoices under-billed by the postage).
+      relations: ["items", "summary", "shipping_address", "billing_address", "shipping_methods"],
     })
 
     if (!order) {
@@ -276,7 +279,15 @@ export default async function orderPlacedFakturoidHandler({
     })
 
     // Add shipping as a line item if shipping_total > 0
-    const shippingTotal = Number((order as any).shipping_total) || 0
+    // Prefer the computed total, but fall back to summing the methods — retrieveOrder
+    // does not always compute shipping_total even with the relation loaded.
+    const shippingTotal =
+      Number((order as any).shipping_total) ||
+      ((order as any).shipping_methods || []).reduce(
+        (sum: number, m: any) => sum + (Number(m.amount) || 0),
+        0
+      ) ||
+      0
     if (shippingTotal > 0) {
       const shippingLine: any = {
         name: "Doprava",
