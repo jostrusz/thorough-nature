@@ -134,8 +134,16 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     }
 
     if (!config) {
-      console.log(`[SupportBox] No config found for to: ${JSON.stringify(toAddresses)}`)
-      return res.status(400).json({ error: "Config not found for email address" })
+      // The MX record hands Resend every address on the domain, so mail can
+      // arrive for a local-part we have no config for — a retired alias, a
+      // typo, or plain spam. That is a permanent condition: retrying delivers
+      // the same unroutable address again. Answering 4xx made Resend retry the
+      // event indefinitely and threaten to disable the endpoint, so acknowledge
+      // it instead and record it in the log for whoever needs to add the config.
+      console.warn(
+        `[SupportBox] No config found for to: ${JSON.stringify(toAddresses)} — acknowledged and dropped`
+      )
+      return res.status(200).json({ ignored: true, reason: "no_config_for_recipient" })
     }
 
     // ── Fetch full email content from Resend API ──

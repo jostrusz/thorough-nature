@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import crypto from "crypto"
 import { MARKETING_MODULE } from "../../../../modules/marketing"
 import type MarketingModuleService from "../../../../modules/marketing/service"
+import { suppressEmail } from "../../../../modules/marketing/utils/suppress"
 
 /**
  * Resend webhook endpoint for the MARKETING module only.
@@ -143,14 +144,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         updates.bounced_at = now
         updates.bounce_reason = data.bounce?.type || data.reason || "hard_bounce"
         if (toEmail) {
-          await service.createMarketingSuppressions({
+          await suppressEmail(service, {
             brand_id: (msg as any).brand_id,
             email: toEmail,
             reason: "bounced_hard",
             source_message_id: msg.id,
             suppressed_at: now,
             metadata: { bounce_type: updates.bounce_reason },
-          } as any)
+          })
           // Flow-executor reads contact.status (not suppression) — flip it so we
           // stop sending to a hard-bounced address.
           await markContactStatus(service, (msg as any).brand_id, toEmail, "bounced")
@@ -161,13 +162,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
         updates.status = "complained"
         updates.complained_at = now
         if (toEmail) {
-          await service.createMarketingSuppressions({
+          await suppressEmail(service, {
             brand_id: (msg as any).brand_id,
             email: toEmail,
             reason: "complained",
             source_message_id: msg.id,
             suppressed_at: now,
-          } as any)
+          })
           // Flow-executor reads contact.status (not suppression) — flip it so we
           // stop sending to an address that filed a spam complaint.
           await markContactStatus(service, (msg as any).brand_id, toEmail, "complained")

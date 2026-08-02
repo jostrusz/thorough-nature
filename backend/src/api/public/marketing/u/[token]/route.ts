@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Pool } from "pg"
 import { MARKETING_MODULE } from "../../../../../modules/marketing"
 import type MarketingModuleService from "../../../../../modules/marketing/service"
+import { suppressEmail } from "../../../../../modules/marketing/utils/suppress"
 import { verifyToken } from "../../../../../modules/marketing/utils/tokens"
 import { hashEmail } from "../../../../../modules/marketing/utils/crypto"
 import { getStrings, type UnsubStrings } from "../../../../../modules/marketing/utils/unsubscribe-i18n"
@@ -94,25 +95,18 @@ async function unsubscribe(
     }
   }
 
-  // ─── 2. Suppression insert (swallow duplicate-key) ────────────────────
+  // ─── 2. Suppression insert (duplicates are a no-op) ───────────────────
   try {
     const service = req.scope.resolve(MARKETING_MODULE) as unknown as MarketingModuleService
-    await service.createMarketingSuppressions({
+    await suppressEmail(service, {
       brand_id: payload.b,
       email,
       reason: "unsubscribed",
       suppressed_at: now,
-    } as any)
+    })
   } catch (err: any) {
-    const msg = String(err?.message || err || "").toLowerCase()
-    const isDuplicate =
-      msg.includes("duplicate key") ||
-      msg.includes("unique constraint") ||
-      err?.code === "23505"
-    if (!isDuplicate) {
-      logger.warn(`[Unsubscribe] suppression insert failed for ${email}: ${err?.message || err}`)
-    }
-    // either way, continue — desired state is already in place if dup
+    logger.warn(`[Unsubscribe] suppression insert failed for ${email}: ${err?.message || err}`)
+    // continue — an unsubscribe must never fail on the visitor's side
   }
 
   // ─── 2b. Eagerly exit any active flow runs for this contact ──────────
