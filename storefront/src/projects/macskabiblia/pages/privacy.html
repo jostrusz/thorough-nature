@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adatvédelmi tájékoztató — Macskabiblia</title>
+<meta name="description" content="Hogyan kezeljük személyes adatait a Macskabiblia könyv megvásárlásakor.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="/kocici-bible-logo.png" type="image/png">
+
+<!-- ═══ FONTS ═══ -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+<style>
+/* ═══ FONTS ═══ */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ═══ CSS VARIABLES — Velvet Dusk ═══ */
+:root {
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
+ --white: #FFFFFF;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
+}
+
+/* ═══ RESET ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ═══ NAVIGATION ═══ */
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
+.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+.nav-logo img { height: 40px; width: auto; }
+.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
+.nav-links a:hover { color: var(--heading); }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--heading); font-weight: 600; }
+.nav-links a.active::after { width: 100%; }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
+.nav-cta::after { display: none !important; }
+.nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
+.nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--heading); }
+.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
+
+@media (max-width: 768px) {
+ .nav-links { display: none; }
+ .nav-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+ .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+}
+
+/* ═══ PAGE CONTENT ═══ */
+.page-header {
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ padding: 56px 20px 48px;
+ text-align: center;
+}
+.page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
+.page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+
+.page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+/* Info boxes */
+.info-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 40px;
+}
+.info-box h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li { padding: 4px 0; }
+.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+
+/* Sections */
+.section-block { margin-bottom: 40px; }
+.section-block h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .section-num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ border-radius: 10px;
+ flex-shrink: 0;
+}
+.section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
+.section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
+.section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
+.section-block strong { color: var(--heading); }
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p { margin: 0; font-size: 15px; }
+
+/* Data table */
+.data-table {
+ width: 100%;
+ border-collapse: collapse;
+ margin: 16px 0;
+ border-radius: 12px;
+ overflow: hidden;
+ border: 1px solid var(--section);
+}
+.data-table th {
+ background: var(--dark);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 600;
+ padding: 12px 16px;
+ text-align: left;
+}
+.data-table td {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--body);
+ padding: 12px 16px;
+ border-bottom: 1px solid var(--section);
+ line-height: 1.5;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:nth-child(even) td { background: var(--light); }
+
+/* Rechten box */
+.rights-box {
+ background: var(--white);
+ border: 2px solid var(--cta);
+ border-radius: 16px;
+ padding: 28px;
+ margin: 24px 0;
+}
+.rights-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 18px;
+ color: var(--heading);
+ margin-bottom: 16px;
+}
+.rights-list {
+ list-style: none;
+ padding: 0;
+}
+.rights-list li {
+ display: flex;
+ align-items: flex-start;
+ gap: 12px;
+ padding: 10px 0;
+ border-bottom: 1px solid var(--section);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.6;
+}
+.rights-list li:last-child { border-bottom: none; }
+.rights-list .icon { flex-shrink: 0; font-size: 18px; }
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
+
+/* ═══ FOOTER ═══ */
+.site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; }
+.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
+.footer-contact a:hover { color: var(--white); }
+.footer-bottom { max-width: 960px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+
+@media (max-width: 768px) {
+ .page-header h1 { font-size: 28px; }
+ .section-block h2 { font-size: 20px; }
+ .data-table { font-size: 13px; }
+ .data-table th, .data-table td { padding: 10px 12px; }
+ .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+ .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 480px) {
+ .page-header h1 { font-size: 24px; }
+ .page-header { padding: 40px 16px 36px; }
+ .page-content { padding: 32px 16px 60px; }
+ .data-table { display: block; overflow-x: auto; }
+}
+</style>
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+</head>
+<body>
+
+<!-- ═══ NAVIGÁCIÓ ═══ -->
+<nav class="site-nav">
+ <div class="nav-inner">
+  <a href="index.html" class="nav-logo">
+   <img src="/kocici-bible-logo.png" alt="Macskabiblia" width="124" height="56">
+
+  </a>
+  <div class="nav-links">
+   <a href="verzending.html">Szállítás</a>
+   <a href="voorwaarden.html">ÁSZF</a>
+   <a href="privacy.html" class="active">Adatvédelem</a>
+   <a href="contact.html">Kapcsolat</a>
+   <a href="index.html" class="nav-cta">Megrendelem &rarr;</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+   <span></span><span></span><span></span>
+  </button>
+ </div>
+</nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="verzending.html">Szállítás</a>
+ <a href="voorwaarden.html">ÁSZF</a>
+ <a href="privacy.html">Adatvédelem</a>
+ <a href="contact.html">Kapcsolat</a>
+ <a href="index.html" class="nav-cta-mobile">Megrendelem &rarr;</a>
+</div>
+
+<!-- ═══ FEJLÉC ═══ -->
+<header class="page-header">
+ <div class="badge">🔒 GDPR</div>
+ <h1>Adatvédelmi tájékoztató</h1>
+ <p>Hogyan kezeljük személyes adatait — átláthatóan és a jogszabályoknak megfelelően.</p>
+</header>
+
+<!-- ═══ TARTALOM ═══ -->
+<div class="page-content">
+
+ <div class="info-box">
+  <h3>📌 Összefoglaló</h3>
+  <ul>
+   <li>Csak a megrendeléshez és a kézbesítéshez szükséges adatokat gyűjtjük</li>
+   <li>Fizetési adatait tanúsított fizetési szolgáltatók kezelik biztonságosan</li>
+   <li>Adatait soha nem adjuk el harmadik feleknek</li>
+   <li>Ön teljes körű ellenőrzést gyakorol az adatai felett (hozzáférés, helyesbítés, törlés)</li>
+   <li>Betartjuk a GDPR és a vonatkozó adatvédelmi jogszabályok előírásait</li>
+  </ul>
+ </div>
+
+ <!-- 1. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">1</span> Az adatkezelő</h2>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praha, Cseh Köztársaság</p>
+  <p>Cégjegyzékszám (IČO): 06259928 | Adószám (DIČ): CZ06259928</p>
+  <p>E-mail: <a href="mailto:nagy@macskabiblia-konyv.hu" style="color: var(--cta);">nagy@macskabiblia-konyv.hu</a> | Telefon: <a href="tel:+420732915755" style="color: var(--cta);">+420 732 915 755</a></p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 2. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">2</span> Milyen személyes adatokat kezelünk?</h2>
+  <p>A megrendelés leadásakor a következő adatokat gyűjtjük és kezeljük:</p>
+
+  <table class="data-table">
+   <thead>
+    <tr>
+     <th>Adat</th>
+     <th>Cél</th>
+     <th>Megőrzési idő</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td>Vezeték- és keresztnév</td><td>Kézbesítés &amp; számlázás</td><td>10 év (adójogi kötelezettség)</td></tr>
+    <tr><td>E-mail-cím</td><td>Rendelés-visszaigazolás, ügyfélszolgálat</td><td>Leiratkozásig</td></tr>
+    <tr><td>Telefonszám</td><td>Kézbesítés (futárszolgálat)</td><td>A kézbesítés után 30 nap</td></tr>
+    <tr><td>Címadatok</td><td>Kézbesítés &amp; számlázás</td><td>10 év (adójogi kötelezettség)</td></tr>
+    <tr><td>Fizetési adatok</td><td>A fizetés feldolgozása</td><td>Nem tároljuk*</td></tr>
+    <tr><td>IP-cím</td><td>Csalásmegelőzés, elemzés</td><td>12 hónap</td></tr>
+   </tbody>
+  </table>
+
+  <p style="font-size: 14px; color: var(--muted);">* A teljes fizetési adatokat (kártyaszám, bankszámlaszám) kizárólag tanúsított fizetési szolgáltatók kezelik (bankkártyás fizetési szolgáltató, PayPal); ezeket mi nem tároljuk.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 3. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">3</span> Mire használjuk az adatait?</h2>
+  <ul>
+   <li>A megrendelés feldolgozása és feladása</li>
+   <li>Rendelés-visszaigazolás és kézbesítési információk küldése</li>
+   <li>Ügyfélszolgálat és a kérdések megválaszolása</li>
+   <li>Számlázás és könyvelés (jogszabályi kötelezettség)</li>
+   <li>A weboldal és a felhasználói élmény fejlesztése (elemzés)</li>
+   <li>Marketingkommunikáció (kizárólag az Ön hozzájárulásával)</li>
+   <li>Csalásmegelőzés és biztonság</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 4. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Az adatkezelés jogalapjai</h2>
+  <ul>
+   <li><strong>Szerződés teljesítése</strong> (GDPR 6. cikk (1) bekezdés b) pont) – a megrendelés feldolgozása és kézbesítése</li>
+   <li><strong>Jogi kötelezettség</strong> (GDPR 6. cikk (1) bekezdés c) pont) – számlázás és adózási célok</li>
+   <li><strong>Hozzájárulás</strong> (GDPR 6. cikk (1) bekezdés a) pont) – marketing és hírlevél</li>
+   <li><strong>Jogos érdek</strong> (GDPR 6. cikk (1) bekezdés f) pont) – csalásmegelőzés és webelemzés</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 5. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">5</span> Sütik (cookie-k) és nyomon követés</h2>
+  <p>Weboldalunk a következő sütiket és nyomonkövetési eszközöket használja:</p>
+
+  <table class="data-table">
+   <thead>
+    <tr>
+     <th>Eszköz</th>
+     <th>Cél</th>
+     <th>Típus</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><td>Bankkártyás fizetési szolgáltató</td><td>A fizetés feldolgozása</td><td>Feltétlenül szükséges</td></tr>
+    <tr><td>PayPal</td><td>A fizetés feldolgozása</td><td>Feltétlenül szükséges</td></tr>
+    <tr><td>Facebook Pixel (Meta)</td><td>Hirdetésmérés &amp; remarketing</td><td>Marketing (hozzájárulással)</td></tr>
+    <tr><td>Munkamenet-süti</td><td>A kosár megjegyzése</td><td>Funkcionális</td></tr>
+   </tbody>
+  </table>
+
+  <div class="highlight-box">
+   <p><strong>Marketingsütik:</strong> A Facebook Pixel kizárólag a sütisávon keresztül megadott hozzájárulás alapján kerül elhelyezésre. Hozzájárulását bármikor visszavonhatja.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 6. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">6</span> Adattovábbítás harmadik feleknek</h2>
+  <p>Adatait kizárólag a következő szolgáltatókkal osztjuk meg, szolgáltatásaink nyújtása érdekében:</p>
+  <ul>
+   <li><strong>Fizetési szolgáltatók (bankkártyás fizetés, PayPal)</strong> — a fizetés feldolgozása</li>
+   <li><strong>Dextrum Fulfillment a.s.</strong> — a könyvek raktározása és feladása</li>
+   <li><strong>Packeta</strong> — a csomag kézbesítése</li>
+   <li><strong>E-kereskedelmi platform</strong> — a weboldal és a pénztár üzemeltetése</li>
+   <li><strong>Fakturoid</strong> — számlázás és könyvelés</li>
+   <li><strong>Facebook (Meta)</strong> — hirdetésmérés (kizárólag hozzájárulással)</li>
+  </ul>
+  <p>Adatait <strong>soha nem adjuk el</strong> harmadik feleknek. Minden adatfeldolgozó szerződésben vállalja, hogy adatait kizárólag a megállapodás szerinti célokra használja.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 7. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">7</span> Adatbiztonság</h2>
+  <p>Adatai biztonságát komolyan vesszük, és megfelelő intézkedéseket alkalmazunk:</p>
+  <ul>
+   <li>SSL/TLS titkosítás minden adatátvitelhez (HTTPS)</li>
+   <li>Biztonságos szerverek uniós adatközpontokban</li>
+   <li>Korlátozott hozzáférés a személyes adatokhoz („need-to-know" elv)</li>
+   <li>Rendszeres biztonsági frissítések és monitorozás</li>
+   <li>PCI-DSS-nek megfelelő fizetésfeldolgozás tanúsított fizetési szolgáltatókon keresztül</li>
+   <li>Álnevesítés és adattakarékosság, ahol ez lehetséges</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 8. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">8</span> Az Ön GDPR szerinti jogai</h2>
+
+  <div class="rights-box">
+   <h3>Önt bármikor megilletik az alábbi jogok:</h3>
+   <ul class="rights-list">
+    <li><span class="icon">👁</span> <strong>Hozzáférési jog</strong> — tájékoztatást kérhet arról, milyen adatait kezeljük</li>
+    <li><span class="icon">✏️</span> <strong>Helyesbítéshez való jog</strong> — a pontatlan vagy hiányos adatok javítása</li>
+    <li><span class="icon">🗑</span> <strong>Törléshez való jog</strong> — az „elfeledtetéshez való jog"</li>
+    <li><span class="icon">📦</span> <strong>Adathordozhatósághoz való jog</strong> — az adatok átvitele másik szolgáltatóhoz</li>
+    <li><span class="icon">🚫</span> <strong>Tiltakozáshoz való jog</strong> — a jogos érdeken alapuló adatkezelés ellen</li>
+    <li><span class="icon">⏸</span> <strong>Az adatkezelés korlátozásához való jog</strong> — meghatározott esetekben</li>
+    <li><span class="icon">↩️</span> <strong>A hozzájárulás visszavonásához való jog</strong> — marketing vagy sütik esetén</li>
+   </ul>
+  </div>
+
+  <p>Jogai gyakorlásához írjon a <a href="mailto:nagy@macskabiblia-konyv.hu" style="color: var(--cta);">nagy@macskabiblia-konyv.hu</a> címre. A kérelem beérkezésétől számított <strong>30 napon belül</strong> válaszolunk.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 9. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">9</span> Megőrzési idő</h2>
+  <p>Személyes adatait csak a feltétlenül szükséges ideig őrizzük meg:</p>
+  <ul>
+   <li><strong>Rendelési adatok és számlák:</strong> 10 év (adójogi kötelezettség)</li>
+   <li><strong>Ügyfélkommunikáció:</strong> az utolsó kapcsolatfelvételtől számított 3 év</li>
+   <li><strong>Hírlevél-adatok:</strong> a leiratkozásig + 1 hónap az adminisztratív feldolgozásra</li>
+   <li><strong>Webstatisztikák:</strong> 26 hónap</li>
+   <li><strong>Technikai naplók (IP-címek):</strong> legfeljebb 12 hónap</li>
+  </ul>
+  <p>A megőrzési idő lejárta után adatait biztonságosan töröljük vagy anonimizáljuk.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 10. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">10</span> Hírlevél és marketing</h2>
+  <p>Ha feliratkozott hírlevelünkre, e-mail-címét a következőkről szóló tájékoztatásra használjuk:</p>
+  <ul>
+   <li>új termékek és ajánlatok,</li>
+   <li>feliratkozóknak szóló kizárólagos kedvezmények,</li>
+   <li>macskákkal kapcsolatos tippek és tanácsok.</li>
+  </ul>
+  <p>Bármikor <strong>díjmentesen és egyszerűen leiratkozhat</strong> a hírlevelekben található hivatkozással, vagy a <a href="mailto:nagy@macskabiblia-konyv.hu" style="color: var(--cta);">nagy@macskabiblia-konyv.hu</a> címre küldött e-maillel.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 11. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">11</span> Felügyeleti hatóság</h2>
+  <p>Ha nem elégedett azzal, ahogyan a személyes adatait kezeljük, panasszal élhet az illetékes adatvédelmi felügyeleti hatóságnál.</p>
+  <!-- PRÁVNÍ REVIZE: původně odkaz na české právo, doplnit maďarský ekvivalent -->
+  <div class="highlight-box">
+   <p>Panaszát benyújthatja az adatkezelő székhelye szerinti ország adatvédelmi felügyeleti hatóságához, illetve a szokásos tartózkodási helye vagy a feltételezett jogsértés helye szerinti tagállam felügyeleti hatóságához. A bírósági jogorvoslathoz való joga ettől függetlenül fennáll.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 12. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">12</span> Kiskorúak</h2>
+  <p>Weboldalunk és termékeink nem 16 év alatti személyeknek szólnak. Tudatosan nem gyűjtünk személyes adatokat kiskorúaktól.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 13. szakasz -->
+ <div class="section-block">
+  <h2><span class="section-num">13</span> A tájékoztató módosítása</h2>
+  <p>Jelen adatvédelmi tájékoztatót időről időre frissíthetjük. A legfrissebb változat mindig elérhető a weboldalunkon. A lényeges változásokról e-mailben tájékoztatjuk Önt.</p>
+ </div>
+
+ <div class="info-box" style="margin-top: 48px; background: linear-gradient(135deg, var(--light), var(--section));">
+  <h3>📅 Utolsó frissítés</h3>
+  <p>Jelen adatvédelmi tájékoztató utolsó frissítésének dátuma: <strong>2025. december 27.</strong></p>
+ </div>
+
+</div>
+
+<!-- ═══ LÁBLÉC ═══ -->
+<footer class="site-footer">
+ <div class="footer-inner">
+  <div class="footer-brand">
+  </div>
+  <div class="footer-links">
+   <a href="voorwaarden.html">ÁSZF</a>
+   <a href="verzending.html">Szállítás &amp; visszaküldés</a>
+   <a href="privacy.html">Adatvédelem</a>
+   <a href="contact.html">Kapcsolat</a>
+  </div>
+  <div class="footer-contact">
+   <a href="mailto:nagy@macskabiblia-konyv.hu">📧 nagy@macskabiblia-konyv.hu</a>
+   <a href="tel:+420732915755">📞 +420 732 915 755</a>
+  </div>
+ </div>
+ <div class="footer-bottom">
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praha • IČO: 06259928 • DIČ: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Minden jog fenntartva.</span>
+ </div>
+</footer>
+
+<script>
+function toggleMobileMenu() {
+ document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>
