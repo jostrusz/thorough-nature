@@ -10,8 +10,8 @@ var PROJECT_CONFIG = {
     "name": "Mačacia biblia",
     "handle": "macacia-biblia",
     "variantId": "variant_01KZ3AQC81MF93JQ9DRADA9E9T",
-    "price": 22,
-    "originalPrice": 28,
+    "price": 24,
+    "originalPrice": 34,
     "currency": "EUR",
     "thumbnail": "https://www.macaciabiblia.sk/kocici-bible-cover.png"
   },
@@ -26,8 +26,8 @@ var PROJECT_CONFIG = {
   "bundleOptions": [
     {
       "qty": 1,
-      "price": 22,
-      "originalPrice": 28,
+      "price": 24,
+      "originalPrice": 34,
       "label": "1 kniha + 3× bonusy",
       "sublabel": "Pre seba",
       "badge": "NAJPREDÁVANEJŠIE",
@@ -36,8 +36,8 @@ var PROJECT_CONFIG = {
     },
     {
       "qty": 2,
-      "price": 36,
-      "originalPrice": 56,
+      "price": 40,
+      "originalPrice": 68,
       "label": "2 knihy + 3× bonusy",
       "sublabel": "Pre mňa a darček pre blízkych",
       "badge": "NAJOBĽÚBENEJŠIE",
@@ -46,8 +46,8 @@ var PROJECT_CONFIG = {
     },
     {
       "qty": 3,
-      "price": 48,
-      "originalPrice": 84,
+      "price": 54,
+      "originalPrice": 102,
       "label": "3 knihy + 3× bonusy",
       "sublabel": "Pre celú rodinu mačkárov",
       "badge": "NAJVIAC UŠETRÍTE",
@@ -56,8 +56,8 @@ var PROJECT_CONFIG = {
     },
     {
       "qty": 4,
-      "price": 60,
-      "originalPrice": 112,
+      "price": 68,
+      "originalPrice": 136,
       "label": "4 knihy + 3× bonusy",
       "sublabel": "Obdarujte všetkých mačacích kamarátov",
       "badge": "NAJLEPŠIA HODNOTA",

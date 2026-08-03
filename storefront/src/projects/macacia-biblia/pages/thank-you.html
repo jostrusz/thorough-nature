@@ -689,7 +689,7 @@ body { background: var(--bg); }
     </div>
     <div class="ty-order-total">
       <span class="ty-order-total-label">Zaplatené</span>
-      <span class="ty-order-total-price" id="ty-total-price">22&nbsp;€</span>
+      <span class="ty-order-total-price" id="ty-total-price">24&nbsp;€</span>
     </div>
   </div>
 
@@ -817,7 +817,7 @@ body { background: var(--bg); }
     try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nedajú sa parsovať zákaznícke dáta'); }
   }
 
-  // Formátování částky: 550 -> "22 €", 1199 -> "36 €"
+  // Formátování částky: 550 -> "24 €", 1199 -> "36 €"
   function formatCzk(amount) {
     var n = Math.round(Number(amount) || 0);
     var s = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');

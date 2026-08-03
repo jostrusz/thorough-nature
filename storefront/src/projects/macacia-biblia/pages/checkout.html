@@ -2393,7 +2393,7 @@ body {
         <div class="msb-subtitle" id="msb-subtitle">Paperback · 1× kniha</div>
       </div>
       <div class="msb-price-col">
-        <div class="msb-price" id="msb-price">22&nbsp;€</div>
+        <div class="msb-price" id="msb-price">24&nbsp;€</div>
         <div class="msb-items-label" id="msb-items-label">Celkom</div>
       </div>
       <svg class="msb-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -2404,14 +2404,14 @@ body {
       <!-- Hlavní produkt -->
       <div class="msb-line" id="msb-product-line">
         <span class="msb-line-label" id="msb-product-name">Ma&ccaron;acia biblia</span>
-        <span class="msb-line-val" id="msb-product-price">22&nbsp;€</span>
+        <span class="msb-line-val" id="msb-product-price">24&nbsp;€</span>
       </div>
       <!-- Order bumpy (dynamicky) -->
       <div id="msb-bumps"></div>
       <!-- Medzis&uacute;&ccaron;et -->
       <div class="msb-line" id="msb-subtotal-line" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(194,123,160,0.18);">
         <span class="msb-line-label">Medzis&uacute;&ccaron;et</span>
-        <span class="msb-line-val" id="msb-subtotal">22&nbsp;€</span>
+        <span class="msb-line-val" id="msb-subtotal">24&nbsp;€</span>
       </div>
       <!-- DPH -->
       <div class="msb-line" id="msb-tax-line">
@@ -2436,7 +2436,7 @@ body {
       <!-- Celkom -->
       <div class="msb-line total-line">
         <span class="msb-line-label">Celkom</span>
-        <span class="msb-line-val" id="msb-total">22&nbsp;€</span>
+        <span class="msb-line-val" id="msb-total">24&nbsp;€</span>
       </div>
       <div class="msb-tax-note">Vr&aacute;tane DPH</div>
     </div>
@@ -2802,7 +2802,7 @@ body {
         <div class="checkout-btn-wrap animate-in animate-in-delay-3">
           <button type="submit" class="checkout-btn" id="submit-btn">
             <span class="spinner"></span>
-            <span class="btn-text">Dokon&ccaron;i&tcaron; objedn&aacute;vku — 22 €</span>
+            <span class="btn-text">Dokon&ccaron;i&tcaron; objedn&aacute;vku — 24 €</span>
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
           <p class="btn-subtext">Budete presmerovan&iacute; na zabezpe&ccaron;en&uacute; platobn&uacute; str&aacute;nku.</p>
@@ -2842,7 +2842,7 @@ body {
           <div class="summary-product-name" id="desktop-product-name">Ma&ccaron;acia biblia</div>
           <div class="summary-product-author">Michal Peterka</div>
           <div class="summary-product-format">Paperback</div>
-          <div class="summary-product-price" id="desktop-product-price">22&nbsp;€</div>
+          <div class="summary-product-price" id="desktop-product-price">24&nbsp;€</div>
         </div>
       </div>
 
@@ -2863,7 +2863,7 @@ body {
 
       <div class="summary-line" id="summary-subtotal">
         <span>Medzis&uacute;&ccaron;et</span>
-        <span id="subtotal-value">22&nbsp;€</span>
+        <span id="subtotal-value">24&nbsp;€</span>
       </div>
       <div class="summary-line" id="summary-tax">
         <span id="tax-label">DPH (0%)</span>
@@ -2885,7 +2885,7 @@ body {
       </div>
       <div class="summary-line total" id="summary-total">
         <span>Celkom</span>
-        <span class="price" id="desktop-total-price">22&nbsp;€</span>
+        <span class="price" id="desktop-total-price">24&nbsp;€</span>
       </div>
       <div id="summary-tax-note" style="font-size:11px;color:#888;text-align:right;margin-top:4px;margin-bottom:8px;">
         Vr&aacute;tane DPH
@@ -3140,7 +3140,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   }
 
   /* ─── FUNKCE PRO DYNAMICKÝ ORDER SUMMARY ─── */
-  // Formátovanie cien v slovenskom štýle (22 €)
+  // Formátovanie cien v slovenskom štýle (24 €)
   function formatPrice(amount) {
     if (amount === null || amount === undefined) return '0 €';
     var num = parseFloat(amount);
@@ -4993,17 +4993,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
     'essox': 'LOAN_ESSOX',
   };
 
-  // Czech bank sub-methods for "Bankov&yacute; prevod" expandable group
+  // Slovak bank sub-methods for "Bankový prevod" expandable group
   var BANK_METHODS = {
     'bank_sk_slsp':  { code: 'BANK_SK_SLSP',  label: 'Slovenská sporiteľňa', desc: 'Online prevod', icon: '/icons/slsp.svg' },
     'bank_sk_tb':    { code: 'BANK_SK_TB_P',  label: 'Tatra banka',          desc: 'Online prevod', icon: '/icons/tatra-banka.svg' },
     'bank_sk_vub':   { code: 'BANK_SK_VUB_P', label: 'VÚB banka',            desc: 'Online prevod', icon: '/icons/vub-banka.svg' },
-    'bank_sk_csob':  { code: 'BANK_SK_CSOB',  label: 'Slovensk&aacute; sporite&lcaron;&ncaron;a',                 desc: 'Online prevod', icon: '/icons/csob.svg' },
+    'bank_sk_csob':  { code: 'BANK_SK_CSOB',  label: 'ČSOB',                 desc: 'Online prevod', icon: '/icons/csob.svg' },
     'bank_sk_365':   { code: 'BANK_SK_365B',  label: '365.bank',             desc: 'Online prevod', icon: '/icons/365bank.png' },
-    'bank_sk_fb':    { code: 'BANK_SK_FB',    label: 'Po&scaron;tov&aacute; banka',            desc: 'Online prevod', icon: '/icons/fio-banka.svg' },
-    'bank_sk_mb':    { code: 'BANK_SK_MB',    label: 'UniCredit Bank',                desc: 'Online prevod', icon: '/icons/mbank.svg' },
+    'bank_sk_fb':    { code: 'BANK_SK_FB',    label: 'Fio banka',            desc: 'Online prevod', icon: '/icons/fio-banka.svg' },
+    'bank_sk_mb':    { code: 'BANK_SK_MB',    label: 'mBank',                desc: 'Online prevod', icon: '/icons/mbank.svg' },
     'bank_sk_pb':    { code: 'BANK_SK_PB',    label: 'Prima banka',          desc: 'Online prevod', icon: '/icons/prima-banka.png' },
-    'bank_sk_uc':    { code: 'BANK_SK_UC',    label: '365.bank',       desc: 'Online prevod', icon: '/icons/unicredit.svg' },
+    'bank_sk_uc':    { code: 'BANK_SK_UC',    label: 'UniCredit Bank',       desc: 'Online prevod', icon: '/icons/unicredit.svg' },
     'bank_sk_other': { code: 'BANK_SK_OTHER', label: 'Iná banka',            desc: 'Bankový prevod', icon: '/icons/bank-generic.svg' },
   };
   var BANK_CODES = Object.keys(BANK_METHODS);
@@ -5011,16 +5011,16 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   // ═══ Dynamic CZ bank registry — tiles sourced from gateway config (admin) ═══
   // Canonical bank identity → per-provider method code (Comgate bank_sk_*).
   // PayU has no Slovak PBL, so the payu key stays null across the board.
-  var BANKS = [
+  var CZ_BANK_REGISTRY = [
     { key: 'slsp', label: 'Slovenská sporiteľňa', icon: '/icons/slsp.svg',        comgate: 'bank_sk_slsp', payu: null, popular: true },
     { key: 'tb',   label: 'Tatra banka',          icon: '/icons/tatra-banka.svg', comgate: 'bank_sk_tb',   payu: null, popular: true },
     { key: 'vub',  label: 'VÚB banka',            icon: '/icons/vub-banka.svg',   comgate: 'bank_sk_vub',  payu: null, popular: true },
-    { key: 'csob', label: 'Slovensk&aacute; sporite&lcaron;&ncaron;a',                 icon: '/icons/csob.svg',        comgate: 'bank_sk_csob', payu: null },
+    { key: 'csob', label: 'ČSOB',                 icon: '/icons/csob.svg',        comgate: 'bank_sk_csob', payu: null },
     { key: '365',  label: '365.bank',             icon: '/icons/365bank.png',     comgate: 'bank_sk_365',  payu: null },
-    { key: 'fio',  label: 'Po&scaron;tov&aacute; banka',            icon: '/icons/fio-banka.svg',   comgate: 'bank_sk_fb',   payu: null },
-    { key: 'mb',   label: 'UniCredit Bank',                icon: '/icons/mbank.svg',       comgate: 'bank_sk_mb',   payu: null },
+    { key: 'fio',  label: 'Fio banka',            icon: '/icons/fio-banka.svg',   comgate: 'bank_sk_fb',   payu: null },
+    { key: 'mb',   label: 'mBank',                icon: '/icons/mbank.svg',       comgate: 'bank_sk_mb',   payu: null },
     { key: 'pb',   label: 'Prima banka',          icon: '/icons/prima-banka.png', comgate: 'bank_sk_pb',   payu: null },
-    { key: 'uc',   label: '365.bank',       icon: '/icons/unicredit.svg',   comgate: 'bank_sk_uc',   payu: null },
+    { key: 'uc',   label: 'UniCredit Bank',       icon: '/icons/unicredit.svg',   comgate: 'bank_sk_uc',   payu: null },
   ];
   // Active tiles collected from /store/payment-options: key → {method, provider, provider_id}
   var czBankTiles = {};
