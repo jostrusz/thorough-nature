@@ -2557,7 +2557,7 @@ body {
             <div class="field-error">Zadejte platné telefonní číslo</div>
             <div class="phone-preview" id="phone-preview"></div>
             <div class="phone-warning" id="phone-warning">
-              <div class="phone-warning-text">⚠ Toto číslo se nezdá být platné. Zkontrolujte, zda je správné.</div>
+              <div class="phone-warning-text">⚠ Tohle číslo nám nesedí. Mrkněte, jestli je správně.</div>
               <div class="phone-warning-actions">
                 <button type="button" class="phone-warning-confirm" id="phone-warning-confirm">Ano, je správné</button>
                 <button type="button" class="phone-warning-edit" id="phone-warning-edit">Upravit</button>
@@ -2805,7 +2805,7 @@ body {
             <span class="btn-text">Dokončit objednávku — 550&nbsp;Kč</span>
           </button>
           <div id="submit-validation-msg" class="submit-validation-msg" style="display:none;"></div>
-          <p class="btn-subtext">Budete přesměrováni na zabezpečenou platební stránku.</p>
+          <p class="btn-subtext">Přesměrujeme vás na zabezpečenou platební stránku.</p>
 
           <!-- Trust badges -->
           <div class="checkout-trust">
@@ -2895,7 +2895,7 @@ body {
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
         <div class="title">100% Záruka vrácení peněz</div>
-        <div class="desc">Nesedne vám? Do 30 dnů vám vrátíme celou částku. Ptát se nebudeme.</div>
+        <div class="desc">Nesedne vám? <strong>Do 30 dnů vám vrátíme celou částku.</strong> <em>Ptát se nebudeme.</em></div>
       </div>
 
       <!-- Informace o dopravě -->
@@ -2954,7 +2954,7 @@ body {
     Rybná 716/24, Staré Město, 110 00 Praha, Česká republika<br>
     IČO: 06259928 · DIČ: CZ06259928<br>
     Knihy odesíláme z našeho skladu po celé České republice.<br>
-    Něco nesedí? Napište nám: <a href="mailto:peterka@kocicibible.cz"><strong>peterka@kocicibible.cz</strong></a><br>
+    <strong>Něco nesedí?</strong> Napište nám: <a href="mailto:peterka@kocicibible.cz"><strong>peterka@kocicibible.cz</strong></a><br>
     Odpovídáme do 24 hodin.
   </div>
   <div class="checkout-footer-links">
@@ -5895,17 +5895,17 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
         : cardProvider === 'comgate' ? 'Comgate'
         : 'Mollie';
       subtext.textContent = cardProvider === 'comgate'
-        ? 'Budete přesměrováni na zabezpečenou platbu kartou.'
+        ? 'Přesměrujeme vás na zabezpečenou platbu kartou.'
         : 'Údaje vaší karty jsou bezpečně zpracovány přes ' + providerName + '.';
     } else if (KLARNA_CODES.indexOf(selectedMethod) !== -1) {
-      subtext.textContent = 'Budete přesměrováni na Klarna k dokončení platby.';
+      subtext.textContent = 'Přesměrujeme vás na Klarnu k dokončení platby.';
     } else if (BANK_CODES.indexOf(selectedMethod) !== -1) {
       var bankName = BANK_METHODS[selectedMethod] ? BANK_METHODS[selectedMethod].label : 'banku';
       subtext.textContent = 'Budete přesměrováni na platbu přes ' + bankName + '.';
     } else if (selectedMethod === 'cod') {
       subtext.textContent = 'Zaplatíte při převzetí zásilky. Poplatek +30 Kč.';
     } else {
-      subtext.textContent = 'Budete přesměrováni na zabezpečenou platební stránku.';
+      subtext.textContent = 'Přesměrujeme vás na zabezpečenou platební stránku.';
     }
 
     // Update trust badge provider text
