@@ -215,6 +215,29 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "4.1 MB",
     },
   ],
+  // Mačacia biblia (SK) — rovnaké 3 bonusové e-booky ako CZ edícia.
+  // POZOR: PDF súbory sú zatiaľ v češtine, slovenské preklady ešte nevznikli.
+  // Po ich nahratí na MinIO stačí vymeniť `key` nižšie.
+  'macacia-biblia': [
+    {
+      key: "e-books/Dlouhovekost-zacina-v-kocici-misce.pdf",
+      title: "Dlhovekosť začína v mačacej miske",
+      description: "E-book (PDF)",
+      size: "1.9 MB",
+    },
+    {
+      key: "e-books/Hrava-kocka.pdf",
+      title: "Hravá mačka",
+      description: "E-book (PDF)",
+      size: "1.0 MB",
+    },
+    {
+      key: "e-books/Kocici-SOS-100-problemu-100-reseni.pdf",
+      title: "Mačacie SOS: 100 Problémov, 100 Riešení",
+      description: "E-book (PDF)",
+      size: "4.1 MB",
+    },
+  ],
   // Suelta lo que te destruye (ES) — VYPNUTO, dokud nebudou PDF na MinIO.
   // Prázdné pole = subscriber projekt přeskočí a NEoznačí objednávku ebook_sent,
   // takže po nahrání souborů půjdou e-booky doposlat přes resend_ebooks.
@@ -272,6 +295,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'pusti-to-sk': process.env.PUSTI_TO_SK_STOREFRONT_URL || "https://www.pustitocotanici.sk",
   'engedd-el': process.env.EE_STOREFRONT_URL || "https://www.engeddelkonyv.hu",
   'kocici-bible': process.env.KB_STOREFRONT_URL || "https://www.kocicibible.cz",
+  'macacia-biblia': process.env.MC_STOREFRONT_URL || "https://www.macaciabiblia.sk",
   'lache-livre': process.env.FR_STOREFRONT_URL || "https://www.lacheprise-livre.fr",
   suelta: process.env.ES_STOREFRONT_URL || "https://www.sueltaloquetedestruye.es",
 }
@@ -292,6 +316,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
   'kocici-bible': 'Vaše 3 bonusové e-booky jsou ke stažení',
+  'macacia-biblia': 'Vaše 3 bonusové e-booky sú na stiahnutie',
   'lache-livre': 'Tes e-books sont prêts ! 📖',
   suelta: '¡Tus e-books están listos! 📖',
 }
@@ -309,6 +334,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'zycie-zaslugy': 'tam',
   'zivot-zaslugy': 'tam',
   'kocici-bible': 'tam',
+  'macacia-biblia': 'tam',
   'odpust-knizka': 'tam',
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',
