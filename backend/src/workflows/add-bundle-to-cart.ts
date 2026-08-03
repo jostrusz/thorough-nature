@@ -23,6 +23,15 @@ import {
  * extracts tax from within the price instead of adding it on top.
  */
 const BUNDLE_PRICING: Record<string, Record<number, number>> = {
+  // Mačacia biblia — Slovak edition of Kočičí bible (macaciabiblia.sk).
+  // Czech ladder 550/899/1199/1499 Kč converted at the July ECB average
+  // (24.2073 CZK/EUR) and rounded to whole euros.
+  "macacia-biblia": {
+    1: 22,    // €22 incl. DPH
+    2: 36,    // €36 (save €8)
+    3: 48,    // €48 (save €18)
+    4: 60,    // €60 (save €28)
+  },
   // Lass Los Buch — "Lass los, was dich kaputt macht" (DE/AT/LU)
   "lass-los-was-dich-kaputt-macht": {
     1: 35,    // €35.00 incl. tax

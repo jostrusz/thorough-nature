@@ -193,6 +193,17 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'cs',
     smsDispatchTemplate: 'Psi superzivot: Zasilka odeslana. Sledovaci odkaz: {url} podpora@psi-superzivot.cz',
   },
+  // Slovak edition of Kočičí bible. Same author persona, .sk address —
+  // without its own entry it would fall through to DEFAULT_CONFIG and Slovak
+  // buyers would get Dutch e-mails.
+  'macacia-biblia': {
+    replyTo: 'peterka@macaciabiblia.sk',
+    fromName: 'Michal Peterka - Mačacia biblia',
+    fromEmail: 'Michal Peterka - Mačacia biblia <peterka@macaciabiblia.sk>',
+    project: 'macacia-biblia',
+    locale: 'sk',
+    smsDispatchTemplate: 'Macacia biblia: Zasielka odoslana. Sledovaci odkaz: {url} peterka@macaciabiblia.sk',
+  },
   'kocici-bible': {
     replyTo: 'peterka@kocicibible.cz',
     fromName: 'Michal Peterka - Kočičí bible',

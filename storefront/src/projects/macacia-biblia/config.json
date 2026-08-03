@@ -1,0 +1,87 @@
+{
+  "slug": "macacia-biblia",
+  "name": "Mačacia biblia",
+  "domain": "macaciabiblia.sk",
+  "locale": "sk",
+  "defaultCountry": "SK",
+  "defaultPhonePrefix": "421",
+  "phonePrefixByCountry": {
+    "SK": "421"
+  },
+  "salesChannelName": "Macacia Biblia",
+  "medusaUrl": "https://www.marketing-hq.eu",
+  "publishableApiKey": "pk_6b4c635fd2761f315b9329419ede0f8d2bfa53095b873f2ea31e2b49a2012379",
+  "facebookPixelId": "",
+  "regions": {
+    "SK": "reg_01KWVAZVNATPX01HH77MYWKG3M"
+  },
+  "mainProduct": {
+    "name": "Mačacia biblia",
+    "handle": "macacia-biblia",
+    "variantId": "variant_01KZ3AQC81MF93JQ9DRADA9E9T",
+    "price": 22,
+    "currency": "EUR",
+    "thumbnail": "https://www.macaciabiblia.sk/kocici-bible-cover.png"
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "EUR"
+  },
+  "bundleOptions": [
+    {
+      "qty": 1,
+      "price": 22,
+      "label": "1 kniha + 3× bonusy",
+      "sublabel": "Pro sebe",
+      "badge": "NEJPRODÁVANĚJŠÍ",
+      "save": 0
+    },
+    {
+      "qty": 2,
+      "price": 36,
+      "label": "2 knihy + 3× bonusy",
+      "sublabel": "Pro mě a dárek pro blízké",
+      "badge": "NEJOBLÍBENĚJŠÍ",
+      "save": 8,
+      "savings": 8
+    },
+    {
+      "qty": 3,
+      "price": 48,
+      "label": "3 knihy + 3× bonusy",
+      "sublabel": "Pro celou rodinu koťátkářů",
+      "badge": "NEJVÍC UŠETŘÍTE",
+      "save": 18,
+      "savings": 18
+    },
+    {
+      "qty": 4,
+      "price": 60,
+      "label": "4 knihy + 3× bonusy",
+      "sublabel": "Obdarujte všechny kočičí kámoše",
+      "badge": "NEJLEPŠÍ HODNOTA",
+      "save": 28,
+      "savings": 28
+    }
+  ],
+  "mollieProfileId": "",
+  "packetaApiKey": "cbb760f552ef87b3",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "upsell": "upsell.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  },
+  "upsellProducts": [],
+  "orderBumpEnabled": false
+}
