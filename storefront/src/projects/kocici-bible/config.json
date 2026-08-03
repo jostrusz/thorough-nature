@@ -1,7 +1,7 @@
 {
   "slug": "kocici-bible",
   "name": "Kočičí bible",
-  "domain": "kocicibible.cz",
+  "domain": "www.kocicibible.cz",
   "locale": "cs",
   "defaultCountry": "CZ",
   "defaultPhonePrefix": "420",
@@ -68,7 +68,7 @@
       "savings": 701
     }
   ],
-  "mollieProfileId": "",
+  "mollieProfileId": null,
   "packetaApiKey": "cbb760f552ef87b3",
   "paymentProviders": {},
   "pages": {

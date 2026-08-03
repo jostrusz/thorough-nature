@@ -10,7 +10,7 @@ var PROJECT_CONFIG = {
     "variantId": "variant_01KPFP9X5PXD8WPMJPMMS2ZF02",
     "price": 550,
     "currency": "CZK",
-    "thumbnail": ""
+    "thumbnail": "https://www.kocicibible.cz/kocici-bible-cover.png"
   },
   "upsellProducts": [
         {
