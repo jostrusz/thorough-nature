@@ -127,7 +127,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'odpust-knizka': 'Tvoje e-booky jsou připravené! 📖',
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
-  'kocici-bible': 'Tvoje 3 bonusové e-booky jsou připravené! 📖',
+  'kocici-bible': 'Vaše 3 bonusové e-booky jsou ke stažení',
 }
 
 // Localized fallback first name per project

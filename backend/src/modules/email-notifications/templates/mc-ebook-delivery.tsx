@@ -2,9 +2,9 @@ import { Text, Section, Hr, Link, Button } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
-export const KB_EBOOK_DELIVERY = 'kb-ebook-delivery'
+export const MC_EBOOK_DELIVERY = 'mc-ebook-delivery'
 
-export interface KbEbookDeliveryTemplateProps {
+export interface McEbookDeliveryTemplateProps {
   firstName: string
   downloadUrl: string
   expiresAt: string
@@ -14,14 +14,14 @@ export interface KbEbookDeliveryTemplateProps {
   preview?: string
 }
 
-// Default bonus e-books for Kočičí bible (used when `files` is not provided)
+// Default bonus e-books for Mačacia biblia (used when `files` is not provided)
 const DEFAULT_EBOOKS = [
-  'Dlouhověkost začíná v kočičí misce',
-  'Hravá kočka',
-  'Kočičí SOS: 100 problémů, 100 řešení',
+  'Dlhovekosť začína v mačacej miske',
+  'Hravá mačka',
+  'Mačacie SOS: 100 Problémov, 100 Riešení',
 ]
 
-export const isKbEbookDeliveryData = (data: any): data is KbEbookDeliveryTemplateProps =>
+export const isMcEbookDeliveryData = (data: any): data is McEbookDeliveryTemplateProps =>
   typeof data.firstName === 'string' &&
   typeof data.downloadUrl === 'string' &&
   typeof data.expiresAt === 'string'
@@ -29,7 +29,7 @@ export const isKbEbookDeliveryData = (data: any): data is KbEbookDeliveryTemplat
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
 const pad = '28px'
 
-// KB Brand colors — warm orange palette (matches kb-order-placed)
+// MC Brand colors — warm orange palette (matches mc-order-placed)
 const colors = {
   headerBg: '#2D1B3D',
   headerGradient: 'linear-gradient(135deg, #2D1B3D 0%, #1A1028 100%)',
@@ -56,9 +56,9 @@ const colors = {
   divider: '#E4E4E7',
 }
 
-export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
-  PreviewProps: KbEbookDeliveryTemplateProps
-} = ({ firstName, downloadUrl, expiresAt, files, billingEntity, preview = 'Vaše e-booky jsou ke stažení.' }) => {
+export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
+  PreviewProps: McEbookDeliveryTemplateProps
+} = ({ firstName, downloadUrl, expiresAt, files, billingEntity, preview = 'Tvoje e-booky sú pripravené!' }) => {
   const expiryDate = new Date(expiresAt).toLocaleDateString('cs-CZ', {
     day: 'numeric',
     month: 'long',
@@ -90,7 +90,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             color: 'rgba(255,255,255,0.75)',
             margin: '0 0 10px 0',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -101,7 +101,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Vaše e-booky jsou ke stažení
+            Tvoje e-booky sú pripravené! 📖
           </Text>
           <Text style={{
             fontFamily: font,
@@ -109,7 +109,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             color: 'rgba(255,255,255,0.7)',
             margin: '0',
           }}>
-            Stáhněte si své digitální bonusy
+            Stiahni si svoje digitálne bonusy
           </Text>
         </div>
 
@@ -122,7 +122,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Dobrý den {firstName},
+            Ahoj {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -131,7 +131,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '8px 0 0',
           }}>
-            Díky za objednávku Kočičí bible. Bonusové e-booky máte připravené, stačí kliknout na tlačítko níž.
+            Veľmi ďakujeme za tvoj nákup knihy Mačacia biblia! 🐱 Tvoje bonusové e-booky sú pripravené na stiahnutie. Klikni na tlačidlo nižšie a stiahni si ich.
           </Text>
         </div>
 
@@ -152,7 +152,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               color: colors.accent,
               margin: '0 0 10px',
             }}>
-              Vaše bonusové e-booky
+              Tvoje bonusové e-booky
             </Text>
             {bonusTitles.map((title, i) => (
               <Text key={i} style={{
@@ -184,7 +184,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               display: 'inline-block',
             }}
           >
-            Stáhnout e-booky &#8594;
+            Stiahnuť e-booky &#8594;
           </Button>
         </div>
 
@@ -204,7 +204,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               margin: '0',
               lineHeight: '1.6',
             }}>
-              &#9203; Odkaz ke stažení je platný do <strong>{expiryDate}</strong>. Po stažení si soubor uložte.
+              &#9203; Odkaz na stiahnutie je platný do <strong>{expiryDate}</strong>. Po stiahnutí si súbor ulož.
             </Text>
           </div>
         </div>
@@ -227,7 +227,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#128230; Tištěná kniha je na cestě a dorazí během <strong>2–3 pracovních dnů</strong>. Sledovací číslo vám pošleme v samostatném e-mailu.
+              &#128230; Tvoja tlačená kniha je na ceste a dorazí počas <strong>2–3 pracovných dní</strong>. Sledovacie číslo ti pošleme v samostatnom e-maile.
             </Text>
           </div>
         </div>
@@ -243,7 +243,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             color: colors.accent,
             marginBottom: '16px',
           }}>
-            Než začnete
+            Tipy na čítanie
           </Text>
 
           <div style={{
@@ -260,7 +260,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0 0 12px',
             }}>
-              &#128049; <strong style={{ color: colors.textDark }}>Nečtěte to jako román</strong> — otevřete rovnou kapitolu k tomu, co vás doma pálí nejvíc, a začněte tam.
+              &#128049; <strong style={{ color: colors.textDark }}>Začni v pokoji</strong> — Neponáhľaj sa. Každá kapitola ti prinesie nové poznatky o tvojej mačke.
             </Text>
             <Text style={{
               fontFamily: font,
@@ -269,7 +269,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0 0 12px',
             }}>
-              &#128221; <strong style={{ color: colors.textDark }}>Pište si to</strong> — já měl na to sešit. Datum, co jsem ten den změnil a co se stalo. Zní to jako blbost, ale právě díky tomu jsem přišel na to, co vlastně zabírá.
+              &#128221; <strong style={{ color: colors.textDark }}>Rob si poznámky</strong> — Zapíš si, čo ťa zaujme. Budeš sa k tomu chcieť vrátiť.
             </Text>
             <Text style={{
               fontFamily: font,
@@ -278,7 +278,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Dejte tomu týden</strong> — kočka se nezmění přes noc. První posun se u většiny věcí ukáže kolem pátého dne, u plachých koček spíš za tři týdny.
+              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Buď trpezlivý/á</strong> — Zmeny v správaní mačky prídu postupne. Každý malý pokrok sa počíta!
             </Text>
           </div>
         </div>
@@ -299,10 +299,10 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Nejde stáhnout?
+              Máš problém so sťahovaním?
               <br />
-              <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@kocicibible.cz
+              <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                peterka@macaciabiblia.sk
               </Link>
             </Text>
           </div>
@@ -316,7 +316,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Ať to doma klapne. Michal
+            Nech ti kniha prinesie kopu mačacej radosti! 🐱
           </Text>
           <Text style={{
             fontFamily: font,
@@ -333,8 +333,8 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@kocicibible.cz
+            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
+              peterka@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -353,7 +353,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -362,7 +362,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            Performance Marketing Solution s.r.o. &bull; Rybná 716/24, Staré Město, 110 00 Praha
+            Performance Marketing Solution s.r.o. &bull; Rybná 716/24, Staré Mesto, 110 00 Praha
             <br />
             IČO: 06259928 &bull; DIČ: CZ06259928
           </Text>
@@ -373,7 +373,7 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tenhle e-mail vám přišel, protože jste si objednali na kocicibible.cz.
+            Tento e-mail ti prišiel, pretože si si objednal/a na macaciabiblia.sk.
           </Text>
         </div>
       </Section>
@@ -381,15 +381,15 @@ export const KbEbookDeliveryTemplate: React.FC<KbEbookDeliveryTemplateProps> & {
   )
 }
 
-KbEbookDeliveryTemplate.PreviewProps = {
+McEbookDeliveryTemplate.PreviewProps = {
   firstName: 'Petra',
-  downloadUrl: 'https://kocicibible.cz/download/abc123-test-token',
+  downloadUrl: 'https://macaciabiblia.sk/download/abc123-test-token',
   expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
   files: [
-    { title: 'Dlouhověkost začíná v kočičí misce' },
-    { title: 'Hravá kočka' },
-    { title: 'Kočičí SOS: 100 problémů, 100 řešení' },
+    { title: 'Dlhovekosť začína v mačacej miske' },
+    { title: 'Hravá mačka' },
+    { title: 'Mačacie SOS: 100 Problémov, 100 Riešení' },
   ],
-} as KbEbookDeliveryTemplateProps
+} as McEbookDeliveryTemplateProps
 
-export default KbEbookDeliveryTemplate
+export default McEbookDeliveryTemplate

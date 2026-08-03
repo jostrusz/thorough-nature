@@ -82,11 +82,11 @@
     "checkout": "checkout.html",
     "upsell": "upsell.html",
     "thank-you": "thank-you.html",
-    "contact": "contact.html",
-    "privacy": "privacy.html",
-    "voorwaarden": "voorwaarden.html",
-    "verzending": "verzending.html",
-    "retourbeleid": "retourbeleid.html"
+    "kontakt": "kontakt.html",
+    "ochrana-udajov": "ochrana-udajov.html",
+    "obchodne-podmienky": "obchodne-podmienky.html",
+    "doprava": "doprava.html",
+    "reklamacie": "reklamacie.html"
   },
   "upsellProducts": [],
   "orderBumpEnabled": false

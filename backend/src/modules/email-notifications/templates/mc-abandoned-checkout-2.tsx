@@ -2,9 +2,9 @@ import { Text, Section, Button, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
-export const KB_ABANDONED_CHECKOUT_2 = 'kb-abandoned-checkout-2'
+export const MC_ABANDONED_CHECKOUT_2 = 'mc-abandoned-checkout-2'
 
-export interface KbAbandonedCheckout2Props {
+export interface McAbandonedCheckout2Props {
   firstName: string
   checkoutUrl: string
   productName: string
@@ -13,7 +13,7 @@ export interface KbAbandonedCheckout2Props {
   preview?: string
 }
 
-export const isKbAbandonedCheckout2Data = (data: any): data is KbAbandonedCheckout2Props =>
+export const isMcAbandonedCheckout2Data = (data: any): data is McAbandonedCheckout2Props =>
   typeof data.firstName === 'string' && typeof data.checkoutUrl === 'string'
 
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
@@ -77,15 +77,15 @@ const ReviewCard: React.FC<{ text: string; author: string }> = ({ text, author }
   </div>
 )
 
-export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> & {
-  PreviewProps: KbAbandonedCheckout2Props
+export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> & {
+  PreviewProps: McAbandonedCheckout2Props
 } = ({
   firstName,
   checkoutUrl,
   productName,
   productPrice,
   productImage,
-  preview = 'Kočka nám čůrala za gauč tři roky. Po dvou týdnech byl klid.',
+  preview = 'Mačka nám cikala za gauč tri roky. Po dvoch týždňoch je pokoj...',
 }) => {
   return (
     <Base preview={preview}>
@@ -106,7 +106,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             color: 'rgba(255,255,255,0.65)',
             margin: '0 0 10px 0',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -117,7 +117,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Příběh, který stojí za touto knihou
+            Príbeh, ktorý stojí za touto knihou
           </Text>
         </div>
 
@@ -130,7 +130,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Dobrý den {firstName},
+            Ahoj {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -139,7 +139,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Píšu vám osobně. Ne abych tlačil na pilu, ale protože tohle byste asi měl/a vědět.
+            Chcel som ti napísať osobne. Nie aby som na teba tlačil — ale pretože si myslím, že by si toto mala vedieť.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -148,7 +148,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Tu knihu jsem nenapsal proto, že by mi přišlo hezké napsat knihu. Napsal jsem ji, protože jsem dvanáct let chodil po cizích bytech a viděl pořád to samé. Čůrání vedle bedýnky, noční koncerty, rozdrásaná opěrka. A pořád ty samé rady, které nefungují, protože míří na projev a ne na příčinu.
+            Túto knihu som nenapísal preto, že by sa mi zdalo „pekné“ napísať knihu. Napísal som ju, pretože som roky ako behaviorista sledoval, ako sa majitelia mačiek trápia stále rovnakými problémami — cikanie mimo záchoda, nočné koncerty, poškriabaný nábytok — a dostávajú stále rovnaké rady, ktoré nefungujú. Pretože riešia príznaky, nie príčinu.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -157,7 +157,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Je to v podstatě můj sešit z těch dvanácti let, jen líp uspořádaný. Co jsem zkusil, co z toho vyšlo a za jak dlouho. Plus 3 bonusové e-booky.
+            Kompletný sprievodca mačacím správaním + 3 bonusové e-booky. Všetko postavené na mačacej psychológii a etológii. Toto nie je príručka plná pouček — je to praktický systém, s ktorým konečne porozumieš tomu, čo ti mačka celý čas hovorí.
           </Text>
         </div>
 
@@ -174,20 +174,20 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             color: colors.textMuted,
             margin: '0 0 14px',
           }}>
-            Co říkají ostatní čtenáři
+            Čo hovoria ostatní čitatelia
           </Text>
 
           <ReviewCard
-            text="Kočka nám čůrala za gauč tři roky. TŘI ROKY. Po dvou týdnech podle knihy je klid. Nechápu, že to nikdo neporadil dřív."
-            author="Petra, Brno"
+            text="Mačka nám cikala za gauč tri roky. TRI ROKY. Po dvoch týždňoch podľa knihy je pokoj. Nechápem, že to nikto neporadil skôr."
+            author="Petra, Bratislava"
           />
           <ReviewCard
-            text="Zkoušeli jsme spreje, feromony, rady z fór. Nic. Tahle kniha vysvětlila PROČ to Mia dělá — a najednou to dávalo smysl. Konečně spíme celou noc."
-            author="Martin, Praha"
+            text="Skúšali sme spreje, feromóny, rady z fór. Nič. Táto kniha vysvetlila PREČO to Mia robí — a zrazu to dávalo zmysel. Konečne spíme celú noc."
+            author="Martin, Košice"
           />
           <ReviewCard
-            text="Rozdíl byl znát do týdne. Postupy jsou tak konkrétní, že člověk hned ví, co dělat jinak. Náš kocour je jako vyměněný."
-            author="Lucie, Ostrava"
+            text="Citeľný rozdiel už počas týždňa. Postupy sú také konkrétne, že hneď vieš, čo robiť inak. Náš kocúr je ako vymenený."
+            author="Lucia, Žilina"
           />
         </div>
 
@@ -208,9 +208,9 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               margin: '0',
               lineHeight: '1.5',
             }}>
-              ✓ 100% garance vrácení peněz do 30 dnů.
+              ✓ 100% záruka vrátenia peňazí do 30 dní.
               <br />
-              Žádné otázky, žádné formuláře. Riskuju já, ne vy.
+              Žiadne otázky, žiadne komplikácie. Riziko nesiem ja, nie ty.
             </Text>
           </div>
         </div>
@@ -240,7 +240,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              {productPrice} Kč
+              {productPrice} €
             </Text>
           </div>
         </div>
@@ -261,7 +261,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               display: 'inline-block',
             }}
           >
-            Chci rozumět své kočce &#8594;
+            Chcem rozumieť svojej mačke &#8594;
           </Button>
         </div>
 
@@ -274,7 +274,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Kniha může být na cestě už zítra.
+            Tvoja kniha môže byť na ceste už zajtra.
           </Text>
         </div>
 
@@ -289,7 +289,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.6',
             margin: '0',
           }}>
-            Srdečně,
+            Srdečne,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -306,9 +306,9 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             color: colors.textMuted,
             margin: '2px 0 0',
           }}>
-            Kočičí bible &bull;{' '}
-            <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@kocicibible.cz
+            Mačacia biblia &bull;{' '}
+            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              peterka@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -329,7 +329,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -349,7 +349,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tenhle e-mail vám přišel, protože jste na kocicibible.cz nechali rozdělanou objednávku.
+            Tento e-mail ti prišiel, pretože si rozpracoval/a objednávku na macaciabiblia.sk.
           </Text>
         </div>
       </Section>
@@ -357,13 +357,13 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
   )
 }
 
-KbAbandonedCheckout2Template.PreviewProps = {
+McAbandonedCheckout2Template.PreviewProps = {
   firstName: 'Petra',
-  checkoutUrl: 'https://www.kocicibible.cz/checkout',
-  productName: 'Kočičí bible',
+  checkoutUrl: 'https://www.macaciabiblia.sk/checkout',
+  productName: 'Mačacia biblia',
   productPrice: '550',
   productImage: '',
-  preview: 'Kočka nám čůrala za gauč tři roky. Po dvou týdnech je klid...',
-} as KbAbandonedCheckout2Props
+  preview: 'Mačka nám cikala za gauč tri roky. Po dvoch týždňoch je pokoj...',
+} as McAbandonedCheckout2Props
 
-export default KbAbandonedCheckout2Template
+export default McAbandonedCheckout2Template

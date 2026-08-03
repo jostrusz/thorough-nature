@@ -3,9 +3,9 @@ import * as React from 'react'
 import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
 
-export const KB_ORDER_PLACED = 'kb-order-placed'
+export const MC_ORDER_PLACED = 'mc-order-placed'
 
-export interface KbOrderPlacedTemplateProps {
+export interface McOrderPlacedTemplateProps {
   order: any
   shippingAddress: any
   billingAddress?: any
@@ -19,7 +19,7 @@ export interface KbOrderPlacedTemplateProps {
   preview?: string
 }
 
-export const isKbOrderPlacedTemplateData = (data: any): data is KbOrderPlacedTemplateProps =>
+export const isMcOrderPlacedTemplateData = (data: any): data is McOrderPlacedTemplateProps =>
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
@@ -61,7 +61,7 @@ function formatPrice(amount: number, currencyCode: string): string {
       currency: (currencyCode || 'CZK').toUpperCase(),
     }).format(amount)
   } catch {
-    return `${(amount || 0).toFixed(0)} Kč`
+    return `${(amount || 0).toFixed(2)} €`
   }
 }
 
@@ -73,7 +73,7 @@ function formatDate(dateStr: string): string {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'Europe/Prague',
+      timeZone: 'Europe/Bratislava',
     })
   } catch {
     return dateStr
@@ -82,19 +82,19 @@ function formatDate(dateStr: string): string {
 
 function formatCountry(code: string): string {
   const map: Record<string, string> = {
-    cz: 'Česká republika',
+    cz: 'Česko',
     sk: 'Slovensko',
-    pl: 'Polsko',
-    de: 'Německo',
-    at: 'Rakousko',
-    nl: 'Nizozemsko',
-    be: 'Belgie',
+    pl: 'Poľsko',
+    de: 'Nemecko',
+    at: 'Rakúsko',
+    nl: 'Holandsko',
+    be: 'Belgicko',
     hu: 'Maďarsko',
   }
   return map[(code || '').toLowerCase()] || (code || '').toUpperCase()
 }
 
-export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
+export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
   PreviewProps: any
 } = ({
   order,
@@ -103,7 +103,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
   paymentMethod,
   billingEntity,
   pickupPoint,
-  preview = 'Děkujeme za vaši objednávku!',
+  preview = 'Ďakujeme za vašu objednávku!',
 }) => {
   const currency = order.currency_code || 'czk'
   const items = order.items || []
@@ -114,7 +114,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
     (sum: number, item: any) => sum + (item.unit_price || 0) * (item.quantity || 1),
     0
   )
-  // Use non-raw summary values (major units like 550 Kč), NOT raw values (minor units like 55000 haléřů)
+  // Use non-raw summary values (major units like 22 €), NOT raw values (minor units like 2200 cents)
   // order_summary.totals carries only payment-level figures — it has no
   // shipping_total key — so fall back to the shipping method, where the real
   // fee lives. Without this, paid delivery renders as free.
@@ -156,10 +156,10 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
   // Payment method display name
   const paymentMethodDisplay = (() => {
     if (paymentMethod) return paymentMethod
-    if (isCod) return 'Dobírka (platba při převzetí)'
+    if (isCod) return 'Dobierka (platba pri prevzatí)'
     const method = order.metadata?.payment_method || ''
     if (method === 'blik') return 'BLIK'
-    if (method === 'card' || method === 'creditcard') return 'Platební karta'
+    if (method === 'card' || method === 'creditcard') return 'Platobná karta'
     if (method === 'ideal') return 'iDEAL'
     if (method === 'bancontact') return 'Bancontact'
     if (method === 'p24' || method === 'przelewy24') return 'Przelewy24'
@@ -168,7 +168,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
     if (method === 'klarna') return 'Klarna'
     const provider = order.metadata?.payment_provider || ''
     if (provider === 'comgate') return 'Online platba'
-    if (provider === 'stripe') return 'Platební karta'
+    if (provider === 'stripe') return 'Platobná karta'
     if (provider === 'airwallex') return 'Online platba'
     if (provider) return 'Online platba'
     return 'Online platba'
@@ -176,7 +176,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
 
   // Billing entity — Czech company
   const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
-  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
+  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Mesto, 110 00 Praha'
   const entityIco = billingEntity?.ico || '06259928'
   const entityDic = billingEntity?.dic || 'CZ06259928'
 
@@ -201,7 +201,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             marginBottom: '10px',
             margin: '0 0 10px 0',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -212,7 +212,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Děkujeme za vaši objednávku!
+            Ďakujeme za vašu objednávku!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -241,7 +241,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
               color: colors.greenText,
               margin: '0',
             }}>
-              &#10003; Objednávka potvrzena
+              &#10003; Objednávka potvrdená
             </Text>
           </div>
           <div style={{
@@ -259,7 +259,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
               color: isPaid ? colors.greenText : colors.amberText,
               margin: '0',
             }}>
-              {isPaid ? '✅ Zaplaceno' : '💰 Platba na dobírku'}
+              {isPaid ? '✅ Zaplatené' : '💰 Platba na dobierku'}
             </Text>
           </div>
         </div>
@@ -273,7 +273,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Dobrý den {shippingAddress?.first_name || ''},
+            Ahoj {shippingAddress?.first_name || 'tam'} 👋,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -283,8 +283,8 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             margin: '8px 0 0',
           }}>
             {isPaid
-              ? 'Díky za objednávku. Platba dorazila a my se pouštíme do balení. Níž máte celý přehled.'
-              : 'Díky za objednávku. Chystáme ji k odeslání a zaplatíte až při převzetí. Níž máte celý přehled.'
+              ? 'Veľmi ďakujeme za tvoju objednávku! Platba prebehla úspešne a my sa hneď púšťame do balenia. Nižšie nájdeš kompletný prehľad.'
+              : 'Veľmi ďakujeme za tvoju objednávku! Pripravujeme ju na odoslanie a platbu uhradíš pohodlne pri prevzatí zásielky. Nižšie nájdeš kompletný prehľad.'
             }
           </Text>
         </div>
@@ -308,7 +308,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                   <td align="right" style={{ fontFamily: font, fontSize: '13px', color: colors.textDark, padding: '3px 0' }}>{orderDate}</td>
                 </tr>
                 <tr>
-                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Platební metoda</td>
+                  <td style={{ fontFamily: font, fontSize: '13px', color: colors.textMuted, padding: '3px 0' }}>Platobná metóda</td>
                   <td align="right" style={{ fontFamily: font, fontSize: '13px', fontWeight: 600, color: colors.textDark, padding: '3px 0' }}>{paymentMethodDisplay}</td>
                 </tr>
               </tbody>
@@ -327,7 +327,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             color: colors.accent,
             marginBottom: '14px',
           }}>
-            Vaše objednávka
+            Vaša objednávka
           </Text>
 
           {items.map((item: any) => (
@@ -469,8 +469,8 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
               lineHeight: '1.5',
             }}>
               {isPickup
-                ? <>&#128205; &nbsp;<strong>Doručení na výdejní místo — 2–3 pracovní dny</strong></>
-                : <>&#128230; &nbsp;<strong>Doručení na adresu — 2–3 pracovní dny</strong></>
+                ? <>&#128205; &nbsp;<strong>Doručenie na odberné miesto — 2–3 pracovné dni</strong></>
+                : <>&#128230; &nbsp;<strong>Doručenie na adresu — 2–3 pracovné dni</strong></>
               }
             </Text>
             {isPickup && pickup ? (
@@ -495,7 +495,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                 margin: '6px 0 0',
                 lineHeight: '1.5',
               }}>
-                Zásilku odesíláme do 24 hodin z našeho centrálního skladu.
+                Zásielku odosielame do 24 hodín z nášho centrálneho skladu.
               </Text>
             )}
           </div>
@@ -516,7 +516,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                     color: colors.accent,
                     marginBottom: '10px',
                   }}>
-                    {isPickup ? 'Výdejní místo' : 'Doručovací adresa'}
+                    {isPickup ? 'Odberné miesto' : 'Doručovacia adresa'}
                   </Text>
                   {isPickup && pickup ? (
                     <Text style={{
@@ -558,7 +558,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                     color: colors.accent,
                     marginBottom: '10px',
                   }}>
-                    Fakturační adresa
+                    Fakturačná adresa
                   </Text>
                   <Text style={{
                     fontFamily: font,
@@ -594,7 +594,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             color: colors.accent,
             marginBottom: '18px',
           }}>
-            Co bude následovat?
+            Čo bude nasledovať?
           </Text>
 
           {/* Step 1 */}
@@ -616,9 +616,9 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                   }}>1</div>
                 </td>
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
-                  <strong style={{ color: colors.textDark }}>Objednávka přijata</strong>
+                  <strong style={{ color: colors.textDark }}>Objednávka prijatá</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Objednávku máme a chystáme ji k odeslání.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvoju objednávku máme a práve ju chystáme na odoslanie.</span>
                 </td>
               </tr>
             </tbody>
@@ -645,7 +645,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Pošleme vám e-mail s číslem pro sledování zásilky.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Pošleme ti e-mail s číslom na sledovanie zásielky.</span>
                 </td>
               </tr>
             </tbody>
@@ -674,8 +674,8 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                   <br />
                   <span style={{ fontSize: '13px', color: colors.textMuted }}>
                     {isPickup
-                      ? `Zásilku si vyzvedneš na výdejním místě${pickup?.name ? ` ${pickup.name}` : ''} do 2–3 pracovních dnů.`
-                      : 'Do 2–3 pracovních dnů máte knihu doma.'
+                      ? `Zásielku si vyzdvihneš na odbernom mieste${pickup?.name ?` ${pickup.name}` : ''} do 2–3 pracovných dní.`
+                      : 'Počas 2–3 pracovných dní budeš mať knihu doma.'
                     }
                   </span>
                 </td>
@@ -700,10 +700,10 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Něco k objednávce nesedí? Napište, čtu si to sám.
+              Máš otázku k objednávke? Pokojne napíš!
               <br />
-              <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@kocicibible.cz
+              <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                peterka@macaciabiblia.sk
               </Link>
             </Text>
           </div>
@@ -713,26 +713,26 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
         {(() => {
           const CATALOG = [
             {
-              match: ['pusť to', 'pust to'],
-              title: 'Pusť to, co tě ničí',
-              tagline: 'Hlava, která nikdy nevypne? Bestseller o klidu v hlavě — od přemítání k vnitřnímu klidu.',
-              price: '749 Kč',
+              match: ['pusti to', 'pusti to'],
+              title: 'Pusti to, čo ťa ničí',
+              tagline: 'Hlava, ktorá nikdy nevypne? Bestseller o pokoji v hlave — od premietania k vnútornému pokoju.',
+              price: '28 €',
               url: 'https://www.pusttocotenici.cz/',
               image: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/pust-to-co-te-nici-admin-01KTYC1V1ZYVZ92WZYE7SA8X2Z.png',
             },
             {
-              match: ['život, jaký', 'zivot, jaky', 'zasloužíš', 'zasluzis'],
-              title: 'Život, jaký si zasloužíš',
-              tagline: 'Metoda LIFE RESET™ — 30 minut denně, 30 dní. Pro ženy, na které na konci dne nezbyde nic.',
-              price: '749 Kč',
+              match: ['život, aký', 'zivot, aky', 'zasloužíš', 'zasluzis'],
+              title: 'Život, aký si zaslúžiš',
+              tagline: 'Metóda LIFE RESET™ — 30 minút denne, 30 dní. Pre ženy, na ktoré na konci dňa nezostane nič.',
+              price: '28 €',
               url: 'https://www.nejdriv-ja.cz/',
               image: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/zivos jaky si zaslouzis-01KXD2TK20J0S6PT4NNJNXCA32.png',
             },
             {
               match: ['psí superživot', 'psi superzivot'],
               title: 'Psí superživot',
-              tagline: 'Máte doma i psa? Klidné procházky a pes, co večer prostě leží na gauči. Bez trestů.',
-              price: '550 Kč',
+              tagline: 'Máte doma aj psa? Pokojné prechádzky a pes, čo večer jednoducho leží na gauči. Bez trestov.',
+              price: '22 €',
               url: 'https://www.psi-superzivot.cz/',
               image: 'https://bucket-production-b93e.up.railway.app:443/medusa-media/psi-superzivot-coverr-01KKBV5XSNXVFB49XWWKSZRBVE.png',
             },
@@ -755,7 +755,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                 color: colors.textMuted,
                 margin: '0 0 4px',
               }}>
-                Mohlo by tě zajímat
+                Mohlo by ťa zaujímať
               </Text>
               <Text style={{
                 fontFamily: font,
@@ -764,7 +764,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
                 margin: '0 0 14px',
                 lineHeight: '1.5',
               }}>
-                Čtenáři Kočičí bible si k ní nejčastěji berou ještě tohle:
+                Čitatelia Mačacej biblie si najčastejšie prikupujú tieto knihy:
               </Text>
               {missing.map((c) => (
                 <div key={c.title} style={{
@@ -821,7 +821,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Ať to doma klapne. Michal
+            Nech ti kniha prinesie kopu mačacej radosti! 🐱
           </Text>
           <Text style={{
             fontFamily: font,
@@ -838,8 +838,8 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@kocicibible.cz
+            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
+              peterka@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -859,7 +859,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -881,7 +881,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tenhle e-mail vám přišel, protože jste si objednali na kocicibible.cz.
+            Tento e-mail ste dostali, pretože ste vykonali objednávku na macaciabiblia.sk.
           </Text>
         </div>
       </Section>
@@ -889,7 +889,7 @@ export const KbOrderPlacedTemplate: React.FC<KbOrderPlacedTemplateProps> & {
   )
 }
 
-KbOrderPlacedTemplate.PreviewProps = {
+McOrderPlacedTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
     display_id: '812',
@@ -900,17 +900,17 @@ KbOrderPlacedTemplate.PreviewProps = {
       payment_provider: 'cod',
       shipping_method: 'zasilkovna_pickup',
       packeta_point_id: '15680',
-      packeta_point_name: 'Hrdějovice, Těšínská 9',
-      packeta_point_address: 'Potraviny Flop Kaňka, 373 61 Hrdějovice',
+      packeta_point_name: 'Ružinov, Tomášikova 9',
+      packeta_point_address: 'Potraviny Fresh, 821 01 Bratislava',
     },
     created_at: new Date().toISOString(),
-    email: 'petra.svobodova@seznam.cz',
+    email: 'petra.novakova@zoznam.sk',
     currency_code: 'czk',
     items: [
       {
         id: 'item-1',
-        title: 'Kočičí bible',
-        product_title: 'Kočičí bible',
+        title: 'Mačacia biblia',
+        product_title: 'Mačacia biblia',
         variant_title: 'Paperback',
         quantity: 1,
         unit_price: 550,
@@ -918,8 +918,8 @@ KbOrderPlacedTemplate.PreviewProps = {
       },
       {
         id: 'item-2',
-        title: 'Příplatek za dobírku',
-        product_title: 'Příplatek za dobírku',
+        title: 'Príplatok za dobierku',
+        product_title: 'Príplatok za dobierku',
         variant_title: null,
         quantity: 1,
         unit_price: 30,
@@ -936,7 +936,7 @@ KbOrderPlacedTemplate.PreviewProps = {
     first_name: 'Petra',
     last_name: 'Svobodová',
     address_1: 'Korunní 810/104',
-    city: 'Praha 10',
+    city: 'Bratislava',
     postal_code: '101 00',
     country_code: 'cz',
   },
@@ -944,7 +944,7 @@ KbOrderPlacedTemplate.PreviewProps = {
     first_name: 'Petra',
     last_name: 'Svobodová',
     address_1: 'Korunní 810/104',
-    city: 'Praha 10',
+    city: 'Bratislava',
     postal_code: '101 00',
     country_code: 'cz',
   },
@@ -952,4 +952,4 @@ KbOrderPlacedTemplate.PreviewProps = {
   pickupPoint: null,
 } as any
 
-export default KbOrderPlacedTemplate
+export default McOrderPlacedTemplate

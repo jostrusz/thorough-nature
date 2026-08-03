@@ -43,7 +43,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'Tvoje kniha je zabalená a čeká jen na tebe!',
+  preview = 'Vaše kniha je zabalená. Čeká jen na vás.',
 }) => {
   return (
     <Base preview={preview}>
@@ -75,7 +75,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Tvoje kniha je připravená! 📦
+            Vaše kniha je zabalená
           </Text>
         </div>
 
@@ -88,7 +88,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Ahoj {firstName},
+            Dobrý den {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -97,7 +97,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Dobrá zpráva — tvoje objednávka knihy <strong style={{ color: colors.textDark }}>{productName}</strong> je zabalená a připravená k odeslání. Jediné, co chybí, je tvoje potvrzení.
+Vaše objednávka knihy <strong style={{ color: colors.textDark }}>{productName}</strong> zůstala rozdělaná. Máme ji odloženou stranou, chybí jen potvrzení.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -106,7 +106,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Věděl/a jsi, že kočky skoro nikdy „nezlobí“ naschvál? Čůrání mimo záchod, noční mňoukání, ničení nábytku — to všechno je <em>komunikace</em>. Jen jí zatím nerozumíš.
+Za dvanáct let jsem nepotkal kočku, která by <em>zlobila naschvál</em>. Čůrání vedle bedýnky, noční řev, rozdrásaný gauč. To všechno vám něco říká, jen to zatím není čitelné.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -115,7 +115,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            V téhle knize se naučíš číst řeč své kočky — a proměnit domácí chaos v klid. Konkrétní postupy od kočičího behavioristy, srozumitelně a bez vágních teorií. Plus 3 bonusové e-booky zdarma.
+V knize je sepsané, co jsem si za ta léta ověřil. Co zabralo, co ne a za jak dlouho. Vyberete si jednu věc, dáte tomu týden a uvidíte sami. Plus 3 bonusové e-booky zdarma.
           </Text>
         </div>
 
@@ -190,7 +190,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Tvoje údaje už jsou vyplněné — dokončení objednávky zabere jen minutku.
+            Údaje už máte vyplněné, dokončení zabere minutu.
           </Text>
         </div>
 
@@ -265,7 +265,7 @@ export const KbAbandonedCheckout1Template: React.FC<KbAbandonedCheckout1Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti přišel, protože jsi rozpracoval/a objednávku na kocicibible.cz.
+            Tenhle e-mail vám přišel, protože jste na kocicibible.cz nechali rozdělanou objednávku.
           </Text>
         </div>
       </Section>
@@ -279,7 +279,7 @@ KbAbandonedCheckout1Template.PreviewProps = {
   productName: 'Kočičí bible',
   productPrice: '550',
   productImage: '',
-  preview: 'Tvoje kniha je zabalená a čeká jen na tebe!',
+  preview: 'Vaše kniha je zabalená. Čeká jen na vás.',
 } as KbAbandonedCheckout1Props
 
 export default KbAbandonedCheckout1Template

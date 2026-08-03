@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Děkujeme za objednávku!</title>
+  <title>Ďakujeme za objednávku!</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="canonical" href="https://www.kocicibible.cz/thank-you">
   <link rel="icon" href="/kocici-bible-logo.png" type="image/png">
@@ -14,14 +14,14 @@
   <script src="js/pixel.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     DĚKOVACÍ STRÁNKA — Kočičí bible
+     DĚKOVACÍ STRÁNKA — Mačacia biblia
      Souhrn objednávky + kontrola adresy + editační formulář
      ═══════════════════════════════════════════════════════════ -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ══ Kočičí bible design system ══ */
+/* ══ Mačacia biblia design system ══ */
 :root {
   --bg: #FFFFFF;
   --heading: #1A1A1A;
@@ -495,9 +495,9 @@ body { background: var(--bg); }
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="ty-eyebrow">&#x2705; Objednávka přijata</div>
-    <h1 class="ty-title" id="ty-main-title">Děkujeme za vaši <span class="accent">objednávku!</span></h1>
-    <p class="ty-subtitle">Vaše objednávka byla úspěšně dokončena. Balíček vám co nejdříve připravíme a předáme Zásilkovně.</p>
+    <div class="ty-eyebrow">&#x2705; Objednávka prijatá</div>
+    <h1 class="ty-title" id="ty-main-title">Ďakujeme za vašu <span class="accent">objednávku!</span></h1>
+    <p class="ty-subtitle">Vaša objednávka bola úspešne dokončená. Balíček vám čo najskôr pripravíme a odovzdáme Packete.</p>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -506,8 +506,8 @@ body { background: var(--bg); }
   <div class="ty-address-alert ty-reveal ty-d1">
     <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
     <div class="ty-address-alert-text">
-      <div class="ty-address-alert-title">Zkontrolujte si prosím doručovací údaje</div>
-      <div class="ty-address-alert-desc">Chceme vám objednávku odeslat co nejdříve. Zkontrolujte prosím níže, jestli máte správně vyplněnou <strong>adresu</strong>, <strong>e-mail</strong> a <strong>telefonní číslo</strong>.</div>
+      <div class="ty-address-alert-title">Skontrolujte si prosím doručovacie údaje</div>
+      <div class="ty-address-alert-desc">Chceme vám objednávku odoslať čo najskôr. Skontrolujte prosím nižšie, či máte správne vyplnenú <strong>adresu</strong>, <strong>e-mail</strong> a <strong>telefónne číslo</strong>.</div>
     </div>
   </div>
 
@@ -522,16 +522,16 @@ body { background: var(--bg); }
       </div>
       <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Upravit údaje
+        Upraviť údaje
       </button>
     </div>
     <div class="ty-details-grid" id="ty-details-grid">
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Jméno</div>
+        <div class="ty-detail-label">Meno</div>
         <div class="ty-detail-value" id="ty-show-firstname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Příjmení</div>
+        <div class="ty-detail-label">Priezvisko</div>
         <div class="ty-detail-value" id="ty-show-lastname">—</div>
       </div>
       <div class="ty-detail-item">
@@ -539,19 +539,19 @@ body { background: var(--bg); }
         <div class="ty-detail-value" id="ty-show-email">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Telefon</div>
+        <div class="ty-detail-label">Telefón</div>
         <div class="ty-detail-value" id="ty-show-phone">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full">
-        <div class="ty-detail-label">Doručovací adresa</div>
+        <div class="ty-detail-label">Doručovacia adresa</div>
         <div class="ty-detail-value" id="ty-show-address">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full" id="ty-pickup-row" style="display:none;">
-        <div class="ty-detail-label">Výdejní místo Zásilkovny</div>
+        <div class="ty-detail-label">Odberné miesto Packety</div>
         <div class="ty-detail-value" id="ty-show-pickup">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
-        <div class="ty-detail-label">Firemní údaje</div>
+        <div class="ty-detail-label">Firemné údaje</div>
         <div class="ty-detail-value" id="ty-show-company">—</div>
       </div>
     </div>
@@ -564,16 +564,16 @@ body { background: var(--bg); }
     <div class="ty-edit-form-inner">
       <div class="ty-edit-form-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Úprava údajů
+        Úprava údajov
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-firstname" placeholder=" ">
-          <label for="edit-firstname">Jméno</label>
+          <label for="edit-firstname">Meno</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-lastname" placeholder=" ">
-          <label for="edit-lastname">Příjmení</label>
+          <label for="edit-lastname">Priezvisko</label>
         </div>
       </div>
       <div class="ty-form-row">
@@ -583,13 +583,13 @@ body { background: var(--bg); }
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="tel" id="edit-phone" placeholder=" ">
-          <label for="edit-phone">Telefon</label>
+          <label for="edit-phone">Telefón</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field full">
           <input type="text" id="edit-address" placeholder=" ">
-          <label for="edit-address">Ulice a číslo popisné</label>
+          <label for="edit-address">Ulica a číslo domu</label>
         </div>
       </div>
       <div class="ty-form-row">
@@ -599,16 +599,16 @@ body { background: var(--bg); }
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-city" placeholder=" ">
-          <label for="edit-city">Město</label>
+          <label for="edit-city">Mesto</label>
         </div>
       </div>
       <!-- Firemní pole (B2B) -->
       <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
-        <div style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Firemní údaje</div>
+        <div style="font-size:12px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Firemné údaje</div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field full">
             <input type="text" id="edit-company" placeholder=" ">
-            <label for="edit-company">Název firmy</label>
+            <label for="edit-company">Názov firmy</label>
           </div>
         </div>
         <div class="ty-form-row">
@@ -624,9 +624,9 @@ body { background: var(--bg); }
       </div>
       <div class="ty-form-actions">
         <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
-          Uložit změny
+          Uložiť zmeny
         </button>
-        <button class="ty-form-cancel" onclick="toggleEditForm()">Zrušit</button>
+        <button class="ty-form-cancel" onclick="toggleEditForm()">Zrušiť</button>
       </div>
     </div>
   </div>
@@ -641,47 +641,47 @@ body { background: var(--bg); }
        5. SOUHRN OBJEDNÁVKY
        ═══════════════════════════════════════ -->
   <div class="ty-order-box ty-reveal ty-d3">
-    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Vaše objednávka</div>
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Vaša objednávka</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Kočičí bible</div>
-          <div class="ty-order-desc">Tištěná kniha &mdash; posíláme Zásilkovnou</div>
+          <div class="ty-order-name">Mačacia biblia</div>
+          <div class="ty-order-desc">Tlačená kniha &mdash; posielame Packetou</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook-1">&#x1F35B;</div>
         <div>
-          <div class="ty-order-name">Dlouhověkost začíná v kočičí misce</div>
-          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailem</div>
+          <div class="ty-order-name">Dlhovekosť začína v mačacej miske</div>
+          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailom</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook-2">&#x1F9F6;</div>
         <div>
-          <div class="ty-order-name">Hravá kočka</div>
-          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailem</div>
+          <div class="ty-order-name">Hravá mačka</div>
+          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailom</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ebook-3">&#x1F198;</div>
         <div>
-          <div class="ty-order-name">Kočičí SOS: 100 Problémů, 100 Řešení</div>
-          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailem</div>
+          <div class="ty-order-name">Mačacie SOS: 100 Problémov, 100 Riešení</div>
+          <div class="ty-order-desc">Bonusový e-book &mdash; pošleme e-mailom</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
-          <div class="ty-order-name">Doprava Zásilkovnou</div>
-          <div class="ty-order-desc" id="ty-shipping-desc">Doručení za 2&ndash;3 pracovní dny</div>
+          <div class="ty-order-name">Doprava Packetou</div>
+          <div class="ty-order-desc" id="ty-shipping-desc">Doručenie za 2&ndash;3 pracovné dni</div>
         </div>
       </div>
     </div>
     <div class="ty-order-total">
-      <span class="ty-order-total-label">Zaplaceno</span>
-      <span class="ty-order-total-price" id="ty-total-price">550&nbsp;Kč</span>
+      <span class="ty-order-total-label">Zaplatené</span>
+      <span class="ty-order-total-price" id="ty-total-price">22&nbsp;€</span>
     </div>
   </div>
 
@@ -690,22 +690,22 @@ body { background: var(--bg); }
        ═══════════════════════════════════════ -->
   <div class="ty-ebooks ty-reveal ty-d4">
     <div class="ty-ebooks-title">&#x1F381; Vaše 3 bonusové e-booky</div>
-    <div class="ty-ebooks-desc">Po připsání platby vám <strong>e-mailem pošleme odkaz ke stažení</strong> všech tří bonusových e-booků. Pokud e-mail nevidíte, mrkněte prosím i do složky <strong>spam nebo hromadné</strong>.</div>
+    <div class="ty-ebooks-desc">Po pripísaní platby vám <strong>e-mailom pošleme odkaz na stiahnutie</strong> všetkých troch bonusových e-bookov. Ak e-mail nevidíte, pozrite sa prosím aj do priečinka <strong>spam alebo hromadné</strong>.</div>
     <div class="ty-ebook-tiles">
       <div class="ty-ebook-tile t1">
         <div class="ty-ebook-tile-emoji">&#x1F35B;</div>
-        <div class="ty-ebook-tile-name">Dlouhověkost začíná v&nbsp;kočičí misce</div>
+        <div class="ty-ebook-tile-name">Dlhovekosť začína v&nbsp;mačacej miske</div>
       </div>
       <div class="ty-ebook-tile t2">
         <div class="ty-ebook-tile-emoji">&#x1F9F6;</div>
-        <div class="ty-ebook-tile-name">Hravá kočka</div>
+        <div class="ty-ebook-tile-name">Hravá mačka</div>
       </div>
       <div class="ty-ebook-tile t3">
         <div class="ty-ebook-tile-emoji">&#x1F198;</div>
-        <div class="ty-ebook-tile-name">Kočičí SOS: 100&nbsp;Problémů, 100&nbsp;Řešení</div>
+        <div class="ty-ebook-tile-name">Mačacie SOS: 100&nbsp;Problémov, 100&nbsp;Riešení</div>
       </div>
     </div>
-    <div class="ty-ebooks-note">&#x23F3;&nbsp;Odkaz ke stažení platí 30 dní od doručení e-mailu. Kdyby vám vypršel, napište nám a pošleme nový.</div>
+    <div class="ty-ebooks-note">&#x23F3;&nbsp;Odkaz na stiahnutie platí 30 dní od doručenia e-mailu. Ak by vám vypršal, napíšte nám a pošleme nový.</div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -714,35 +714,35 @@ body { background: var(--bg); }
   <div class="ty-support ty-reveal ty-d4">
     <div class="ty-support-icon">&#x1F4E9;</div>
     <div class="ty-support-text">
-      <div class="ty-support-title">Máte dotaz nebo něco nesedí?</div>
-      <div class="ty-support-desc">Našli jste chybu v objednávce, nebo si s něčím nevíte rady? Napište nám &mdash; rádi vám pomůžeme.</div>
+      <div class="ty-support-title">Máte otázku alebo niečo nesedí?</div>
+      <div class="ty-support-desc">Našli ste chybu v objednávke, alebo si s niečím neviete rady? Napíšte nám &mdash; radi vám pomôžeme.</div>
     </div>
-    <a href="mailto:peterka@kocicibible.cz?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Dobr%C3%BD%20den%2C%0A%0Am%C3%A1m%20dotaz%20ke%20sv%C3%A9%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napište nám</a>
+    <a href="mailto:peterka@macaciabiblia.sk?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Dobr%C3%BD%20den%2C%0A%0Am%C3%A1m%20dotaz%20ke%20sv%C3%A9%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napíšte nám</a>
   </div>
 
   <!-- ═══════════════════════════════════════
        6. CO BUDE DÁL — 3 kroky
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
-    <div class="ty-steps-title">Co bude dál?</div>
+    <div class="ty-steps-title">Čo bude ďalej?</div>
     <div class="ty-steps-grid">
       <div class="ty-step">
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
-        <div class="ty-step-title">Zkontrolujte e-mail</div>
-        <div class="ty-step-desc">Během chvíle vám přijde potvrzení objednávky a po připsání platby e-mail s odkazem na 3 bonusové e-booky. Odkaz platí 30 dní.</div>
+        <div class="ty-step-title">Skontrolujte e-mail</div>
+        <div class="ty-step-desc">O chvíľu vám príde potvrdenie objednávky a po pripísaní platby e-mail s odkazom na 3 bonusové e-booky. Odkaz platí 30 dní.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
-        <div class="ty-step-title">Kniha je na cestě</div>
-        <div class="ty-step-desc">Knihu předáme Zásilkovně a doručí vám ji za 2&ndash;3 pracovní dny &mdash; na výdejní místo, nebo až domů. Sledovací číslo zásilky dostanete e-mailem.</div>
+        <div class="ty-step-title">Kniha je na ceste</div>
+        <div class="ty-step-desc">Knihu odovzdáme Packete a doručí vám ju za 2&ndash;3 pracovné dni &mdash; na odberné miesto, alebo až domov. Sledovacie číslo zásielky dostanete e-mailom.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
         <div class="ty-step-icon">&#x1F431;</div>
-        <div class="ty-step-title">Pusťte se do čtení</div>
-        <div class="ty-step-desc">S e-booky můžete začít hned dnes. Až dorazí kniha, budete své kočce rozumět jako nikdy předtím.</div>
+        <div class="ty-step-title">Pustite sa do čítania</div>
+        <div class="ty-step-desc">S e-bookmi môžete začať hneď dnes. Keď dorazí kniha, budete svojej mačke rozumieť ako nikdy predtým.</div>
       </div>
     </div>
   </div>
@@ -752,8 +752,8 @@ body { background: var(--bg); }
        8. SDÍLENÍ
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
-    <div class="ty-share-title">Znáte někoho, kdo má doma kočku?</div>
-    <div class="ty-share-desc">Pošlete mu odkaz na Kočičí bibli &mdash; uděláte radost jemu i jeho kočce.</div>
+    <div class="ty-share-title">Poznáte niekoho, kto má doma mačku?</div>
+    <div class="ty-share-desc">Pošlite mu odkaz na Mačaciu bibliu &mdash; urobíte radosť jemu aj jeho mačke.</div>
     <div class="ty-share-buttons">
       <a href="https://wa.me/?text=Pr%C3%A1v%C4%9B%20jsem%20si%20objednal%2Fa%20Ko%C4%8Di%C4%8D%C3%AD%20bibli%20a%20mysl%C3%ADm%2C%20%C5%BEe%20by%20se%20l%C3%ADbila%20i%20tob%C4%9B%20a%20tv%C3%A9%20ko%C4%8Dce%20%F0%9F%90%B1%20https%3A%2F%2Fwww.kocicibible.cz" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
@@ -774,9 +774,9 @@ body { background: var(--bg); }
        9. PATIČKA
        ═══════════════════════════════════════ -->
   <div class="ty-footer">
-    <strong>Kočičí bible</strong> &mdash; www.kocicibible.cz<br>
+    <strong>Mačacia biblia</strong> &mdash; www.macaciabiblia.sk<br>
     Performance Marketing Solution s.r.o., Rybná 716/24, 110&nbsp;00 Praha<br>
-    IČO: 06259928 &middot; DIČ: CZ06259928 &middot; <a href="mailto:peterka@kocicibible.cz">peterka@kocicibible.cz</a>
+    IČO: 06259928 &middot; DIČ: CZ06259928 &middot; <a href="mailto:peterka@macaciabiblia.sk">peterka@macaciabiblia.sk</a>
   </div>
 
 </div>
@@ -802,14 +802,14 @@ body { background: var(--bg); }
 
   var customer = null;
   if (customerStr) {
-    try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nelze parsovat zákaznická data'); }
+    try { customer = JSON.parse(customerStr); } catch(e) { console.warn('TY: Nedajú sa parsovať zákaznícke dáta'); }
   }
 
-  // Formátování částky: 550 -> "550 Kč", 1199 -> "1 199 Kč"
+  // Formátování částky: 550 -> "22 €", 1199 -> "36 €"
   function formatCzk(amount) {
     var n = Math.round(Number(amount) || 0);
     var s = String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    return s + ' Kč';
+    return s + ' €';
   }
 
   // Fetch skutečných dat objednávky z API — přepíše localStorage (může být zastaralý)
@@ -848,7 +848,7 @@ body { background: var(--bg); }
             var it = orderItems[i];
             var title = (it.product_title || it.title || '').toLowerCase();
             // Přeskoč vedlejší položky, hledáme hlavní knihu
-            if (title.indexOf('kočičí') === -1) continue;
+            if (title.indexOf('mačacia') === -1) continue;
 
             var variantTitle = (it.variant_title || '').toLowerCase();
             var titleMatch = /^([1-4])\s*knih/.exec(variantTitle);
@@ -863,13 +863,13 @@ body { background: var(--bg); }
             var descEl = orderItemsEl && orderItemsEl.querySelector('.ty-order-desc');
             if (nameEl) {
               nameEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '× Kočičí bible')
-                : 'Kočičí bible';
+                ? (derivedBookCount + '× Mačacia biblia')
+                : 'Mačacia biblia';
             }
             if (descEl) {
               descEl.textContent = derivedBookCount > 1
-                ? (derivedBookCount + '× tištěná kniha — posíláme Zásilkovnou')
-                : 'Tištěná kniha — posíláme Zásilkovnou';
+                ? (derivedBookCount + '× tlačená kniha — posielame Packetou')
+                : 'Tlačená kniha — posielame Packetou';
             }
           }
           // Order bumpy — autoritativně z položek objednávky
@@ -879,7 +879,7 @@ body { background: var(--bg); }
             var bTitle = (bit.product_title || bit.title || '');
             var bSku = (bit.variant_sku || bit.variant && bit.variant.sku || '');
             if (/^FEE-/.test(bSku)) continue;                              // poplatky (dobírka/doprava)
-            if (bTitle.toLowerCase().indexOf('kočičí bible') !== -1) continue; // hlavní kniha
+            if (bTitle.toLowerCase().indexOf('mačacia biblia') !== -1) continue; // hlavní kniha
             bumpRows.push({
               name: bTitle.replace(/\s*[–—-]\s*upsell.*$/i, ''),
               price: (Number(bit.unit_price) || 0) * (bit.quantity || 1)
@@ -901,16 +901,16 @@ body { background: var(--bg); }
     .catch(function(e) { console.warn('TY: Could not fetch order details:', e.message); });
   }
 
-  // Firemní údaje (B2B)
+  // Firemné údaje (B2B)
   var companyStr = localStorage.getItem('medusa_company');
   var companyData = null;
   if (companyStr) {
-    try { companyData = JSON.parse(companyStr); } catch(e) { console.warn('TY: Nelze parsovat firemní data'); }
+    try { companyData = JSON.parse(companyStr); } catch(e) { console.warn('TY: Nedajú sa parsovať firemné dáta'); }
   }
 
   // Mapování country kódů na názvy
   var countryNames = {
-    CZ: 'Česká republika', SK: 'Slovensko',
+    SK: 'Slovensko', CZ: 'Česko',
   };
 
   // ────────────────────────────────────────────────────
@@ -920,7 +920,7 @@ body { background: var(--bg); }
   // 2a. Personalizovaný nadpis
   var titleEl = document.getElementById('ty-main-title');
   if (titleEl && customer && customer.first_name) {
-    titleEl.innerHTML = 'Děkujeme, <span class="accent">' + customer.first_name + '!</span>';
+    titleEl.innerHTML = 'Ďakujeme, <span class="accent">' + customer.first_name + '!</span>';
   }
 
   // 2b. Číslo objednávky
@@ -936,9 +936,9 @@ body { background: var(--bg); }
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
-    var subject = encodeURIComponent('Dotaz k objednávce #' + orderNum);
-    var body = encodeURIComponent('Dobrý den,\n\nmám dotaz ke své objednávce.\n\nČíslo objednávky: #' + orderNum + '\n\nMůj dotaz: ');
-    mailtoEl.href = 'mailto:peterka@kocicibible.cz?subject=' + subject + '&body=' + body;
+    var subject = encodeURIComponent('Otázka k objednávke #' + orderNum);
+    var body = encodeURIComponent('Dobrý deň,\n\nmám otázku k svojej objednávke.\n\nČíslo objednávky: #' + orderNum + '\n\nMoja otázka: ');
+    mailtoEl.href = 'mailto:peterka@macaciabiblia.sk?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bundle ceník z konfigurace jako fallback
@@ -974,7 +974,7 @@ body { background: var(--bg); }
       row.className = 'ty-order-item ty-bump-row';
       row.innerHTML = '<div class="ty-order-icon book">&#127873;</div><div>'
         + '<div class="ty-order-name"></div>'
-        + '<div class="ty-order-desc">Bonusov&aacute; kniha &mdash; ve stejn&eacute;m bal&iacute;ku'
+        + '<div class="ty-order-desc">Bonusov&aacute; kniha &mdash; v rovnakom bal&iacute;ku'
         + (b.price ? ' &middot; ' + formatCzk(b.price) : '') + '</div></div>';
       row.querySelector('.ty-order-name').textContent = b.name;
       if (mainRow && mainRow.nextSibling) mainRow.parentNode.insertBefore(row, mainRow.nextSibling);
@@ -990,11 +990,11 @@ body { background: var(--bg); }
   if (orderItemsEl && bundleQty > 1) {
     var mainItemName = orderItemsEl.querySelector('.ty-order-name');
     if (mainItemName) {
-      mainItemName.textContent = bundleQty + '× Kočičí bible';
+      mainItemName.textContent = bundleQty + '× Mačacia biblia';
     }
     var mainItemDesc = orderItemsEl.querySelector('.ty-order-desc');
     if (mainItemDesc) {
-      mainItemDesc.textContent = bundleQty + '× tištěná kniha — posíláme Zásilkovnou';
+      mainItemDesc.textContent = bundleQty + '× tlačená kniha — posielame Packetou';
     }
   }
 
@@ -1002,9 +1002,9 @@ body { background: var(--bg); }
   var shippingDescEl = document.getElementById('ty-shipping-desc');
   if (shippingDescEl) {
     if (shippingMethod === 'home') {
-      shippingDescEl.textContent = 'Doručení na vaši adresu za 2–3 pracovní dny';
+      shippingDescEl.textContent = 'Doručenie na vašu adresu za 2–3 pracovné dni';
     } else if (shippingMethod === 'pickup') {
-      shippingDescEl.textContent = 'Doručení na výdejní místo za 2–3 pracovní dny';
+      shippingDescEl.textContent = 'Doručenie na odberné miesto za 2–3 pracovné dni';
     }
   }
   // Zobraz zvolené výdejní místo v kartě údajů
@@ -1042,7 +1042,7 @@ body { background: var(--bg); }
       else if (cc) parts.push(cc);
       el('ty-show-address').innerHTML = parts.join('<br>');
     }
-    // Firemní údaje (B2B)
+    // Firemné údaje (B2B)
     if (companyData && companyData.company_name) {
       var companyRow = el('ty-company-row');
       var companyVal = el('ty-show-company');
@@ -1143,13 +1143,13 @@ body { background: var(--bg); }
 
     // Validace — alespoň e-mail a jméno
     if (!newData.email || !newData.first_name) {
-      showFeedback('Vyplňte prosím alespoň jméno a e-mail.', 'error');
+      showFeedback('Vyplňte prosím aspoň meno a e-mail.', 'error');
       return;
     }
 
     // Stav načítání
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-spinner"></span> Ukládám...';
+    btn.innerHTML = '<span class="btn-spinner"></span> Ukladám...';
 
     // Aktualizuj lokální data ihned (pro lepší UX)
     customer = {
@@ -1166,7 +1166,7 @@ body { background: var(--bg); }
     // Aktualizuj localStorage
     localStorage.setItem('medusa_customer', JSON.stringify(customer));
 
-    // Firemní údaje aktualizovat
+    // Firemné údaje aktualizovat
     var ecEl = document.getElementById('edit-company');
     if (ecEl) {
       var cName = ecEl.value.trim();
@@ -1183,7 +1183,7 @@ body { background: var(--bg); }
 
     // Pokud nemáme order ID, přeskočíme API volání (preview/test mód)
     if (!orderId) {
-      console.log('TY: Žádné order ID — ukládám pouze lokálně');
+      console.log('TY: Žiadne order ID — ukladám iba lokálne');
       finishSave(true);
       return;
     }
@@ -1223,25 +1223,25 @@ body { background: var(--bg); }
     .then(function(res) { return res.json(); })
     .then(function(data) {
       if (data.success) {
-        console.log('TY: Objednávka aktualizována v Meduse');
+        console.log('TY: Objednávka aktualizovaná v Meduse');
         finishSave(true);
       } else {
         console.warn('TY: API vrátilo chybu:', data.message);
         // Data jsou uložená lokálně, ale API selhalo
-        finishSave(true, 'Údaje jsme uložili. Pokud by něco nesedělo, napište nám prosím e-mail.');
+        finishSave(true, 'Údaje sme uložili. Ak by niečo nesedelo, napíšte nám prosím e-mail.');
       }
     })
     .catch(function(err) {
-      console.error('TY: Chyba při API volání:', err);
+      console.error('TY: Chyba pri API volaní:', err);
       // Lokální data jsou uložená, API nedostupné
-      finishSave(true, 'Údaje jsme uložili. Server je momentálně nedostupný — pokud by něco nesedělo, napište nám.');
+      finishSave(true, 'Údaje sme uložili. Server je momentálne nedostupný — ak by niečo nesedelo, napíšte nám.');
     });
   };
 
   function finishSave(success, customMessage) {
     var btn = document.getElementById('ty-save-btn');
     btn.disabled = false;
-    btn.innerHTML = 'Uložit změny';
+    btn.innerHTML = 'Uložiť zmeny';
 
     // Zavři formulář, ukaž kartu
     document.getElementById('ty-edit-form').classList.remove('is-open');
@@ -1249,9 +1249,9 @@ body { background: var(--bg); }
 
     // Ukaž zpětnou vazbu
     if (success) {
-      showFeedback(customMessage || 'Vaše údaje jsme aktualizovali! Balíček pošleme na správnou adresu.', 'success');
+      showFeedback(customMessage || 'Vaše údaje sme aktualizovali! Balíček pošleme na správnu adresu.', 'success');
     } else {
-      showFeedback(customMessage || 'Něco se pokazilo. Zkuste to prosím znovu.', 'error');
+      showFeedback(customMessage || 'Niečo sa pokazilo. Skúste to prosím znova.', 'error');
     }
   }
 
@@ -1329,7 +1329,7 @@ body { background: var(--bg); }
     localStorage.removeItem('medusa_checkout_total');
     localStorage.removeItem('checkout_shipping_method');
     localStorage.removeItem('checkout_packeta_point');
-    console.log('TY: localStorage vyčištěn (po 5 min)');
+    console.log('TY: localStorage vyčistený (po 5 min)');
   }, 5 * 60 * 1000);
 
   // ────────────────────────────────────────────────────

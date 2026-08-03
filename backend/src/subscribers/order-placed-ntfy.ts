@@ -100,6 +100,7 @@ const PROJECT_NAMES: Record<string, string> = {
   "zivot-zaslugy": "Život, jaký si zasloužíš (CZ)",
   "psi-superzivot": "Psí superživot (CZ)",
   "kocici-bible": "Kočičí bible (CZ)",
+  "macacia-biblia": "Mačacia biblia (SK)",
   // known bad values on existing orders
   "odpust-ksiazka": "Odpuść (PL)",
   "Slipp taket": "Slipp taket (NO)",

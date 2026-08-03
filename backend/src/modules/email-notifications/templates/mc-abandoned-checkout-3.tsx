@@ -2,9 +2,9 @@ import { Text, Section, Button, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
-export const KB_ABANDONED_CHECKOUT_2 = 'kb-abandoned-checkout-2'
+export const MC_ABANDONED_CHECKOUT_3 = 'mc-abandoned-checkout-3'
 
-export interface KbAbandonedCheckout2Props {
+export interface McAbandonedCheckout3Props {
   firstName: string
   checkoutUrl: string
   productName: string
@@ -13,84 +13,44 @@ export interface KbAbandonedCheckout2Props {
   preview?: string
 }
 
-export const isKbAbandonedCheckout2Data = (data: any): data is KbAbandonedCheckout2Props =>
+export const isMcAbandonedCheckout3Data = (data: any): data is McAbandonedCheckout3Props =>
   typeof data.firstName === 'string' && typeof data.checkoutUrl === 'string'
 
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
 const pad = '28px'
 
 const colors = {
-  headerBg: '#2D1B3D',
-  headerGradient: 'linear-gradient(135deg, #3D2B4D 0%, #2D1B3D 50%, #1A1028 100%)',
+  headerBg: '#18181B',
+  headerGradient: 'linear-gradient(135deg, #27272A 0%, #18181B 50%, #09090B 100%)',
   accent: '#C27BA0',
   accentSoft: '#FAF5F8',
   textDark: '#18181B',
   textBody: '#3F3F46',
   textMuted: '#71717A',
   boxBorder: '#EDD9E5',
-  starColor: '#F59E0B',
   footerBg: '#2D1B3D',
   footerText: '#9B7AAD',
   footerAccent: '#C27BA0',
   divider: '#EDD9E5',
-  guaranteeBg: '#F0FDF4',
-  guaranteeBorder: '#BBF7D0',
-  guaranteeText: '#166534',
+  urgentBg: '#FEF2F2',
+  urgentBorder: '#FECACA',
+  urgentText: '#991B1B',
 }
 
-const ReviewCard: React.FC<{ text: string; author: string }> = ({ text, author }) => (
-  <div style={{
-    backgroundColor: '#FAFAFA',
-    border: `1px solid ${colors.boxBorder}`,
-    borderRadius: '10px',
-    padding: '16px 18px',
-    marginBottom: '10px',
-  }}>
-    <Text style={{
-      fontFamily: font,
-      fontSize: '14px',
-      color: colors.starColor,
-      margin: '0 0 6px',
-      letterSpacing: '2px',
-    }}>
-      ★★★★★
-    </Text>
-    <Text style={{
-      fontFamily: font,
-      fontSize: '14px',
-      fontStyle: 'italic' as const,
-      color: colors.textBody,
-      lineHeight: '1.6',
-      margin: '0 0 8px',
-    }}>
-      &bdquo;{text}&ldquo;
-    </Text>
-    <Text style={{
-      fontFamily: font,
-      fontSize: '12px',
-      fontWeight: 600,
-      color: colors.textMuted,
-      margin: '0',
-    }}>
-      — {author}
-    </Text>
-  </div>
-)
-
-export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> & {
-  PreviewProps: KbAbandonedCheckout2Props
+export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> & {
+  PreviewProps: McAbandonedCheckout3Props
 } = ({
   firstName,
   checkoutUrl,
   productName,
   productPrice,
   productImage,
-  preview = 'Kočka nám čůrala za gauč tři roky. Po dvou týdnech byl klid.',
+  preview = 'Zostáva 24 hodín — potom musím tvoj košík uvoľniť.',
 }) => {
   return (
     <Base preview={preview}>
       <Section>
-        {/* ====== HEADER ====== */}
+        {/* ====== HEADER — dark, urgent tone ====== */}
         <div style={{
           backgroundColor: colors.headerBg,
           background: colors.headerGradient,
@@ -103,26 +63,48 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             fontWeight: 600,
             letterSpacing: '3px',
             textTransform: 'uppercase' as const,
-            color: 'rgba(255,255,255,0.65)',
+            color: 'rgba(255,255,255,0.55)',
             margin: '0 0 10px 0',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '24px',
+            fontSize: '26px',
             fontWeight: 800,
             color: '#ffffff',
             margin: '0',
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Příběh, který stojí za touto knihou
+            Poslední šance, {firstName}
           </Text>
         </div>
 
-        {/* ====== PERSONAL MESSAGE ====== */}
-        <div style={{ padding: `28px ${pad} 0` }}>
+        {/* ====== URGENT BOX ====== */}
+        <div style={{ padding: `24px ${pad} 0` }}>
+          <div style={{
+            backgroundColor: colors.urgentBg,
+            border: `1px solid ${colors.urgentBorder}`,
+            borderRadius: '10px',
+            padding: '16px 20px',
+            textAlign: 'center' as const,
+          }}>
+            <Text style={{
+              fontFamily: font,
+              fontSize: '14px',
+              fontWeight: 700,
+              color: colors.urgentText,
+              margin: '0',
+              lineHeight: '1.5',
+            }}>
+              ⏰ Tvoj košík o 24 hodín uvoľníme
+            </Text>
+          </div>
+        </div>
+
+        {/* ====== BODY ====== */}
+        <div style={{ padding: `20px ${pad} 0` }}>
           <Text style={{
             fontFamily: font,
             fontSize: '15px',
@@ -130,7 +112,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Dobrý den {firstName},
+            Ahoj {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -139,7 +121,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Píšu vám osobně. Ne abych tlačil na pilu, ale protože tohle byste asi měl/a vědět.
+            Toto je moja posledná pripomienka. Zajtra sa tvoj košík automaticky uvoľní a tvoju objednávku už pre teba nedokážem podržať.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -148,7 +130,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Tu knihu jsem nenapsal proto, že by mi přišlo hezké napsat knihu. Napsal jsem ji, protože jsem dvanáct let chodil po cizích bytech a viděl pořád to samé. Čůrání vedle bedýnky, noční koncerty, rozdrásaná opěrka. A pořád ty samé rady, které nefungují, protože míří na projev a ne na příčinu.
+            Chápem, že urobiť tento krok môže byť ťažké. Ale spýtaj sa sama seba: <strong style={{ color: colors.textDark }}>keď nie teraz — tak kedy?</strong>
           </Text>
           <Text style={{
             fontFamily: font,
@@ -157,66 +139,22 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Je to v podstatě můj sešit z těch dvanácti let, jen líp uspořádaný. Co jsem zkusil, co z toho vyšlo a za jak dlouho. Plus 3 bonusové e-booky.
+            Koľko nocí ťa ešte zobudí mňaukanie o tretej ráno? Koľkokrát ešte budeš drhnúť koberec a hovoriť si &bdquo;to sa nejako urovná&ldquo;?
           </Text>
-        </div>
-
-        <Hr style={{ margin: `24px ${pad}`, borderColor: colors.divider }} />
-
-        {/* ====== REVIEWS ====== */}
-        <div style={{ padding: `0 ${pad}` }}>
           <Text style={{
             fontFamily: font,
-            fontSize: '13px',
-            fontWeight: 700,
-            textTransform: 'uppercase' as const,
-            letterSpacing: '1.5px',
-            color: colors.textMuted,
-            margin: '0 0 14px',
+            fontSize: '15px',
+            lineHeight: '1.7',
+            margin: '16px 0 0',
+            color: colors.textBody,
+            fontWeight: 600,
           }}>
-            Co říkají ostatní čtenáři
+            Samo sa to neurovná. Ale s porozumením sa to urovnať dá — a rýchlejšie, než čakáš.
           </Text>
-
-          <ReviewCard
-            text="Kočka nám čůrala za gauč tři roky. TŘI ROKY. Po dvou týdnech podle knihy je klid. Nechápu, že to nikdo neporadil dřív."
-            author="Petra, Brno"
-          />
-          <ReviewCard
-            text="Zkoušeli jsme spreje, feromony, rady z fór. Nic. Tahle kniha vysvětlila PROČ to Mia dělá — a najednou to dávalo smysl. Konečně spíme celou noc."
-            author="Martin, Praha"
-          />
-          <ReviewCard
-            text="Rozdíl byl znát do týdne. Postupy jsou tak konkrétní, že člověk hned ví, co dělat jinak. Náš kocour je jako vyměněný."
-            author="Lucie, Ostrava"
-          />
-        </div>
-
-        {/* ====== GUARANTEE ====== */}
-        <div style={{ padding: `20px ${pad} 0` }}>
-          <div style={{
-            backgroundColor: colors.guaranteeBg,
-            border: `1px solid ${colors.guaranteeBorder}`,
-            borderRadius: '10px',
-            padding: '16px 20px',
-            textAlign: 'center' as const,
-          }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '14px',
-              fontWeight: 600,
-              color: colors.guaranteeText,
-              margin: '0',
-              lineHeight: '1.5',
-            }}>
-              ✓ 100% garance vrácení peněz do 30 dnů.
-              <br />
-              Žádné otázky, žádné formuláře. Riskuju já, ne vy.
-            </Text>
-          </div>
         </div>
 
         {/* ====== PRODUCT CARD ====== */}
-        <div style={{ padding: `20px ${pad} 0` }}>
+        <div style={{ padding: `24px ${pad} 0` }}>
           <div style={{
             backgroundColor: colors.accentSoft,
             borderRadius: '12px',
@@ -240,7 +178,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              {productPrice} Kč
+              {productPrice} €
             </Text>
           </div>
         </div>
@@ -261,7 +199,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               display: 'inline-block',
             }}
           >
-            Chci rozumět své kočce &#8594;
+            Dokončiť objednávku teraz &#8594;
           </Button>
         </div>
 
@@ -274,7 +212,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Kniha může být na cestě už zítra.
+            30-dňová záruka vrátenia peňazí. Žiadne otázky. Žiadne riziko.
           </Text>
         </div>
 
@@ -289,7 +227,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.6',
             margin: '0',
           }}>
-            Srdečně,
+            Srdečne,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -306,9 +244,9 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             color: colors.textMuted,
             margin: '2px 0 0',
           }}>
-            Kočičí bible &bull;{' '}
-            <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@kocicibible.cz
+            Mačacia biblia &bull;{' '}
+            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              peterka@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -329,7 +267,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -349,7 +287,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tenhle e-mail vám přišel, protože jste na kocicibible.cz nechali rozdělanou objednávku.
+            Toto je posledná pripomienka tvojej objednávky. Žiadne ďalšie upozornenie ti už nepošleme.
           </Text>
         </div>
       </Section>
@@ -357,13 +295,13 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
   )
 }
 
-KbAbandonedCheckout2Template.PreviewProps = {
+McAbandonedCheckout3Template.PreviewProps = {
   firstName: 'Petra',
-  checkoutUrl: 'https://www.kocicibible.cz/checkout',
-  productName: 'Kočičí bible',
+  checkoutUrl: 'https://www.macaciabiblia.sk/checkout',
+  productName: 'Mačacia biblia',
   productPrice: '550',
   productImage: '',
-  preview: 'Kočka nám čůrala za gauč tři roky. Po dvou týdnech je klid...',
-} as KbAbandonedCheckout2Props
+  preview: 'Zostáva 24 hodín — potom musím tvoj košík uvoľniť.',
+} as McAbandonedCheckout3Props
 
-export default KbAbandonedCheckout2Template
+export default McAbandonedCheckout3Template

@@ -45,7 +45,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'Zbývá 24 hodin — pak musím tvůj košík uvolnit.',
+  preview = 'Zbývá 24 hodin, pak musím ten košík uvolnit.',
 }) => {
   return (
     <Base preview={preview}>
@@ -98,7 +98,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
               margin: '0',
               lineHeight: '1.5',
             }}>
-              ⏰ Tvůj košík za 24 hodin uvolníme
+              Za 24 hodin ten košík uvolním
             </Text>
           </div>
         </div>
@@ -112,7 +112,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Ahoj {firstName},
+            Dobrý den {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -121,7 +121,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Tohle je moje poslední připomínka. Zítra se tvůj košík automaticky uvolní a tvou objednávku už pro tebe nedokážu podržet.
+            Poslední připomínka, pak dám pokoj. Zítra se košík automaticky uvolní a objednávku už pro vás nepodržím.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -130,7 +130,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Chápu, že udělat tenhle krok může být těžké. Ale zeptej se sama sebe: <strong style={{ color: colors.textDark }}>když ne teď — tak kdy?</strong>
+            Chápu, že se do toho člověku nechce. Jen jedna otázka: <strong style={{ color: colors.textDark }}>když ne teď, tak kdy?</strong>
           </Text>
           <Text style={{
             fontFamily: font,
@@ -139,7 +139,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Kolik nocí tě ještě vzbudí mňoukání ve tři ráno? Kolikrát ještě budeš drhnout koberec a říkat si &bdquo;to se nějak srovná&ldquo;?
+            Kolik nocí vás ještě vzbudí mňoukání nad ránem? Kolikrát ještě budete drhnout koberec a říkat si, že se to nějak srovná?
           </Text>
           <Text style={{
             fontFamily: font,
@@ -149,7 +149,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             color: colors.textBody,
             fontWeight: 600,
           }}>
-            Samo se to nesrovná. Ale s porozuměním se to srovnat dá — a rychleji, než čekáš.
+            Samo se to nesrovná, to už mám ověřené. S porozuměním ale ano, a většinou rychleji, než čekáte.
           </Text>
         </div>
 
@@ -212,7 +212,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            30denní garance vrácení peněz. Žádné otázky. Žádné riziko.
+            30 dní na vrácení peněz. Bez ptaní.
           </Text>
         </div>
 
@@ -287,7 +287,7 @@ export const KbAbandonedCheckout3Template: React.FC<KbAbandonedCheckout3Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tohle je poslední připomínka tvé objednávky. Žádné další upozornění už ti nepošleme.
+            Tohle byla poslední připomínka. Další e-mail už vám nepošleme.
           </Text>
         </div>
       </Section>

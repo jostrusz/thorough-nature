@@ -1,10 +1,10 @@
-import { Text, Section, Button, Hr, Link } from '@react-email/components'
+import { Text, Section, Button, Img, Hr, Link } from '@react-email/components'
 import * as React from 'react'
 import { Base } from './base'
 
-export const KB_ABANDONED_CHECKOUT_2 = 'kb-abandoned-checkout-2'
+export const MC_ABANDONED_CHECKOUT_1 = 'mc-abandoned-checkout-1'
 
-export interface KbAbandonedCheckout2Props {
+export interface McAbandonedCheckout1Props {
   firstName: string
   checkoutUrl: string
   productName: string
@@ -13,7 +13,7 @@ export interface KbAbandonedCheckout2Props {
   preview?: string
 }
 
-export const isKbAbandonedCheckout2Data = (data: any): data is KbAbandonedCheckout2Props =>
+export const isMcAbandonedCheckout1Data = (data: any): data is McAbandonedCheckout1Props =>
   typeof data.firstName === 'string' && typeof data.checkoutUrl === 'string'
 
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
@@ -23,69 +23,27 @@ const colors = {
   headerBg: '#2D1B3D',
   headerGradient: 'linear-gradient(135deg, #3D2B4D 0%, #2D1B3D 50%, #1A1028 100%)',
   accent: '#C27BA0',
+  accentLight: '#E8B4D0',
   accentSoft: '#FAF5F8',
   textDark: '#18181B',
   textBody: '#3F3F46',
   textMuted: '#71717A',
   boxBorder: '#EDD9E5',
-  starColor: '#F59E0B',
   footerBg: '#2D1B3D',
   footerText: '#9B7AAD',
   footerAccent: '#C27BA0',
   divider: '#EDD9E5',
-  guaranteeBg: '#F0FDF4',
-  guaranteeBorder: '#BBF7D0',
-  guaranteeText: '#166534',
 }
 
-const ReviewCard: React.FC<{ text: string; author: string }> = ({ text, author }) => (
-  <div style={{
-    backgroundColor: '#FAFAFA',
-    border: `1px solid ${colors.boxBorder}`,
-    borderRadius: '10px',
-    padding: '16px 18px',
-    marginBottom: '10px',
-  }}>
-    <Text style={{
-      fontFamily: font,
-      fontSize: '14px',
-      color: colors.starColor,
-      margin: '0 0 6px',
-      letterSpacing: '2px',
-    }}>
-      ★★★★★
-    </Text>
-    <Text style={{
-      fontFamily: font,
-      fontSize: '14px',
-      fontStyle: 'italic' as const,
-      color: colors.textBody,
-      lineHeight: '1.6',
-      margin: '0 0 8px',
-    }}>
-      &bdquo;{text}&ldquo;
-    </Text>
-    <Text style={{
-      fontFamily: font,
-      fontSize: '12px',
-      fontWeight: 600,
-      color: colors.textMuted,
-      margin: '0',
-    }}>
-      — {author}
-    </Text>
-  </div>
-)
-
-export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> & {
-  PreviewProps: KbAbandonedCheckout2Props
+export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> & {
+  PreviewProps: McAbandonedCheckout1Props
 } = ({
   firstName,
   checkoutUrl,
   productName,
   productPrice,
   productImage,
-  preview = 'Kočka nám čůrala za gauč tři roky. Po dvou týdnech byl klid.',
+  preview = 'Tvoja kniha je zabalená a čaká len na teba!',
 }) => {
   return (
     <Base preview={preview}>
@@ -106,22 +64,22 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             color: 'rgba(255,255,255,0.65)',
             margin: '0 0 10px 0',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
-            fontSize: '24px',
+            fontSize: '26px',
             fontWeight: 800,
             color: '#ffffff',
             margin: '0',
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Příběh, který stojí za touto knihou
+            Tvoja kniha je pripravená! 📦
           </Text>
         </div>
 
-        {/* ====== PERSONAL MESSAGE ====== */}
+        {/* ====== GREETING + BODY ====== */}
         <div style={{ padding: `28px ${pad} 0` }}>
           <Text style={{
             fontFamily: font,
@@ -130,7 +88,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Dobrý den {firstName},
+            Ahoj {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -139,7 +97,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Píšu vám osobně. Ne abych tlačil na pilu, ale protože tohle byste asi měl/a vědět.
+            Dobrá správa — tvoja objednávka knihy <strong style={{ color: colors.textDark }}>{productName}</strong> je zabalená a pripravená na odoslanie. Jediné, čo chýba, je tvoje potvrdenie.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -148,7 +106,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Tu knihu jsem nenapsal proto, že by mi přišlo hezké napsat knihu. Napsal jsem ji, protože jsem dvanáct let chodil po cizích bytech a viděl pořád to samé. Čůrání vedle bedýnky, noční koncerty, rozdrásaná opěrka. A pořád ty samé rady, které nefungují, protože míří na projev a ne na příčinu.
+            Vedel/a si, že mačky skoro nikdy „nezlobia“ naschvál? Cikanie mimo záchoda, nočné mňaukanie, ničenie nábytku — to všetko je <em>komunikace</em>. Len jej zatiaľ nerozumieš.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -157,63 +115,21 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Je to v podstatě můj sešit z těch dvanácti let, jen líp uspořádaný. Co jsem zkusil, co z toho vyšlo a za jak dlouho. Plus 3 bonusové e-booky.
+            V tejto knihe sa naučíš čítať reč svojej mačky — a premeniť domáci chaos na pokoj. Konkrétne postupy od mačacieho behavioristu, zrozumiteľne a bez vágnych teórií. Plus 3 bonusové e-booky zdarma.
           </Text>
         </div>
 
-        <Hr style={{ margin: `24px ${pad}`, borderColor: colors.divider }} />
-
-        {/* ====== REVIEWS ====== */}
-        <div style={{ padding: `0 ${pad}` }}>
-          <Text style={{
-            fontFamily: font,
-            fontSize: '13px',
-            fontWeight: 700,
-            textTransform: 'uppercase' as const,
-            letterSpacing: '1.5px',
-            color: colors.textMuted,
-            margin: '0 0 14px',
-          }}>
-            Co říkají ostatní čtenáři
-          </Text>
-
-          <ReviewCard
-            text="Kočka nám čůrala za gauč tři roky. TŘI ROKY. Po dvou týdnech podle knihy je klid. Nechápu, že to nikdo neporadil dřív."
-            author="Petra, Brno"
-          />
-          <ReviewCard
-            text="Zkoušeli jsme spreje, feromony, rady z fór. Nic. Tahle kniha vysvětlila PROČ to Mia dělá — a najednou to dávalo smysl. Konečně spíme celou noc."
-            author="Martin, Praha"
-          />
-          <ReviewCard
-            text="Rozdíl byl znát do týdne. Postupy jsou tak konkrétní, že člověk hned ví, co dělat jinak. Náš kocour je jako vyměněný."
-            author="Lucie, Ostrava"
-          />
-        </div>
-
-        {/* ====== GUARANTEE ====== */}
-        <div style={{ padding: `20px ${pad} 0` }}>
-          <div style={{
-            backgroundColor: colors.guaranteeBg,
-            border: `1px solid ${colors.guaranteeBorder}`,
-            borderRadius: '10px',
-            padding: '16px 20px',
-            textAlign: 'center' as const,
-          }}>
-            <Text style={{
-              fontFamily: font,
-              fontSize: '14px',
-              fontWeight: 600,
-              color: colors.guaranteeText,
-              margin: '0',
-              lineHeight: '1.5',
-            }}>
-              ✓ 100% garance vrácení peněz do 30 dnů.
-              <br />
-              Žádné otázky, žádné formuláře. Riskuju já, ne vy.
-            </Text>
+        {/* ====== PRODUCT IMAGE ====== */}
+        {productImage && (
+          <div style={{ textAlign: 'center' as const, padding: `20px ${pad} 0` }}>
+            <Img
+              src={productImage}
+              alt={productName}
+              width="200"
+              style={{ borderRadius: '12px', maxWidth: '100%', border: `1px solid ${colors.boxBorder}` }}
+            />
           </div>
-        </div>
+        )}
 
         {/* ====== PRODUCT CARD ====== */}
         <div style={{ padding: `20px ${pad} 0` }}>
@@ -240,7 +156,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               margin: '0',
               color: colors.accent,
             }}>
-              {productPrice} Kč
+              {productPrice} €
             </Text>
           </div>
         </div>
@@ -261,7 +177,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
               display: 'inline-block',
             }}
           >
-            Chci rozumět své kočce &#8594;
+            Áno, pošlite mi moju knihu &#8594;
           </Button>
         </div>
 
@@ -274,7 +190,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Kniha může být na cestě už zítra.
+            Tvoje údaje sú už vyplnené — dokončenie objednávky zaberie len minútku.
           </Text>
         </div>
 
@@ -289,7 +205,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.6',
             margin: '0',
           }}>
-            Srdečně,
+            Srdečne,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -306,9 +222,9 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             color: colors.textMuted,
             margin: '2px 0 0',
           }}>
-            Kočičí bible &bull;{' '}
-            <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@kocicibible.cz
+            Mačacia biblia &bull;{' '}
+            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              peterka@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -329,7 +245,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -349,7 +265,7 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tenhle e-mail vám přišel, protože jste na kocicibible.cz nechali rozdělanou objednávku.
+            Tento e-mail ti prišiel, pretože si rozpracoval/a objednávku na macaciabiblia.sk.
           </Text>
         </div>
       </Section>
@@ -357,13 +273,13 @@ export const KbAbandonedCheckout2Template: React.FC<KbAbandonedCheckout2Props> &
   )
 }
 
-KbAbandonedCheckout2Template.PreviewProps = {
+McAbandonedCheckout1Template.PreviewProps = {
   firstName: 'Petra',
-  checkoutUrl: 'https://www.kocicibible.cz/checkout',
-  productName: 'Kočičí bible',
+  checkoutUrl: 'https://www.macaciabiblia.sk/checkout',
+  productName: 'Mačacia biblia',
   productPrice: '550',
   productImage: '',
-  preview: 'Kočka nám čůrala za gauč tři roky. Po dvou týdnech je klid...',
-} as KbAbandonedCheckout2Props
+  preview: 'Tvoja kniha je zabalená a čaká len na teba!',
+} as McAbandonedCheckout1Props
 
-export default KbAbandonedCheckout2Template
+export default McAbandonedCheckout1Template

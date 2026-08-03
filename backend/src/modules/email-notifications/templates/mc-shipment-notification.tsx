@@ -3,9 +3,9 @@ import * as React from 'react'
 import { cleanItemTitle } from '../../../utils/clean-item-title'
 import { Base } from './base'
 
-export const KB_SHIPMENT_NOTIFICATION = 'kb-shipment-notification'
+export const MC_SHIPMENT_NOTIFICATION = 'mc-shipment-notification'
 
-export interface KbShipmentNotificationTemplateProps {
+export interface McShipmentNotificationTemplateProps {
   order: any
   shippingAddress: any
   trackingNumber?: string
@@ -20,7 +20,7 @@ export interface KbShipmentNotificationTemplateProps {
   preview?: string
 }
 
-export const isKbShipmentNotificationData = (data: any): data is KbShipmentNotificationTemplateProps =>
+export const isMcShipmentNotificationData = (data: any): data is McShipmentNotificationTemplateProps =>
   typeof data.order === 'object' && typeof data.shippingAddress === 'object'
 
 const font = "'Inter', 'Segoe UI', Arial, sans-serif"
@@ -60,19 +60,19 @@ function formatPrice(amount: number, currencyCode: string): string {
       currency: (currencyCode || 'CZK').toUpperCase(),
     }).format(amount)
   } catch {
-    return `${(amount || 0).toFixed(0)} Kč`
+    return `${(amount || 0).toFixed(2)} €`
   }
 }
 
 function formatCountry(code: string): string {
   const map: Record<string, string> = {
-    cz: 'Česká republika', sk: 'Slovensko', pl: 'Polsko', de: 'Německo',
-    at: 'Rakousko', nl: 'Nizozemsko', be: 'Belgie', hu: 'Maďarsko',
+    cz: 'Česko', sk: 'Slovensko', pl: 'Poľsko', de: 'Nemecko',
+    at: 'Rakúsko', nl: 'Holandsko', be: 'Belgicko', hu: 'Maďarsko',
   }
   return map[(code || '').toLowerCase()] || (code || '').toUpperCase()
 }
 
-export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemplateProps> & {
+export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemplateProps> & {
   PreviewProps: any
 } = ({
   order,
@@ -82,7 +82,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
   trackingCompany,
   billingEntity,
   pickupPoint,
-  preview = 'Vaše objednávka byla odeslána!',
+  preview = 'Vaša objednávka bola odoslaná!',
 }) => {
   const currency = order.currency_code || 'czk'
   const items = order.items || []
@@ -98,7 +98,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
 
   // Billing entity — Czech company
   const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
-  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
+  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Mesto, 110 00 Praha'
   const entityIco = billingEntity?.ico || '06259928'
   const entityDic = billingEntity?.dic || 'CZ06259928'
 
@@ -121,7 +121,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             color: 'rgba(255,255,255,0.75)',
             margin: '0 0 10px 0',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -132,7 +132,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Vaše objednávka je na cestě
+            Tvoja objednávka je na ceste!
           </Text>
           <Text style={{
             fontFamily: font,
@@ -160,7 +160,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
               color: colors.greenText,
               margin: '0',
             }}>
-              &#128230; Na cestě k vám
+              &#128230; Na ceste k vám
             </Text>
           </div>
         </div>
@@ -174,7 +174,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Dobrý den {shippingAddress?.first_name || ''},
+            Ahoj {shippingAddress?.first_name || 'tam'} 👋,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -184,8 +184,8 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             margin: '8px 0 0',
           }}>
             {isPickup
-              ? 'Zabaleno a odesláno na výdejní místo. Jakmile tam bude připravená k vyzvednutí, dáme vám vědět.'
-              : 'Zabaleno a odesláno, kniha je na cestě k vám. Podrobnosti o zásilce máte níž.'
+              ? 'Skvelá správa! Tvoja objednávka bola zabalená a odoslaná na odberné miesto. Len čo bude pripravená na vyzdvihnutie, dostaneš ďalšie upozornenie.'
+              : 'Skvelá správa! Tvoja objednávka bola zabalená a už je na ceste k tebe. Nižšie nájdeš podrobnosti o zásielke.'
             }
           </Text>
         </div>
@@ -209,7 +209,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                 color: colors.greenText,
                 marginBottom: '12px',
               }}>
-                Sledování zásilky
+                Sledovanie zásielky
               </Text>
               {trackingCompany && (
                 <Text style={{
@@ -218,7 +218,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                   color: colors.textBody,
                   marginBottom: '6px',
                 }}>
-                  Dopravce: <strong style={{ color: colors.textDark }}>{trackingCompany}</strong>
+                  Dopravca: <strong style={{ color: colors.textDark }}>{trackingCompany}</strong>
                 </Text>
               )}
               {trackingNumber && (
@@ -228,7 +228,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                   color: colors.textBody,
                   marginBottom: trackingUrl ? '14px' : '0',
                 }}>
-                  Číslo zásilky: <strong style={{ color: colors.textDark }}>{trackingNumber}</strong>
+                  Číslo zásielky: <strong style={{ color: colors.textDark }}>{trackingNumber}</strong>
                 </Text>
               )}
               {trackingUrl && (
@@ -246,7 +246,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                     display: 'inline-block',
                   }}
                 >
-                  Sledovat zásilku &#8594;
+                  Sledovať zásielku &#8594;
                 </Link>
               )}
             </div>
@@ -270,8 +270,8 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
               lineHeight: '1.5',
             }}>
               {isPickup
-                ? <><strong>&#128205; Doručení na výdejní místo</strong></>
-                : <><strong>&#128666; Očekávané doručení: 2–3 pracovní dny</strong></>
+                ? <><strong>&#128205; Doručenie na odberné miesto</strong></>
+                : <><strong>&#128666; Očakávané doručenie: 2–5 pracovných dní</strong></>
               }
             </Text>
             <Text style={{
@@ -281,7 +281,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
               margin: '6px 0 0',
               lineHeight: '1.5',
             }}>
-              {isPickup ? 'Zásilku si vyzvednete na zvoleném výdejním místě.' : 'Knihy odesíláme z našeho centrálního skladu v ČR.'}
+              {isPickup ? 'Zásielku si vyzdvihneš na zvolenom odbernom mieste.' : 'Knihy odosielame z nášho centrálneho skladu.'}
             </Text>
           </div>
         </div>
@@ -297,7 +297,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             color: colors.accent,
             marginBottom: '14px',
           }}>
-            Odeslané položky
+            Odoslané položky
           </Text>
 
           {items.map((item: any) => (
@@ -390,7 +390,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             color: colors.accent,
             marginBottom: '10px',
           }}>
-            {isPickup ? 'Výdejní místo' : 'Doručovací adresa'}
+            {isPickup ? 'Odberné miesto' : 'Doručovacia adresa'}
           </Text>
           <div style={{
             backgroundColor: colors.boxBg,
@@ -443,7 +443,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             color: colors.accent,
             marginBottom: '18px',
           }}>
-            Co bude dál
+            Čo môžete očakávať?
           </Text>
 
           {/* Step 1 — done */}
@@ -467,7 +467,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Objednávku jsme zabalili a předali dopravci.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvoja objednávka bola zabalená a odoslaná z nášho skladu.</span>
                 </td>
               </tr>
             </tbody>
@@ -492,9 +492,9 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                   }}>2</div>
                 </td>
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
-                  <strong style={{ color: colors.textDark }}>Na cestě</strong>
+                  <strong style={{ color: colors.textDark }}>Na ceste</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilka míří na vaše výdejní místo.' : 'Dopravce veze zásilku na vaši adresu.'}</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásielka mieri na tvoje odberné miesto.' : 'Dopravca doručuje zásielku na tvoju adresu.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -521,7 +521,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Doručeno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásilku si vyzvednete na výdejním místě.' : 'Do 2–3 pracovních dnů máte knihu doma.'}</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásielku si vyzdvihneš na odbernom mieste.' : 'Počas 2–5 pracovných dní budeš mať knihu doma.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -544,10 +544,10 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Něco se zásilkou nesedí? Napište, čtu si to sám.
+              Máš otázku k zásielke? Pokojne napíš!
               <br />
-              <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@kocicibible.cz
+              <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                peterka@macaciabiblia.sk
               </Link>
             </Text>
           </div>
@@ -561,7 +561,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Ať to doma klapne. Michal
+            Nech ti kniha prinesie kopu mačacej radosti! 🐱
           </Text>
           <Text style={{
             fontFamily: font,
@@ -578,8 +578,8 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@kocicibible.cz" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@kocicibible.cz
+            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
+              peterka@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -598,7 +598,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             margin: '0 0 8px',
             letterSpacing: '0.5px',
           }}>
-            Kočičí bible
+            Mačacia biblia
           </Text>
           <Text style={{
             fontFamily: font,
@@ -620,7 +620,7 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tenhle e-mail vám přišel, protože jste si objednali na kocicibible.cz.
+            Tento e-mail ste dostali, pretože ste vykonali objednávku na macaciabiblia.sk.
           </Text>
         </div>
       </Section>
@@ -628,19 +628,19 @@ export const KbShipmentNotificationTemplate: React.FC<KbShipmentNotificationTemp
   )
 }
 
-KbShipmentNotificationTemplate.PreviewProps = {
+McShipmentNotificationTemplate.PreviewProps = {
   order: {
     id: 'test-order-id',
     display_id: '812',
     metadata: { custom_order_number: 'CZ2026-812' },
     created_at: new Date().toISOString(),
-    email: 'petra.svobodova@seznam.cz',
+    email: 'petra.novakova@zoznam.sk',
     currency_code: 'czk',
     items: [
       {
         id: 'item-1',
-        title: 'Kočičí bible',
-        product_title: 'Kočičí bible',
+        title: 'Mačacia biblia',
+        product_title: 'Mačacia biblia',
         variant_title: null,
         quantity: 2,
         unit_price: 550,
@@ -652,7 +652,7 @@ KbShipmentNotificationTemplate.PreviewProps = {
     first_name: 'Petra',
     last_name: 'Svobodová',
     address_1: 'Korunní 810/104',
-    city: 'Praha 10',
+    city: 'Bratislava',
     postal_code: '101 00',
     country_code: 'cz',
   },
@@ -662,4 +662,4 @@ KbShipmentNotificationTemplate.PreviewProps = {
   pickupPoint: null,
 } as any
 
-export default KbShipmentNotificationTemplate
+export default McShipmentNotificationTemplate
