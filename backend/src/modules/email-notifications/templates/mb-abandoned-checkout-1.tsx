@@ -43,7 +43,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'A könyved be van csomagolva, és már csak rád vár!',
+  preview = 'A könyved be van csomagolva. Csak te maradtál félúton.',
 }) => {
   return (
     <Base preview={preview}>
@@ -75,7 +75,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            A könyved készen áll! 📦
+            A könyved be van csomagolva 📦
           </Text>
         </div>
 
@@ -97,7 +97,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Jó hírem van — a rendelésed, a <strong style={{ color: colors.textDark }}>{productName}</strong> című könyv, be van csomagolva és feladásra kész. Már csak a megerősítésed hiányzik.
+            Nem akarok rád telepedni — azt itthon a macskám csinálja, minden este fél tízkor, pontosan a mellkasomra. Csak szólok, hogy a <strong style={{ color: colors.textDark }}>{productName}</strong> ott maradt félúton a kosaradban. Be van csomagolva, feladásra kész, egyetlen kattintás hiányzik.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -106,7 +106,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Tudtad, hogy a macskák szinte soha nem „rosszalkodnak” szándékosan? Az alomtálcán kívüli pisilés, az éjszakai nyávogás, a bútorok szétkaparása — mindez <em>kommunikáció</em>. Csak még nem érted a nyelvét.
+            Egy dolgot hadd mondjak el addig is. A macska soha nem „csak úgy” pisil a kanapé mögé. Nem bosszúból, nem dacból, nem azért, mert nem szeret. Hanem mert <em>mond</em> valamit. Olyan nyelven, amit még nem tanultál meg.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -115,7 +115,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Ebből a könyvből megtanulod olvasni a macskád jelzéseit — és az otthoni káoszt nyugalommá változtatni. Konkrét módszerek egy macskaviselkedés-szakértőtől, érthetően, homályos elméletek nélkül. Plusz 3 ingyenes bonusz e-könyv.
+            Én az első macskámnál kilenc hónapig hittem, hogy az állat direkt szívat. Nem szívatott. Én nem figyeltem. Ebben a könyvben pont ezt a figyelést tanítom meg — konkrét lépésekkel, macskaviselkedés-szakértőtől, homályos elméletek nélkül. Plusz 3 ingyenes bonusz e-könyv.
           </Text>
         </div>
 
@@ -190,7 +190,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Az adataid már ki vannak töltve — a rendelés befejezése alig egy percet vesz igénybe.
+            Az adataid megvannak, a befejezés nagyjából egy perc. Kevesebb, mint amíg a macskád eldönti, hogy bemegy-e az ajtón.
           </Text>
         </div>
 
@@ -205,7 +205,7 @@ export const MbAbandonedCheckout1Template: React.FC<MbAbandonedCheckout1Props> &
             lineHeight: '1.6',
             margin: '0',
           }}>
-            Üdvözlettel,
+            Üdv,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -279,7 +279,7 @@ MbAbandonedCheckout1Template.PreviewProps = {
   productName: 'Macskabiblia',
   productPrice: '7 990',
   productImage: '',
-  preview: 'A könyved be van csomagolva, és már csak rád vár!',
+  preview: 'A könyved be van csomagolva. Csak te maradtál félúton.',
 } as MbAbandonedCheckout1Props
 
 export default MbAbandonedCheckout1Template

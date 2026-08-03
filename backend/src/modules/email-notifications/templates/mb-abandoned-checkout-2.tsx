@@ -85,7 +85,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'A macskánk három évig pisilt a kanapé mögé. Két hét után nyugalom lett...',
+  preview = 'Spray, feromon, „majd kinövi”. Nem nőtte ki. Elmondom, miért.',
 }) => {
   return (
     <Base preview={preview}>
@@ -117,7 +117,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            A történet, ami e könyv mögött áll
+            Miért írtam meg ezt a könyvet
           </Text>
         </div>
 
@@ -139,7 +139,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Személyesen akartam írni neked. Nem azért, hogy nyomást gyakoroljak rád — hanem mert szerintem ezt érdemes tudnod.
+            Nem nyomulni akarok. Csak elmondom, miért létezik ez a könyv egyáltalán.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -148,7 +148,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Ezt a könyvet nem azért írtam meg, mert &bdquo;jól hangzott&rdquo;, hogy könyvet írjak. Azért írtam, mert macskaviselkedés-szakértőként éveken át néztem, ahogy a macskatartók ugyanazokkal a gondokkal küzdenek — a bili mellé pisilés, az éjszakai koncertek, a szétkarmolt bútor — és újra meg újra ugyanazokat a tanácsokat kapják, amelyek nem működnek. Mert a tüneteket kezelik, nem az okot.
+            Macskaviselkedés-szakértőként éveken át ültem be idegen nappalikba, és mindenhol ugyanazt hallottam: a bili mellé pisil, hajnali háromkor koncertet ad, a kanapé sarka lassan nincs meg. És mindenki ugyanazt a három tanácsot kapta valahonnan — spray, feromon, &bdquo;majd kinövi&rdquo;. Nem nőtte ki. A francokat nőtte ki.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -157,7 +157,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Teljes, 235 oldalas útmutató a macskák viselkedéséhez + 3 ingyenes bonusz e-könyv. Minden a macskapszichológiára és az etológiára épül. Ez nem egy közhelyekkel teli kézikönyv — ez egy gyakorlati rendszer, amellyel végre megérted, mit mond neked a macskád már hosszú ideje.
+            Bevallom, én is így kezdtem: az első saját macskámnál vettem egy elriasztó sprayt, ami pontosan annyit ért el, hogy az állat átköltözött a szoba másik sarkába. Ott folytatta. Hát persze. A tünetet nyomkodtam, nem az okot. Ezért lett ebből 235 oldalas útmutató a macskák viselkedéséről + 3 ingyenes bonusz e-könyv, macskapszichológiára és etológiára építve. Nem közhelygyűjtemény — gyakorlati rendszer, amitől végre érteni fogod, mit mond neked a macskád már hosszú ideje.
           </Text>
         </div>
 
@@ -174,7 +174,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             color: colors.textMuted,
             margin: '0 0 14px',
           }}>
-            Mit mondanak a többi olvasók
+            Mit mondanak, akik már elolvasták
           </Text>
 
           <ReviewCard
@@ -210,7 +210,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             }}>
               ✓ 100% pénzvisszafizetési garancia 30 napig.
               <br />
-              Semmi kérdés, semmi bonyodalom. A kockázatot én vállalom, nem te.
+              Semmi kérdés, semmi magyarázkodás. A kockázat az enyém, nem a tiéd.
             </Text>
           </div>
         </div>
@@ -274,7 +274,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            A könyved akár már holnap úton lehet hozzád.
+            Ha ma befejezed, holnap már úton van hozzád.
           </Text>
         </div>
 
@@ -289,7 +289,7 @@ export const MbAbandonedCheckout2Template: React.FC<MbAbandonedCheckout2Props> &
             lineHeight: '1.6',
             margin: '0',
           }}>
-            Szívélyes üdvözlettel,
+            Üdv,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -363,7 +363,7 @@ MbAbandonedCheckout2Template.PreviewProps = {
   productName: 'Macskabiblia',
   productPrice: '7 990',
   productImage: '',
-  preview: 'A macskánk három évig pisilt a kanapé mögé. Két hét után nyugalom lett...',
+  preview: 'Spray, feromon, „majd kinövi”. Nem nőtte ki. Elmondom, miért.',
 } as MbAbandonedCheckout2Props
 
 export default MbAbandonedCheckout2Template

@@ -58,7 +58,7 @@ const colors = {
 
 export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
   PreviewProps: MbEbookDeliveryTemplateProps
-} = ({ firstName, downloadUrl, expiresAt, files, billingEntity, preview = 'Az e-könyveid készen állnak!' }) => {
+} = ({ firstName, downloadUrl, expiresAt, files, billingEntity, preview = 'Itt a bónusz e-könyveid. Töltsd le, mielőtt elfelejted.' }) => {
   const expiryDate = new Date(expiresAt).toLocaleDateString('hu-HU', {
     day: 'numeric',
     month: 'long',
@@ -101,7 +101,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Az e-könyveid készen állnak! 📖
+            Itt a bónusz e-könyveid 📖
           </Text>
           <Text style={{
             fontFamily: font,
@@ -109,7 +109,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
             color: 'rgba(255,255,255,0.7)',
             margin: '0',
           }}>
-            Töltsd le a digitális bónuszaidat
+            Egy kattintás, és a tiéd mind
           </Text>
         </div>
 
@@ -122,7 +122,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '0',
           }}>
-            Szia {firstName}!
+            Szia {firstName},
           </Text>
           <Text style={{
             fontFamily: font,
@@ -131,7 +131,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '8px 0 0',
           }}>
-            Nagyon köszönjük, hogy megvetted a Macskabiblia című könyvet! 🐱 A bónusz e-könyveid készen állnak a letöltésre. Kattints az alábbi gombra, és töltsd le őket.
+            Köszönöm, hogy megvetted a Macskabibliát. 🐱 A bónusz e-könyveid letölthetők, a gomb lentebb van. Én az ilyesmit általában elhalasztom, aztán három hónap múlva keresem — szóval inkább most csináld meg.
           </Text>
         </div>
 
@@ -204,7 +204,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
               margin: '0',
               lineHeight: '1.6',
             }}>
-              &#9203; A letöltési link eddig érvényes: <strong>{expiryDate}</strong>. Letöltés után mentsd el a fájlt.
+              &#9203; A letöltési link eddig érvényes: <strong>{expiryDate}</strong>. Utána már nem működik, szóval mentsd le a fájlokat, amint megvannak.
             </Text>
           </div>
         </div>
@@ -260,7 +260,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0 0 12px',
             }}>
-              &#128049; <strong style={{ color: colors.textDark }}>Kezdd nyugodtan</strong> — Ne siess. Minden fejezet új ismereteket ad a macskádról.
+              &#128049; <strong style={{ color: colors.textDark }}>Ne akard egy este alatt</strong> — Ez nem verseny. A macskád úgyis a saját tempójában dönti el, mikor hajlandó változni.
             </Text>
             <Text style={{
               fontFamily: font,
@@ -269,7 +269,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0 0 12px',
             }}>
-              &#128221; <strong style={{ color: colors.textDark }}>Jegyzetelj</strong> — Írd le, ami megfogott. Vissza fogsz még térni hozzá.
+              &#128221; <strong style={{ color: colors.textDark }}>Firkálj bele</strong> — Én a saját példányomba ceruzával írok. Nem szentírás, hanem munkaeszköz.
             </Text>
             <Text style={{
               fontFamily: font,
@@ -278,7 +278,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Légy türelmes</strong> — A macskád viselkedésében a változások fokozatosan jönnek. Minden apró előrelépés számít!
+              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Hetekben számolj, ne napokban</strong> — A macska nem kutya, nem akar megfelelni neked. Ami két hét alatt megvan, az már siker.
             </Text>
           </div>
         </div>
@@ -299,7 +299,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Problémád van a letöltéssel?
+              Nem indul a letöltés? Írj, ezt a postafiókot én olvasom.
               <br />
               <Link href="mailto:konyv@macskabiblia-konyv.hu" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
                 konyv@macskabiblia-konyv.hu
@@ -316,7 +316,7 @@ export const MbEbookDeliveryTemplate: React.FC<MbEbookDeliveryTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Sok macskás örömöt kívánok a könyvhöz! 🐱
+            Jó olvasást. 🐱 A nehezét úgyis a macskád fogja eldönteni.
           </Text>
           <Text style={{
             fontFamily: font,

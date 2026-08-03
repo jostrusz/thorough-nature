@@ -128,6 +128,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
   'kocici-bible': 'Vaše 3 bonusové e-booky jsou ke stažení',
+  macskabiblia: 'Itt a 3 bónusz e-könyved 📖',
 }
 
 // Localized fallback first name per project
@@ -145,6 +146,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'odpust-knizka': 'tam',
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',
+  macskabiblia: 'Olvasó',
 }
 
 export async function POST(

@@ -28,7 +28,7 @@
       + '<h1 style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0 0 12px;">' + (isCancelled ? 'A fizetés megszakadt' : 'A fizetés feldolgozás alatt van') + '</h1>'
       + '<p style="font-size:16px;color:#666;margin:0 0 32px;line-height:1.5;">' + (isCancelled ? 'A fizetésed nem fejeződött be. Nem történt terhelés. Próbáld meg újra, vagy válassz másik fizetési módot.' : 'A fizetésed még feldolgozás alatt van. Ha néhány percen belül nem fejeződik be, add le újra a rendelést.') + '</p>'
       + '<a href="' + window.location.pathname + '" style="display:inline-block;padding:16px 48px;background:linear-gradient(135deg,#C27BA0,#A8628A);color:#fff;font-size:16px;font-weight:600;border-radius:12px;text-decoration:none;box-shadow:0 4px 14px rgba(194,123,160,0.3);transition:transform 0.15s;">Rendelés újrapróbálása</a>'
-      + '<p style="font-size:13px;color:#999;margin-top:20px;">Ha a probléma továbbra is fennáll, írj nekünk: <a href="mailto:nagy@macskabiblia-konyv.hu" style="color:#C27BA0;">nagy@macskabiblia-konyv.hu</a></p>'
+      + '<p style="font-size:13px;color:#999;margin-top:20px;">Ha a probléma továbbra is fennáll, írj nekünk: <a href="mailto:konyv@macskabiblia-konyv.hu" style="color:#C27BA0;">konyv@macskabiblia-konyv.hu</a></p>'
       + '</div></div>');
     return;
   }
@@ -2522,8 +2522,8 @@ body {
         <div class="ob3-section animate-in" id="order-bumps-section">
           <div class="ob3-head">
             <span class="ob3-badge">&#127873; EGYSZERI AJ&Aacute;NLAT, CSAK MOST</span>
-            <div class="ob3-title">Tedd a csomagba a m&aacute;sik bestsellert</div>
-            <div class="ob3-sub">Ugyanabban a csomagban k&uuml;ldj&uuml;k &mdash; nulla plusz sz&aacute;ll&iacute;t&aacute;si d&iacute;j. Egy kattint&aacute;s:</div>
+            <div class="ob3-title">Ha m&aacute;r &uacute;gyis megy a csomag</div>
+            <div class="ob3-sub">Ugyanabba a dobozba tessz&uuml;k. A sz&aacute;ll&iacute;t&aacute;s nulla forint. Egy kattint&aacute;s:</div>
           </div>
           <div class="ob3-list" id="ob3-list"><!-- cards rendered by JS from PROJECT_CONFIG.upsellProducts --></div>
         </div>
@@ -2895,7 +2895,7 @@ body {
       <div class="guarantee-box">
         <div class="icon">🛡️</div>
         <div class="title">100%-os pénzvisszafizetési garancia</div>
-        <div class="desc">Nem tetszik? 30 napon belül visszakapod a teljes összeget. Nem kérdezzük meg, miért — csak visszautaljuk.</div>
+        <div class="desc">Nem jön be? Harminc napon belül visszautaljuk az egészet. Indoklást nem kérünk — ha azt írod, hogy a macska ült rá, azt is elfogadjuk.</div>
       </div>
 
       <!-- Shipping information -->
@@ -2910,7 +2910,7 @@ body {
         </div>
         <div class="summary-shipping-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Kérdésed van? <strong>nagy@macskabiblia-konyv.hu</strong></span>
+          <span>Kérdésed van? <strong>konyv@macskabiblia-konyv.hu</strong></span>
         </div>
       </div>
 
@@ -2944,7 +2944,7 @@ body {
     Rybná 716/24, 110 00 Prága 1, Csehország<br>
     Cégazonosító: 06259928 · Adószám: CZ06259928<br>
     A könyveket a raktárunkból küldjük, Magyarország egész területére.<br>
-    Kérdésed vagy gondod van? Írj bátran: <a href="mailto:nagy@macskabiblia-konyv.hu"><strong>nagy@macskabiblia-konyv.hu</strong></a><br>
+    Kérdésed vagy gondod van? Írj bátran: <a href="mailto:konyv@macskabiblia-konyv.hu"><strong>konyv@macskabiblia-konyv.hu</strong></a><br>
     24 órán belül válaszolunk, és minden ügyet személyesen intézünk.
   </div>
   <div class="checkout-footer-links">
@@ -3339,24 +3339,24 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
   var BUMP_DETAILS = {
     engedd: {
       meta: ['&#128214; 290 oldal', '&#128221; Munkaf&uuml;zet a k&ouml;nyvben', '&#11088; 9,3/10 el&eacute;gedetts&eacute;g'],
-      intro1: '<strong>Ismer&#337;s.</strong> Este fekszel az &aacute;gyban, a tested kimer&uuml;lt &mdash; a fejed viszont megy tov&aacute;bb. &Uacute;jraj&aacute;tszod, mit kellett volna m&aacute;shogy mondanod. Mi lett volna, ha. Reggel f&aacute;radtabban &eacute;bredsz, mint ahogy elaludt&aacute;l.',
-      intro2: 'Pontosan ezekre az est&eacute;kre &iacute;rta Joris de Vries az <strong>Engedd el, ami t&ouml;nkretesz</strong> c&iacute;m&#369; k&ouml;nyvet. Semmi k&ouml;zhely, semmi &bdquo;gondolj pozit&iacute;van&rdquo;. Idegtudom&aacute;nyra &eacute;p&uuml;l&#337;, konkr&eacute;t l&eacute;p&eacute;sek, amelyek meg&aacute;ll&iacute;tj&aacute;k a r&aacute;g&oacute;d&aacute;st &mdash; <em>emberi nyelven meg&iacute;rva</em>.',
-      pillarsTitle: 'Miben seg&iacute;t',
+      intro1: '<strong>Ismer&#337;s.</strong> F&eacute;l tizenegy, a macska m&aacute;r alszik a l&aacute;badon, te viszont fekszel, &eacute;s a fejed megy tov&aacute;bb: mit kellett volna m&aacute;shogy mondani, mi lett volna, ha. Reggel f&aacute;radtabban kelsz, mint ahogy lefek&uuml;dt&eacute;l. A macska kipihente.',
+      intro2: 'Minden ilyen k&ouml;nyv azzal kezdi, hogy engedd el. Marhas&aacute;g: att&oacute;l, hogy valaki kimondja, m&eacute;g nem engedted el. Joris de Vries <strong>Engedd el, ami t&ouml;nkretesz</strong> c&iacute;m&#369; k&ouml;nyve konkr&eacute;t l&eacute;p&eacute;seket ad, idegtudom&aacute;nyra &eacute;p&iacute;tve, ember nyelv&eacute;n. Elolvastam. Az &eacute;jszakai r&aacute;di&oacute;t a fejemben nem kapcsolta ki, de lehalk&iacute;totta.',
+      pillarsTitle: 'Mire j&oacute;',
       pillars: [
-        ['&#127744;', 'V&Eacute;GTELEN R&Aacute;G&Oacute;D&Aacute;S', 'Meg&aacute;ll&iacute;tod a k&ouml;rt &mdash; nem harcolsz vele tov&aacute;bbi h&aacute;rom &oacute;r&aacute;t'],
-        ['&#128564;', 'A FEJED NEM KAPCSOL KI', 'Elalszol an&eacute;lk&uuml;l, hogy lej&aacute;tszan&aacute;d a &bdquo;mi lett volna, ha&rdquo; forgat&oacute;k&ouml;nyveket'],
-        ['&#128148;', 'R&Eacute;GI SEBEK', 'Elengeded a s&eacute;relmet an&eacute;lk&uuml;l, hogy meg kellene magyar&aacute;znod'],
-        ['&#128532;', 'B&#368;NTUDAT', 'Nem b&uuml;nteted magad olyasmi&eacute;rt, amin m&aacute;r &uacute;gysem v&aacute;ltoztatsz'],
-        ['&#128221;', 'MUNKAF&Uuml;ZET', 'Gyakorlatok m&aacute;ra est&eacute;re &mdash; nem elm&eacute;let &bdquo;majd valamikorra&rdquo;']
+        ['&#127744;', 'V&Eacute;GTELEN R&Aacute;G&Oacute;D&Aacute;S', 'Meg&aacute;ll&iacute;tod a k&ouml;rt, nem tolod tov&aacute;bb hajnali kett&#337;ig'],
+        ['&#128564;', 'A FEJED NEM KAPCSOL KI', 'Elalszol an&eacute;lk&uuml;l, hogy v&eacute;gigp&ouml;rgetn&eacute;d a &bdquo;mi lett volna, ha&rdquo; r&eacute;szt'],
+        ['&#128148;', 'R&Eacute;GI SEBEK', 'Elengeded, an&eacute;lk&uuml;l hogy b&aacute;rkinek meg kellene magyar&aacute;znod'],
+        ['&#128532;', 'B&#368;NTUDAT', 'Abbahagyod az &ouml;nostoroz&aacute;st olyasmi&eacute;rt, amin &uacute;gysem v&aacute;ltoztatsz'],
+        ['&#128221;', 'MUNKAF&Uuml;ZET', 'Gyakorlatok m&aacute;ra est&eacute;re, nem elm&eacute;let valamikorra']
       ],
       results: [
-        'Nyomtatott k&ouml;nyv <strong>8&nbsp;990&nbsp;Ft</strong>-&eacute;rt 10&nbsp;999&nbsp;Ft helyett &mdash; csak itt, a rendel&eacute;s mell&eacute;',
-        'A teljes munkaf&uuml;zet, minden gyakorlattal',
-        'A Macskabibli&aacute;val egy csomagban k&uuml;ldj&uuml;k &mdash; nulla plusz sz&aacute;ll&iacute;t&aacute;si d&iacute;j',
-        'Nem seg&iacute;t? 30 napon bel&uuml;l visszak&uuml;ld&ouml;d, &eacute;s visszautaljuk. Nem k&eacute;rdez&uuml;nk semmit.'
+        'A nyomtatott k&ouml;nyv <strong>8&nbsp;990&nbsp;Ft</strong>, nem 10&nbsp;999&nbsp;Ft &mdash; de csak itt, a rendel&eacute;s mell&eacute;',
+        'A teljes munkaf&uuml;zet, az &ouml;sszes gyakorlattal',
+        'Egy dobozban j&ouml;n a Macskabibli&aacute;val, a sz&aacute;ll&iacute;t&aacute;s nulla forint',
+        'Nem j&ouml;n be? Harminc napon bel&uuml;l visszak&uuml;ld&ouml;d, &eacute;s visszautaljuk. Nem k&eacute;rdez&uuml;nk semmit.'
       ],
       comboIcon: '&#129504;',
-      combo: '<strong>A macska lecsendes&iacute;ti az otthonodat. Ez a k&ouml;nyv azt csendes&iacute;ti le, amit a fejedben hordozol.</strong> A v&aacute;s&aacute;rl&oacute;ink a kett&#337;t veszik egy&uuml;tt a leggyakrabban.',
+      combo: '<strong>A macska lecsendes&iacute;ti a lak&aacute;st. Ez a k&ouml;nyv azt, ami a fejedben megy.</strong> A kett&#337;t viszik egy&uuml;tt a leggyakrabban. Van benne logika.',
       review: '&bdquo;&Eacute;vek &oacute;ta el&#337;sz&ouml;r nem p&ouml;rg&ouml;tt az agyam &eacute;jf&eacute;lkor. Csoda nem t&ouml;rt&eacute;nt. De az a nyugalom meg&eacute;r 8&nbsp;990 forintot.&rdquo;',
       reviewer: '&mdash; Kov&aacute;cs Anita, Debrecen'
     }
@@ -7294,7 +7294,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
       // NO prominent "try again" — the webhook safety-net + reconcile cron finish the
       // order and the customer gets an e-mail. This avoids both the false "error" and
       // the double-payment risk. A soft retry link still covers a real non-payment.
-      preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:460px;margin:0 auto;font-family:"DM Sans",sans-serif;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF3C7;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><p style="font-size:20px;font-weight:600;color:#1a1a2e;margin:0 0 10px;">A fizetés feldolgozás alatt ⏳</p><p style="font-size:14px;color:#666;margin:0;line-height:1.6;">Ha épp most fizettél (főleg átutalással), a visszaigazolás eltarthat pár percig — <strong>e-mailben megérkezik</strong>. Kérlek <strong>ne add le újra a rendelést</strong>, hogy ne fizess kétszer.</p><p style="font-size:13px;color:#999;margin-top:18px;">Nem ment át a fizetés? <a href="' + window.location.pathname + '" style="color:#C27BA0;font-weight:600;">Újrapróbálás</a> · <a href="mailto:nagy@macskabiblia-konyv.hu" style="color:#C27BA0;">nagy@macskabiblia-konyv.hu</a></p></div>';
+      preloader.innerHTML = '<div style="text-align:center;padding:40px 20px;max-width:460px;margin:0 auto;font-family:"DM Sans",sans-serif;"><div style="width:56px;height:56px;margin:0 auto 20px;background:#FEF3C7;border-radius:50%;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><p style="font-size:20px;font-weight:600;color:#1a1a2e;margin:0 0 10px;">A fizetés feldolgozás alatt ⏳</p><p style="font-size:14px;color:#666;margin:0;line-height:1.6;">Ha épp most fizettél (főleg átutalással), a visszaigazolás eltarthat pár percig — <strong>e-mailben megérkezik</strong>. Kérlek <strong>ne add le újra a rendelést</strong>, hogy ne fizess kétszer.</p><p style="font-size:13px;color:#999;margin-top:18px;">Nem ment át a fizetés? <a href="' + window.location.pathname + '" style="color:#C27BA0;font-weight:600;">Újrapróbálás</a> · <a href="mailto:konyv@macskabiblia-konyv.hu" style="color:#C27BA0;">konyv@macskabiblia-konyv.hu</a></p></div>';
     });
 
     return; // Stop further checkout initialization

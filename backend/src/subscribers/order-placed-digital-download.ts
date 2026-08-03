@@ -317,6 +317,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
   'kocici-bible': 'Vaše 3 bonusové e-booky jsou ke stažení',
   'macacia-biblia': 'Vaše 3 bonusové e-booky sú na stiahnutie',
+  macskabiblia: 'Itt a 3 bónusz e-könyved 📖',
   'lache-livre': 'Tes e-books sont prêts ! 📖',
   suelta: '¡Tus e-books están listos! 📖',
 }
@@ -335,6 +336,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'zivot-zaslugy': 'tam',
   'kocici-bible': 'tam',
   'macacia-biblia': 'tam',
+  macskabiblia: 'Olvasó',
   'odpust-knizka': 'tam',
   'pusti-to-sk': 'tam',
   'engedd-el': 'Olvasó',

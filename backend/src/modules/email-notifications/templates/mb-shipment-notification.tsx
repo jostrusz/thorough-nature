@@ -82,7 +82,7 @@ export const MbShipmentNotificationTemplate: React.FC<MbShipmentNotificationTemp
   trackingCompany,
   billingEntity,
   pickupPoint,
-  preview = 'A rendelésedet feladtuk!',
+  preview = 'Elment a csomagod. Innentől a futáron múlik.',
 }) => {
   const currency = order.currency_code || 'huf'
   const items = order.items || []
@@ -132,7 +132,7 @@ export const MbShipmentNotificationTemplate: React.FC<MbShipmentNotificationTemp
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            A rendelésed úton van!
+            A csomagod elindult
           </Text>
           <Text style={{
             fontFamily: font,
@@ -184,8 +184,8 @@ export const MbShipmentNotificationTemplate: React.FC<MbShipmentNotificationTemp
             margin: '8px 0 0',
           }}>
             {isPickup
-              ? 'Jó hírem van! A rendelésedet becsomagoltuk, és elindult a Packeta csomagpont felé. Amint átvehető lesz, külön értesítést kapsz.'
-              : 'Jó hírem van! A rendelésedet becsomagoltuk, és a csomag már úton van hozzád. Lentebb megtalálod a küldemény részleteit.'
+              ? 'Becsomagoltuk, ráment a címke, és a csomag elindult a Packeta csomagpont felé. Amint átvehető lesz, külön értesítést kapsz — azt már nem én küldöm, hanem a futárszolgálat.'
+              : 'Becsomagoltuk, ráment a címke, és a csomag elindult hozzád. A követési adatokat lentebb találod. Innentől a futáron múlik, nem rajtam.'
             }
           </Text>
         </div>
@@ -544,7 +544,7 @@ export const MbShipmentNotificationTemplate: React.FC<MbShipmentNotificationTemp
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Kérdésed van a küldeményről? Írj nyugodtan!
+              Napok óta nem mozdul a csomagkövetés? Írj, ezt a postafiókot én olvasom.
               <br />
               <Link href="mailto:konyv@macskabiblia-konyv.hu" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
                 konyv@macskabiblia-konyv.hu
@@ -561,7 +561,7 @@ export const MbShipmentNotificationTemplate: React.FC<MbShipmentNotificationTemp
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Sok macskás örömöt kívánok a könyvhöz! 🐱
+            Jó olvasást! 🐱 A macskád valószínűleg előbb ül rá a könyvre, mint ahogy kinyitod.
           </Text>
           <Text style={{
             fontFamily: font,

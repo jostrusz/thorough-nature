@@ -103,7 +103,7 @@ export const MbOrderPlacedTemplate: React.FC<MbOrderPlacedTemplateProps> & {
   paymentMethod,
   billingEntity,
   pickupPoint,
-  preview = 'Köszönjük a rendelésedet!',
+  preview = 'Megvan a rendelésed. Innentől a mi dolgunk.',
 }) => {
   const currency = order.currency_code || 'huf'
   const items = order.items || []
@@ -214,7 +214,7 @@ export const MbOrderPlacedTemplate: React.FC<MbOrderPlacedTemplateProps> & {
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Köszönjük a rendelésedet!
+            Megvan a rendelésed
           </Text>
           <Text style={{
             fontFamily: font,
@@ -285,8 +285,8 @@ export const MbOrderPlacedTemplate: React.FC<MbOrderPlacedTemplateProps> & {
             margin: '8px 0 0',
           }}>
             {isPaid
-              ? 'Nagyon köszönjük a rendelésedet! A fizetés sikeresen megtörtént, és máris nekilátunk a csomagolásnak. Alább megtalálod a teljes összesítőt.'
-              : 'Nagyon köszönjük a rendelésedet! Már készítjük elő a feladásra, a fizetést pedig kényelmesen a csomag átvételekor rendezheted. Alább megtalálod a teljes összesítőt.'
+              ? 'Hát megvan. A fizetés lement, a könyved pedig már a csomagolóasztalon. A macskám ezt nem tartja nagy eseménynek — én igen. Alább megtalálod a teljes összesítőt.'
+              : 'Hát megvan. Már készítjük elő a feladásra, a pénzt pedig majd akkor add oda, amikor a csomag a kezedben van. Előre semmit nem kell intézned. Alább megtalálod a teljes összesítőt.'
             }
           </Text>
         </div>
@@ -702,7 +702,7 @@ export const MbOrderPlacedTemplate: React.FC<MbOrderPlacedTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Kérdésed van a rendeléseddel kapcsolatban? Írj nyugodtan!
+              Valami nem stimmel a rendeléssel? Írj nyugodtan, ezt a postafiókot én olvasom.
               <br />
               <Link href="mailto:konyv@macskabiblia-konyv.hu" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
                 konyv@macskabiblia-konyv.hu
@@ -750,7 +750,7 @@ export const MbOrderPlacedTemplate: React.FC<MbOrderPlacedTemplateProps> & {
                 margin: '0 0 14px',
                 lineHeight: '1.5',
               }}>
-                A Macskabiblia olvasói leggyakrabban ezt a könyvet veszik meg mellé:
+                A Macskabiblia olvasói leggyakrabban ezt teszik mellé a kosárba. Nem én találtam ki, ezt a statisztika mondja:
               </Text>
               {missing.map((c) => (
                 <div key={c.title} style={{
@@ -807,7 +807,7 @@ export const MbOrderPlacedTemplate: React.FC<MbOrderPlacedTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Sok macskás örömet kívánok a könyvhöz! 🐱
+            Jó olvasást! 🐱 És sok szerencsét, ha a macskád is rá akar feküdni a könyvre.
           </Text>
           <Text style={{
             fontFamily: font,

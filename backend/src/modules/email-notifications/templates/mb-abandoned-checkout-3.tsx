@@ -45,7 +45,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'Még 24 óra — utána fel kell szabadítanom a kosaradat.',
+  preview = 'Holnap felszabadul a kosarad. Utána már nem tudom fogni neked.',
 }) => {
   return (
     <Base preview={preview}>
@@ -77,7 +77,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Utolsó esély, {firstName}
+            Ez az utolsó levelem, {firstName}
           </Text>
         </div>
 
@@ -121,7 +121,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Ez az utolsó emlékeztetőm. Holnap a kosarad automatikusan felszabadul, és a rendelésedet már nem tudom tovább tartani neked.
+            Ez az utolsó levelem ebben az ügyben. Holnap a rendszer magától felszabadítja a kosaradat, és onnantól nekem sincs mit tartogatnom.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -130,7 +130,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Megértem, hogy nehéz lehet megtenni ezt a lépést. De tedd fel magadnak a kérdést: <strong style={{ color: colors.textDark }}>ha nem most — akkor mikor?</strong>
+            Nem foglak ijesztgetni. Csak felteszek egy kérdést, amit pár évvel és jó néhány kimosott szőnyeggel ezelőtt magamnak is feltettem: <strong style={{ color: colors.textDark }}>ha nem most, akkor mikor?</strong>
           </Text>
           <Text style={{
             fontFamily: font,
@@ -139,7 +139,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Hány éjszakán ébreszt még fel a nyávogás hajnali háromkor? Hányszor sikálod még a szőnyeget azzal, hogy &bdquo;majd csak rendeződik valahogy&rdquo;?
+            Hány hajnali háromkor akarsz még felülni az ágyban a nyávogásra? Hányszor akarod még kisikálni ugyanazt a foltot ugyanabból a szőnyegből, azzal, hogy &bdquo;majd csak rendeződik valahogy&rdquo;?
           </Text>
           <Text style={{
             fontFamily: font,
@@ -149,7 +149,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             color: colors.textBody,
             fontWeight: 600,
           }}>
-            Magától nem rendeződik. De megértéssel igen — és gyorsabban, mint gondolnád.
+            Magától nem rendeződik. A macska nem kezd el magyarul beszélni attól, hogy vársz. Megértéssel viszont igen — és gyorsabban, mint hinnéd.
           </Text>
         </div>
 
@@ -212,7 +212,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            30 napos pénzvisszafizetési garancia. Semmi kérdés. Semmi kockázat.
+            30 napos pénzvisszafizetési garancia. Semmi kérdés, semmi magyarázkodás.
           </Text>
         </div>
 
@@ -227,7 +227,7 @@ export const MbAbandonedCheckout3Template: React.FC<MbAbandonedCheckout3Props> &
             lineHeight: '1.6',
             margin: '0',
           }}>
-            Szívélyes üdvözlettel,
+            Üdv,
           </Text>
           <Text style={{
             fontFamily: font,
@@ -301,7 +301,7 @@ MbAbandonedCheckout3Template.PreviewProps = {
   productName: 'Macskabiblia',
   productPrice: '7 990',
   productImage: '',
-  preview: 'Még 24 óra — utána fel kell szabadítanom a kosaradat.',
+  preview: 'Holnap felszabadul a kosarad. Utána már nem tudom fogni neked.',
 } as MbAbandonedCheckout3Props
 
 export default MbAbandonedCheckout3Template
