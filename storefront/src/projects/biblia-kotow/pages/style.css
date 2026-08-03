@@ -310,6 +310,18 @@ h2 { font-size: 38px; }
  line-height: 1.75; margin: 0 0 20px 0;
 }
 
+/* Hero deck — vedouci veta mezi H1 a popisem.
+   Drive to byl 15px muted text bez spodniho marginu, takze se lepil
+   primo na nasledujici odstavec a v hierarchii sedel pod nim. */
+.hero-subtitle {
+ font-family: 'DM Sans', sans-serif; font-size: 19px; font-weight: 500;
+ color: var(--heading); line-height: 1.5; letter-spacing: -0.01em;
+ max-width: 540px; margin: 2px 0 26px 0;
+}
+.hero-subtitle em { font-style: italic; color: var(--cta); }
+.hero-left .body-text { max-width: 560px; }
+.hero-left .body-text:last-of-type { margin-bottom: 0; }
+
 /* Zvýraznění textu — jemný highlight */
 .highlight-yellow {
  background: linear-gradient(transparent 50%, rgba(232,208,228,0.5) 50%);
@@ -1835,7 +1847,13 @@ h2 { font-size: 38px; }
  .redenen-list li { padding: 16px 16px; gap: 12px; font-size: 15.5px; line-height: 1.68; border-radius: 14px; }
  .redenen-list .arrow { width: 26px; height: 26px; font-size: 14px; }
  .hero-section { padding-top: 40px; padding-bottom: 48px; }
- .hero { flex-direction: column; text-align: center; gap: 24px; }
+ .hero {
+  flex-direction: column; text-align: center; gap: 24px;
+  /* align-items:center ze zakladniho pravidla smrstilo polozky na obsah,
+     takze H1 pretekalo viewport o ~16 px. Ve sloupci chceme plnou sirku. */
+  align-items: stretch;
+ }
+ .hero > *, .hero-left > * { max-width: 100%; }
  .hero-left { display: contents; }
  .hero-left .eyebrow { order: 1; }
  .hero-left h1 { order: 2; }
