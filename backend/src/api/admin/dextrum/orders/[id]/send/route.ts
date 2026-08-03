@@ -150,6 +150,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
       // (quantity=N na variantě); Dextrum zná fyzický kód 363682 (stejná kniha
       // jako psi-superzivot upsell variant 363682).
       "KOCICI-BIBLE-OFICIAL-PB": { physicalSku: "363682", quantity: 1 },
+      // ─── Polish: Biblia kotów (biblia-kotow) ───
+      // Polský klon Kočičí bible. Bez tohohle řádku skončí každá objednávka
+      // ve WAITING s "The value is not filled in / items.productId".
+      "BIBLIA-KOTOW-PB": { physicalSku: "BKUKJHKHKJS2877", quantity: 1 },
+      // Order bumpy na polském checkoutu. Suffix -BK odlišuje bump variantu od
+      // hlavního produktu vlastního funnelu; -2 i -3 už zabraly jiné projekty
+      // (OTCCN64787237-2 = zycie-zaslugy, -3 = zivot-zaslugy).
+      "OTCCN64787237-BK": { physicalSku: "OTCCN64787237", quantity: 1 },
+      "ZJNS827837491-BK": { physicalSku: "ZJNS827837491", quantity: 1 },
       // ─── French: Lâche prise sur ce qui te détruit (lache-livre) ───
       // Dextrum zná knihu pod fyzickým kódem LVREFCE872687224. Medusí SKU
       // LACHE-{N} tam neexistují, takže mySTOCK vrací

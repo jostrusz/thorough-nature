@@ -74,5 +74,33 @@
     "verzending": "verzending.html",
     "retourbeleid": "retourbeleid.html"
   },
-  "orderBumpEnabled": false
+  "orderBumpEnabled": true,
+  "upsellProducts": [
+    {
+      "id": "odpusc",
+      "name": "Odpuść to, co cię niszczy",
+      "handle": "odpusc-to-co-cie-niszczy-bk",
+      "variantId": "variant_01KZ3A7RP41VTH11A6N894FYQJ",
+      "price": 99,
+      "originalPrice": 119,
+      "currency": "PLN",
+      "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/odpusc-ksiazka-thumbnail-01KK8RBZFKFSMZJJDDRR82PJ1D.png",
+      "author": "Joris de Vries · 290 stron + zeszyt ćwiczeń",
+      "desc": "Bestseller dla każdego, komu w głowie bez przerwy kręci się ta sama myśl. Jak zatrzymać nadmierne myślenie, uspokoić emocje i odzyskać wewnętrzny spokój — w oparciu o neurobiologię i psychologię, bez ogólnikowych rad.",
+      "hook": "Idealna dla Ciebie albo na prezent dla kogoś, kto „nie potrafi się wyłączyć”."
+    },
+    {
+      "id": "zycie",
+      "name": "Życie, jakiego nigdy sobie nie pozwoliłaś",
+      "handle": "zycie-jakiego-nigdy-sobie-nie-pozwolilas-bk",
+      "variantId": "variant_01KZ3A8AJFN1FYF7WPM1J7FZ30",
+      "price": 99,
+      "originalPrice": 129,
+      "currency": "PLN",
+      "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/Zycie-jakiego-nigdy-sobie-nie-pozwolilas-pichi-01KQV9FJE4MMTVEDQ4TSG7AGG9.png",
+      "author": "Anna de Vries · 340 stron · LIFE RESET™",
+      "desc": "30-dniowy system w 5 obszarach (dom, granice, myśli, nawyki, energia), który krok po kroku pomoże Ci zbudować życie naprawdę pasujące do Ciebie. Bez ogólnikowych afirmacji — konkretny plan.",
+      "hook": "Dla każdej, kto po uporządkowaniu głowy chce uporządkować i życie."
+    }
+  ]
 }
