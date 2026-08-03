@@ -157,7 +157,7 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Kompletný sprievodca mačacím správaním + 3 bonusové e-booky. Všetko postavené na mačacej psychológii a etológii. Toto nie je príručka plná pouček — je to praktický systém, s ktorým konečne porozumieš tomu, čo ti mačka celý čas hovorí.
+            Kompletný sprievodca mačacím správaním + 4 bonusové e-booky. Všetko postavené na mačacej psychológii a etológii. Toto nie je príručka plná pouček — je to praktický systém, s ktorým konečne porozumieš tomu, čo ti mačka celý čas hovorí.
           </Text>
         </div>
 

@@ -16,9 +16,10 @@ export interface McEbookDeliveryTemplateProps {
 
 // Default bonus e-books for Mačacia biblia (used when `files` is not provided)
 const DEFAULT_EBOOKS = [
-  'Dlhovekosť začína v mačacej miske',
-  'Hravá mačka',
-  'Mačacie SOS: 100 Problémov, 100 Riešení',
+  'Tajomstvo kvalitnej výživy mačky',
+  'Tréning vašej mačky',
+  'PET CARE',
+  '999 mačacích mien',
 ]
 
 export const isMcEbookDeliveryData = (data: any): data is McEbookDeliveryTemplateProps =>
@@ -386,9 +387,10 @@ McEbookDeliveryTemplate.PreviewProps = {
   downloadUrl: 'https://macaciabiblia.sk/download/abc123-test-token',
   expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
   files: [
-    { title: 'Dlhovekosť začína v mačacej miske' },
-    { title: 'Hravá mačka' },
-    { title: 'Mačacie SOS: 100 Problémov, 100 Riešení' },
+    { title: 'Tajomstvo kvalitnej výživy mačky' },
+    { title: 'Tréning vašej mačky' },
+    { title: 'PET CARE' },
+    { title: '999 mačacích mien' },
   ],
 } as McEbookDeliveryTemplateProps
 

@@ -115,7 +115,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            V tejto knihe sa naučíš čítať reč svojej mačky — a premeniť domáci chaos na pokoj. Konkrétne postupy od mačacieho behavioristu, zrozumiteľne a bez vágnych teórií. Plus 3 bonusové e-booky zdarma.
+            V tejto knihe sa naučíš čítať reč svojej mačky — a premeniť domáci chaos na pokoj. Konkrétne postupy od mačacieho behavioristu, zrozumiteľne a bez vágnych teórií. Plus 4 bonusové e-booky zdarma.
           </Text>
         </div>
 

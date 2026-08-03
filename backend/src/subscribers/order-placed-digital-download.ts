@@ -215,29 +215,17 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
       size: "4.1 MB",
     },
   ],
-  // Mačacia biblia (SK) — rovnaké 3 bonusové e-booky ako CZ edícia.
-  // POZOR: PDF súbory sú zatiaľ v češtine, slovenské preklady ešte nevznikli.
-  // Po ich nahratí na MinIO stačí vymeniť `key` nižšie.
-  'macacia-biblia': [
-    {
-      key: "e-books/Dlouhovekost-zacina-v-kocici-misce.pdf",
-      title: "Dlhovekosť začína v mačacej miske",
-      description: "E-book (PDF)",
-      size: "1.9 MB",
-    },
-    {
-      key: "e-books/Hrava-kocka.pdf",
-      title: "Hravá mačka",
-      description: "E-book (PDF)",
-      size: "1.0 MB",
-    },
-    {
-      key: "e-books/Kocici-SOS-100-problemu-100-reseni.pdf",
-      title: "Mačacie SOS: 100 Problémov, 100 Riešení",
-      description: "E-book (PDF)",
-      size: "4.1 MB",
-    },
-  ],
+  // Mačacia biblia (SK) — VYPNUTO, dokud nebudou PDF na MinIO.
+  // Slovenská edice má JINOU sadu 4 bonusů než česká; české PDF (Dlouhověkost /
+  // Hravá kočka / Kočičí SOS) sem NEPATŘÍ — jsou to jiné tituly.
+  // Prázdné pole = subscriber projekt přeskočí a NEoznačí objednávku ebook_sent,
+  // takže po nahrání souborů půjdou e-booky doposlat přes resend_ebooks.
+  // Až budou hotové, doplnit klíče tak, aby seděly s tím, co je v bucketu:
+  //   → "Tajomstvo kvalitnej výživy mačky"
+  //   → "Tréning vašej mačky"
+  //   → "PET CARE"
+  //   → "999 mačacích mien"
+  'macacia-biblia': [],
   // Suelta lo que te destruye (ES) — VYPNUTO, dokud nebudou PDF na MinIO.
   // Prázdné pole = subscriber projekt přeskočí a NEoznačí objednávku ebook_sent,
   // takže po nahrání souborů půjdou e-booky doposlat přes resend_ebooks.
@@ -316,7 +304,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   'pusti-to-sk': 'Tvoje e-knihy sú pripravené! 📖',
   'engedd-el': 'A 2 ingyenes e-könyved készen áll! 📖',
   'kocici-bible': 'Vaše 3 bonusové e-booky jsou ke stažení',
-  'macacia-biblia': 'Vaše 3 bonusové e-booky sú na stiahnutie',
+  'macacia-biblia': 'Vaše 4 bonusové e-booky sú na stiahnutie',
   macskabiblia: 'Itt a 3 bónusz e-könyved 📖',
   'lache-livre': 'Tes e-books sont prêts ! 📖',
   suelta: '¡Tus e-books están listos! 📖',
