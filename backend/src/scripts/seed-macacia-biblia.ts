@@ -140,7 +140,7 @@ export default async function seedMacaciaBiblia({ container }: ExecArgs) {
           {
             title: "Mačacia biblia",
             description:
-              "Kompletný sprievodca šťastným životom s mačkou. Nauč sa tajnú reč svojej mačky, zastav nežiaduce správanie a vybuduj vzťah plný lásky. 235 strán praktických rád založených na mačacej behaviorálnej vede + 4 bonusové e-knihy. Autor: Michal Peterka.",
+              "Kompletný sprievodca šťastným životom s mačkou. Nauč sa tajnú reč svojej mačky, zastav nežiaduce správanie a vybuduj vzťah plný lásky. 235 strán praktických rád založených na mačacej behaviorálnej vede + 3 bonusové e-knihy: Dlhovekosť začína v mačacej miske, Hravá mačka a Mačacie SOS. Autor: Michal Peterka.",
             handle: PRODUCT_HANDLE,
             weight: 450,
             status: ProductStatus.PUBLISHED,

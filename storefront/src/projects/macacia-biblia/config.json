@@ -21,7 +21,8 @@
     "variantId": "variant_01KZ3AQC81MF93JQ9DRADA9E9T",
     "price": 22,
     "currency": "EUR",
-    "thumbnail": "https://www.macaciabiblia.sk/kocici-bible-cover.png"
+    "thumbnail": "https://www.macaciabiblia.sk/kocici-bible-cover.png",
+    "originalPrice": 28
   },
   "upsellProduct": {
     "name": "",
@@ -35,35 +36,40 @@
     {
       "qty": 1,
       "price": 22,
+      "originalPrice": 28,
       "label": "1 kniha + 3× bonusy",
-      "sublabel": "Pro sebe",
-      "badge": "NEJPRODÁVANĚJŠÍ",
-      "save": 0
+      "sublabel": "Pre seba",
+      "badge": "NAJPREDÁVANEJŠIE",
+      "save": 0,
+      "savings": 0
     },
     {
       "qty": 2,
       "price": 36,
+      "originalPrice": 56,
       "label": "2 knihy + 3× bonusy",
-      "sublabel": "Pro mě a dárek pro blízké",
-      "badge": "NEJOBLÍBENĚJŠÍ",
+      "sublabel": "Pre mňa a darček pre blízkych",
+      "badge": "NAJOBĽÚBENEJŠIE",
       "save": 8,
       "savings": 8
     },
     {
       "qty": 3,
       "price": 48,
+      "originalPrice": 84,
       "label": "3 knihy + 3× bonusy",
-      "sublabel": "Pro celou rodinu koťátkářů",
-      "badge": "NEJVÍC UŠETŘÍTE",
+      "sublabel": "Pre celú rodinu mačkárov",
+      "badge": "NAJVIAC UŠETRÍTE",
       "save": 18,
       "savings": 18
     },
     {
       "qty": 4,
       "price": 60,
+      "originalPrice": 112,
       "label": "4 knihy + 3× bonusy",
-      "sublabel": "Obdarujte všechny kočičí kámoše",
-      "badge": "NEJLEPŠÍ HODNOTA",
+      "sublabel": "Obdarujte všetkých mačacích kamarátov",
+      "badge": "NAJLEPŠIA HODNOTA",
       "save": 28,
       "savings": 28
     }
