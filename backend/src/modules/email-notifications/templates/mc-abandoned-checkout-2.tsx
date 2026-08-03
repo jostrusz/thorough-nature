@@ -174,20 +174,20 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             color: colors.textMuted,
             margin: '0 0 14px',
           }}>
-            Čo hovoria ostatní čitatelia
+            Čo hovoria čitatelia českej edície
           </Text>
 
           <ReviewCard
             text="Mačka nám cikala za gauč tri roky. TRI ROKY. Po dvoch týždňoch podľa knihy je pokoj. Nechápem, že to nikto neporadil skôr."
-            author="Petra, Bratislava"
+            author="Petra, Brno"
           />
           <ReviewCard
             text="Skúšali sme spreje, feromóny, rady z fór. Nič. Táto kniha vysvetlila PREČO to Mia robí — a zrazu to dávalo zmysel. Konečne spíme celú noc."
-            author="Martin, Košice"
+            author="Martin, Praha"
           />
           <ReviewCard
             text="Citeľný rozdiel už počas týždňa. Postupy sú také konkrétne, že hneď vieš, čo robiť inak. Náš kocúr je ako vymenený."
-            author="Lucia, Žilina"
+            author="Lucie, Ostrava"
           />
         </div>
 
