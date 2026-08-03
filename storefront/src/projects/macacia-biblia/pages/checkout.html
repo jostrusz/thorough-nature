@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Poklad&ncaron;a — Ma&ccaron;acia biblia</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="canonical" href="https://www.kocicibible.cz/checkout">
+<link rel="canonical" href="https://www.macaciabiblia.sk/checkout">
 <link rel="icon" href="/kocici-bible-logo.png" type="image/png">
 
 <!-- Zabránění probliknutí checkoutu při návratu z platby — formulář se ihned skryje -->
@@ -4456,7 +4456,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
               // ─── Add project metadata (same as regular checkout) ───
-              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'kocici-bible' };
+              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'macacia-biblia' };
               if (window.AnalyticsTracker) {
                 customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
                 customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -4735,7 +4735,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                 customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
                 // ─── Add project metadata (same as regular checkout) ───
-                customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'kocici-bible' };
+                customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'macacia-biblia' };
                 if (window.AnalyticsTracker) {
                   customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
                   customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -4916,7 +4916,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
               customerData.billing_address = Object.assign({}, customerData.shipping_address);
 
               // ─── Add project metadata (same as regular checkout) ───
-              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'kocici-bible' };
+              customerData.metadata = { project_id: PROJECT_CONFIG.projectId || PROJECT_CONFIG.slug || 'macacia-biblia' };
               if (window.AnalyticsTracker) {
                 customerData.metadata.analytics_visitor_id = window.AnalyticsTracker.visitorId || '';
                 customerData.metadata.analytics_session_id = window.AnalyticsTracker.sessionId || '';
@@ -7275,7 +7275,7 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             abandoned_checkout: true,
             abandoned_at: new Date().toISOString(),
             checkout_url: window.location.href.split('?')[0],
-            project_id: PROJECT_CONFIG.projectId || 'kocici-bible'
+            project_id: PROJECT_CONFIG.projectId || 'macacia-biblia'
           }
         })
       });
