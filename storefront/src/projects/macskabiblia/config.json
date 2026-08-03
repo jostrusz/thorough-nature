@@ -1,0 +1,107 @@
+{
+  "slug": "macskabiblia",
+  "name": "Macskabiblia",
+  "domain": "macskabiblia-konyv.hu",
+  "locale": "hu",
+  "defaultCountry": "HU",
+  "defaultPhonePrefix": "36",
+  "phonePrefixByCountry": {
+    "HU": "36"
+  },
+  "salesChannelName": "Macskabiblia",
+  "medusaUrl": "https://www.marketing-hq.eu",
+  "publishableApiKey": "pk_4398657697871fcd07e78acab23e8a9a6aae6dcfaece27063ffd573ba36023b0",
+  "facebookPixelId": "",
+  "regions": {
+    "HU": "reg_01KWG6W2W6Z2YR8GVBRM3CEVHX"
+  },
+  "mainProduct": {
+    "name": "Macskabiblia",
+    "handle": "macskabiblia",
+    "variantId": "variant_01KZ3D1ZGVSHYT654VM0KYNDBP",
+    "price": 7990,
+    "originalPrice": 9990,
+    "currency": "HUF",
+    "thumbnail": "https://macskabiblia-konyv.hu/macskabiblia-cover.png"
+  },
+  "upsellProduct": {
+    "name": "Engedd el, ami tönkretesz",
+    "handle": "engedd-el-ami-tonkretesz-mb",
+    "variantId": "variant_01KZ3DMBMN804Y587TRYPJCHP1",
+    "price": 8990,
+    "originalPrice": 10999,
+    "currency": "HUF"
+  },
+  "bundleOptions": [
+    {
+      "qty": 1,
+      "price": 7990,
+      "originalPrice": 9990,
+      "label": "1 könyv + 3 bónusz",
+      "sublabel": "Magadnak",
+      "badge": "LEGKELENDŐBB",
+      "save": 0,
+      "savings": 0
+    },
+    {
+      "qty": 2,
+      "price": 12990,
+      "originalPrice": 19980,
+      "label": "2 könyv + 3 bónusz",
+      "sublabel": "Neked és ajándékba",
+      "badge": "LEGNÉPSZERŰBB",
+      "save": 6990,
+      "savings": 6990
+    },
+    {
+      "qty": 3,
+      "price": 16990,
+      "originalPrice": 29970,
+      "label": "3 könyv + 3 bónusz",
+      "sublabel": "Az egész macskás családnak",
+      "badge": "A LEGTÖBBET SPÓROLSZ",
+      "save": 12980,
+      "savings": 12980
+    },
+    {
+      "qty": 4,
+      "price": 21490,
+      "originalPrice": 39960,
+      "label": "4 könyv + 3 bónusz",
+      "sublabel": "Tökéletes ajándékcsomag",
+      "badge": "",
+      "save": 18470,
+      "savings": 18470
+    }
+  ],
+  "mollieProfileId": "",
+  "packetaApiKey": "cbb760f552ef87b3",
+  "paymentProviders": {},
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "upsell": "upsell.html",
+    "thank-you": "thank-you.html",
+    "contact": "contact.html",
+    "privacy": "privacy.html",
+    "voorwaarden": "voorwaarden.html",
+    "verzending": "verzending.html",
+    "retourbeleid": "retourbeleid.html"
+  },
+  "upsellProducts": [
+    {
+      "id": "engedd",
+      "name": "Engedd el, ami tönkretesz",
+      "handle": "engedd-el-ami-tonkretesz-mb",
+      "variantId": "variant_01KZ3DMBMN804Y587TRYPJCHP1",
+      "price": 8990,
+      "originalPrice": 10999,
+      "currency": "HUF",
+      "image": "https://www.engeddelkonyv.hu/engedd-pichi.png",
+      "author": "Joris de Vries · 290 oldal + munkafüzet",
+      "desc": "Bestseller mindenkinek, akinek a fejében véget nem érő gondolatfolyam pörög. Hogyan állítsd meg a rágódást, csillapítsd az érzelmeidet és találd meg a belső nyugalmat — idegtudományra és viselkedéslélektanra építve, üres közhelyek nélkül.",
+      "hook": "Ideális neked, vagy ajándékba annak, aki „nem tudja kikapcsolni a fejét”."
+    }
+  ],
+  "orderBumpEnabled": true
+}

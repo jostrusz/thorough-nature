@@ -239,6 +239,34 @@ const BK_STEPS: StepConfig[] = [
   },
 ]
 
+/** Macskabiblia (macskabiblia, HU) 3-step sequence */
+const MB_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.MB_ABANDONED_CHECKOUT_1,
+    subject: (name) => name ? `Szia ${name}, a könyved már csak rád vár! 📦` : `A könyved már csak rád vár! 📦`,
+    preview: "A Macskabiblia be van csomagolva, és már csak rád vár!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.MB_ABANDONED_CHECKOUT_2,
+    subject: (name) => name ? `${name}, a történet, ami e könyv mögött áll` : `A történet, ami e könyv mögött áll`,
+    preview: "A macskánk három évig a kanapé mögé pisilt. Két hét után nyugalom lett...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.MB_ABANDONED_CHECKOUT_3,
+    subject: (name) => name ? `Utolsó esély, ${name} — a kosaradat hamarosan felszabadítjuk` : `Utolsó esély — a kosaradat hamarosan felszabadítjuk`,
+    preview: "Még 24 óra — utána fel kell szabadítanom a kosaradat.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Pusti to, čo ťa ničí (pusti-to-sk) 3-step sequence */
 const SK_STEPS: StepConfig[] = [
   {
@@ -1046,6 +1074,79 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send BK step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Macskabiblia: 3-step sequence ──
+      if (projectId === "macskabiblia") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = MB_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || ""
+        const checkoutUrl = meta.checkout_url || "https://www.macskabiblia-konyv.hu/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Macskabiblia"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "7990"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Nagy Zoltán - Macskabiblia <konyv@macskabiblia-konyv.hu>",
+            data: {
+              emailOptions: {
+                replyTo: "konyv@macskabiblia-konyv.hu",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] MB step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send MB step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue

@@ -32,6 +32,15 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 48,    // €48 (save €18)
     4: 60,    // €60 (save €28)
   },
+  // Macskabiblia — Hungarian edition of Kočičí bible (macskabiblia-konyv.hu).
+  // Single-book price 7 990 Ft set by the owner; the rest follows the Czech
+  // ladder 550/899/1199/1499 Kč proportionally, rounded to the local -990 form.
+  "macskabiblia": {
+    1: 7990,   // 7 990 Ft incl. ÁFA
+    2: 12990,  // 12 990 Ft (save 2 990 Ft)
+    3: 16990,  // 16 990 Ft (save 6 980 Ft)
+    4: 21490,  // 21 490 Ft (save 10 470 Ft)
+  },
   // Lass Los Buch — "Lass los, was dich kaputt macht" (DE/AT/LU)
   "lass-los-was-dich-kaputt-macht": {
     1: 35,    // €35.00 incl. tax

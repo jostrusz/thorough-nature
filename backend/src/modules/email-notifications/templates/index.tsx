@@ -67,6 +67,10 @@ import { KbEbookDeliveryTemplate, KB_EBOOK_DELIVERY, isKbEbookDeliveryData } fro
 import { BkOrderPlacedTemplate, BK_ORDER_PLACED, isBkOrderPlacedTemplateData } from './bk-order-placed'
 import { BkShipmentNotificationTemplate, BK_SHIPMENT_NOTIFICATION, isBkShipmentNotificationData } from './bk-shipment-notification'
 import { BkEbookDeliveryTemplate, BK_EBOOK_DELIVERY, isBkEbookDeliveryData } from './bk-ebook-delivery'
+// Macskabiblia (macskabiblia, HU) templates
+import { MbOrderPlacedTemplate, MB_ORDER_PLACED, isMbOrderPlacedTemplateData } from './mb-order-placed'
+import { MbShipmentNotificationTemplate, MB_SHIPMENT_NOTIFICATION, isMbShipmentNotificationData } from './mb-shipment-notification'
+import { MbEbookDeliveryTemplate, MB_EBOOK_DELIVERY, isMbEbookDeliveryData } from './mb-ebook-delivery'
 // Pusť to, co tě ničí (odpust-knizka) templates
 import { OdOrderPlacedTemplate, OD_ORDER_PLACED, isOdOrderPlacedTemplateData } from './od-order-placed'
 import { OdEbookDeliveryTemplate, OD_EBOOK_DELIVERY, isOdEbookDeliveryData } from './od-ebook-delivery'
@@ -85,6 +89,9 @@ import { KbAbandonedCheckout3Template, KB_ABANDONED_CHECKOUT_3, isKbAbandonedChe
 import { BkAbandonedCheckout1Template, BK_ABANDONED_CHECKOUT_1, isBkAbandonedCheckout1Data } from './bk-abandoned-checkout-1'
 import { BkAbandonedCheckout2Template, BK_ABANDONED_CHECKOUT_2, isBkAbandonedCheckout2Data } from './bk-abandoned-checkout-2'
 import { BkAbandonedCheckout3Template, BK_ABANDONED_CHECKOUT_3, isBkAbandonedCheckout3Data } from './bk-abandoned-checkout-3'
+import { MbAbandonedCheckout1Template, MB_ABANDONED_CHECKOUT_1, isMbAbandonedCheckout1Data } from './mb-abandoned-checkout-1'
+import { MbAbandonedCheckout2Template, MB_ABANDONED_CHECKOUT_2, isMbAbandonedCheckout2Data } from './mb-abandoned-checkout-2'
+import { MbAbandonedCheckout3Template, MB_ABANDONED_CHECKOUT_3, isMbAbandonedCheckout3Data } from './mb-abandoned-checkout-3'
 import { OdAbandonedCheckout2Template, OD_ABANDONED_CHECKOUT_2, isOdAbandonedCheckout2Data } from './od-abandoned-checkout-2'
 import { OdAbandonedCheckout3Template, OD_ABANDONED_CHECKOUT_3, isOdAbandonedCheckout3Data } from './od-abandoned-checkout-3'
 // Pusti to, čo ťa ničí (pusti-to-sk) templates
@@ -199,6 +206,10 @@ export const EmailTemplates = {
   BK_ORDER_PLACED,
   BK_SHIPMENT_NOTIFICATION,
   BK_EBOOK_DELIVERY,
+  // Macskabiblia (HU)
+  MB_ORDER_PLACED,
+  MB_SHIPMENT_NOTIFICATION,
+  MB_EBOOK_DELIVERY,
   // Odpusť to, co tě ničí
   OD_ORDER_PLACED,
   OD_EBOOK_DELIVERY,
@@ -217,6 +228,9 @@ export const EmailTemplates = {
   BK_ABANDONED_CHECKOUT_1,
   BK_ABANDONED_CHECKOUT_2,
   BK_ABANDONED_CHECKOUT_3,
+  MB_ABANDONED_CHECKOUT_1,
+  MB_ABANDONED_CHECKOUT_2,
+  MB_ABANDONED_CHECKOUT_3,
   OD_ABANDONED_CHECKOUT_2,
   OD_ABANDONED_CHECKOUT_3,
   SK_ORDER_PLACED,
@@ -326,6 +340,14 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(bkKey)) {
       return bkKey
+    }
+  }
+  // Macskabiblia — Hungarian edition of Kočičí bible, dedicated mb-* templates
+  if (project === 'macskabiblia') {
+    const mbKey = `mb-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(mbKey)) {
+      return mbKey
     }
   }
   if (project === 'odpust-knizka') {
@@ -1002,6 +1024,34 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       }
       return <BkEbookDeliveryTemplate {...data} />
 
+    // ── Macskabiblia (HU) templates ──────────────────────────
+    case EmailTemplates.MB_ORDER_PLACED:
+      if (!isMbOrderPlacedTemplateData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.MB_ORDER_PLACED}"`
+        )
+      }
+      return <MbOrderPlacedTemplate {...data} />
+
+    case EmailTemplates.MB_SHIPMENT_NOTIFICATION:
+      if (!isMbShipmentNotificationData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.MB_SHIPMENT_NOTIFICATION}"`
+        )
+      }
+      return <MbShipmentNotificationTemplate {...data} />
+
+    case EmailTemplates.MB_EBOOK_DELIVERY:
+      if (!isMbEbookDeliveryData(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.MB_EBOOK_DELIVERY}"`
+        )
+      }
+      return <MbEbookDeliveryTemplate {...data} />
+
     // ── Odpusť to, co tě ničí templates ──────────────────────
     case EmailTemplates.OD_ORDER_PLACED:
       if (!isOdOrderPlacedTemplateData(data)) {
@@ -1141,6 +1191,31 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <BkAbandonedCheckout3Template {...data} />
+
+    case EmailTemplates.MB_ABANDONED_CHECKOUT_1:
+      if (!isMbAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.MB_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <MbAbandonedCheckout1Template {...data} />
+    case EmailTemplates.MB_ABANDONED_CHECKOUT_2:
+      if (!isMbAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.MB_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <MbAbandonedCheckout2Template {...data} />
+    case EmailTemplates.MB_ABANDONED_CHECKOUT_3:
+      if (!isMbAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.MB_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <MbAbandonedCheckout3Template {...data} />
 
     case EmailTemplates.OD_ABANDONED_CHECKOUT_2:
       if (!isOdAbandonedCheckout2Data(data)) {

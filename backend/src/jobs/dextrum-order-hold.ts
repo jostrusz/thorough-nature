@@ -422,6 +422,9 @@ export default async function dextrumOrderHold(container: MedusaContainer) {
           // Dextrum zná knihu pod kódem EEAT89789272462 (sortiment 00512375), ne pod
           // medusím SKU "ENGEDD-EL-PB".
           "ENGEDD-EL-PB": { physicalSku: "EEAT89789272462", quantity: 1 },
+          // Order bump na maďarském checkoutu Macskabiblia. Suffix -MB drží
+          // bump variantu oddělenou od hlavního produktu vlastního funnelu.
+          "EEAT89789272462-MB": { physicalSku: "EEAT89789272462", quantity: 1 },
           // Kočičí bible — samostatný funnel (kocicibible.cz). Single-variant bundle
           // (quantity=N na variantě); Dextrum zná fyzický kód 363682.
           "KOCICI-BIBLE-OFICIAL-PB": { physicalSku: "363682", quantity: 1 },

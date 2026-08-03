@@ -204,6 +204,16 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
     locale: 'sk',
     smsDispatchTemplate: 'Macacia biblia: Zasielka odoslana. Sledovaci odkaz: {url} peterka@macaciabiblia.sk',
   },
+  // Hungarian edition of Kočičí bible. Unlike CZ/PL/SK it runs under its own
+  // author persona (Zoltán Nagy), so the from-name deliberately differs.
+  'macskabiblia': {
+    replyTo: 'konyv@macskabiblia-konyv.hu',
+    fromName: 'Nagy Zoltán - Macskabiblia',
+    fromEmail: 'Nagy Zoltán - Macskabiblia <konyv@macskabiblia-konyv.hu>',
+    project: 'macskabiblia',
+    locale: 'hu',
+    smsDispatchTemplate: 'Macskabiblia: A csomag elindult. Kovetes: {url} konyv@macskabiblia-konyv.hu',
+  },
   'kocici-bible': {
     replyTo: 'peterka@kocicibible.cz',
     fromName: 'Michal Peterka - Kočičí bible',
