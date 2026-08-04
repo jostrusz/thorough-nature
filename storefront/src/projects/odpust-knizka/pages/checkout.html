@@ -7951,6 +7951,28 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
             };
 
             var category = klarnaSelectedCategory || 'pay_later';
+
+            // Klarna's SDK requires init -> load -> authorize. Calling
+            // authorize() without load() throws ApplicationNotLoadedError,
+            // which is why pay_later / pay_over_time stopped completing while
+            // pay_now kept working. The stylesheet has always carried
+            // #klarna-widget-container, but the element was never in the DOM,
+            // so it is created on demand here.
+            var klarnaContainer = document.getElementById('klarna-widget-container');
+            if (!klarnaContainer) {
+              klarnaContainer = document.createElement('div');
+              klarnaContainer.id = 'klarna-widget-container';
+              var klarnaAnchorEl = document.getElementById('payment-errors');
+              if (klarnaAnchorEl && klarnaAnchorEl.parentNode) {
+                klarnaAnchorEl.parentNode.insertBefore(klarnaContainer, klarnaAnchorEl);
+              } else {
+                document.body.appendChild(klarnaContainer);
+              }
+            }
+            klarnaContainer.classList.add('open');
+
+            function klarnaRunAuthorize() {
+              try {
             console.log('[Klarna] Calling Klarna.Payments.authorize for category:', category);
 
             Klarna.Payments.authorize(
@@ -8012,6 +8034,23 @@ window.__extractOrderOrThrow = window.__extractOrderOrThrow || function(complete
                   var reason = klarnaRes.error ? klarnaRes.error.invalid_fields?.join(', ') : '';
                   reject(new Error('Platba Klarna nebyla schválena.' + (reason ? ' Zkontrolujte: ' + reason : ' Zkuste jinou platební metodu.')));
                 }
+              }
+                );
+              } catch (authErr) {
+                reject(new Error('Klarna Payments SDK se nenačtalo. Zkuste to prosím znovu.'));
+              }
+            }
+
+            console.log('[Klarna] Loading widget for category:', category);
+            Klarna.Payments.load(
+              { container: '#klarna-widget-container', payment_method_category: category },
+              function(loadRes) {
+                console.log('[Klarna] Load response:', JSON.stringify(loadRes));
+                if (loadRes && loadRes.error) {
+                  reject(new Error('Klarna Payments SDK se nenačtalo. Zkuste to prosím znovu.'));
+                  return;
+                }
+                klarnaRunAuthorize();
               }
             );
           });
