@@ -21,7 +21,7 @@
     "variantId": "variant_01KZ3AQC81MF93JQ9DRADA9E9T",
     "price": 24,
     "currency": "EUR",
-    "thumbnail": "https://www.macaciabiblia.sk/kocici-bible-cover.png",
+    "thumbnail": "https://www.macaciabiblia.sk/macacia-biblia-cover.webp",
     "originalPrice": 34
   },
   "upsellProduct": {
@@ -88,6 +88,20 @@
     "doprava": "doprava.html",
     "reklamacie": "reklamacie.html"
   },
-  "upsellProducts": [],
-  "orderBumpEnabled": false
+  "upsellProducts": [
+    {
+      "id": "pusti",
+      "name": "Pusti to, čo ťa ničí",
+      "handle": "pusti-to-co-ta-nici-mb",
+      "variantId": "variant_01KZ5B9GACJ6KM2GRBYGNASSAY",
+      "price": 25,
+      "originalPrice": 32,
+      "currency": "EUR",
+      "image": "https://bucket-production-b93e.up.railway.app:443/medusa-media/Pusti-to-co-ta-nici-01KX33DPGAPZ6D7NN4KHH4NXPA.png",
+      "author": "Joris de Vries · 290 strán + pracovný zošit",
+      "desc": "Bestseller pre každého, komu v hlave beží nekonečný prúd myšlienok. Ako zastaviť premýšľanie, upokojiť emócie a nájsť vnútorný pokoj — postavené na neurovede a psychológii, žiadne vágne rady.",
+      "hook": "Ideálne pre vás alebo ako darček pre niekoho, kto „nedokáže vypnúť“."
+    }
+  ],
+  "orderBumpEnabled": true
 }
