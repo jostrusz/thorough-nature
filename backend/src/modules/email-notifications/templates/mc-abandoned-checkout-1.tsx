@@ -106,7 +106,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Za dvanásť rokov som nestretol mačku, ktorá by zlobila naschvál. Cikanie mimo záchoda, nočný rev, rozdrapený gauč — to všetko je <em>komunikace</em>. Len to zatiaľ nie je čitateľné.
+            Za dvanásť rokov som nestretol mačku, ktorá by zlobila naschvál. Cikanie mimo záchoda, nočný rev, dodriapaný gauč — to všetko je <em>komunikace</em>. Len to zatiaľ nie je čitateľné.
           </Text>
           <Text style={{
             fontFamily: font,
