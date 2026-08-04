@@ -729,7 +729,7 @@ body { background: var(--bg); }
       <div class="ty-support-title">Máte otázku alebo niečo nesedí?</div>
       <div class="ty-support-desc">Našli ste chybu v objednávke, alebo si s niečím neviete rady? Napíšte nám &mdash; radi vám pomôžeme.</div>
     </div>
-    <a href="mailto:peterka@macaciabiblia.sk?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Dobr%C3%BD%20den%2C%0A%0Am%C3%A1m%20dotaz%20ke%20sv%C3%A9%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napíšte nám</a>
+    <a href="mailto:pomoc@macaciabiblia.sk?subject=Dotaz%20k%20objedn%C3%A1vce%20%23&body=Dobr%C3%BD%20den%2C%0A%0Am%C3%A1m%20dotaz%20ke%20sv%C3%A9%20objedn%C3%A1vce.%0A%0A%C4%8C%C3%ADslo%20objedn%C3%A1vky%3A%20%0A%0AM%C5%AFj%20dotaz%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Napíšte nám</a>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -788,7 +788,7 @@ body { background: var(--bg); }
   <div class="ty-footer">
     <strong>Mačacia biblia</strong> &mdash; www.macaciabiblia.sk<br>
     Performance Marketing Solution s.r.o., Rybná 716/24, 110&nbsp;00 Praha<br>
-    IČO: 06259928 &middot; DIČ: CZ06259928 &middot; <a href="mailto:peterka@macaciabiblia.sk">peterka@macaciabiblia.sk</a>
+    IČO: 06259928 &middot; DIČ: CZ06259928 &middot; <a href="mailto:pomoc@macaciabiblia.sk">pomoc@macaciabiblia.sk</a>
   </div>
 
 </div>
@@ -950,7 +950,7 @@ body { background: var(--bg); }
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
     var subject = encodeURIComponent('Otázka k objednávke #' + orderNum);
     var body = encodeURIComponent('Dobrý deň,\n\nmám otázku k svojej objednávke.\n\nČíslo objednávky: #' + orderNum + '\n\nMoja otázka: ');
-    mailtoEl.href = 'mailto:peterka@macaciabiblia.sk?subject=' + subject + '&body=' + body;
+    mailtoEl.href = 'mailto:pomoc@macaciabiblia.sk?subject=' + subject + '&body=' + body;
   }
 
   // 2d. Celková cena — bundle ceník z konfigurace jako fallback

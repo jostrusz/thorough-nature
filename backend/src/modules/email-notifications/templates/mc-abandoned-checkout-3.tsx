@@ -45,7 +45,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'Zostáva 24 hodín — potom musím tvoj košík uvoľniť.',
+  preview = 'Zostáva 24 hodín, potom musím ten košík uvoľniť.',
 }) => {
   return (
     <Base preview={preview}>
@@ -98,7 +98,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
               margin: '0',
               lineHeight: '1.5',
             }}>
-              ⏰ Tvoj košík o 24 hodín uvoľníme
+              O 24 hodín ten košík uvoľním
             </Text>
           </div>
         </div>
@@ -121,7 +121,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Toto je moja posledná pripomienka. Zajtra sa tvoj košík automaticky uvoľní a tvoju objednávku už pre teba nedokážem podržať.
+            Posledná pripomienka, potom dám pokoj. Zajtra sa košík automaticky uvoľní a objednávku už pre vás nepodržím.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -130,7 +130,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Chápem, že urobiť tento krok môže byť ťažké. Ale spýtaj sa sama seba: <strong style={{ color: colors.textDark }}>keď nie teraz — tak kedy?</strong>
+            Chápem, že sa do toho človeku nechce. Len jedna otázka: <strong style={{ color: colors.textDark }}>keď nie teraz, tak kedy?</strong>
           </Text>
           <Text style={{
             fontFamily: font,
@@ -149,7 +149,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
             color: colors.textBody,
             fontWeight: 600,
           }}>
-            Samo sa to neurovná. Ale s porozumením sa to urovnať dá — a rýchlejšie, než čakáš.
+            Samo sa to neurovná, to už mám overené. S porozumením áno, a väčšinou rýchlejšie, než čakáte.
           </Text>
         </div>
 
@@ -212,7 +212,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            30-dňová záruka vrátenia peňazí. Žiadne otázky. Žiadne riziko.
+            30 dní na vrátenie peňazí. Bez pýtania.
           </Text>
         </div>
 
@@ -245,8 +245,8 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
             margin: '2px 0 0',
           }}>
             Mačacia biblia &bull;{' '}
-            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@macaciabiblia.sk
+            <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              pomoc@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -287,7 +287,7 @@ export const McAbandonedCheckout3Template: React.FC<McAbandonedCheckout3Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Toto je posledná pripomienka tvojej objednávky. Žiadne ďalšie upozornenie ti už nepošleme.
+            Toto bola posledná pripomienka. Ďalší e-mail vám už nepošleme.
           </Text>
         </div>
       </Section>
@@ -301,7 +301,7 @@ McAbandonedCheckout3Template.PreviewProps = {
   productName: 'Mačacia biblia',
   productPrice: '550',
   productImage: '',
-  preview: 'Zostáva 24 hodín — potom musím tvoj košík uvoľniť.',
+  preview: 'Zostáva 24 hodín, potom musím ten košík uvoľniť.',
 } as McAbandonedCheckout3Props
 
 export default McAbandonedCheckout3Template

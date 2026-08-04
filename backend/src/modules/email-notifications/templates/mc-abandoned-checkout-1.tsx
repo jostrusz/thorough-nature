@@ -43,7 +43,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
   productName,
   productPrice,
   productImage,
-  preview = 'Tvoja kniha je zabalená a čaká len na teba!',
+  preview = 'Vaša kniha je zabalená. Čaká len na vás.',
 }) => {
   return (
     <Base preview={preview}>
@@ -75,7 +75,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Tvoja kniha je pripravená! 📦
+            Vaša kniha je zabalená
           </Text>
         </div>
 
@@ -97,7 +97,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Dobrá správa — tvoja objednávka knihy <strong style={{ color: colors.textDark }}>{productName}</strong> je zabalená a pripravená na odoslanie. Jediné, čo chýba, je tvoje potvrdenie.
+            Vaša objednávka knihy <strong style={{ color: colors.textDark }}>{productName}</strong> zostala rozrobená. Máme ju odloženú bokom, chýba len potvrdenie.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -106,7 +106,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Vedel/a si, že mačky skoro nikdy „nezlobia“ naschvál? Cikanie mimo záchoda, nočné mňaukanie, ničenie nábytku — to všetko je <em>komunikace</em>. Len jej zatiaľ nerozumieš.
+            Za dvanásť rokov som nestretol mačku, ktorá by zlobila naschvál. Cikanie mimo záchoda, nočný rev, rozdrapený gauč — to všetko je <em>komunikace</em>. Len to zatiaľ nie je čitateľné.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -190,7 +190,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Tvoje údaje sú už vyplnené — dokončenie objednávky zaberie len minútku.
+            Údaje už máte vyplnené, dokončenie zaberie minútu.
           </Text>
         </div>
 
@@ -223,8 +223,8 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             margin: '2px 0 0',
           }}>
             Mačacia biblia &bull;{' '}
-            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@macaciabiblia.sk
+            <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              pomoc@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -265,7 +265,7 @@ export const McAbandonedCheckout1Template: React.FC<McAbandonedCheckout1Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si rozpracoval/a objednávku na macaciabiblia.sk.
+            Tento e-mail vám prišiel, pretože ste na macaciabiblia.sk nechali rozrobenú objednávku.
           </Text>
         </div>
       </Section>
@@ -279,7 +279,7 @@ McAbandonedCheckout1Template.PreviewProps = {
   productName: 'Mačacia biblia',
   productPrice: '550',
   productImage: '',
-  preview: 'Tvoja kniha je zabalená a čaká len na teba!',
+  preview: 'Vaša kniha je zabalená. Čaká len na vás.',
 } as McAbandonedCheckout1Props
 
 export default McAbandonedCheckout1Template

@@ -102,7 +102,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Tvoje e-booky sú pripravené! 📖
+            Vaše e-booky sú na stiahnutie
           </Text>
           <Text style={{
             fontFamily: font,
@@ -110,7 +110,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             color: 'rgba(255,255,255,0.7)',
             margin: '0',
           }}>
-            Stiahni si svoje digitálne bonusy
+            Stiahnite si svoje digitálne bonusy
           </Text>
         </div>
 
@@ -132,7 +132,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '8px 0 0',
           }}>
-            Veľmi ďakujeme za tvoj nákup knihy Mačacia biblia! 🐱 Tvoje bonusové e-booky sú pripravené na stiahnutie. Klikni na tlačidlo nižšie a stiahni si ich.
+            Vďaka za objednávku Mačacej biblie. Bonusové e-booky máte pripravené, stačí kliknúť na tlačidlo nižšie.
           </Text>
         </div>
 
@@ -153,7 +153,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
               color: colors.accent,
               margin: '0 0 10px',
             }}>
-              Tvoje bonusové e-booky
+              Vaše bonusové e-booky
             </Text>
             {bonusTitles.map((title, i) => (
               <Text key={i} style={{
@@ -228,7 +228,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#128230; Tvoja tlačená kniha je na ceste a dorazí počas <strong>2–3 pracovných dní</strong>. Sledovacie číslo ti pošleme v samostatnom e-maile.
+              &#128230; Tlačená kniha je na ceste a dorazí počas <strong>2–3 pracovných dní</strong>. Sledovacie číslo vám pošleme v samostatnom e-maile.
             </Text>
           </div>
         </div>
@@ -244,7 +244,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             color: colors.accent,
             marginBottom: '16px',
           }}>
-            Tipy na čítanie
+            Než začnete
           </Text>
 
           <div style={{
@@ -261,7 +261,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0 0 12px',
             }}>
-              &#128049; <strong style={{ color: colors.textDark }}>Začni v pokoji</strong> — Neponáhľaj sa. Každá kapitola ti prinesie nové poznatky o tvojej mačke.
+              &#128049; <strong style={{ color: colors.textDark }}>Začni v pokoji</strong> — neberte to ako román. Prečítajte si kapitolu k tomu, čo vás doma páli najviac, a začnite tam.
             </Text>
             <Text style={{
               fontFamily: font,
@@ -270,7 +270,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0 0 12px',
             }}>
-              &#128221; <strong style={{ color: colors.textDark }}>Rob si poznámky</strong> — Zapíš si, čo ťa zaujme. Budeš sa k tomu chcieť vrátiť.
+              &#128221; <strong style={{ color: colors.textDark }}>Rob si poznámky</strong> — ja som na to mal zošit. Dátum, čo som ten deň zmenil a čo sa stalo. Znie to ako hlúposť, ale práve vďaka tomu som prišiel na to, čo vlastne zaberá.
             </Text>
             <Text style={{
               fontFamily: font,
@@ -279,7 +279,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Buď trpezlivý/á</strong> — Zmeny v správaní mačky prídu postupne. Každý malý pokrok sa počíta!
+              &#10084;&#65039; <strong style={{ color: colors.textDark }}>Buď trpezlivý/á</strong> — mačka sa nezmení cez noc. Prvý posun sa u väčšiny vecí ukáže okolo piateho dňa, u plachých mačiek skôr za tri týždne.
             </Text>
           </div>
         </div>
@@ -300,10 +300,10 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máš problém so sťahovaním?
+              Nejde stiahnuť?
               <br />
-              <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@macaciabiblia.sk
+              <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                pomoc@macaciabiblia.sk
               </Link>
             </Text>
           </div>
@@ -317,7 +317,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Nech ti kniha prinesie kopu mačacej radosti! 🐱
+            Nech to doma klapne.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -334,8 +334,8 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@macaciabiblia.sk
+            <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
+              pomoc@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -363,7 +363,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             lineHeight: '1.7',
             margin: '0 0 8px',
           }}>
-            Performance Marketing Solution s.r.o. &bull; Rybná 716/24, Staré Mesto, 110 00 Praha
+            Performance Marketing Solution s.r.o. &bull; Rybná 716/24, Staré Město, 110 00 Praha
             <br />
             IČO: 06259928 &bull; DIČ: CZ06259928
           </Text>
@@ -374,7 +374,7 @@ export const McEbookDeliveryTemplate: React.FC<McEbookDeliveryTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si si objednal/a na macaciabiblia.sk.
+            Tento e-mail vám prišiel, pretože ste si objednali na macaciabiblia.sk.
           </Text>
         </div>
       </Section>

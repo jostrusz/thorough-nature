@@ -176,7 +176,7 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
 
   // Billing entity — Czech company
   const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
-  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Mesto, 110 00 Praha'
+  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
   const entityIco = billingEntity?.ico || '06259928'
   const entityDic = billingEntity?.dic || 'CZ06259928'
 
@@ -283,8 +283,8 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
             margin: '8px 0 0',
           }}>
             {isPaid
-              ? 'Veľmi ďakujeme za tvoju objednávku! Platba prebehla úspešne a my sa hneď púšťame do balenia. Nižšie nájdeš kompletný prehľad.'
-              : 'Veľmi ďakujeme za tvoju objednávku! Pripravujeme ju na odoslanie a platbu uhradíš pohodlne pri prevzatí zásielky. Nižšie nájdeš kompletný prehľad.'
+              ? 'Vďaka za objednávku. Platba dorazila a my sa púšťame do balenia. Nižšie máte celý prehľad.'
+              : 'Vďaka za objednávku. Chystáme ju na odoslanie a zaplatíte až pri prevzatí. Nižšie máte celý prehľad.'
             }
           </Text>
         </div>
@@ -618,7 +618,7 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Objednávka prijatá</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvoju objednávku máme a práve ju chystáme na odoslanie.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Objednávku máme a chystáme ju na odoslanie.</span>
                 </td>
               </tr>
             </tbody>
@@ -645,7 +645,7 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Pošleme ti e-mail s číslom na sledovanie zásielky.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Pošleme vám e-mail s číslom na sledovanie zásielky.</span>
                 </td>
               </tr>
             </tbody>
@@ -700,10 +700,10 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máš otázku k objednávke? Pokojne napíš!
+              Niečo k objednávke nesedí? Napíšte, čítam si to sám.
               <br />
-              <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@macaciabiblia.sk
+              <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                pomoc@macaciabiblia.sk
               </Link>
             </Text>
           </div>
@@ -764,7 +764,7 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
                 margin: '0 0 14px',
                 lineHeight: '1.5',
               }}>
-                Čitatelia Mačacej biblie si najčastejšie prikupujú tieto knihy:
+                Čitatelia Mačacej biblie si k nej najčastejšie berú ešte toto:
               </Text>
               {missing.map((c) => (
                 <div key={c.title} style={{
@@ -821,7 +821,7 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Nech ti kniha prinesie kopu mačacej radosti! 🐱
+            Nech to doma klapne.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -838,8 +838,8 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@macaciabiblia.sk
+            <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
+              pomoc@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -881,7 +881,7 @@ export const McOrderPlacedTemplate: React.FC<McOrderPlacedTemplateProps> & {
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ste dostali, pretože ste vykonali objednávku na macaciabiblia.sk.
+            Tento e-mail vám prišiel, pretože ste si objednali na macaciabiblia.sk.
           </Text>
         </div>
       </Section>

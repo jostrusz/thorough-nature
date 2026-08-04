@@ -139,7 +139,7 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             margin: '12px 0 0',
             color: colors.textBody,
           }}>
-            Chcel som ti napísať osobne. Nie aby som na teba tlačil — ale pretože si myslím, že by si toto mala vedieť.
+            Píšem vám osobne. Nie aby som tlačil na pílu, ale pretože toto by ste asi mali vedieť.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -157,7 +157,7 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             margin: '16px 0 0',
             color: colors.textBody,
           }}>
-            Kompletný sprievodca mačacím správaním + 4 bonusové e-booky. Všetko postavené na mačacej psychológii a etológii. Toto nie je príručka plná pouček — je to praktický systém, s ktorým konečne porozumieš tomu, čo ti mačka celý čas hovorí.
+            Je to v podstate môj zošit z dvanástich rokov, len lepšie usporiadaný. Čo som skúsil, čo z toho vyšlo a za ako dlho. Plus 4 bonusové e-booky.
           </Text>
         </div>
 
@@ -210,7 +210,7 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             }}>
               ✓ 100% záruka vrátenia peňazí do 30 dní.
               <br />
-              Žiadne otázky, žiadne komplikácie. Riziko nesiem ja, nie ty.
+              Žiadne otázky, žiadne formuláre. Riskujem ja, nie vy.
             </Text>
           </div>
         </div>
@@ -274,7 +274,7 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             textAlign: 'center' as const,
             margin: '0',
           }}>
-            Tvoja kniha môže byť na ceste už zajtra.
+            Kniha môže byť na ceste už zajtra.
           </Text>
         </div>
 
@@ -307,8 +307,8 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             margin: '2px 0 0',
           }}>
             Mačacia biblia &bull;{' '}
-            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
-              peterka@macaciabiblia.sk
+            <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline' }}>
+              pomoc@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -349,7 +349,7 @@ export const McAbandonedCheckout2Template: React.FC<McAbandonedCheckout2Props> &
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ti prišiel, pretože si rozpracoval/a objednávku na macaciabiblia.sk.
+            Tento e-mail vám prišiel, pretože ste na macaciabiblia.sk nechali rozrobenú objednávku.
           </Text>
         </div>
       </Section>

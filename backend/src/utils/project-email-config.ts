@@ -197,12 +197,12 @@ const PROJECT_CONFIGS: Record<string, ProjectEmailConfig> = {
   // without its own entry it would fall through to DEFAULT_CONFIG and Slovak
   // buyers would get Dutch e-mails.
   'macacia-biblia': {
-    replyTo: 'peterka@macaciabiblia.sk',
+    replyTo: 'pomoc@macaciabiblia.sk',
     fromName: 'Michal Peterka - Mačacia biblia',
-    fromEmail: 'Michal Peterka - Mačacia biblia <peterka@macaciabiblia.sk>',
+    fromEmail: 'Michal Peterka - Mačacia biblia <pomoc@macaciabiblia.sk>',
     project: 'macacia-biblia',
     locale: 'sk',
-    smsDispatchTemplate: 'Macacia biblia: Zasielka odoslana. Sledovaci odkaz: {url} peterka@macaciabiblia.sk',
+    smsDispatchTemplate: 'Macacia biblia: Zasielka odoslana. Sledovaci odkaz: {url} pomoc@macaciabiblia.sk',
   },
   // Hungarian edition of Kočičí bible. Unlike CZ/PL/SK it runs under its own
   // author persona (Zoltán Nagy), so the from-name deliberately differs.

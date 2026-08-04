@@ -98,7 +98,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
 
   // Billing entity — Czech company
   const entityName = billingEntity?.legal_name || 'Performance Marketing Solution s.r.o.'
-  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Mesto, 110 00 Praha'
+  const entityAddress = billingEntity?.address_line || 'Rybná 716/24, Staré Město, 110 00 Praha'
   const entityIco = billingEntity?.ico || '06259928'
   const entityDic = billingEntity?.dic || 'CZ06259928'
 
@@ -132,7 +132,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
             lineHeight: '1.2',
             letterSpacing: '-0.02em',
           }}>
-            Tvoja objednávka je na ceste!
+            Vaša objednávka je na ceste
           </Text>
           <Text style={{
             fontFamily: font,
@@ -184,8 +184,8 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
             margin: '8px 0 0',
           }}>
             {isPickup
-              ? 'Skvelá správa! Tvoja objednávka bola zabalená a odoslaná na odberné miesto. Len čo bude pripravená na vyzdvihnutie, dostaneš ďalšie upozornenie.'
-              : 'Skvelá správa! Tvoja objednávka bola zabalená a už je na ceste k tebe. Nižšie nájdeš podrobnosti o zásielke.'
+              ? 'Zabalené a odoslané na odberné miesto. Len čo tam bude pripravená na vyzdvihnutie, dáme vám vedieť.'
+              : 'Zabalené a odoslané, kniha je na ceste k vám. Podrobnosti o zásielke máte nižšie.'
             }
           </Text>
         </div>
@@ -443,7 +443,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
             color: colors.accent,
             marginBottom: '18px',
           }}>
-            Čo môžete očakávať?
+            Čo bude ďalej
           </Text>
 
           {/* Step 1 — done */}
@@ -467,7 +467,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Odesláno</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Tvoja objednávka bola zabalená a odoslaná z nášho skladu.</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>Objednávku sme zabalili a odovzdali dopravcovi.</span>
                 </td>
               </tr>
             </tbody>
@@ -494,7 +494,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
                 <td style={{ fontFamily: font, fontSize: '14px', color: colors.textBody, lineHeight: '1.6', paddingLeft: '6px' }}>
                   <strong style={{ color: colors.textDark }}>Na ceste</strong>
                   <br />
-                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásielka mieri na tvoje odberné miesto.' : 'Dopravca doručuje zásielku na tvoju adresu.'}</span>
+                  <span style={{ fontSize: '13px', color: colors.textMuted }}>{isPickup ? 'Zásielka mieri na vaše odberné miesto.' : 'Dopravca vezie zásielku na vašu adresu.'}</span>
                 </td>
               </tr>
             </tbody>
@@ -544,10 +544,10 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
               lineHeight: '1.6',
               margin: '0',
             }}>
-              Máš otázku k zásielke? Pokojne napíš!
+              Niečo so zásielkou nesedí? Napíšte, čítam si to sám.
               <br />
-              <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
-                peterka@macaciabiblia.sk
+              <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'underline', fontWeight: 700 }}>
+                pomoc@macaciabiblia.sk
               </Link>
             </Text>
           </div>
@@ -561,7 +561,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
             color: colors.textBody,
             margin: '0 0 4px',
           }}>
-            Nech ti kniha prinesie kopu mačacej radosti! 🐱
+            Nech to doma klapne.
           </Text>
           <Text style={{
             fontFamily: font,
@@ -578,8 +578,8 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
             color: colors.textMuted,
             margin: '0',
           }}>
-            <Link href="mailto:peterka@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
-              peterka@macaciabiblia.sk
+            <Link href="mailto:pomoc@macaciabiblia.sk" style={{ color: colors.accent, textDecoration: 'none' }}>
+              pomoc@macaciabiblia.sk
             </Link>
           </Text>
         </div>
@@ -620,7 +620,7 @@ export const McShipmentNotificationTemplate: React.FC<McShipmentNotificationTemp
             lineHeight: '1.5',
             margin: '0',
           }}>
-            Tento e-mail ste dostali, pretože ste vykonali objednávku na macaciabiblia.sk.
+            Tento e-mail vám prišiel, pretože ste si objednali na macaciabiblia.sk.
           </Text>
         </div>
       </Section>
