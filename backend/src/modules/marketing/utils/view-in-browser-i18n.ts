@@ -23,6 +23,9 @@ const TRANSLATIONS: Record<string, ViewInBrowserStrings> = {
   cs: { text: "Nemůžete si e-mail správně zobrazit?", label: "Zobrazit v prohlížeči" },
   sk: { text: "Nemôžete si e-mail správne zobraziť?", label: "Zobraziť v prehliadači" },
   hu: { text: "Nem látszik jól az e-mail?", label: "Megtekintés a böngészőben" },
+  fr: { text: "L'e-mail ne s'affiche pas correctement ?", label: "Ouvrir dans le navigateur" },
+  es: { text: "¿No se ve bien este correo?", label: "Verlo en el navegador" },
+  no: { text: "Kan du ikke lese denne e-posten ordentlig?", label: "Vis i nettleseren" },
   en: { text: "Can't read this email properly?", label: "View in browser" },
 }
 

@@ -7,6 +7,7 @@ import { verifyToken } from "../../../../../modules/marketing/utils/tokens"
 import { compileTemplate } from "../../../../../modules/marketing/utils/template-compiler"
 import { buildUnsubscribeUrl } from "../../../../../modules/marketing/utils/tracking-injector"
 import { getViewInBrowserStrings } from "../../../../../modules/marketing/utils/view-in-browser-i18n"
+import { pickGenderVariant } from "../../../../../modules/marketing/utils/gender-resolver"
 
 /**
  * GET /public/marketing/view/:token
@@ -52,6 +53,14 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 
     const [brand] = await service.listMarketingBrands({ id: payload.b })
 
+    // Contact is needed before the HTML lookup: gender-aware flows store
+    // subject / preheader / html as a { m, f } map, and we have to pick the
+    // same variant the executor sent. Fetched here, reused in step 4.
+    const [contactRow] = (msg as any).contact_id
+      ? await service.listMarketingContacts({ id: (msg as any).contact_id })
+      : [null]
+    const contactGender = (contactRow as any)?.gender
+
     // 2. Locate source HTML + subject from campaign OR flow node.
     let sourceHtml: string | null = null
     let subject = (msg as any).subject_snapshot || ""
@@ -59,9 +68,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     if ((msg as any).campaign_id) {
       const [camp] = await service.listMarketingCampaigns({ id: (msg as any).campaign_id })
       if (camp) {
-        sourceHtml = (camp as any).custom_html || null
-        subject = (camp as any).subject || subject
-        preheader = (camp as any).preheader || ""
+        sourceHtml = pickGenderVariant((camp as any).custom_html, contactGender) || null
+        subject = pickGenderVariant((camp as any).subject, contactGender) || subject
+        preheader = pickGenderVariant((camp as any).preheader, contactGender) || ""
       }
     } else if ((msg as any).flow_id && (msg as any).flow_node_id) {
       const { rows } = await pool.query(
@@ -71,9 +80,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       const def = rows[0]?.definition || {}
       const node = Array.isArray(def.nodes) ? def.nodes.find((n: any) => n.id === (msg as any).flow_node_id) : null
       if (node?.config) {
-        sourceHtml = node.config.html || null
-        preheader = node.config.preheader || ""
-        if (node.config.subject) subject = node.config.subject
+        sourceHtml = pickGenderVariant(node.config.html, contactGender) || null
+        preheader = pickGenderVariant(node.config.preheader, contactGender) || ""
+        const nodeSubject = pickGenderVariant(node.config.subject, contactGender)
+        if (nodeSubject) subject = nodeSubject
       }
     }
 
@@ -95,16 +105,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 
     // 4. Compile placeholders. Use contact from the message if still present.
     let contact: any = {}
-    if ((msg as any).contact_id) {
-      const [c] = await service.listMarketingContacts({ id: (msg as any).contact_id })
-      if (c) {
-        contact = {
-          first_name: (c as any).first_name || "",
-          last_name: (c as any).last_name || "",
-          email: (c as any).email || "",
-          locale: (c as any).locale || "",
-          country_code: (c as any).country_code || "",
-        }
+    if (contactRow) {
+      contact = {
+        first_name: (contactRow as any).first_name || "",
+        last_name: (contactRow as any).last_name || "",
+        email: (contactRow as any).email || "",
+        locale: (contactRow as any).locale || "",
+        country_code: (contactRow as any).country_code || "",
+        gender: (contactRow as any).gender || "",
+        vocative: (contactRow as any).vocative || "",
       }
     }
 
