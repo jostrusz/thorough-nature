@@ -54,7 +54,7 @@
 @media (max-width: 768px){
   .hero{gap:14px}
   .hero-left h1{font-size:32px;line-height:1.22;margin:0}
-  .hero-left .hero-subtitle{order:2;margin:6px auto 0;font-size:17px;line-height:1.45}
+  .hero-left .hero-subtitle{order:2;margin:8px auto 18px;font-size:17px;line-height:1.45}
   .hero-left .body-text{margin-top:4px}
   .hero-left .hero-buttons{margin-top:16px!important}
 }
@@ -118,7 +118,7 @@
     </h1>
 
     <!-- Podtitulek pod H1 -->
-    <p class="anim d1 hero-subtitle" style="font-size: 19px; color: var(--body); margin-top: 16px; max-width: 46ch; line-height: 1.5; font-weight: 500;">
+    <p class="anim d1 hero-subtitle">
      Kniha, díky které <strong style="color: var(--heading); font-weight: 700;">20&nbsp;000 majitelů koček</strong> konečně rozumí tomu <em>chlupatému veličenstvu na gauči</em>.
     </p>
 
@@ -534,49 +534,6 @@
    </div>
 
   </div>
- </div>
-</div>
-
-<!-- ═══════════════════════════════════════════
- SEKCE 5: BOOK PREVIEW — karusel stránek knihy
- ═══════════════════════════════════════════ -->
-<div class="book-preview anim reveal">
- <div class="book-preview-inner">
-
-  <h2>
-   Podívejte se dovnitř. Tohle jsou <span class="highlight-teal">skutečné stránky</span> z knihy a <em>postupy</em>, které jdou <span class="highlight-teal">zkusit ještě dnes</span>
-  </h2>
-
-  <div class="pages-carousel">
-   <!-- Navigační šipky -->
-   <button class="pages-arrow prev" id="pagesArrowPrev" aria-label="Předchozí strana">‹</button>
-   <button class="pages-arrow next" id="pagesArrowNext" aria-label="Další strana">›</button>
-
-   <div class="pages-track" id="pagesTrack">
-    <div class="pages-slide">
-     <img src="/images/book-preview-1.webp" alt="Kočičí bible — obsah a úvodní kapitoly" width="637" height="824">
-    </div>
-    <div class="pages-slide">
-     <img src="/images/book-preview-2.webp" alt="Kočičí bible — kapitola o řeči těla kočky" width="637" height="824">
-    </div>
-    <div class="pages-slide">
-     <img src="/images/book-preview-3.webp" alt="Kočičí bible — praktické postupy pro řešení problémového chování" width="637" height="824">
-    </div>
-    <div class="pages-slide">
-     <img src="/images/book-preview-4.webp" alt="Kočičí bible — kapitola o čůrání mimo záchod" width="637" height="824">
-    </div>
-    <div class="pages-slide">
-     <img src="/images/book-preview-5.webp" alt="Kočičí bible — kapitola o výživě a zdraví kočky" width="637" height="824">
-    </div>
-    <div class="pages-slide">
-     <img src="/images/book-preview-6.webp" alt="Kočičí bible — kapitola o hře a obohacení prostředí" width="637" height="824">
-    </div>
-   </div>
-  </div>
-
-  <!-- Dot navigace -->
-  <div class="pages-dots" id="pagesDots"></div>
-
  </div>
 </div>
 
@@ -1759,89 +1716,6 @@ window.addEventListener('load', function() {
 })();
 </script>
 
-<!-- ═══ Book Preview karusel logika ═══ -->
-<script>
-(function() {
- var track = document.getElementById('pagesTrack');
- var prevBtn = document.getElementById('pagesArrowPrev');
- var nextBtn = document.getElementById('pagesArrowNext');
- var dotsContainer = document.getElementById('pagesDots');
- if (!track || !prevBtn || !nextBtn) return;
-
- var slides = track.querySelectorAll('.pages-slide');
- var currentPage = 0;
- var gap = 24;
-
- // Kolik slidů je vidět najednou podle šířky viewportu
- function getVisible() {
-  var w = track.parentElement.offsetWidth;
-  if (w < 500) return 1;
-  if (w < 800) return 2;
-  return 3;
- }
-
- function getTotalPages() {
-  return Math.max(1, slides.length - getVisible() + 1);
- }
-
- // Vytvořit dot navigaci
- function buildDots() {
-  dotsContainer.innerHTML = '';
-  var total = getTotalPages();
-  for (var i = 0; i < total; i++) {
-   var dot = document.createElement('button');
-   dot.className = 'pages-dot' + (i === currentPage ? ' active' : '');
-   dot.setAttribute('aria-label', 'Strana ' + (i + 1));
-   dot.dataset.idx = i;
-   dot.addEventListener('click', function() {
-    currentPage = parseInt(this.dataset.idx);
-    updatePages();
-   });
-   dotsContainer.appendChild(dot);
-  }
- }
-
- function updatePages() {
-  var slideW = slides[0].offsetWidth + gap;
-  track.style.transform = 'translateX(-' + (currentPage * slideW) + 'px)';
-  prevBtn.disabled = (currentPage <= 0);
-  nextBtn.disabled = (currentPage >= getTotalPages() - 1);
-  // Aktualizace dotů
-  var dots = dotsContainer.querySelectorAll('.pages-dot');
-  dots.forEach(function(d, i) {
-   d.className = 'pages-dot' + (i === currentPage ? ' active' : '');
-  });
- }
-
- prevBtn.addEventListener('click', function() {
-  if (currentPage > 0) { currentPage--; updatePages(); }
- });
- nextBtn.addEventListener('click', function() {
-  if (currentPage < getTotalPages() - 1) { currentPage++; updatePages(); }
- });
-
- // Touch/swipe podpora
- var startX = 0;
- track.addEventListener('touchstart', function(e) {
-  startX = e.touches[0].clientX;
- }, { passive: true });
- track.addEventListener('touchend', function(e) {
-  var diff = startX - e.changedTouches[0].clientX;
-  if (diff > 50 && currentPage < getTotalPages() - 1) { currentPage++; updatePages(); }
-  else if (diff < -50 && currentPage > 0) { currentPage--; updatePages(); }
- }, { passive: true });
-
- // Při změně velikosti okna
- window.addEventListener('resize', function() {
-  if (currentPage >= getTotalPages()) currentPage = getTotalPages() - 1;
-  buildDots();
-  updatePages();
- });
-
- buildDots();
- updatePages();
-})();
-</script>
 
 <!-- ═══ Mobilní menu toggle ═══ -->
 <script>
