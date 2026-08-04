@@ -22,6 +22,9 @@ import { StAbandonedCheckout3Template, ST_ABANDONED_CHECKOUT_3, isStAbandonedChe
 import { StEbookDeliveryTemplate, ST_EBOOK_DELIVERY, isStEbookDeliveryData } from './st-ebook-delivery'
 import { StShipmentNotificationTemplate, ST_SHIPMENT_NOTIFICATION, isStShipmentNotificationData } from './st-shipment-notification'
 // Slipp taket (slipp-taket) templates
+import { SlAbandonedCheckout1Template, SL_ABANDONED_CHECKOUT_1, isSlAbandonedCheckout1Data } from './sl-abandoned-checkout-1'
+import { SlAbandonedCheckout2Template, SL_ABANDONED_CHECKOUT_2, isSlAbandonedCheckout2Data } from './sl-abandoned-checkout-2'
+import { SlAbandonedCheckout3Template, SL_ABANDONED_CHECKOUT_3, isSlAbandonedCheckout3Data } from './sl-abandoned-checkout-3'
 import { SlOrderPlacedTemplate, SL_ORDER_PLACED, isSlOrderPlacedTemplateData } from './sl-order-placed'
 import { SlEbookDeliveryTemplate, SL_EBOOK_DELIVERY, isSlEbookDeliveryData } from './sl-ebook-delivery'
 // Odpuść to, co cię niszczy (odpusc-ksiazka) templates
@@ -173,6 +176,9 @@ export const EmailTemplates = {
   ST_SHIPMENT_NOTIFICATION,
   // Slipp taket
   SL_ORDER_PLACED,
+  SL_ABANDONED_CHECKOUT_1,
+  SL_ABANDONED_CHECKOUT_2,
+  SL_ABANDONED_CHECKOUT_3,
   SL_EBOOK_DELIVERY,
   // Odpuść to, co cię niszczy
   OK_ORDER_PLACED,
@@ -615,6 +621,33 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
       return <StShipmentNotificationTemplate {...data} />
 
     // ── Slipp taket templates ──────────────────────────────────
+    case EmailTemplates.SL_ABANDONED_CHECKOUT_1:
+      if (!isSlAbandonedCheckout1Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SL_ABANDONED_CHECKOUT_1}"`
+        )
+      }
+      return <SlAbandonedCheckout1Template {...data} />
+
+    case EmailTemplates.SL_ABANDONED_CHECKOUT_2:
+      if (!isSlAbandonedCheckout2Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SL_ABANDONED_CHECKOUT_2}"`
+        )
+      }
+      return <SlAbandonedCheckout2Template {...data} />
+
+    case EmailTemplates.SL_ABANDONED_CHECKOUT_3:
+      if (!isSlAbandonedCheckout3Data(data)) {
+        throw new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          `Invalid data for template "${EmailTemplates.SL_ABANDONED_CHECKOUT_3}"`
+        )
+      }
+      return <SlAbandonedCheckout3Template {...data} />
+
     case EmailTemplates.SL_ORDER_PLACED:
       if (!isSlOrderPlacedTemplateData(data)) {
         throw new MedusaError(

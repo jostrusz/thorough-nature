@@ -83,6 +83,23 @@ function getKlarnaLocale(countryCode: string, fallback = "en-US"): string {
 }
 
 /**
+ * Path of the terms-and-conditions page per project, used for
+ * `merchant_urls.terms`. Each market names the page in its own language, so
+ * there is no single path that works everywhere. Projects missing here fall
+ * back to the site root, which always resolves.
+ */
+const KLARNA_TERMS_PATH_BY_PROJECT: Record<string, string> = {
+  loslatenboek: "/voorwaarden",
+  "het-leven": "/voorwaarden",
+  dehondenbijbel: "/voorwaarden",
+  "slapp-taget": "/villkor",
+  "slipp-taket": "/vilkar",
+  "lass-los": "/agb",
+  "lache-livre": "/conditions-generales",
+  suelta: "/terminos",
+}
+
+/**
  * Convert amount from Medusa major units (EUR) to Klarna minor units (cents).
  * Medusa stores prices as major units: 35 = €35.00
  * Klarna expects minor units: 3500 = €35.00
@@ -322,6 +339,21 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
 
       const returnUrl = data?.return_url || context?.extra?.return_url || backendUrl
 
+      // `returnUrl` is the storefront checkout URL and already carries the query
+      // string the checkout needs to resume, e.g.
+      //   https://www.slipptaketboken.no/checkout?payment_return=1&cart_id=cart_XXX
+      // Appending path segments to it produced malformed merchant_urls such as
+      //   ...&cart_id=cart_XXX/order/confirmed
+      // which glued the extra path onto the cart_id value. Build the auxiliary
+      // URLs from the origin instead and leave returnUrl itself untouched.
+      const returnOrigin = (() => {
+        try {
+          return new URL(returnUrl).origin
+        } catch {
+          return backendUrl
+        }
+      })()
+
       // Tax amount in minor units
       const taxTotalMinor = toMinorUnits(context?.extra?.tax_total || 0, currencyUpper)
 
@@ -352,9 +384,12 @@ class KlarnaPaymentProviderService extends AbstractPaymentProvider<Options> {
               },
             ],
         merchant_urls: {
-          terms: `${returnUrl}/terms`,
-          checkout: `${returnUrl}/checkout`,
-          confirmation: `${returnUrl}/order/confirmed`,
+          terms: `${returnOrigin}${KLARNA_TERMS_PATH_BY_PROJECT[projectSlug || ""] || "/"}`,
+          checkout: `${returnOrigin}/checkout`,
+          // Send the customer back to the exact URL the checkout handed us —
+          // it already carries ?payment_return=1&cart_id=... which the
+          // storefront needs to resume and complete the cart.
+          confirmation: returnUrl,
           push: `${backendUrl}/webhooks/klarna`,
         },
         billing_address: billingAddress.given_name ? billingAddress : {

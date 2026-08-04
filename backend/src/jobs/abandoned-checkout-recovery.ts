@@ -99,6 +99,34 @@ const ST_STEPS: StepConfig[] = [
   },
 ]
 
+/** Slipp taket på det som ødelegger deg (slipp-taket) 3-step sequence — NO / NOK */
+const SL_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.SL_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Hei ${name}, boken din venter på deg! 📦`,
+    preview: "Boken din ligger ferdig pakket og venter.",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.SL_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, historien bak Slipp taket`,
+    preview: "Etter en uke kjente jeg meg lettere enn på lenge...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.SL_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Siste sjanse, ${name} — handlekurven din frigjøres snart`,
+    preview: "Ett døgn til, så frigjør jeg handlekurven din.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Lass los, was dich kaputt macht (lass-los) 3-step sequence */
 const LL_STEPS: StepConfig[] = [
   {
@@ -709,6 +737,86 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send ST step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Slipp taket på det som ødelegger deg: 3-step sequence ──
+      // Norway is NOK and prices carry no decimals, so the total is rounded the
+      // same way Släpp Taget does it for SEK. Before this branch existed the
+      // project fell through to the Dutch lb- default, which sent Norwegian
+      // customers a Dutch email quoting the NOK amount as euros.
+      if (projectId === "slipp-taket") {
+        // All 3 steps sent? Done.
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = SL_STEPS[currentStep] // currentStep=0 → step 1, etc.
+
+        // Check if enough time has passed
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue // invalid date, skip
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        // Extract customer data
+        const firstName = cart.shipping_address?.first_name || "du"
+        const checkoutUrl = meta.checkout_url || "https://www.slipptaketboken.no/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName =
+          mainItem?.variant?.product?.title ||
+          mainItem?.title ||
+          "Slipp taket på det som ødelegger deg"
+        // Calculate total price from all cart items (quantity × unit_price)
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "499"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Slipp taket på det som ødelegger deg <bok@slipptaketboken.no>",
+            data: {
+              emailOptions: {
+                replyTo: "bok@slipptaketboken.no",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          // Update metadata with step tracking
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              // Legacy compat: mark as sent after step 1
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] SL step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send SL step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue
