@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>¡Gracias por tu pedido!</title>
+  <title>Obrigado pela tua encomenda!</title>
   <link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
 
   <!-- Sdílená konfigurace projektu -->
@@ -466,9 +466,9 @@ body { background: var(--bg); }
     <div class="ty-check-circle">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <div class="ty-eyebrow">&#x2705; Pedido confirmado</div>
-    <h1 class="ty-title" id="ty-main-title">¡Gracias por tu <span class="accent">pedido!</span></h1>
-    <p class="ty-subtitle">Tu pedido se ha completado correctamente. Vamos a preparar y enviar tu paquete lo antes posible.</p>
+    <div class="ty-eyebrow">&#x2705; Encomenda confirmada</div>
+    <h1 class="ty-title" id="ty-main-title">Obrigado pela tua <span class="accent">encomenda!</span></h1>
+    <p class="ty-subtitle">A tua encomenda foi concluída com sucesso. Vamos preparar e expedir a tua embalagem o mais depressa possível.</p>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -477,8 +477,8 @@ body { background: var(--bg); }
   <div class="ty-address-alert ty-reveal ty-d1">
     <div class="ty-address-alert-icon">&#x26A0;&#xFE0F;</div>
     <div class="ty-address-alert-text">
-      <div class="ty-address-alert-title">Revisa tus datos de entrega</div>
-      <div class="ty-address-alert-desc">Queremos enviarte el pedido cuanto antes. Comprueba abajo que tu <strong>dirección</strong>, tu <strong>correo</strong> y tu <strong>teléfono</strong> sean correctos.</div>
+      <div class="ty-address-alert-title">Confere os teus dados de entrega</div>
+      <div class="ty-address-alert-desc">Queremos enviar-te a encomenda o quanto antes. Confirma em baixo que a tua <strong>morada</strong>, o teu <strong>e-mail</strong> e o teu <strong>telefone</strong> estão correctos.</div>
     </div>
   </div>
 
@@ -489,36 +489,36 @@ body { background: var(--bg); }
     <div class="ty-details-header">
       <div class="ty-details-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Tus datos
+        Os teus dados
       </div>
       <button class="ty-edit-btn" id="ty-edit-toggle" onclick="toggleEditForm()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Editar datos
+        Editar dados
       </button>
     </div>
     <div class="ty-details-grid" id="ty-details-grid">
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Nombre</div>
+        <div class="ty-detail-label">Nome</div>
         <div class="ty-detail-value" id="ty-show-firstname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Apellidos</div>
+        <div class="ty-detail-label">Apelido</div>
         <div class="ty-detail-value" id="ty-show-lastname">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Correo electrónico</div>
+        <div class="ty-detail-label">E-mail</div>
         <div class="ty-detail-value" id="ty-show-email">—</div>
       </div>
       <div class="ty-detail-item">
-        <div class="ty-detail-label">Teléfono</div>
+        <div class="ty-detail-label">Telefone</div>
         <div class="ty-detail-value" id="ty-show-phone">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full">
-        <div class="ty-detail-label">Dirección de entrega</div>
+        <div class="ty-detail-label">Morada de entrega</div>
         <div class="ty-detail-value" id="ty-show-address">—</div>
       </div>
       <div class="ty-detail-item ty-detail-full" id="ty-company-row" style="display:none;">
-        <div class="ty-detail-label">Datos de facturación</div>
+        <div class="ty-detail-label">Dados de facturação</div>
         <div class="ty-detail-value" id="ty-show-company">—</div>
       </div>
     </div>
@@ -531,32 +531,32 @@ body { background: var(--bg); }
     <div class="ty-edit-form-inner">
       <div class="ty-edit-form-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Guardar cambios
+        Guardar alterações
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-firstname" placeholder=" ">
-          <label for="edit-firstname">Nombre</label>
+          <label for="edit-firstname">Nome</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-lastname" placeholder=" ">
-          <label for="edit-lastname">Apellidos</label>
+          <label for="edit-lastname">Apelido</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field">
           <input type="email" id="edit-email" placeholder=" ">
-          <label for="edit-email">Correo electrónico</label>
+          <label for="edit-email">E-mail</label>
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="tel" id="edit-phone" placeholder=" ">
-          <label for="edit-phone">Teléfono</label>
+          <label for="edit-phone">Telefone</label>
         </div>
       </div>
       <div class="ty-form-row">
         <div class="ty-form-group ty-float-field full">
           <input type="text" id="edit-address" placeholder=" ">
-          <label for="edit-address">Calle y número</label>
+          <label for="edit-address">Rua e número</label>
         </div>
       </div>
       <div class="ty-form-row">
@@ -566,32 +566,32 @@ body { background: var(--bg); }
         </div>
         <div class="ty-form-group ty-float-field">
           <input type="text" id="edit-city" placeholder=" ">
-          <label for="edit-city">Ciudad</label>
+          <label for="edit-city">Localidade</label>
         </div>
       </div>
       <!-- Firemní pole (B2B) -->
       <div id="ty-edit-company-section" style="display:none; margin-top:4px;">
-        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Datos de facturación</div>
+        <div style="font-size:12px;font-weight:600;color:#9B7AAD;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Dados de facturação</div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field full">
             <input type="text" id="edit-company" placeholder=" ">
-            <label for="edit-company">Nombre de la empresa</label>
+            <label for="edit-company">Nome da empresa</label>
           </div>
         </div>
         <div class="ty-form-row">
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-kvk" placeholder=" ">
-            <label for="edit-kvk">NIF / CIF</label>
+            <label for="edit-kvk">NIF</label>
           </div>
           <div class="ty-form-group ty-float-field">
             <input type="text" id="edit-vat" placeholder=" ">
-            <label for="edit-vat">NIF-IVA</label>
+            <label for="edit-vat">NIF intracomunitário</label>
           </div>
         </div>
       </div>
       <div class="ty-form-actions">
         <button class="ty-form-save" id="ty-save-btn" onclick="saveDetails()">
-          Guardar cambios
+          Guardar alterações
         </button>
         <button class="ty-form-cancel" onclick="toggleEditForm()">Cancelar</button>
       </div>
@@ -608,39 +608,39 @@ body { background: var(--bg); }
        5. ORDER SUMMARY
        ═══════════════════════════════════════ -->
   <div class="ty-order-box ty-reveal ty-d3">
-    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; Tu pedido</div>
+    <div class="ty-order-label" id="ty-order-label">&#x1F4E6; A tua encomenda</div>
     <div class="ty-order-items" id="ty-order-items">
       <div class="ty-order-item">
         <div class="ty-order-icon book">&#x1F4D6;</div>
         <div>
-          <div class="ty-order-name">Suelta lo que te destruye</div>
-          <div class="ty-order-desc">Libro físico &mdash; 320 páginas &mdash; en camino</div>
+          <div class="ty-order-name">Larga o que te destrói</div>
+          <div class="ty-order-desc">Livro físico &mdash; 320 páginas &mdash; a caminho</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <img class="ty-order-cover" src="/images/bonus-antidoto-vueltas.png" alt="El antídoto contra darle vueltas" width="44" height="63" loading="lazy">
+        <img class="ty-order-cover" src="/images/bonus-antidoto-vueltas.png" alt="O antídoto para dar voltas à cabeça" width="44" height="63" loading="lazy">
         <div>
-          <div class="ty-order-name">El antídoto contra darle vueltas</div>
-          <div class="ty-order-desc">E-book de regalo &mdash; te lo mandamos por correo</div>
+          <div class="ty-order-name">O antídoto para dar voltas à cabeça</div>
+          <div class="ty-order-desc">E-book oferta &mdash; enviamos-to por e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
-        <img class="ty-order-cover" src="/images/bonus-amor-sin-censura.png" alt="Amor sin censura" width="44" height="63" loading="lazy">
+        <img class="ty-order-cover" src="/images/bonus-amor-sin-censura.png" alt="Amor sem rodeios" width="44" height="63" loading="lazy">
         <div>
-          <div class="ty-order-name">Amor sin censura</div>
-          <div class="ty-order-desc">E-book de regalo &mdash; te lo mandamos por correo</div>
+          <div class="ty-order-name">Amor sem rodeios</div>
+          <div class="ty-order-desc">E-book oferta &mdash; enviamos-to por e-mail</div>
         </div>
       </div>
       <div class="ty-order-item">
         <div class="ty-order-icon ship">&#x1F69A;</div>
         <div>
-          <div class="ty-order-name">Envío gratuito</div>
-          <div class="ty-order-desc">Entrega en 3&ndash;5 días laborables</div>
+          <div class="ty-order-name">Portes grátis</div>
+          <div class="ty-order-desc">Entrega em 3&ndash;5 dias úteis</div>
         </div>
       </div>
     </div>
     <div class="ty-order-total">
-      <span class="ty-order-total-label">Pagado</span>
+      <span class="ty-order-total-label">Pago</span>
       <span class="ty-order-total-price" id="ty-total-price">&euro; 36</span>
     </div>
   </div>
@@ -651,35 +651,35 @@ body { background: var(--bg); }
   <div class="ty-support ty-reveal ty-d4">
     <div class="ty-support-icon">&#x1F4E9;</div>
     <div class="ty-support-text">
-      <div class="ty-support-title">¿Dudas o algún problema?</div>
-      <div class="ty-support-desc">¿Has visto un error, tienes una pregunta sobre tu pedido o algo no va bien? Escríbenos sin problema &mdash; ¡te ayudamos encantados!</div>
+      <div class="ty-support-title">Dúvidas ou algum problema?</div>
+      <div class="ty-support-desc">Viste algum erro, tens uma pergunta sobre a tua encomenda ou algo não está bem? Escreve-nos à vontade &mdash; ajudamos com todo o gosto!</div>
     </div>
-    <a href="mailto:livro@largaoquetedestroi.pt?subject=Pregunta%20sobre%20el%20pedido%20%23&body=Hola%2C%0A%0ATengo%20una%20pregunta%20sobre%20mi%20pedido.%0A%0AN%C3%BAmero%20de%20pedido%3A%20%0A%0AMi%20pregunta%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envíanos un correo</a>
+    <a href="mailto:livro@largaoquetedestroi.pt?subject=Pergunta%20sobre%20a%20encomenda%20%23&body=Ol%C3%A1%2C%0A%0ATenho%20uma%20pergunta%20sobre%20a%20minha%20encomenda.%0A%0AN%C3%BAmero%20da%20encomenda%3A%20%0A%0AA%20minha%20pergunta%3A%20" class="ty-support-btn" id="ty-support-mailto">&#x2709; Envia-nos um e-mail</a>
   </div>
 
   <!-- ═══════════════════════════════════════
        6. WHAT HAPPENS NOW — 3 stappen
        ═══════════════════════════════════════ -->
   <div class="ty-steps ty-reveal ty-d5">
-    <div class="ty-steps-title">¿Y ahora qué?</div>
+    <div class="ty-steps-title">E agora?</div>
     <div class="ty-steps-grid">
       <div class="ty-step">
         <div class="ty-step-num">1</div>
         <div class="ty-step-icon">&#x1F4E7;</div>
-        <div class="ty-step-title">Mira tu correo</div>
-        <div class="ty-step-desc">En menos de 2 minutos te llega el correo de confirmación con tu número de pedido. Los dos e-books de regalo, <em>El antídoto contra darle vueltas</em> y <em>Amor sin censura</em>, te los enviamos por correo aparte.</div>
+        <div class="ty-step-title">Vê o teu e-mail</div>
+        <div class="ty-step-desc">Em menos de 2 minutos chega-te o e-mail de confirmação com o número da encomenda. Os dois e-books oferta, <em>O antídoto para dar voltas à cabeça</em> y <em>Amor sem rodeios</em>, enviamos-tos por e-mail à parte.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">2</div>
         <div class="ty-step-icon">&#x1F4E6;</div>
-        <div class="ty-step-title">Libro en camino</div>
-        <div class="ty-step-desc">Tu libro físico sale en 24 horas laborables y te llega en 3&ndash;5 días laborables con SEUR. Recibirás un enlace de seguimiento por correo.</div>
+        <div class="ty-step-title">Livro a caminho</div>
+        <div class="ty-step-desc">O teu livro físico sai em 24 horas úteis e chega-te em 3&ndash;5 dias úteis. Vais receber um link de seguimento por e-mail.</div>
       </div>
       <div class="ty-step">
         <div class="ty-step-num">3</div>
         <div class="ty-step-icon">&#x1F680;</div>
-        <div class="ty-step-title">Empieza a soltar</div>
-        <div class="ty-step-desc">En cuanto llegue el paquete, abre el libro por el primer ejercicio. Los e-books te acompañan después.</div>
+        <div class="ty-step-title">Começa a largar</div>
+        <div class="ty-step-desc">Assim que a encomenda chegar, abre o livro no primeiro exercício. Os e-books acompanham-te depois.</div>
       </div>
     </div>
   </div>
@@ -688,19 +688,19 @@ body { background: var(--bg); }
        7. SOCIAL PROOF
        ═══════════════════════════════════════ -->
   <div class="ty-reviews ty-reveal ty-d5">
-    <div class="ty-reviews-title">Otras personas ya dieron el paso</div>
+    <div class="ty-reviews-title">Outras pessoas já deram o passo</div>
     <div class="ty-review-cards">
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&laquo;Llevaba años con una presión en el pecho. Este libro me enseñó que era culpa sin procesar. A las 3 semanas sentí literalmente cómo se derretía.&raquo;</div>
-        <div class="ty-review-author">María V.</div>
-        <div class="ty-review-loc">Madrid</div>
+        <div class="ty-review-text">&laquo;Andava há anos com um aperto no peito. Este livro mostrou-me que era culpa por resolver. Ao fim de 3 semanas senti-o literalmente a derreter.&raquo;</div>
+        <div class="ty-review-author">Maria V.</div>
+        <div class="ty-review-loc">Lisboa</div>
       </div>
       <div class="ty-review">
         <div class="ty-review-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div>
-        <div class="ty-review-text">&laquo;Dormí del tirón por primera vez en años. Los ejercicios son tan concretos &mdash; nada de rollos etéreos, pasos de verdad. Mis hijos notaron la diferencia en una semana.&raquo;</div>
-        <div class="ty-review-author">Lucía K.</div>
-        <div class="ty-review-loc">Valencia</div>
+        <div class="ty-review-text">&laquo;Dormi de uma ponta à outra pela primeira vez em anos. Os exercícios são tão concretos &mdash; nada de conversa etérea, passos a sério. Os meus filhos notaram a diferença numa semana.&raquo;</div>
+        <div class="ty-review-author">Lúcia C.</div>
+        <div class="ty-review-loc">Porto</div>
       </div>
     </div>
   </div>
@@ -709,8 +709,8 @@ body { background: var(--bg); }
        8. SHARE
        ═══════════════════════════════════════ -->
   <div class="ty-share ty-reveal ty-d6">
-    <div class="ty-share-title">¿Conoces a alguien que también lo necesita?</div>
-    <div class="ty-share-desc">Comparte esta página con quien lo necesite y ayúdale a dar el primer paso.</div>
+    <div class="ty-share-title">Conheces alguém que também precisa disto?</div>
+    <div class="ty-share-desc">Partilha esta página com quem precisa e ajuda-o a dar o primeiro passo.</div>
     <div class="ty-share-buttons">
       <a href="https://wa.me/?text=Acabo%20de%20pedir%20Suelta%20lo%20que%20te%20destruye%20y%20creo%20que%20t%C3%BA%20tambi%C3%A9n%20lo%20necesitas%20%F0%9F%92%9B" target="_blank" class="ty-share-btn wa">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.612.638l4.67-1.413A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.24 0-4.312-.727-5.994-1.96l-.418-.312-2.774.84.893-2.89-.338-.44A9.958 9.958 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
@@ -733,7 +733,7 @@ body { background: var(--bg); }
 <!-- ══ JS: Data z objednávky, edit formulář, FB Pixel, Confetti, Scroll reveal ══ -->
 <script>
   // Název produktu bereme z configu projektu — dřív tu byl natvrdo nizozemský titul.
-  var PRODUCT_NAME = (window.PROJECT_CONFIG && PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Suelta lo que te destruye';
+  var PRODUCT_NAME = (window.PROJECT_CONFIG && PROJECT_CONFIG.mainProduct && PROJECT_CONFIG.mainProduct.name) || 'Larga o que te destrói';
 </script>
 <script>
 (function(){
@@ -856,7 +856,7 @@ body { background: var(--bg); }
 
   // Mapování country kódů na názvy
   var countryNames = {
-    ES: 'España',
+    ES: 'Portugal',
   };
 
   // ────────────────────────────────────────────────────
@@ -866,7 +866,7 @@ body { background: var(--bg); }
   // 2a. Personalizovaný heading
   var titleEl = document.getElementById('ty-main-title');
   if (titleEl && customer && customer.first_name) {
-    titleEl.innerHTML = '¡Gracias, <span class="accent">' + customer.first_name + '!</span>';
+    titleEl.innerHTML = 'Obrigado, <span class="accent">' + customer.first_name + '!</span>';
   }
 
   // 2b. Objednávkové číslo
@@ -882,8 +882,8 @@ body { background: var(--bg); }
   var mailtoEl = document.getElementById('ty-support-mailto');
   if (mailtoEl) {
     var orderNum = displayId || (orderId ? orderId.replace('order_', '').substring(0, 8).toUpperCase() : '');
-    var subject = encodeURIComponent('Consulta sobre el pedido n\u00BA ' + orderNum);
-    var body = encodeURIComponent('Hola,\n\nTengo una pregunta sobre mi pedido.\n\nN\u00FAmero de pedido: #' + orderNum + '\n\nMi pregunta: ');
+    var subject = encodeURIComponent('Questão sobre a encomenda n.\u00BA ' + orderNum);
+    var body = encodeURIComponent('Ol\u00E1,\n\nTenho uma pergunta sobre a minha encomenda.\n\nN\u00FAmero da encomenda: #' + orderNum + '\n\nA minha pergunta: ');
     mailtoEl.href = 'mailto:livro@largaoquetedestroi.pt?subject=' + subject + '&body=' + body;
   }
 
@@ -932,7 +932,7 @@ body { background: var(--bg); }
   if (upsellPurchased || orderBumpActive) {
     if (orderItemsEl) {
       var upsellName = (PROJECT_CONFIG.upsellProduct && PROJECT_CONFIG.upsellProduct.name) || 'Upsell Product';
-      var extraLabel = orderBumpActive ? 'Libro f\u00EDsico \u2014 a\u00F1adido al pedido' : 'Libro f\u00EDsico \u2014 pedido adicional';
+      var extraLabel = orderBumpActive ? 'Livro f\u00EDsico \u2014 adicionado \u00E0 encomenda' : 'Libro f\u00EDsico \u2014 pedido adicional';
       // Insert with emoji placeholder; async-replace with real thumbnail from Medusa
       var iconId = 'ty-upsell-icon-' + Date.now();
       var upsellItemHtml = '<div class="ty-order-item ty-upsell-item">' +
@@ -1176,7 +1176,7 @@ body { background: var(--bg); }
       } else {
         console.warn('TY: API vrátilo chybu:', data.message);
         // Data jsou uložená lokálně, ale API selhalo
-        finishSave(true, 'Datos guardados en este dispositivo. Si el problema sigue, escríbenos.');
+        finishSave(true, 'Dados guardados neste dispositivo. Se o problema continuar, escreve-nos.');
       }
     })
     .catch(function(err) {
@@ -1189,7 +1189,7 @@ body { background: var(--bg); }
   function finishSave(success, customMessage) {
     var btn = document.getElementById('ty-save-btn');
     btn.disabled = false;
-    btn.innerHTML = 'Guardar cambios';
+    btn.innerHTML = 'Guardar alterações';
 
     // Zavři formulář, ukaž kartu
     document.getElementById('ty-edit-form').classList.remove('is-open');
@@ -1197,7 +1197,7 @@ body { background: var(--bg); }
 
     // Ukáž feedback
     if (success) {
-      showFeedback(customMessage || '\u00A1Tus datos est\u00E1n actualizados! Enviaremos tu paquete a la direcci\u00F3n correcta.', 'success');
+      showFeedback(customMessage || '\u00A1Os teus dados est\u00E1n actualizados! Enviaremos tu paquete a la direcci\u00F3n correcta.', 'success');
     } else {
       showFeedback(customMessage || 'Algo ha ido mal. Int\u00E9ntalo de nuevo.', 'error');
     }
