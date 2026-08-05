@@ -6,6 +6,7 @@ import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
 import { renderEmailToHtml } from '../utils/render-email-html'
 import { getProjectEmailConfig, getEmailSubject } from '../utils/project-email-config'
+import { ensureProjectId } from '../utils/resolve-project-id'
 import { shouldSkipDuplicate } from '../utils/idempotency-guard'
 
 export default async function orderPlacedHandler({
@@ -195,6 +196,10 @@ export default async function orderPlacedHandler({
   } catch (err: any) {
     console.warn('[OrderPlaced] Could not resolve billing entity:', err.message)
   }
+
+  // Express-wallet orders arrive without project_id; without it the config below
+  // falls back to Dutch. Resolve from sales_channel first. See ensureProjectId.
+  await ensureProjectId(container, order, 'OrderPlaced')
 
   // Project-specific email config (DH vs Loslatenboek)
   const projectConfig = getProjectEmailConfig(order)
