@@ -97,6 +97,7 @@ const KLARNA_TERMS_PATH_BY_PROJECT: Record<string, string> = {
   "lass-los": "/agb",
   "lache-livre": "/conditions-generales",
   suelta: "/terminos",
+  larga: "/termos",
 }
 
 /**

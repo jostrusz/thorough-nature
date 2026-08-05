@@ -1,0 +1,95 @@
+{
+  "slug": "larga",
+  "name": "Larga o que te destrói",
+  "domain": "largaoquetedestroi.pt",
+  "locale": "pt",
+  "orderPrefix": "PT2026",
+  "defaultCountry": "PT",
+  "defaultPhonePrefix": "351",
+  "phonePrefixByCountry": {
+    "PT": "351"
+  },
+  "salesChannelName": "larga",
+  "medusaUrl": "",
+  "publishableApiKey": "pk_6ab9f2888dfc934c03b21ad6fc1b1b29362f66ae99ba10aa14019efa14e8682c",
+  "facebookPixelId": "",
+  "regions": {
+    "PT": "reg_01KZ83JC0PR5H5TZ541900XZFA"
+  },
+  "mainProduct": {
+    "name": "Larga o que te destrói",
+    "handle": "larga-o-que-te-destroi",
+    "variantId": "variant_01KZ83KAM0JWRAEDJTYSR6DS6D",
+    "price": 36,
+    "currency": "EUR",
+    "thumbnail": ""
+  },
+  "upsellProduct": {
+    "name": "",
+    "handle": "",
+    "variantId": "",
+    "price": 0,
+    "originalPrice": 0,
+    "currency": "EUR"
+  },
+  "bundleOptions": [
+    {
+      "qty": 1,
+      "price": 36,
+      "save": 0,
+      "badge": "PARA TI",
+      "variantId": "variant_01KZ83KAM0JWRAEDJTYSR6DS6D"
+    },
+    {
+      "qty": 2,
+      "price": 61,
+      "save": 11,
+      "badge": "PARTILHA COM ALGUÉM",
+      "variantId": "variant_01KZ83KAM0C3T0DG4EERP6VTEE"
+    },
+    {
+      "qty": 3,
+      "price": 82,
+      "save": 26,
+      "badge": "PERFEITO PARA OFERECER",
+      "variantId": "variant_01KZ83KAM0HCTR6RYJ8798MZDE"
+    },
+    {
+      "qty": 4,
+      "price": 102,
+      "save": 42,
+      "badge": "MELHOR PREÇO",
+      "variantId": "variant_01KZ83KAM0MBQA2B6E1NG5K4HD"
+    }
+  ],
+  "_homeDeliveryFeeNote": "Portugal ships home-delivery only (mirrors ES). No pickup-point network wired — keep this at 0.",
+  "homeDeliveryFee": 0,
+  "catalogContentIds": [],
+  "mollieProfileId": "",
+  "paymentProviders": {
+    "revolut": "pp_revolut_revolut",
+    "paypal": "pp_paypal_paypal",
+    "klarna": "pp_klarna_klarna"
+  },
+  "pages": {
+    "": "index.html",
+    "checkout": "checkout.html",
+    "thank-you": "thank-you.html",
+    "contacto": "contacto.html",
+    "privacidade": "privacidade.html",
+    "termos": "termos.html",
+    "envios": "envios.html",
+    "devolucoes": "devolucoes.html",
+    "popup-larga": "popup-larga.html"
+  },
+  "redirects": {
+    "contact": "contacto",
+    "privacy": "privacidade",
+    "privacidad": "privacidade",
+    "terminos": "termos",
+    "envio": "envios",
+    "devoluciones": "devolucoes"
+  },
+  "packetaApiKey": "",
+  "_upsellNote": "Upsell vypnutý pro PT — stejně jako u ES. upsell.html je nizozemský klon, upsellProduct je prázdný. Bez klíče 'upsell' v pages route.ts posílá zákazníka rovnou na thank-you."
+}

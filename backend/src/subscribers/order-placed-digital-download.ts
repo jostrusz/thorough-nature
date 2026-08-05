@@ -233,6 +233,10 @@ const EBOOK_FILES_BY_PROJECT: Record<string, Array<{ key: string; title: string;
   //   e-books/El-antidoto-contra-darle-vueltas.pdf   → "El antídoto contra darle vueltas"
   //   e-books/Amor-sin-censura.pdf                   → "Amor sin censura"
   suelta: [],
+  // Larga o que te destrói (PT) — VYPNUTO, dokud nebudou portugalské PDF na MinIO.
+  // Prázdné pole = subscriber projekt přeskočí a NEoznačí objednávku ebook_sent,
+  // takže po nahrání souborů půjdou e-booky doposlat přes resend_ebooks.
+  larga: [],
   // Lâche prise sur ce qui te détruit (FR) — 2 bonusové e-booky
   'lache-livre': [
     {
@@ -286,6 +290,7 @@ const STOREFRONT_URLS: Record<string, string> = {
   'macacia-biblia': process.env.MC_STOREFRONT_URL || "https://www.macaciabiblia.sk",
   'lache-livre': process.env.FR_STOREFRONT_URL || "https://www.lacheprise-livre.fr",
   suelta: process.env.ES_STOREFRONT_URL || "https://www.sueltaloquetedestruye.es",
+  larga: process.env.PT_STOREFRONT_URL || "https://www.largaoquetedestroi.pt",
 }
 
 // Localized email subjects per project
@@ -308,6 +313,7 @@ const EMAIL_SUBJECTS: Record<string, string> = {
   macskabiblia: 'Itt a 3 bónusz e-könyved 📖',
   'lache-livre': 'Tes e-books sont prêts ! 📖',
   suelta: '¡Tus e-books están listos! 📖',
+  larga: 'Os teus e-books estão prontos! 📖',
 }
 
 // Localized fallback first names
@@ -330,6 +336,7 @@ const DEFAULT_FIRST_NAMES: Record<string, string> = {
   'engedd-el': 'Olvasó',
   'lache-livre': 'toi',
   suelta: 'hola',
+  larga: 'olá',
 }
 
 export async function sendEbookDelivery(orderId: string, container: any, eventName: string) {

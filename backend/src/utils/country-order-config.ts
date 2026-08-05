@@ -36,6 +36,7 @@ export const REGION_IDS = {
   eur_sk: "reg_01KWVAZVNATPX01HH77MYWKG3M", // Slovakia (Pusti To SK) — own EUR region
   eur_fr: "reg_01KX052MRE4BSM059VN4SH2AY0", // France (Lache Livre) — own EUR region
   eur_es: "reg_01KYSB3HP83W7D8JDA8D28YVY6", // Spain (Suelta) — own EUR region
+  eur_pt: "reg_01KZ83JC0PR5H5TZ541900XZFA", // Portugal (Larga) — own EUR region
 } as const
 
 // ── Shipping option IDs (verified) ──
@@ -61,6 +62,7 @@ const SO = {
   ZAS_HOME_LACHE: "so_01KX053135P5BJNDHR1DV25WFF",      // Packeta - À domicile (Lache Livre FR home)
   ZAS_PICKUP_LACHE: "so_01KX053135Q3B19W0ZTC7WA6QH",    // Packeta - Point relais (Lache Livre FR pickup)
   HOME_SUELTA: "so_01KYSB3WJVD56VS665ESPWZ3JF",         // Envío a domicilio (Suelta ES home — no pickup points)
+  HOME_LARGA: "so_01KZ83JZ22XC72BKA6T3QK0F7W",          // Envio ao domicílio (Larga PT home — no pickup points)
 } as const
 
 /**
@@ -195,6 +197,15 @@ export const PROJECT_CONFIG = {
     sales_channel_id: "sc_01KYSB3FDS4NH0P3YXXRJJZWBP",
     homeShippingOptionId: SO.HOME_SUELTA,
     homeShippingOptionName: "SEUR — Envío gratuito",
+    pickupShippingOptionId: null,
+    pickupShippingOptionName: null,
+  },
+  // Portugal has no pickup-point network wired yet — home delivery only.
+  larga: {
+    name: "larga",
+    sales_channel_id: "sc_01KZ83J7YJV5YCKGN4Y8RDBZDW",
+    homeShippingOptionId: SO.HOME_LARGA,
+    homeShippingOptionName: "Envio ao domicílio",
     pickupShippingOptionId: null,
     pickupShippingOptionName: null,
   },

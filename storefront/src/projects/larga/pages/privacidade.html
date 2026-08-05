@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de privacidad — Suelta lo que te destruye</title>
+<meta name="description" content="Qué datos recogemos en largaoquetedestroi.pt, para qué los usamos y cómo ejercer tus derechos RGPD.">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="/laat-los-logo-logo.png" type="image/png">
+
+<!-- ═══ FONTS ═══ -->
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+<style>
+/* ═══ FONTS ═══ */
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-400_j92kcm.woff2) format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-600_kjbl47.woff2) format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Recoleta'; src: url(https://res.cloudinary.com/dckynhswz/raw/upload/v1771307812/recoleta-700_sue47k.woff2) format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'DM Sans'; src: url(/fonts/dm-sans-italic-400-ext.woff2) format('woff2'); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ═══ CSS PROMĚNNÉ — Velvet Dusk ═══ */
+:root {
+ --bg: #FAF5F8;
+ --heading: #2D1B3D;
+ --cta: #C27BA0;
+ --section: #EDD9E5;
+ --body: #5A3D6B;
+ --highlight: #D9A4C0;
+ --dark: #1A1028;
+ --white: #FFFFFF;
+ --light: #F5EDF2;
+ --muted: #9B7AAD;
+ --cta-hover: #A8628A;
+ --accent: #D498B5;
+}
+
+/* ═══ RESET ═══ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--body); min-height: 100vh; }
+
+/* ═══ NAVIGACE ═══ */
+.site-nav { background: var(--white); border-bottom: 1px solid var(--section); padding: 0 20px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 12px rgba(45, 27, 61, 0.06); }
+.nav-inner { max-width: 1050px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { display: flex; align-items: center; text-decoration: none; gap: 10px; }
+.nav-logo img { height: 40px; width: auto; }
+.nav-logo-text { font-family: 'Recoleta', serif; font-size: 16px; font-weight: 600; color: var(--heading); line-height: 1.2; }
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: var(--body); text-decoration: none; transition: color 0.2s; position: relative; }
+.nav-links a:hover { color: var(--heading); }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--cta); transition: width 0.3s ease; }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--heading); font-weight: 600; }
+.nav-links a.active::after { width: 100%; }
+.nav-cta { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: var(--white) !important; background: var(--cta); padding: 10px 22px; border-radius: 8px; text-decoration: none !important; transition: all 0.25s ease; box-shadow: 0 3px 12px rgba(194, 123, 160, 0.2); }
+.nav-cta:hover { background: var(--cta-hover) !important; color: var(--white) !important; transform: translateY(-1px); box-shadow: 0 5px 18px rgba(194, 123, 160, 0.35); }
+.nav-cta::after { display: none !important; }
+.nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; flex-direction: column; gap: 5px; }
+.nav-hamburger span { display: block; width: 24px; height: 2px; background: var(--heading); border-radius: 2px; transition: all 0.3s ease; }
+.nav-mobile-overlay { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(26, 16, 40, 0.5); z-index: 999; }
+.nav-mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--white); padding: 24px 20px; box-shadow: 0 8px 24px rgba(45, 27, 61, 0.12); z-index: 1000; flex-direction: column; gap: 0; border-bottom: 2px solid var(--section); }
+.nav-mobile-menu a { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: var(--body); text-decoration: none; padding: 14px 0; border-bottom: 1px solid var(--section); display: block; transition: color 0.2s; }
+.nav-mobile-menu a:last-child { border-bottom: none; }
+.nav-mobile-menu a:hover { color: var(--heading); }
+.nav-mobile-menu .nav-cta-mobile { display: inline-block; font-weight: 700; color: var(--white); background: var(--cta); padding: 14px 28px; border-radius: 10px; text-align: center; margin-top: 16px; border-bottom: none; }
+.nav-mobile-menu .nav-cta-mobile:hover { background: var(--cta-hover); color: var(--white); }
+
+@media (max-width: 768px) {
+ .nav-links { display: none; }
+ .nav-hamburger { display: flex; }
+ .nav-mobile-menu.open { display: flex; }
+ .nav-mobile-overlay.open { display: block; }
+ .nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+ .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+ .nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+}
+
+/* ═══ CONTENT STRÁNKY ═══ */
+.page-header {
+ background: linear-gradient(135deg, var(--dark) 0%, #2D1B3D 50%, #3D2A50 100%);
+ padding: 56px 20px 48px;
+ text-align: center;
+}
+.page-header h1 { font-family: 'Recoleta', serif; font-size: 36px; font-weight: 600; color: var(--white); margin-bottom: 12px; line-height: 1.2; }
+.page-header p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: rgba(255, 255, 255, 0.7); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.page-header .badge { display: inline-block; background: rgba(194, 123, 160, 0.2); color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 6px 16px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 0.5px; }
+
+.page-content { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+/* Informační boxy */
+.info-box {
+ background: var(--light);
+ border: 1px solid var(--section);
+ border-radius: 16px;
+ padding: 28px;
+ margin-bottom: 40px;
+}
+.info-box h3 { font-family: 'Recoleta', serif; font-size: 18px; color: var(--heading); margin-bottom: 12px; }
+.info-box p, .info-box li { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--body); line-height: 1.7; }
+.info-box ul { list-style: none; padding: 0; }
+.info-box ul li { padding: 4px 0; }
+.info-box ul li::before { content: '→ '; color: var(--cta); font-weight: 700; }
+
+/* Sekce */
+.section-block { margin-bottom: 40px; }
+.section-block h2 {
+ font-family: 'Recoleta', serif;
+ font-size: 24px;
+ font-weight: 600;
+ color: var(--heading);
+ margin-bottom: 16px;
+ line-height: 1.3;
+ display: flex;
+ align-items: center;
+ gap: 10px;
+}
+.section-block h2 .section-num {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: var(--cta);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ font-weight: 700;
+ border-radius: 10px;
+ flex-shrink: 0;
+}
+.section-block p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 12px; }
+.section-block ul, .section-block ol { padding-left: 24px; margin-bottom: 12px; }
+.section-block li { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--body); line-height: 1.75; margin-bottom: 6px; }
+.section-block strong { color: var(--heading); }
+
+.highlight-box {
+ background: linear-gradient(135deg, var(--light), var(--section));
+ border-left: 4px solid var(--cta);
+ border-radius: 0 12px 12px 0;
+ padding: 20px 24px;
+ margin: 20px 0;
+}
+.highlight-box p { margin: 0; font-size: 15px; }
+
+/* Tabulka dat */
+.data-table {
+ width: 100%;
+ border-collapse: collapse;
+ margin: 16px 0;
+ border-radius: 12px;
+ overflow: hidden;
+ border: 1px solid var(--section);
+}
+.data-table th {
+ background: var(--dark);
+ color: var(--white);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ font-weight: 600;
+ padding: 12px 16px;
+ text-align: left;
+}
+.data-table td {
+ font-family: 'DM Sans', sans-serif;
+ font-size: 14px;
+ color: var(--body);
+ padding: 12px 16px;
+ border-bottom: 1px solid var(--section);
+ line-height: 1.5;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:nth-child(even) td { background: var(--light); }
+
+/* Rechten box */
+.rights-box {
+ background: var(--white);
+ border: 2px solid var(--cta);
+ border-radius: 16px;
+ padding: 28px;
+ margin: 24px 0;
+}
+.rights-box h3 {
+ font-family: 'Recoleta', serif;
+ font-size: 18px;
+ color: var(--heading);
+ margin-bottom: 16px;
+}
+.rights-list {
+ list-style: none;
+ padding: 0;
+}
+.rights-list li {
+ display: flex;
+ align-items: flex-start;
+ gap: 12px;
+ padding: 10px 0;
+ border-bottom: 1px solid var(--section);
+ font-family: 'DM Sans', sans-serif;
+ font-size: 15px;
+ color: var(--body);
+ line-height: 1.6;
+}
+.rights-list li:last-child { border-bottom: none; }
+.rights-list .icon { flex-shrink: 0; font-size: 18px; }
+
+.divider { height: 1px; background: var(--section); margin: 40px 0; }
+
+/* ═══ FOOTER ═══ */
+.site-footer { background: var(--dark); padding: 48px 24px 24px; color: rgba(255, 255, 255, 0.7); }
+.footer-inner { max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 16px; }
+.footer-brand-text { font-family: 'Recoleta', serif; font-size: 18px; color: var(--white); line-height: 1.3; }
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a { font-family: 'DM Sans', sans-serif; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--white); }
+.footer-contact { display: flex; flex-direction: column; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; }
+.footer-contact a { color: rgba(255, 255, 255, 0.7); text-decoration: none; }
+.footer-contact a:hover { color: var(--white); }
+.footer-payments { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+.footer-payments .pay-icon { height: 28px; width: auto; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.15); }
+.footer-bottom { max-width: 960px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: 'DM Sans', sans-serif; font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+
+@media (max-width: 768px) {
+ .page-header h1 { font-size: 28px; }
+ .section-block h2 { font-size: 20px; }
+ .data-table { font-size: 13px; }
+ .data-table th, .data-table td { padding: 10px 12px; }
+ .footer-inner { flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+ .footer-bottom { flex-direction: column; align-items: center; text-align: center; }
+}
+@media (max-width: 480px) {
+ .page-header h1 { font-size: 24px; }
+ .page-header { padding: 40px 16px 36px; }
+ .page-content { padding: 32px 16px 60px; }
+ .data-table { display: block; overflow-x: auto; }
+}
+</style>
+<script src="js/project-config.js"></script>
+<script src="js/pixel.js"></script>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "wegp7c6oma");
+</script>
+</head>
+<body>
+
+<!-- ═══ NAVIGACE ═══ -->
+<nav class="site-nav">
+ <div class="nav-inner">
+  <a href="index.html" class="nav-logo">
+   <img src="/larga-logo.png" alt="Suelta lo que te destruye" width="152" height="40">
+
+  </a>
+  <div class="nav-links">
+   <a href="envio.html">Envíos</a>
+   <a href="terminos.html">Términos</a>
+   <a href="privacidad.html" class="active">Privacidad</a>
+   <a href="contacto.html">Contacto</a>
+   <a href="index.html" class="nav-cta">Pídelo ahora &rarr;</a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+   <span></span><span></span><span></span>
+  </button>
+ </div>
+</nav>
+<div class="nav-mobile-overlay" onclick="toggleMobileMenu()"></div>
+<div class="nav-mobile-menu">
+ <a href="envio.html">Envíos</a>
+ <a href="terminos.html">Términos</a>
+ <a href="privacidad.html">Privacidad</a>
+ <a href="contacto.html">Contacto</a>
+ <a href="index.html" class="nav-cta-mobile">Pídelo ahora &rarr;</a>
+</div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="page-header">
+ <div class="badge">🔒 RGPD</div>
+ <h1>Política de privacidad</h1>
+ <p>Qué datos tuyos guardamos, para qué y durante cuánto tiempo. Sin jerga legal innecesaria.</p>
+</header>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="page-content">
+
+ <div class="info-box">
+  <h3>📌 En resumen</h3>
+  <ul>
+   <li>Solo pedimos los datos que hacen falta para mandarte el libro</li>
+   <li>No vendemos ni cedemos tus datos a nadie para que te haga publicidad</li>
+   <li>Puedes pedirnos ver, corregir o borrar lo que tenemos sobre ti</li>
+   <li>Usamos el píxel de Meta y Microsoft Clarity para medir y mejorar la web</li>
+   <li>Los datos de tu tarjeta no pasan nunca por nuestros servidores</li>
+  </ul>
+ </div>
+
+ <!-- 1 -->
+ <div class="section-block">
+  <h2><span class="section-num">1</span> Quién responde de tus datos</h2>
+  <p><strong>Performance Marketing Solution s.r.o.</strong></p>
+  <p>Rybná 716/24, Staré Město, 110 00 Praga, República Checa</p>
+  <p>IČO: 06259928 | DIČ: CZ06259928</p>
+  <p>Correo: <a href="mailto:livro@largaoquetedestroi.pt" style="color: var(--cta);">livro@largaoquetedestroi.pt</a></p>
+  <p>Si tienes cualquier duda sobre tus datos, escríbenos a ese correo. Contesta una persona, no un formulario.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 2 -->
+ <div class="section-block">
+  <h2><span class="section-num">2</span> Qué datos recogemos</h2>
+  <p>Cuando haces un pedido nos das lo siguiente:</p>
+
+  <table class="data-table">
+   <thead>
+    <tr><th>Dato</th><th>Para qué lo usamos</th><th>Cuánto lo guardamos</th></tr>
+   </thead>
+   <tbody>
+    <tr><td>Nombre y apellidos</td><td>Envío y factura</td><td>10 años (obligación fiscal)</td></tr>
+    <tr><td>Correo electrónico</td><td>Confirmación, seguimiento, e-books, soporte</td><td>Hasta que nos pidas borrarlo</td></tr>
+    <tr><td>Teléfono</td><td>Que SEUR pueda avisarte de la entrega</td><td>90 días tras la entrega</td></tr>
+    <tr><td>Dirección postal</td><td>Envío y factura</td><td>10 años (obligación fiscal)</td></tr>
+    <tr><td>Datos de pago</td><td>Cobrar el pedido</td><td>No los guardamos*</td></tr>
+    <tr><td>Dirección IP</td><td>Prevención de fraude y estadísticas</td><td>90 días</td></tr>
+   </tbody>
+  </table>
+
+  <p style="font-size:14px;">* Los datos de tu tarjeta los procesan directamente Revolut, Stripe, PayPal o Klarna dentro de sus propios sistemas. Nosotros solo vemos si el pago ha salido bien y los cuatro últimos dígitos.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 3 -->
+ <div class="section-block">
+  <h2><span class="section-num">3</span> Para qué los usamos y con qué base legal</h2>
+  <ul>
+   <li><strong>Preparar y enviarte el pedido</strong> — porque hay un contrato entre nosotros (art. 6.1.b RGPD)</li>
+   <li><strong>Mandarte confirmaciones, seguimiento y e-books</strong> — mismo motivo</li>
+   <li><strong>Atenderte cuando escribes</strong> — mismo motivo</li>
+   <li><strong>Facturar y llevar la contabilidad</strong> — porque la ley nos obliga (art. 6.1.c)</li>
+   <li><strong>Mejorar la web y medir la publicidad</strong> — interés legítimo, y puedes oponerte cuando quieras (art. 6.1.f)</li>
+   <li><strong>Enviarte correos de marketing</strong> — solo si te has apuntado tú (art. 6.1.a). En cada correo hay un enlace para darte de baja</li>
+  </ul>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 4 -->
+ <div class="section-block">
+  <h2><span class="section-num">4</span> Cookies y medición</h2>
+  <p>La web usa estas herramientas:</p>
+
+  <table class="data-table">
+   <thead>
+    <tr><th>Herramienta</th><th>Para qué</th><th>Tipo</th></tr>
+   </thead>
+   <tbody>
+    <tr><td>Meta Pixel (Facebook / Instagram)</td><td>Medir qué anuncios funcionan y mostrarte publicidad relacionada</td><td>Marketing</td></tr>
+    <tr><td>Microsoft Clarity</td><td>Ver de forma anónima cómo se usa la web para arreglar lo que falla</td><td>Analítica</td></tr>
+    <tr><td>Revolut, Stripe, PayPal, Klarna</td><td>Procesar el pago de forma segura</td><td>Necesaria</td></tr>
+    <tr><td>Cookie de sesión</td><td>Recordar tu carrito mientras compras</td><td>Necesaria</td></tr>
+   </tbody>
+  </table>
+
+  <div class="highlight-box">
+   <p><strong>Cómo evitarlo:</strong> puedes bloquear las cookies de terceros desde la configuración de tu navegador, activar «Do Not Track», o ajustar qué publicidad ves desde la <a href="https://www.facebook.com/adpreferences" target="_blank" rel="noopener" style="color: var(--cta);">configuración de anuncios de Meta</a>. La web sigue funcionando igual si las bloqueas.</p>
+  </div>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 5 -->
+ <div class="section-block">
+  <h2><span class="section-num">5</span> Con quién los compartimos</h2>
+  <p>Solo con quien hace falta para que recibas el libro:</p>
+  <ul>
+   <li><strong>Revolut, Stripe, PayPal, Klarna</strong> — cobrar el pedido</li>
+   <li><strong>SEUR y nuestro operador logístico</strong> — preparar y entregarte el paquete</li>
+   <li><strong>Resend</strong> — enviarte los correos de confirmación, seguimiento y e-books</li>
+   <li><strong>Fakturoid</strong> — emitir la factura y llevar la contabilidad</li>
+   <li><strong>Meta y Microsoft</strong> — medición de anuncios y analítica de la web</li>
+  </ul>
+  <p>Todos son proveedores nuestros y solo pueden usar tus datos para lo que les encargamos. <strong>Nunca vendemos tus datos ni los cedemos a terceros para que te vendan cosas.</strong></p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 6 -->
+ <div class="section-block">
+  <h2><span class="section-num">6</span> Dónde están tus datos</h2>
+  <p>Nuestra tienda está alojada en Railway, cuyos servidores están en Estados Unidos, y algunos proveedores (Meta, Microsoft, Stripe, PayPal) también tratan datos fuera de la Unión Europea.</p>
+  <p>Esas transferencias se hacen al amparo de las <strong>cláusulas contractuales tipo</strong> aprobadas por la Comisión Europea y, cuando corresponde, del marco de privacidad de datos UE–EE. UU.</p>
+  <p>Para protegerlos: todo va cifrado por HTTPS, el acceso a los datos está limitado a quien lo necesita para trabajar, y los pagos se procesan en entornos certificados PCI DSS.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 7 -->
+ <div class="section-block">
+  <h2><span class="section-num">7</span> Tus derechos</h2>
+
+  <div class="rights-box">
+   <h3>Puedes pedirnos en cualquier momento:</h3>
+   <ul class="rights-list">
+    <li><span class="icon">👁</span> <strong>Acceso</strong> — que te digamos qué datos tuyos tenemos</li>
+    <li><span class="icon">✏️</span> <strong>Rectificación</strong> — que corrijamos lo que esté mal</li>
+    <li><span class="icon">🗑</span> <strong>Supresión</strong> — que los borremos</li>
+    <li><span class="icon">📦</span> <strong>Portabilidad</strong> — que te los demos en un archivo para llevártelos</li>
+    <li><span class="icon">🚫</span> <strong>Oposición</strong> — que dejemos de usarlos para medición o publicidad</li>
+    <li><span class="icon">⏸</span> <strong>Limitación</strong> — que los congelemos mientras se aclara algo</li>
+   </ul>
+  </div>
+
+  <p>Escríbenos a <a href="mailto:livro@largaoquetedestroi.pt" style="color: var(--cta);">livro@largaoquetedestroi.pt</a> y te contestamos como mucho en 30 días, normalmente en dos o tres.</p>
+  <p>Hay un límite: las facturas y los datos que aparecen en ellas los tenemos que conservar 10 años aunque nos pidas borrarlos, porque lo exige la normativa fiscal.</p>
+  <p>Si crees que no hemos hecho las cosas bien, puedes reclamar ante la <a href="https://www.aepd.es" target="_blank" rel="noopener" style="color: var(--cta);">Agencia Española de Protección de Datos</a> o ante la autoridad checa de protección de datos (ÚOOÚ).</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 8 -->
+ <div class="section-block">
+  <h2><span class="section-num">8</span> Menores</h2>
+  <p>Esta tienda es para mayores de 18 años. No recogemos datos de menores a sabiendas. Si crees que un menor nos ha dado sus datos, dínoslo y los borramos.</p>
+ </div>
+
+ <div class="divider"></div>
+
+ <!-- 9 -->
+ <div class="section-block">
+  <h2><span class="section-num">9</span> Cambios en esta política</h2>
+  <p>Si cambiamos algo relevante, actualizamos esta página y la fecha de abajo. Si el cambio te afecta de verdad, te avisamos por correo.</p>
+ </div>
+
+ <div class="last-updated" style="text-align:center; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--muted); margin-top:40px; padding-top:20px; border-top:1px solid var(--section);">
+  Última actualización: 31 de julio de 2026
+ </div>
+
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+ <div class="footer-inner">
+  <div class="footer-brand">
+  </div>
+  <div class="footer-links">
+   <a href="terminos.html">Términos</a>
+   <a href="envio.html">Devoluciones</a>
+   <a href="privacidad.html">Privacidad</a>
+   <a href="contacto.html">Contacto</a>
+  </div>
+  <div class="footer-contact">
+   <a href="mailto:livro@largaoquetedestroi.pt">📧 livro@largaoquetedestroi.pt</a>
+   <a href="tel:+420732915755">📞 +420 732 915 755</a>  </div>
+  <div class="footer-payments">
+   <img src="/icons/visa.svg" alt="Visa" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/mastercard.svg" alt="Mastercard" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/paypal.svg" alt="PayPal" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/klarna.svg" alt="Klarna" class="pay-icon" width="35" height="28" style="height:28px;">
+   <img src="/icons/revolut_pay.svg" alt="Revolut Pay" class="pay-icon" width="35" height="28" style="height:28px;">
+  </div>
+ </div>
+ <div class="footer-bottom">
+  <span>Performance Marketing Solution s.r.o. • Rybná 716/24, Staré Město, 110 00 Praga • IČO: 06259928 • DIČ: CZ06259928</span>
+  <span>&copy; 2026 Performance Marketing Solution s.r.o. Todos los derechos reservados.</span>
+ </div>
+</footer>
+
+<script>
+function toggleMobileMenu() {
+ document.querySelector('.nav-hamburger').classList.toggle('open');
+ document.querySelector('.nav-mobile-menu').classList.toggle('open');
+ document.querySelector('.nav-mobile-overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>

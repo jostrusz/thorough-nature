@@ -94,6 +94,7 @@ const PROJECT_NAMES: Record<string, string> = {
   "lass-los": "Lass los (DE/AT)",
   "lache-livre": "Lâche prise (FR)",
   suelta: "Suelta lo que te destruye (ES)",
+  larga: "Larga o que te destrói (PT)",
   "engedd-el": "Engedd el (HU)",
   "odpust-knizka": "Pusť to, co tě ničí (CZ)",
   "pusti-to-sk": "Pusti to, čo ťa ničí (SK)",

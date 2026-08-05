@@ -164,6 +164,13 @@ const BUNDLE_PRICING: Record<string, Record<number, number>> = {
     3: 82,    // 82 € TTC (save 26 €)
     4: 102,   // 102 € TTC (save 42 €)
   },
+  // Larga o que te destrói — edição PT (larga), EUR
+  "larga-o-que-te-destroi": {
+    1: 36,    // 36 € IVA incl. (6% taxa reduzida)
+    2: 61,    // 61 € (poupas 11 €)
+    3: 82,    // 82 € (poupas 26 €)
+    4: 102,   // 102 € (poupas 42 €)
+  },
   // Suelta lo que te destruye — edición ES (suelta), EUR
   "suelta-lo-que-te-destruye": {
     1: 36,    // 36 € IVA incl. (4% superreducido)
@@ -197,6 +204,7 @@ const BUNDLE_SKU_PATTERNS: RegExp[] = [
   /^LACHE-(\d+)$/,   // lache-livre FR: LACHE-1, LACHE-2, LACHE-3, LACHE-4
   /^ZKZ-(\d+)$/,     // zivot-zaslugy CZ: ZKZ-1, ZKZ-2, ZKZ-3, ZKZ-4
   /^SUELTA-(\d+)$/,  // suelta ES: SUELTA-1, SUELTA-2, SUELTA-3, SUELTA-4
+  /^LARGA-(\d+)$/,   // larga PT: LARGA-1, LARGA-2, LARGA-3, LARGA-4
 ]
 
 // Explicit SKU → bundle qty for non-pattern SKUs (official barcodes / EAN-style).
