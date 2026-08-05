@@ -125,6 +125,13 @@ import { EsShipmentNotificationTemplate, ES_SHIPMENT_NOTIFICATION, isEsShipmentN
 import { EsAbandonedCheckout1Template, ES_ABANDONED_CHECKOUT_1, isEsAbandonedCheckout1Data } from './es-abandoned-checkout-1'
 import { EsAbandonedCheckout2Template, ES_ABANDONED_CHECKOUT_2, isEsAbandonedCheckout2Data } from './es-abandoned-checkout-2'
 import { EsAbandonedCheckout3Template, ES_ABANDONED_CHECKOUT_3, isEsAbandonedCheckout3Data } from './es-abandoned-checkout-3'
+// Larga o que te destrói (larga) templates
+import { PtOrderPlacedTemplate, PT_ORDER_PLACED, isPtOrderPlacedTemplateData } from './pt-order-placed'
+import { PtEbookDeliveryTemplate, PT_EBOOK_DELIVERY, isPtEbookDeliveryData } from './pt-ebook-delivery'
+import { PtShipmentNotificationTemplate, PT_SHIPMENT_NOTIFICATION, isPtShipmentNotificationData } from './pt-shipment-notification'
+import { PtAbandonedCheckout1Template, PT_ABANDONED_CHECKOUT_1, isPtAbandonedCheckout1Data } from './pt-abandoned-checkout-1'
+import { PtAbandonedCheckout2Template, PT_ABANDONED_CHECKOUT_2, isPtAbandonedCheckout2Data } from './pt-abandoned-checkout-2'
+import { PtAbandonedCheckout3Template, PT_ABANDONED_CHECKOUT_3, isPtAbandonedCheckout3Data } from './pt-abandoned-checkout-3'
 // Życie, jakiego nigdy sobie nie pozwoliłaś (zycie-zaslugy) templates
 import { ZzOrderPlacedTemplate, ZZ_ORDER_PLACED, isZzOrderPlacedTemplateData } from './zz-order-placed'
 import { ZzShipmentNotificationTemplate, ZZ_SHIPMENT_NOTIFICATION, isZzShipmentNotificationData } from './zz-shipment-notification'
@@ -266,6 +273,12 @@ export const EmailTemplates = {
   FR_ABANDONED_CHECKOUT_1,
   FR_ABANDONED_CHECKOUT_2,
   FR_ABANDONED_CHECKOUT_3,
+  PT_ORDER_PLACED,
+  PT_EBOOK_DELIVERY,
+  PT_SHIPMENT_NOTIFICATION,
+  PT_ABANDONED_CHECKOUT_1,
+  PT_ABANDONED_CHECKOUT_2,
+  PT_ABANDONED_CHECKOUT_3,
   ES_ORDER_PLACED,
   ES_EBOOK_DELIVERY,
   ES_SHIPMENT_NOTIFICATION,
@@ -404,6 +417,13 @@ export function resolveTemplateKey(templateKey: string, project?: string): strin
     const allKeys = Object.values(EmailTemplates) as string[]
     if (allKeys.includes(frKey)) {
       return frKey
+    }
+  }
+  if (project === 'larga') {
+    const ptKey = `pt-${templateKey}`
+    const allKeys = Object.values(EmailTemplates) as string[]
+    if (allKeys.includes(ptKey)) {
+      return ptKey
     }
   }
   if (project === 'suelta') {
@@ -1450,6 +1470,38 @@ export function generateEmailTemplate(templateKey: string, data: unknown): React
         )
       }
       return <FrAbandonedCheckout3Template {...data} />
+
+    // ── Larga o que te destrói (PT) templates ─────
+    case EmailTemplates.PT_ORDER_PLACED:
+      if (!isPtOrderPlacedTemplateData(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PT_ORDER_PLACED}"`)
+      }
+      return <PtOrderPlacedTemplate {...data} />
+    case EmailTemplates.PT_EBOOK_DELIVERY:
+      if (!isPtEbookDeliveryData(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PT_EBOOK_DELIVERY}"`)
+      }
+      return <PtEbookDeliveryTemplate {...data} />
+    case EmailTemplates.PT_SHIPMENT_NOTIFICATION:
+      if (!isPtShipmentNotificationData(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PT_SHIPMENT_NOTIFICATION}"`)
+      }
+      return <PtShipmentNotificationTemplate {...data} />
+    case EmailTemplates.PT_ABANDONED_CHECKOUT_1:
+      if (!isPtAbandonedCheckout1Data(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PT_ABANDONED_CHECKOUT_1}"`)
+      }
+      return <PtAbandonedCheckout1Template {...data} />
+    case EmailTemplates.PT_ABANDONED_CHECKOUT_2:
+      if (!isPtAbandonedCheckout2Data(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PT_ABANDONED_CHECKOUT_2}"`)
+      }
+      return <PtAbandonedCheckout2Template {...data} />
+    case EmailTemplates.PT_ABANDONED_CHECKOUT_3:
+      if (!isPtAbandonedCheckout3Data(data)) {
+        throw new MedusaError(MedusaError.Types.INVALID_DATA, `Invalid data for template "${EmailTemplates.PT_ABANDONED_CHECKOUT_3}"`)
+      }
+      return <PtAbandonedCheckout3Template {...data} />
 
     // ── Suelta lo que te destruye (ES) templates ─────
     case EmailTemplates.ES_ORDER_PLACED:

@@ -351,6 +351,34 @@ const ENG_STEPS: StepConfig[] = [
   },
 ]
 
+/** Larga o que te destrói (larga) 3-step sequence */
+const PT_STEPS: StepConfig[] = [
+  {
+    step: 1,
+    templateKey: EmailTemplates.PT_ABANDONED_CHECKOUT_1,
+    subject: (name) => `Olá ${name}, o teu livro está à tua espera 📦`,
+    preview: "O teu livro está embalado e só espera por ti!",
+    delayMs: THIRTY_MINUTES_MS,
+    delayFrom: (_meta, abandonedAt) => abandonedAt,
+  },
+  {
+    step: 2,
+    templateKey: EmailTemplates.PT_ABANDONED_CHECKOUT_2,
+    subject: (name) => `${name}, a história por trás deste livro`,
+    preview: "Ao fim de apenas uma semana sentia-me mais leve do que nunca...",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step1_at),
+  },
+  {
+    step: 3,
+    templateKey: EmailTemplates.PT_ABANDONED_CHECKOUT_3,
+    subject: (name) => `Última oportunidade, ${name}: o teu carrinho será esvaziado`,
+    preview: "Faltam 24 horas: depois o teu carrinho será esvaziado.",
+    delayMs: TWENTY_FOUR_HOURS_MS,
+    delayFrom: (meta) => new Date(meta.recovery_email_step2_at),
+  },
+]
+
 /** Suelta lo que te destruye (suelta) 3-step sequence */
 const ES_STEPS: StepConfig[] = [
   {
@@ -1474,6 +1502,73 @@ export default async function abandonedCheckoutRecovery(container: MedusaContain
         } catch (emailError: any) {
           logger.error(
             `[Abandoned Cart] Failed to send FR step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
+          )
+        }
+        continue
+      }
+
+      // ── Larga o que te destrói: 3-step sequence ──
+      if (projectId === "larga") {
+        if (currentStep >= 3) {
+          skippedCount++
+          continue
+        }
+
+        const nextStepConfig = PT_STEPS[currentStep]
+
+        const referenceTime = nextStepConfig.delayFrom(meta, abandonedAt)
+        if (isNaN(referenceTime.getTime())) continue
+        if ((now.getTime() - referenceTime.getTime()) < nextStepConfig.delayMs) continue
+
+        const firstName = cart.shipping_address?.first_name || ""
+        const checkoutUrl = meta.checkout_url || "https://www.largaoquetedestroi.pt/checkout"
+        const mainItem = (cart.items || [])[0]
+        const productName = mainItem?.variant?.product?.title || mainItem?.title || "Larga o que te destrói"
+        const cartTotal = (cart.items || []).reduce((sum: number, item: any) => {
+          return sum + (Number(item.unit_price) || 0) * (Number(item.quantity) || 1)
+        }, 0)
+        const productPrice = cartTotal > 0
+          ? Math.round(cartTotal).toString()
+          : "36"
+        const productImage = mainItem?.variant?.product?.thumbnail || ""
+
+        try {
+          await notificationModuleService.createNotifications({
+            to: cart.email,
+            channel: "email",
+            template: nextStepConfig.templateKey,
+            from: "Joris de Vries - Larga o que te destrói <livro@largaoquetedestroi.pt>",
+            data: {
+              emailOptions: {
+                replyTo: "livro@largaoquetedestroi.pt",
+                subject: nextStepConfig.subject(firstName),
+              },
+              firstName,
+              checkoutUrl,
+              productName,
+              productPrice,
+              productImage,
+              preview: nextStepConfig.preview,
+            },
+          })
+
+          await cartModuleService.updateCarts(cart.id, {
+            metadata: {
+              ...meta,
+              recovery_email_step: nextStepConfig.step,
+              [`recovery_email_step${nextStepConfig.step}_at`]: now.toISOString(),
+              recovery_email_sent: true,
+              recovery_email_sent_at: meta.recovery_email_sent_at || now.toISOString(),
+            },
+          })
+
+          sentCount++
+          logger.info(
+            `[Abandoned Cart] PT step ${nextStepConfig.step} email sent to ${cart.email} for cart ${cart.id}`
+          )
+        } catch (emailError: any) {
+          logger.error(
+            `[Abandoned Cart] Failed to send PT step ${nextStepConfig.step} to ${cart.email}: ${emailError.message}`
           )
         }
         continue
