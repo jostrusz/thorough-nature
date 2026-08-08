@@ -410,11 +410,13 @@ function SummaryCard({ task, conversationId }: any) {
               <div className="px-3.5 py-3 whitespace-pre-wrap text-[13.5px] bg-ui-bg-base" style={WRAP}>
                 {draftText}
               </div>
+              {/* open by default — you must be able to read what goes out
+                  without clicking, even when the mail is in Dutch or Swedish */}
               {s.decide?.mail?.translation && (
-                <details>
+                <details open>
                   <summary className="cursor-pointer text-xs px-3 py-1.5 list-none [&::-webkit-details-marker]:hidden"
                            style={{ background: "#eff6ff", color: "#2563eb", borderTop: "1px solid #bfdbfe" }}>
-                    🇬🇧 Show English translation
+                    🇨🇿 Český překlad odpovědi
                   </summary>
                   <div className="px-3.5 py-3 whitespace-pre-wrap text-[13px] text-ui-fg-subtle bg-ui-bg-base"
                        style={{ borderTop: "1px solid #bfdbfe", ...WRAP }}>

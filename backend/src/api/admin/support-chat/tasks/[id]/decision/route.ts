@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { createHash } from "node:crypto"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { SUPPORT_COMMAND_MODULE } from "../../../../../../modules/support-command"
 import { SUPPORTBOX_MODULE } from "../../../../../../modules/supportbox"
@@ -34,6 +35,24 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
   if (!["approve", "reject"].includes(decision)) {
     return res.status(400).json({ error: "decision must be approve|reject" })
+  }
+
+  // The VPS agent holds a full admin key, so nothing stopped it from approving
+  // its own card and sending the mail itself. Approval is a human act — this
+  // endpoint refuses the agent's credential outright.
+  // stored as a hash so the key itself never sits in the deploy config
+  const agentKeyHash = process.env.SUPPORT_AGENT_API_KEY_SHA256
+  if (agentKeyHash) {
+    const header = String(req.headers.authorization || "")
+    const raw = header.startsWith("Basic ")
+      ? Buffer.from(header.slice(6), "base64").toString("utf8").replace(/:$/, "")
+      : ""
+    const seen = raw ? createHash("sha256").update(raw).digest("hex") : ""
+    if (seen && seen === agentKeyHash) {
+      return res.status(403).json({
+        error: "The agent cannot decide its own cards. Approvals come from a human in the Command Center.",
+      })
+    }
   }
 
   try {

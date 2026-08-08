@@ -34,6 +34,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         title: t.title,
         description: t.description,
         action_type: t.action_type,
+        // without payload the UI never sees summary and falls back to the bare
+        // draft — no customer summary, no order, no timeline
+        payload: t.payload,
         draft_reply: t.draft_reply,
         edited_draft: t.edited_draft,
         confidence: t.confidence,
