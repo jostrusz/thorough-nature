@@ -82,9 +82,13 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     }
     const activeIds = new Set(activeTickets.map((tk: any) => tk.id))
 
-    // never touched + ticket still active
+    // never touched + ticket still active. Conversation rows are created in one
+    // bulk insert, so their created_at says nothing about how long the customer
+    // has waited — order by the ticket's own timestamp, oldest first.
+    const waitedSince = (c: any) => new Date(c.last_activity_at || c.created_at).getTime()
     const newConversations = allConvs
       .filter((c: any) => !lastTouch[c.id] && c.status !== "closed" && activeIds.has(c.ticket_id))
+      .sort((a: any, b: any) => waitedSince(a) - waitedSince(b))
       .slice(0, 20)
       .map((c: any) => ({ conversation_id: c.id, ticket_id: c.ticket_id, project: c.project }))
 
@@ -97,6 +101,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         lastInbound[c.ticket_id] &&
         lastInbound[c.ticket_id] > lastTouch[c.id]
       )
+      .sort((a: any, b: any) => lastInbound[a.ticket_id] - lastInbound[b.ticket_id])
       .slice(0, 20)
       .map((c: any) => ({ conversation_id: c.id, ticket_id: c.ticket_id, project: c.project }))
 
