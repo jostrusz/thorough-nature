@@ -117,29 +117,42 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const { consume_message_ids, messages, tasks, task_updates, conversation_updates } = req.body as any
   const now = new Date().toISOString()
 
+  // One bad id must never discard a whole agent run — the drafts and tasks in
+  // the same payload are the expensive part. Each section fails on its own.
+  const warnings: string[] = []
+  const attempt = async (label: string, fn: () => Promise<any>) => {
+    try {
+      return await fn()
+    } catch (e: any) {
+      warnings.push(`${label}: ${e.message}`)
+      return null
+    }
+  }
+
   try {
     if (Array.isArray(consume_message_ids)) {
       for (const mid of consume_message_ids) {
-        await sc.updateAgentMessages({ id: mid, consumed_at: now })
+        // agent sometimes echoes SupportBox message ids, which are not AgentMessage ids
+        await attempt(`consume ${mid}`, () => sc.updateAgentMessages({ id: mid, consumed_at: now }))
       }
     }
     const createdMessages: any[] = []
     if (Array.isArray(messages)) {
       for (const m of messages) {
-        const row = await sc.createAgentMessages({
+        const row = await attempt(`message ${m.conversation_id}`, () => sc.createAgentMessages({
           conversation_id: m.conversation_id,
           role: m.role || "assistant",
           kind: m.kind || "chat",
           body: m.body,
           metadata: m.metadata || null,
-        })
-        createdMessages.push(Array.isArray(row) ? row[0] : row)
+        }))
+        if (row) createdMessages.push(Array.isArray(row) ? row[0] : row)
       }
     }
     const createdTasks: any[] = []
     if (Array.isArray(tasks)) {
       for (const t of tasks) {
-        const row = await sc.createAgentTasks({
+        const row = await attempt(`task ${t.title}`, () => sc.createAgentTasks({
           conversation_id: t.conversation_id || null,
           ticket_id: t.ticket_id || null,
           title: t.title,
@@ -149,31 +162,31 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
           draft_reply: t.draft_reply || null,
           confidence: t.confidence ?? null,
           status: "pending",
-        })
-        createdTasks.push(Array.isArray(row) ? row[0] : row)
+        }))
+        if (row) createdTasks.push(Array.isArray(row) ? row[0] : row)
       }
     }
     if (Array.isArray(task_updates)) {
       for (const u of task_updates) {
-        await sc.updateAgentTasks({
+        await attempt(`task_update ${u.id}`, () => sc.updateAgentTasks({
           id: u.id,
           status: u.status,
           executed_at: u.status === "executed" || u.status === "failed" ? now : undefined,
           result: u.result || undefined,
-        })
+        }))
       }
     }
     if (Array.isArray(conversation_updates)) {
       for (const c of conversation_updates) {
-        await sc.updateAgentConversations({
+        await attempt(`conversation_update ${c.id}`, () => sc.updateAgentConversations({
           id: c.id,
           status: c.status,
           session_id: c.session_id || undefined,
           last_activity_at: now,
-        })
+        }))
       }
     }
-    res.json({ ok: true, messages: createdMessages, tasks: createdTasks })
+    res.json({ ok: true, messages: createdMessages, tasks: createdTasks, warnings })
   } catch (e: any) {
     res.status(500).json({ error: e.message })
   }
