@@ -8,12 +8,12 @@ import { sdk } from "../../lib/sdk"
 /**
  * Command Center — Slack-like control room for the AI support agent.
  *
- * Layout: sidebar (queue) | thread (chat + approval cards) | context panel.
- * All customer e-mails are merged into the thread server-side; approval of a
- * "reply" card sends the e-mail immediately (backend sendTicketReply).
- *
- * Overflow policy: every text container gets min-w-0 + overflow-wrap:anywhere
- * so long tokens/URLs in customer e-mails can never widen the page.
+ * Approval cards come in two shapes:
+ *  - simple: title/description/draft (fallback)
+ *  - rich "summary card" when task.payload.summary is present — TL;DR strip,
+ *    customer+order grid with IDs, communication-timeline accordion, problem
+ *    with root cause, done-list, and a single orange decision zone.
+ * Approving a "reply" task sends the e-mail immediately (backend).
  */
 
 // ── data hooks ──────────────────────────────────────────────────────────
@@ -66,7 +66,6 @@ const projectFlag = (project: string | null) => {
   for (const key of Object.keys(FLAGS)) if (project.includes(key)) return FLAGS[key]
   return "📦"
 }
-// Strip HTML tags for plain display of e-mail bodies that only have body_html.
 const toPlainText = (s: string) => {
   if (!s) return ""
   if (!/[<>]/.test(s)) return s
@@ -83,8 +82,8 @@ const toPlainText = (s: string) => {
     .replace(/\n{3,}/g, "\n\n")
     .trim()
 }
-// Hard wrap for anything: long JWT links, tracking URLs, base64 blobs.
 const WRAP = { overflowWrap: "anywhere", wordBreak: "break-word" } as const
+const MONO = { fontFamily: "ui-monospace,SFMono-Regular,Menlo,monospace" } as const
 
 // ── sidebar row ─────────────────────────────────────────────────────────
 function ConvRow({ row, active, onClick }: any) {
@@ -107,13 +106,12 @@ function ConvRow({ row, active, onClick }: any) {
   )
 }
 
-// ── approval card ───────────────────────────────────────────────────────
-function TaskCard({ task, conversationId }: any) {
+// ── decision buttons (shared by simple + rich card) ─────────────────────
+function DecisionZoneButtons({ task, conversationId, isReply, draftText }: any) {
   const qc = useQueryClient()
   const [mode, setMode] = useState<"idle" | "edit" | "reject">("idle")
   const [draft, setDraft] = useState(task.edited_draft || task.draft_reply || "")
   const [note, setNote] = useState("")
-  const [expanded, setExpanded] = useState(task.status === "pending")
 
   const decide = useMutation({
     mutationFn: (body: any) =>
@@ -125,16 +123,335 @@ function TaskCard({ task, conversationId }: any) {
     },
   })
 
+  if (task.status !== "pending") return null
+
+  return (
+    <div className="mt-2">
+      {mode === "idle" && (
+        <div className="flex gap-2 flex-wrap items-center">
+          <button
+            onClick={() => decide.mutate({ decision: "approve" })}
+            disabled={decide.isPending}
+            className="px-4 py-2 rounded-md text-sm font-semibold text-white disabled:opacity-50"
+            style={{ background: "#16a34a" }}
+          >
+            {decide.isPending ? "Sending…" : isReply ? "✓ Yes, send to customer" : "✓ Approve"}
+          </button>
+          {draftText && (
+            <button
+              onClick={() => setMode("edit")}
+              className="px-3 py-2 rounded-md text-sm border border-ui-border-strong bg-ui-bg-base hover:bg-ui-bg-base-hover"
+            >
+              ✎ Edit reply
+            </button>
+          )}
+          <button
+            onClick={() => setMode("reject")}
+            className="px-3 py-2 rounded-md text-sm border bg-ui-bg-base text-ui-fg-error hover:bg-ui-bg-base-hover"
+            style={{ borderColor: "#fecaca" }}
+          >
+            ✗ Give instructions instead
+          </button>
+          <span className="basis-full text-[11px] text-ui-fg-muted">
+            …or just type below — “make it warmer”, “offer 50% instead” — and the agent will redo the proposal.
+          </span>
+        </div>
+      )}
+      {mode === "edit" && (
+        <div>
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            rows={10}
+            className="w-full text-sm rounded-md border border-ui-border-base bg-ui-bg-field p-2"
+          />
+          <div className="flex gap-2 mt-2 flex-wrap">
+            <button
+              onClick={() => decide.mutate({ decision: "approve", edited_draft: draft })}
+              disabled={decide.isPending}
+              className="px-4 py-2 rounded-md text-sm font-semibold text-white disabled:opacity-50"
+              style={{ background: "#16a34a" }}
+            >
+              {decide.isPending ? "Sending…" : isReply ? "✓ Send edited version" : "✓ Approve with edits"}
+            </button>
+            <button onClick={() => setMode("idle")} className="px-3 py-2 rounded-md text-sm border border-ui-border-base bg-ui-bg-base">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      {mode === "reject" && (
+        <div>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Instruction for the agent — what to do instead…"
+            className="w-full text-sm rounded-md border border-ui-border-base bg-ui-bg-field p-2"
+          />
+          <div className="flex gap-2 mt-2 flex-wrap">
+            <button
+              onClick={() => decide.mutate({ decision: "reject", note })}
+              disabled={decide.isPending}
+              className="px-3 py-2 rounded-md text-sm font-medium disabled:opacity-50"
+              style={{ background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" }}
+            >
+              ✗ Reject with instruction
+            </button>
+            <button onClick={() => setMode("idle")} className="px-3 py-2 rounded-md text-sm border border-ui-border-base bg-ui-bg-base">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const STATUS_BADGE: Record<string, [string, string]> = {
+  pending: ["⚡ NEEDS YOUR OK", "bg-ui-tag-orange-bg text-ui-tag-orange-text"],
+  approved: ["✓ Approved — queued for execution", "bg-ui-tag-blue-bg text-ui-tag-blue-text"],
+  rejected: ["✗ Rejected", "bg-ui-tag-red-bg text-ui-tag-red-text"],
+  executed: ["✅ Done", "bg-ui-tag-green-bg text-ui-tag-green-text"],
+  failed: ["⚠️ Failed", "bg-ui-tag-red-bg text-ui-tag-red-text"],
+  cancelled: ["— Cancelled", "bg-ui-tag-neutral-bg text-ui-tag-neutral-text"],
+}
+
+// ── RICH summary card (payload.summary) ─────────────────────────────────
+function SummaryCard({ task, conversationId }: any) {
+  const s = task.payload.summary
+  const [label, badgeCls] = STATUS_BADGE[task.status] || STATUS_BADGE.pending
   const isReply = task.action_type === "reply"
-  const statusBadge: Record<string, [string, string]> = {
-    pending: ["⚡ AWAITING YOUR APPROVAL", "bg-ui-tag-orange-bg text-ui-tag-orange-text"],
-    approved: ["✓ Approved — queued for execution", "bg-ui-tag-blue-bg text-ui-tag-blue-text"],
-    rejected: ["✗ Rejected", "bg-ui-tag-red-bg text-ui-tag-red-text"],
-    executed: ["✅ Done", "bg-ui-tag-green-bg text-ui-tag-green-text"],
-    failed: ["⚠️ Failed", "bg-ui-tag-red-bg text-ui-tag-red-text"],
-    cancelled: ["— Cancelled", "bg-ui-tag-neutral-bg text-ui-tag-neutral-text"],
+  const draftText = task.edited_draft || task.draft_reply
+
+  const stChip = (st: any) => {
+    if (!st) return null
+    const styles: Record<string, any> = {
+      dead: { background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" },
+      ok: { background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" },
+      neutral: { background: "var(--bg, #f4f4f5)", color: "#a1a1aa", border: "1px solid #e4e4e7" },
+    }
+    return (
+      <span className="text-[10px] font-bold rounded px-1.5 ml-1.5 align-middle inline-block"
+            style={styles[st.type] || styles.neutral}>
+        {st.label}
+      </span>
+    )
   }
-  const [label, badgeCls] = statusBadge[task.status] || statusBadge.pending
+
+  return (
+    <div className="my-2 rounded-xl border overflow-hidden max-w-2xl min-w-0 bg-ui-bg-base"
+         style={{ borderColor: task.status === "pending" ? "#fdba74" : undefined, ...WRAP }}>
+      {/* header */}
+      <div className="flex items-center gap-2 px-4 py-2.5 flex-wrap"
+           style={{ background: "#fff7ed", borderBottom: "1px solid #fdba74" }}>
+        <span className={`text-xs px-2 py-0.5 rounded font-semibold ${badgeCls}`}>{label}</span>
+        <span className="text-sm font-semibold flex-1 min-w-0" style={WRAP}>{task.title}</span>
+        {typeof task.confidence === "number" && (
+          <span className="text-xs text-ui-fg-subtle flex items-center gap-1.5 shrink-0">
+            {task.confidence}%
+            <span className="w-12 h-1.5 rounded bg-ui-bg-subtle overflow-hidden inline-block">
+              <span className="block h-full" style={{ width: `${task.confidence}%`, background: "#16a34a" }} />
+            </span>
+          </span>
+        )}
+      </div>
+
+      {/* ① TL;DR */}
+      {s.tldr && (
+        <div className="px-4 py-2.5 text-[15px]" style={{ background: "#fffbeb", borderBottom: "1px solid #e4e4e7" }}>
+          📌 {s.tldr}
+        </div>
+      )}
+
+      <div className="p-4 flex flex-col gap-4">
+        {/* ② who: person | order */}
+        {(s.customer || s.order) && (
+          <div className="grid gap-2.5" style={{ gridTemplateColumns: "1fr 1.2fr" }}>
+            {s.customer && (
+              <div className="rounded-lg border border-ui-border-base px-3 py-2 min-w-0">
+                <div className="flex items-center gap-2">
+                  {s.customer.flag && <span>{s.customer.flag}</span>}
+                  <span className="font-bold text-sm">{s.customer.name}</span>
+                </div>
+                <div className="text-xs text-ui-fg-subtle" style={WRAP}>{s.customer.email}</div>
+                {s.customer.meta && (
+                  <div className="text-[11px] text-ui-fg-muted mt-1">{s.customer.meta}</div>
+                )}
+              </div>
+            )}
+            {s.order && (
+              <div className="rounded-lg border border-ui-border-base px-3 py-2 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="font-bold text-sm" style={MONO}>{s.order.number}</span>
+                  {s.order.paid_label && (
+                    <span className="text-[10.5px] font-bold rounded-full px-2"
+                          style={{ background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0" }}>
+                      {s.order.paid_label}
+                    </span>
+                  )}
+                </div>
+                {(s.order.rows || []).map((r: any, i: number) => (
+                  <div key={i} className="flex gap-1.5 text-xs mt-0.5 text-ui-fg-subtle min-w-0">
+                    <span className="text-ui-fg-muted shrink-0 w-16">{r.k}</span>
+                    {r.href ? (
+                      <a href={r.href} target="_blank" rel="noreferrer"
+                         className="text-ui-fg-interactive hover:underline" style={WRAP}>{r.v}</a>
+                    ) : (
+                      <span title={r.title || undefined}
+                            className={r.mono ? "bg-ui-bg-subtle border border-ui-border-base rounded px-1" : ""}
+                            style={r.mono ? { ...MONO, ...WRAP, fontSize: "11px" } : WRAP}>
+                        {r.v}
+                      </span>
+                    )}
+                    {r.sub && <span className="text-ui-fg-muted text-[11px]">{r.sub}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ②b timeline accordion */}
+        {s.timeline?.items?.length > 0 && (
+          <details className="rounded-lg border border-ui-border-base overflow-hidden">
+            <summary className="cursor-pointer flex items-center gap-2 px-3 py-2 text-[13px] font-semibold text-ui-fg-subtle list-none [&::-webkit-details-marker]:hidden">
+              <span>📨 Everything we sent them</span>
+              {s.timeline.count_label && (
+                <span className="ml-auto text-[11px] font-semibold text-ui-fg-muted bg-ui-bg-subtle border border-ui-border-base rounded-full px-2">
+                  {s.timeline.count_label}
+                </span>
+              )}
+            </summary>
+            <div className="border-t border-ui-border-base px-3 py-1.5">
+              {s.timeline.items.map((it: any, i: number) => (
+                <div key={i}
+                     className={`grid gap-x-2 py-1.5 items-baseline ${i < s.timeline.items.length - 1 ? "border-b border-dashed border-ui-border-base" : ""}`}
+                     style={{ gridTemplateColumns: "88px 20px 1fr" }}>
+                  <span className="text-[11px] text-ui-fg-muted whitespace-nowrap" style={MONO}>{it.when}</span>
+                  <span className="text-center">{it.icon}</span>
+                  <span className="text-[13px] min-w-0" style={WRAP}>
+                    {it.what}{stChip(it.status)}
+                    {it.to && <div className="text-xs text-ui-fg-muted" style={WRAP}>{it.to}</div>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {/* ③ problem */}
+        {s.problem && (
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-ui-fg-muted mb-1.5">
+              The problem
+            </div>
+            <div className="rounded-lg border border-ui-border-base overflow-hidden">
+              {s.problem.quote && (
+                <div className="px-3 py-2 bg-ui-bg-subtle italic text-ui-fg-subtle text-[13px]"
+                     style={{ borderLeft: "3px solid #d4d4d8", ...WRAP }}>
+                  “{s.problem.quote}”
+                </div>
+              )}
+              {s.problem.cause && (
+                <div className="flex gap-2 px-3 py-2 items-baseline text-[13px]"
+                     style={{ background: "#fef2f2", borderTop: "1px solid #fecaca", ...WRAP }}>
+                  <span className="shrink-0">🐛</span>
+                  <span>
+                    <b style={{ color: "#dc2626" }}>Root cause:</b> {s.problem.cause}
+                    {s.problem.cause_code && (
+                      <code className="bg-ui-bg-base border rounded px-1 ml-1"
+                            style={{ ...MONO, borderColor: "#fecaca", fontSize: "12px", ...WRAP }}>
+                        {s.problem.cause_code}
+                      </code>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ④ done */}
+        {s.done?.length > 0 && (
+          <div className="rounded-lg px-3 py-2" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
+            <div className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#16a34a" }}>
+              Already handled — no action needed
+            </div>
+            {s.done.map((d: any, i: number) => (
+              <div key={i} className="flex gap-2 py-0.5 text-[13px] text-ui-fg-subtle items-baseline">
+                <span className="font-bold shrink-0" style={{ color: "#16a34a" }}>✓</span>
+                <span style={WRAP}>
+                  {d.text}
+                  {d.extra && <span className="text-ui-fg-muted text-xs"> ({d.extra})</span>}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ⑤ decision zone */}
+        <div className="rounded-xl overflow-hidden" style={{ border: "2px solid #fdba74" }}>
+          <div className="flex items-center gap-2 px-3 py-2" style={{ background: "#fff7ed" }}>
+            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#ea580c" }}>
+              Your call
+            </span>
+            {s.decide?.what && <span className="text-[13px] font-semibold flex-1" style={WRAP}>{s.decide.what}</span>}
+          </div>
+          {draftText && (
+            <div style={{ borderTop: "1px solid #fdba74" }}>
+              <div className="flex items-center gap-2 px-3 py-1.5 text-xs text-ui-fg-subtle flex-wrap bg-ui-bg-base border-b border-ui-border-base">
+                {s.decide?.mail?.lang && (
+                  <span className="text-[10px] font-bold text-white rounded px-1.5"
+                        style={{ background: "#2563eb" }}>{s.decide.mail.lang}</span>
+                )}
+                {s.decide?.mail?.from && <span>from <b>{s.decide.mail.from}</b></span>}
+                {s.decide?.mail?.attachment && <span>· 📎 {s.decide.mail.attachment}</span>}
+              </div>
+              <div className="px-3.5 py-3 whitespace-pre-wrap text-[13.5px] bg-ui-bg-base" style={WRAP}>
+                {draftText}
+              </div>
+              {s.decide?.mail?.translation && (
+                <details>
+                  <summary className="cursor-pointer text-xs px-3 py-1.5 list-none [&::-webkit-details-marker]:hidden"
+                           style={{ background: "#eff6ff", color: "#2563eb", borderTop: "1px solid #bfdbfe" }}>
+                    🇬🇧 Show English translation
+                  </summary>
+                  <div className="px-3.5 py-3 whitespace-pre-wrap text-[13px] text-ui-fg-subtle bg-ui-bg-base"
+                       style={{ borderTop: "1px solid #bfdbfe", ...WRAP }}>
+                    {s.decide.mail.translation}
+                  </div>
+                </details>
+              )}
+              {s.decide?.mail?.after && (
+                <div className="px-3 py-1.5 text-[11px] text-ui-fg-muted border-t border-dashed border-ui-border-base bg-ui-bg-base">
+                  {s.decide.mail.after}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="px-3 py-2.5" style={{ background: "#fff7ed", borderTop: "1px solid #fdba74" }}>
+            <DecisionZoneButtons task={task} conversationId={conversationId} isReply={isReply} draftText={draftText} />
+            {task.status !== "pending" && (
+              <div className="text-xs text-ui-fg-subtle">
+                {task.decision_note && <p style={WRAP}>Instruction: {task.decision_note}</p>}
+                {task.result?.summary && <p style={WRAP}>Result: {task.result.summary}</p>}
+                {!task.decision_note && !task.result?.summary && <p>Decision recorded.</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── simple approval card (fallback, no payload.summary) ─────────────────
+function TaskCard({ task, conversationId }: any) {
+  if (task.payload?.summary) return <SummaryCard task={task} conversationId={conversationId} />
+
+  const [expanded, setExpanded] = useState(task.status === "pending")
+  const isReply = task.action_type === "reply"
+  const [label, badgeCls] = STATUS_BADGE[task.status] || STATUS_BADGE.pending
   const draftText = task.edited_draft || task.draft_reply
 
   return (
@@ -159,98 +476,19 @@ function TaskCard({ task, conversationId }: any) {
           {task.description}
         </p>
       )}
-
       {draftText && (
         <div className="mt-2 min-w-0">
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="text-xs text-ui-fg-interactive hover:underline"
-          >
+          <button onClick={() => setExpanded(!expanded)} className="text-xs text-ui-fg-interactive hover:underline">
             {expanded ? "▾ hide proposed reply" : "▸ show proposed reply"}
           </button>
-          {expanded && mode !== "edit" && (
-            <div
-              className="mt-1 text-sm whitespace-pre-wrap bg-ui-bg-subtle rounded p-2 border border-ui-border-base"
-              style={WRAP}
-            >
+          {expanded && (
+            <div className="mt-1 text-sm whitespace-pre-wrap bg-ui-bg-subtle rounded p-2 border border-ui-border-base" style={WRAP}>
               {draftText}
             </div>
           )}
         </div>
       )}
-
-      {task.status === "pending" && mode === "idle" && (
-        <div className="flex gap-2 mt-3 flex-wrap">
-          <button
-            onClick={() => decide.mutate({ decision: "approve" })}
-            disabled={decide.isPending}
-            className="px-3 py-1.5 rounded-md text-sm font-medium bg-ui-button-inverted text-ui-fg-on-inverted hover:bg-ui-button-inverted-hover disabled:opacity-50"
-          >
-            {decide.isPending ? "Sending…" : isReply ? "✓ Yes, send to customer" : "✓ Approve"}
-          </button>
-          {draftText && (
-            <button
-              onClick={() => { setMode("edit"); setExpanded(true) }}
-              className="px-3 py-1.5 rounded-md text-sm border border-ui-border-base hover:bg-ui-bg-base-hover"
-            >
-              ✎ Edit reply
-            </button>
-          )}
-          <button
-            onClick={() => setMode("reject")}
-            className="px-3 py-1.5 rounded-md text-sm border border-ui-border-base text-ui-fg-error hover:bg-ui-bg-base-hover"
-          >
-            ✗ Reject
-          </button>
-        </div>
-      )}
-
-      {mode === "edit" && (
-        <div className="mt-2">
-          <textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            rows={10}
-            className="w-full text-sm rounded-md border border-ui-border-base bg-ui-bg-field p-2"
-          />
-          <div className="flex gap-2 mt-2 flex-wrap">
-            <button
-              onClick={() => decide.mutate({ decision: "approve", edited_draft: draft })}
-              disabled={decide.isPending}
-              className="px-3 py-1.5 rounded-md text-sm font-medium bg-ui-button-inverted text-ui-fg-on-inverted disabled:opacity-50"
-            >
-              {decide.isPending ? "Sending…" : isReply ? "✓ Send edited version" : "✓ Approve with edits"}
-            </button>
-            <button onClick={() => setMode("idle")} className="px-3 py-1.5 rounded-md text-sm border border-ui-border-base">
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {mode === "reject" && (
-        <div className="mt-2">
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Instruction for the agent — what to do instead…"
-            className="w-full text-sm rounded-md border border-ui-border-base bg-ui-bg-field p-2"
-          />
-          <div className="flex gap-2 mt-2 flex-wrap">
-            <button
-              onClick={() => decide.mutate({ decision: "reject", note })}
-              disabled={decide.isPending}
-              className="px-3 py-1.5 rounded-md text-sm font-medium bg-ui-tag-red-bg text-ui-tag-red-text disabled:opacity-50"
-            >
-              ✗ Reject with instruction
-            </button>
-            <button onClick={() => setMode("idle")} className="px-3 py-1.5 rounded-md text-sm border border-ui-border-base">
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
+      <DecisionZoneButtons task={task} conversationId={conversationId} isReply={isReply} draftText={draftText} />
       {task.decision_note && task.status !== "pending" && (
         <p className="text-xs text-ui-fg-muted mt-2" style={WRAP}>Instruction: {task.decision_note}</p>
       )}
@@ -292,14 +530,10 @@ function ThreadItem({ item, conversationId }: any) {
     )
   }
 
-  // agent_message
   if (item.role === "system" || item.kind === "event") {
     return (
       <div className="my-2 text-center px-4">
-        <span
-          className="inline-block text-xs text-ui-fg-muted bg-ui-bg-subtle rounded-full px-3 py-1 max-w-full"
-          style={WRAP}
-        >
+        <span className="inline-block text-xs text-ui-fg-muted bg-ui-bg-subtle rounded-full px-3 py-1 max-w-full" style={WRAP}>
           {item.body} · {fmtTime(item.created_at)}
         </span>
       </div>
@@ -324,7 +558,6 @@ function ThreadItem({ item, conversationId }: any) {
       </div>
     )
   }
-  // assistant internal
   return (
     <div className="my-2 flex justify-start min-w-0">
       <div
