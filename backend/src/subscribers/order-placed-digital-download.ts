@@ -8,6 +8,7 @@ import { resolveBillingEntity } from '../utils/resolve-billing-entity'
 import { logEmailActivity } from '../utils/email-logger'
 import { renderEmailToHtml } from '../utils/render-email-html'
 import { getProjectEmailConfig } from '../utils/project-email-config'
+import { ensureProjectId } from '../utils/resolve-project-id'
 import crypto from 'crypto'
 
 // Ebook files per project — these are the MinIO keys
@@ -354,6 +355,11 @@ export async function sendEbookDelivery(orderId: string, container: any, eventNa
       console.log(`[digital-download] E-books already sent for order ${order.id}, skipping (event: ${eventName})`)
       return
     }
+
+    // Express-wallet orders arrive without project_id; without it the config
+    // below falls back to Dutch — and here that would also pick the wrong
+    // e-book set. Resolve from sales_channel first. See ensureProjectId.
+    await ensureProjectId(container, order, 'digital-download')
 
     // Project-specific config
     const projectConfig = getProjectEmailConfig(order)
