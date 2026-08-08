@@ -51,7 +51,17 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         await sc.createAgentMessages({
           conversation_id: task.conversation_id,
           role: "system", kind: "event",
-          body: `Rejected: ${task.title}${note ? ` — instruction: ${note}` : ""}`,
+          body: `Rejected: ${task.title}`,
+        })
+        // The agent queue only picks up role:"owner"/kind:"chat" messages, so a
+        // rejection must also be written as an owner instruction — otherwise the
+        // agent never learns it was rejected and the ticket stalls in "working".
+        await sc.createAgentMessages({
+          conversation_id: task.conversation_id,
+          role: "owner", kind: "chat",
+          body: note?.trim()
+            ? `I rejected your proposal "${task.title}". Do this instead: ${note.trim()}`
+            : `I rejected your proposal "${task.title}". Rethink it and propose something different.`,
         })
         await sc.updateAgentConversations({
           id: task.conversation_id, status: "agent_working", last_activity_at: now,
