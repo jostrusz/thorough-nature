@@ -16,7 +16,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     const enabled = settings.length ? settings[0].value?.enabled !== false : true
     if (!enabled) return res.json({ enabled: false, owner_messages: [], approved_tasks: [] })
 
-    const [ownerMsgs, approvedTasks] = await Promise.all([
+    const [ownerMsgs, approvedTasks, allConvs, assistantMsgs] = await Promise.all([
       sc.listAgentMessages(
         { role: "owner", kind: "chat", consumed_at: null },
         { order: { created_at: "ASC" }, take: 50 }
@@ -25,8 +25,29 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         { status: "approved" },
         { order: { decided_at: "ASC" }, take: 50 }
       ),
+      sc.listAgentConversations(
+        { kind: "ticket" },
+        { order: { created_at: "ASC" }, take: 500 }
+      ),
+      sc.listAgentMessages(
+        { role: "assistant" },
+        { select: ["conversation_id"], take: 2000 }
+      ),
     ])
-    res.json({ enabled: true, owner_messages: ownerMsgs, approved_tasks: approvedTasks })
+    // New conversations = ticket conversations the agent has never touched
+    // (no assistant message yet) and that are not closed.
+    const touched = new Set(assistantMsgs.map((m: any) => m.conversation_id))
+    const newConversations = allConvs
+      .filter((c: any) => !touched.has(c.id) && c.status !== "closed")
+      .slice(0, 20)
+      .map((c: any) => ({ conversation_id: c.id, ticket_id: c.ticket_id, project: c.project }))
+
+    res.json({
+      enabled: true,
+      owner_messages: ownerMsgs,
+      approved_tasks: approvedTasks,
+      new_conversations: newConversations,
+    })
   } catch (e: any) {
     res.status(500).json({ error: e.message })
   }
