@@ -1,6 +1,7 @@
 // @ts-nocheck
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { SUPPORT_COMMAND_MODULE } from "../../../../modules/support-command"
+import { SUPPORTBOX_MODULE } from "../../../../modules/supportbox"
 
 /**
  * VPS agent loop endpoints (phase 3). Auth: standard Medusa admin auth — the
@@ -11,12 +12,40 @@ import { SUPPORT_COMMAND_MODULE } from "../../../../modules/support-command"
  */
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const sc = req.scope.resolve(SUPPORT_COMMAND_MODULE) as any
+  const sb = req.scope.resolve(SUPPORTBOX_MODULE) as any
   try {
     const settings = await sc.listAgentSettings({ key: "agent_enabled" }, { take: 1 })
     const enabled = settings.length ? settings[0].value?.enabled !== false : true
     if (!enabled) return res.json({ enabled: false, owner_messages: [], approved_tasks: [] })
 
-    const [ownerMsgs, approvedTasks, allConvs, assistantMsgs] = await Promise.all([
+    // Lazy-create conversations for active tickets that lack one — the agent
+    // must not depend on the Command Center UI being open in a browser.
+    const activeTickets = await sb.listSupportboxTickets(
+      { status: ["new", "read"] },
+      { order: { created_at: "ASC" }, take: 200 }
+    )
+    let allConvs = await sc.listAgentConversations(
+      { kind: "ticket" },
+      { order: { created_at: "ASC" }, take: 1000 }
+    )
+    const haveConv = new Set(allConvs.map((c: any) => c.ticket_id))
+    const missing = activeTickets.filter((tk: any) => !haveConv.has(tk.id))
+    if (missing.length) {
+      await sc.createAgentConversations(
+        missing.map((tk: any) => ({
+          kind: "ticket",
+          ticket_id: tk.id,
+          status: "idle",
+          last_activity_at: new Date(tk.created_at).toISOString(),
+        }))
+      )
+      allConvs = await sc.listAgentConversations(
+        { kind: "ticket" },
+        { order: { created_at: "ASC" }, take: 1000 }
+      )
+    }
+
+    const [ownerMsgs, approvedTasks, assistantMsgs, inboundMsgs] = await Promise.all([
       sc.listAgentMessages(
         { role: "owner", kind: "chat", consumed_at: null },
         { order: { created_at: "ASC" }, take: 50 }
@@ -25,20 +54,49 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         { status: "approved" },
         { order: { decided_at: "ASC" }, take: 50 }
       ),
-      sc.listAgentConversations(
-        { kind: "ticket" },
-        { order: { created_at: "ASC" }, take: 500 }
-      ),
       sc.listAgentMessages(
         { role: "assistant" },
-        { select: ["conversation_id"], take: 2000 }
+        { select: ["conversation_id", "created_at"], order: { created_at: "DESC" }, take: 2000 }
+      ),
+      sb.listSupportboxMessages(
+        { direction: "inbound" },
+        { select: ["ticket_id", "created_at"], order: { created_at: "DESC" }, take: 500 }
       ),
     ])
-    // New conversations = ticket conversations the agent has never touched
-    // (no assistant message yet) and that are not closed.
-    const touched = new Set(assistantMsgs.map((m: any) => m.conversation_id))
+
+    // Latest assistant touch per conversation
+    const lastTouch: Record<string, number> = {}
+    for (const m of assistantMsgs) {
+      const ts = new Date(m.created_at).getTime()
+      if (!lastTouch[m.conversation_id] || ts > lastTouch[m.conversation_id]) {
+        lastTouch[m.conversation_id] = ts
+      }
+    }
+    // Latest inbound customer message per ticket
+    const lastInbound: Record<string, number> = {}
+    for (const m of inboundMsgs) {
+      const ts = new Date(m.created_at).getTime()
+      if (!lastInbound[m.ticket_id] || ts > lastInbound[m.ticket_id]) {
+        lastInbound[m.ticket_id] = ts
+      }
+    }
+    const activeIds = new Set(activeTickets.map((tk: any) => tk.id))
+
+    // never touched + ticket still active
     const newConversations = allConvs
-      .filter((c: any) => !touched.has(c.id) && c.status !== "closed")
+      .filter((c: any) => !lastTouch[c.id] && c.status !== "closed" && activeIds.has(c.ticket_id))
+      .slice(0, 20)
+      .map((c: any) => ({ conversation_id: c.id, ticket_id: c.ticket_id, project: c.project }))
+
+    // customer replied AFTER the agent's last touch and ticket is active again
+    const customerFollowups = allConvs
+      .filter((c: any) =>
+        lastTouch[c.id] &&
+        c.status !== "closed" &&
+        activeIds.has(c.ticket_id) &&
+        lastInbound[c.ticket_id] &&
+        lastInbound[c.ticket_id] > lastTouch[c.id]
+      )
       .slice(0, 20)
       .map((c: any) => ({ conversation_id: c.id, ticket_id: c.ticket_id, project: c.project }))
 
@@ -47,6 +105,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       owner_messages: ownerMsgs,
       approved_tasks: approvedTasks,
       new_conversations: newConversations,
+      customer_followups: customerFollowups,
     })
   } catch (e: any) {
     res.status(500).json({ error: e.message })
