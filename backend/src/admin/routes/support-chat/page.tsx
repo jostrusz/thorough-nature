@@ -3,6 +3,7 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Sparkles } from "@medusajs/icons"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useSearchParams } from "react-router-dom"
 import { sdk } from "../../lib/sdk"
 
 /**
@@ -677,7 +678,16 @@ function ContextPanel({ ticketId }: { ticketId: string | null }) {
 const SupportChatPage = () => {
   const qc = useQueryClient()
   const { data } = useConversations()
-  const [activeId, setActiveId] = useState<string | null>(null)
+  // the open conversation lives in the URL (?c=…) so a refresh — or a link
+  // pasted to yourself — comes back to the same ticket instead of the index
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeId = searchParams.get("c")
+  const setActiveId = (id: string | null) => {
+    const next = new URLSearchParams(searchParams)
+    if (id) next.set("c", id)
+    else next.delete("c")
+    setSearchParams(next)
+  }
   const [composer, setComposer] = useState("")
   const [composerKind, setComposerKind] = useState<"chat" | "note">("chat")
   const [showSolved, setShowSolved] = useState(false)
