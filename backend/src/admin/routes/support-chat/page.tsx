@@ -216,6 +216,29 @@ const STATUS_BADGE: Record<string, [string, string]> = {
   cancelled: ["— Cancelled", "bg-ui-tag-neutral-bg text-ui-tag-neutral-text"],
 }
 
+// The agent writes summary sections as plain sentences about as often as it
+// writes them as structured objects. Rendering only the object shape left the
+// card full of empty bullets, so every section below accepts both.
+const asText = (v: any): string =>
+  typeof v === "string" ? v : v?.text ?? v?.what ?? v?.v ?? ""
+
+// "09.07.2026 – 08:24 📥 Přihlásila se k odběru" -> { when, icon, what }
+const splitTimelineLine = (line: string) => {
+  const m = String(line).match(
+    /^\s*([0-9][0-9.\-/: ]{3,}(?:\d{2}:\d{2})?)\s*[–—-]?\s*(\p{Extended_Pictographic}️?)?\s*(.*)$/u
+  )
+  if (!m) return { when: "", icon: "", what: String(line) }
+  return { when: (m[1] || "").trim(), icon: m[2] || "", what: (m[3] || "").trim() }
+}
+const normTimelineItem = (it: any) =>
+  typeof it === "string" ? splitTimelineLine(it) : { when: it.when, icon: it.icon, what: it.what, to: it.to, status: it.status }
+
+// "1) Schválit … 2) Zvaž …" -> ["1) Schválit …", "2) Zvaž …"]
+const splitDecision = (text: string): string[] => {
+  const parts = String(text).split(/(?=(?:^|\s)\d\)\s)/g).map((p) => p.trim()).filter(Boolean)
+  return parts.length > 1 ? parts : [String(text).trim()]
+}
+
 // ── RICH summary card (payload.summary) ─────────────────────────────────
 function SummaryCard({ task, conversationId }: any) {
   const s = task.payload.summary
@@ -290,7 +313,9 @@ function SummaryCard({ task, conversationId }: any) {
                     </span>
                   )}
                 </div>
-                {(s.order.rows || []).map((r: any, i: number) => (
+                {(s.order.rows || []).map((row: any, i: number) => {
+                  const r = typeof row === "string" ? { k: "", v: row } : row
+                  return (
                   <div key={i} className="flex gap-1.5 text-xs mt-0.5 text-ui-fg-subtle min-w-0">
                     <span className="text-ui-fg-muted shrink-0 w-16">{r.k}</span>
                     {r.href ? (
@@ -305,7 +330,8 @@ function SummaryCard({ task, conversationId }: any) {
                     )}
                     {r.sub && <span className="text-ui-fg-muted text-[11px]">{r.sub}</span>}
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -323,18 +349,21 @@ function SummaryCard({ task, conversationId }: any) {
               )}
             </summary>
             <div className="border-t border-ui-border-base px-3 py-1.5">
-              {s.timeline.items.map((it: any, i: number) => (
+              {s.timeline.items.map((raw: any, i: number) => {
+                const it = normTimelineItem(raw)
+                return (
                 <div key={i}
                      className={`grid gap-x-2 py-1.5 items-baseline ${i < s.timeline.items.length - 1 ? "border-b border-dashed border-ui-border-base" : ""}`}
-                     style={{ gridTemplateColumns: "88px 20px 1fr" }}>
-                  <span className="text-[11px] text-ui-fg-muted whitespace-nowrap" style={MONO}>{it.when}</span>
+                     style={{ gridTemplateColumns: "104px 20px 1fr" }}>
+                  <span className="text-[11px] text-ui-fg-muted" style={MONO}>{it.when}</span>
                   <span className="text-center">{it.icon}</span>
                   <span className="text-[13px] min-w-0" style={WRAP}>
                     {it.what}{stChip(it.status)}
                     {it.to && <div className="text-xs text-ui-fg-muted" style={WRAP}>{it.to}</div>}
                   </span>
                 </div>
-              ))}
+                )
+              })}
             </div>
           </details>
         )}
@@ -378,11 +407,11 @@ function SummaryCard({ task, conversationId }: any) {
               Already handled — no action needed
             </div>
             {s.done.map((d: any, i: number) => (
-              <div key={i} className="flex gap-2 py-0.5 text-[13px] text-ui-fg-subtle items-baseline">
+              <div key={i} className="flex gap-2 py-1 text-[13px] text-ui-fg-subtle items-baseline">
                 <span className="font-bold shrink-0" style={{ color: "#16a34a" }}>✓</span>
                 <span style={WRAP}>
-                  {d.text}
-                  {d.extra && <span className="text-ui-fg-muted text-xs"> ({d.extra})</span>}
+                  {asText(d)}
+                  {d?.extra && <span className="text-ui-fg-muted text-xs"> ({d.extra})</span>}
                 </span>
               </div>
             ))}
@@ -391,11 +420,26 @@ function SummaryCard({ task, conversationId }: any) {
 
         {/* ⑤ decision zone */}
         <div className="rounded-xl overflow-hidden" style={{ border: "2px solid #fdba74" }}>
-          <div className="flex items-center gap-2 px-3 py-2" style={{ background: "#fff7ed" }}>
-            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#ea580c" }}>
+          {/* label above, not beside — a multi-part instruction squeezed into a
+              flex row next to the label was unreadable */}
+          <div className="px-3 py-2" style={{ background: "#fff7ed" }}>
+            <div className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#ea580c" }}>
               Your call
-            </span>
-            {s.decide?.what && <span className="text-[13px] font-semibold flex-1" style={WRAP}>{s.decide.what}</span>}
+            </div>
+            {s.decide?.what && (
+              <div className="flex flex-col gap-1.5">
+                {splitDecision(s.decide.what).map((part, i, all) => (
+                  <div key={i} className="flex gap-2 items-baseline text-[13px] text-ui-fg-base" style={WRAP}>
+                    {all.length > 1 && (
+                      <span className="shrink-0 font-bold" style={{ color: "#ea580c" }}>
+                        {part.match(/^\d\)/)?.[0] || "•"}
+                      </span>
+                    )}
+                    <span style={WRAP}>{all.length > 1 ? part.replace(/^\d\)\s*/, "") : part}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           {draftText && (
             <div style={{ borderTop: "1px solid #fdba74" }}>
